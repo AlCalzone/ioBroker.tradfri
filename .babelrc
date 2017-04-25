@@ -1,0 +1,4 @@
+﻿{
+    "presets": [ "eslatest-node6" ],
+    "plugins": [ "transform-class-properties", "transform-es2015-parameters" ]
+}
