@@ -37,7 +37,6 @@
         "eslint-config-defaults": "^9.0.0",
         "eslint-plugin-disable": "^0.3.0",
         "eslint-plugin-react": "^6.10.3",
-        //"fs-extra": "^2.1.1",
         "gulp": "^3.9.1",
         "gulp-babel": "^6.1.2",
         "gulp-clean": "^0.3.2",
@@ -46,8 +45,6 @@
         "gulp-plumber": "^1.1.0",
         "gulp-rename": "^1.2.2",
         "gulp-sourcemaps": "^2.5.1",
-        //"gulp-ssh": "^0.6.0",
-        //"stream-filter": "^2.1.0",
         "mocha": "^2.3.4",
         "chai": "^3.4.1"
     },
