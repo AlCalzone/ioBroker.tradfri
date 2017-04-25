@@ -187,4 +187,4 @@ gulp.task('publish-release', async function () {
 });
 gulp.task('publish-debug', async function () {
 	await publishFiles(copyMode.debug);
-});
+});*/
