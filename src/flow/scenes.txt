@@ -1,0 +1,18 @@
+activate scene:
+put /15004/132848 = group/id
+	{"5850":1,"9039":196762} 
+	= onoff: 1, sceneid: ...
+
+*************************
+create scene:
+post /15005/132848 = scene/groupid
+	{"9058":1,"9001":"TestTestTest"}
+	= isactive: 1, na
+
+--> diverse updates -> liefert sceneid
+
+*************************
+
+delete scene:
+-> delete /15005/132848/227756 = /scene/groupid/sceneid
+<- deleted
