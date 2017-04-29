@@ -1,4 +1,6 @@
 "use strict";
+// Babel polyfill
+import "babel-polyfill";
 
 // Eigene Module laden
 import _ from "./lib/global";
@@ -8,6 +10,8 @@ import { /*entries,*/ values } from "./lib/object-polyfill";
 import { getEnumValueAsName } from "./lib/enums";
 // Adapter-Utils laden
 import utils from "./lib/utils";
+
+const customSubscriptions = {}; // wird unten intialisiert
 
 // Adapter-Objekt erstellen
 const adapter = utils.adapter({

@@ -1,6 +1,7 @@
 "use strict";
+// Babel polyfill
 
-// Eigene Module laden
+require("babel-polyfill");
 
 var _global = require("./lib/global");
 
@@ -19,10 +20,15 @@ var _utils2 = _interopRequireDefault(_utils);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
+// Eigene Module laden
+
 //import deferred from "./lib/defer-promise";
 
 // Adapter-Utils laden
 
+
+var customSubscriptions = {}; // wird unten intialisiert
 
 // Adapter-Objekt erstellen
 var adapter = _utils2.default.adapter({
@@ -45,8 +51,6 @@ var adapter = _utils2.default.adapter({
 							// Custom subscriptions erlauben 
 							_global2.default.subscribe = subscribe;
 							_global2.default.unsubscribe = unsubscribe;
-
-							// did I break something?
 
 						case 5:
 						case "end":

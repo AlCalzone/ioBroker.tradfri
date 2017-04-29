@@ -8,10 +8,10 @@
                 "de": "Initiale Version"
             }
         },
-        "title": "Javascript/Node.js based tradfri adapter",
+        "title": "IKEA Trådfri",
         "desc": {
-            "en": "ioBroker tradfri Adapter",
-            "de": "ioBroker Tradfri Adapter"
+            "en": "Communicates with IKEA Trådfri Gateway to control devices",
+            "de": "Kommuniziert mit IKEA Trådfri Gateway um Geräte zu steuern"
         },
         "platform": "Javascript/Node.js",
         "mode": "daemon",
@@ -21,7 +21,8 @@
         "keywords": [ "tradfri" ],
         "readme": "https://github.com/ioBroker/ioBroker.tradfri/blob/master/README.md",
         "loglevel": "info",
-        "type": "common adapters"
+        "type": "common adapters",
+        "messagebox": true
     },
     "native": {
 

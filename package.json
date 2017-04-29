@@ -25,6 +25,7 @@
     "url": "https://github.com/ioBroker/ioBroker.tradfri"
   },
   "dependencies": {
+    "babel-polyfill": "^6.23.0",
     "node-coap-dtls": "git+https://github.com/neustar/node-coap-dtls"
   },
   "devDependencies": {
@@ -47,7 +48,9 @@
     "gulp-plumber": "^1.1.0",
     "gulp-rename": "^1.2.2",
     "gulp-sourcemaps": "^2.5.1",
-    "mocha": "^2.3.4"
+    "gulp-ssh": "^0.6.0",
+    "mocha": "^2.3.4",
+    "stream-filter": "^2.1.0"
   },
   "main": "main.js",
   "scripts": {
