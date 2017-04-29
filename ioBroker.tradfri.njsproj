@@ -23,7 +23,7 @@
     <Content Include="LICENSE" />
     <Content Include="package.json" />
     <Content Include="README.md" />
-    <Compile Include="_private_gulpfile.babel.js" />
+    <Compile Include="gulpfile.babel.js" />
     <Compile Include="_public_gulpfile.babel.js" />
     <Compile Include="main.js" />
     <Content Include="admin\index.html" />
