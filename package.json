@@ -25,6 +25,7 @@
         "url": "https://github.com/ioBroker/ioBroker.tradfri"
     },
     "dependencies": {
+        "node-coap-dtls": "git+https://github.com/neustar/node-coap-dtls"
     },
     "devDependencies": {
         "babel-core": "^6.24.0",
