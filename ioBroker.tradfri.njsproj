@@ -23,7 +23,8 @@
     <Content Include="LICENSE" />
     <Content Include="package.json" />
     <Content Include="README.md" />
-    <Compile Include="gulpfile.babel.js" />
+    <Compile Include="_private_gulpfile.babel.js" />
+    <Compile Include="_public_gulpfile.babel.js" />
     <Compile Include="main.js" />
     <Content Include="admin\index.html" />
     <Content Include="admin\tradfri.png" />
@@ -76,7 +77,6 @@
     <Folder Include="docs\en\img" />
     <Folder Include="docs\ru" />
     <Folder Include="docs\ru\img" />
-    <Folder Include="ioBroker.tradfri" />
     <Folder Include="lib" />
     <Folder Include="src" />
     <Folder Include="src\flow" />

@@ -265,3 +265,6 @@ typings/
 
 # Sourcemaps
 maps/
+
+# private gulpfile (contains private stuff)
+_private_gulpfile*.js
