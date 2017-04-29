@@ -38,4 +38,4 @@ var IPSODevice = function (_IPSOObject) {
 }(_ipsoObject2.default);
 
 exports.default = IPSODevice;
-//# sourceMappingURL=../../maps/ipso/ipsoDevice.js.map
+//# sourceMappingURL=../maps/ipso/ipsoDevice.js.map

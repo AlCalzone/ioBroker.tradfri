@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{53e51c2f-73aa-4803-9a77-5431efc98998}</ProjectGuid>
     <ProjectHome />
-    <ProjectView>ShowAllFiles</ProjectView>
+    <ProjectView>ProjectFiles</ProjectView>
     <StartupFile />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -24,6 +24,9 @@
     <Content Include="package.json" />
     <Content Include="README.md" />
     <Compile Include="gulpfile.babel.js" />
+    <Compile Include="src\lib\coapResourceObserver.js">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="_public_gulpfile.babel.js" />
     <Compile Include="main.js" />
     <Content Include="admin\index.html" />

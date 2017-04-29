@@ -51,4 +51,4 @@ var LightSetting = function (_IPSODevice) {
 }(_ipsoDevice2.default);
 
 exports.default = LightSetting;
-//# sourceMappingURL=../../maps/ipso/lightSetting.js.map
+//# sourceMappingURL=../maps/ipso/lightSetting.js.map

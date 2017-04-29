@@ -15,4 +15,4 @@ exports.default = endpoints = {
 	gateway: "15011",
 	gatewayDetails: "15012"
 };
-//# sourceMappingURL=../../maps/ipso/endpoints.js.map
+//# sourceMappingURL=../maps/ipso/endpoints.js.map

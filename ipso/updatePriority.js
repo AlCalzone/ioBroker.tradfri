@@ -9,4 +9,4 @@ exports.default = updatePriority = {
 	required: 2,
 	forced: 5
 };
-//# sourceMappingURL=../../maps/ipso/updatePriority.js.map
+//# sourceMappingURL=../maps/ipso/updatePriority.js.map

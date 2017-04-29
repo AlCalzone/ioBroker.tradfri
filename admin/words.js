@@ -1,10 +1,8 @@
 // Dictionary (systemDictionary is global variable from adapter-settings.js)
 systemDictionary = {
-	"template adapter settings": {"de": "Beispiel", "ru": "Пример"},
-	"test1":                    {"en": "Test 1", "de": "Test 1", "ru": "Тест 1"},
-	"test2":                    {"en": "Test 2", "de": "Test 2", "ru": "Тест 2"},
+	"tradfri adapter settings": { "de": "Einstellungen fГјr TrГҐdfri-Adapter", "en": "TrГҐdfri adapter settings"},
 	"on save adapter restarts with new config immediately": {
 		"de": "Beim Speichern von Einstellungen der Adapter wird sofort neu gestartet.",
-		"ru": "Сразу после сохранения настроек драйвер перезапуститься с новыми значениями"
+		"ru": "Г‘Г°Г Г§Гі ГЇГ®Г±Г«ГҐ Г±Г®ГµГ°Г Г­ГҐГ­ГЁГї Г­Г Г±ГІГ°Г®ГҐГЄ Г¤Г°Г Г©ГўГҐГ° ГЇГҐГ°ГҐГ§Г ГЇГіГ±ГІГЁГІГјГ±Гї Г± Г­Г®ГўГ»Г¬ГЁ Г§Г­Г Г·ГҐГ­ГЁГїГ¬ГЁ"
 	}
 };

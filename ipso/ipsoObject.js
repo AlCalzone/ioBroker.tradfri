@@ -255,4 +255,4 @@ var IPSOObject = function () {
 }();
 
 exports.default = IPSOObject;
-//# sourceMappingURL=../../maps/ipso/ipsoObject.js.map
+//# sourceMappingURL=../maps/ipso/ipsoObject.js.map

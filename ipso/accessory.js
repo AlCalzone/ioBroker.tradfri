@@ -61,4 +61,4 @@ var Accessory = function (_IPSODevice) {
 }(_ipsoDevice2.default);
 
 exports.default = Accessory;
-//# sourceMappingURL=../../maps/ipso/accessory.js.map
+//# sourceMappingURL=../maps/ipso/accessory.js.map

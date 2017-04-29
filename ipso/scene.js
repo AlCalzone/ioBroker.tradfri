@@ -48,4 +48,4 @@ var Scene = function (_IPSODevice) {
 }(_ipsoDevice2.default);
 
 exports.default = Scene;
-//# sourceMappingURL=../../maps/ipso/scene.js.map
+//# sourceMappingURL=../maps/ipso/scene.js.map

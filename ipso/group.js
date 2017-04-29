@@ -56,4 +56,4 @@ function parseAccessoryLink(link) {
 	var deviceIDs = hsLink["9003"];
 	return deviceIDs;
 }
-//# sourceMappingURL=../../maps/ipso/group.js.map
+//# sourceMappingURL=../maps/ipso/group.js.map

@@ -80,4 +80,4 @@ function parseNotificationDetails(kvpList) {
 
 	return ret;
 }
-//# sourceMappingURL=../../maps/ipso/notification.js.map
+//# sourceMappingURL=../maps/ipso/notification.js.map

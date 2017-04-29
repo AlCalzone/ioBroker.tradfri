@@ -13,59 +13,49 @@ var _objectPolyfill = require("./lib/object-polyfill");
 
 var _enums = require("./lib/enums");
 
+var _coapResourceObserver = require("./lib/coapResourceObserver");
+
+var _coapResourceObserver2 = _interopRequireDefault(_coapResourceObserver);
+
 var _utils = require("./lib/utils");
 
 var _utils2 = _interopRequireDefault(_utils);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
-
-// Eigene Module laden
-
 //import deferred from "./lib/defer-promise";
 
-// Adapter-Utils laden
 
-
+// Eigene Module laden
 var customSubscriptions = {}; // wird unten intialisiert
+
+
+// Adapter-Utils laden
+var obs = void 0;
 
 // Adapter-Objekt erstellen
 var adapter = _utils2.default.adapter({
 	name: "tradfri",
 
 	// Wird aufgerufen, wenn Adapter initialisiert wird
-	ready: function () {
-		var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
-			return regeneratorRuntime.wrap(function _callee$(_context) {
-				while (1) {
-					switch (_context.prev = _context.next) {
-						case 0:
-							// Adapter-Instanz global machen
-							_global2.default.adapter = adapter;
+	ready: function ready() {
+		// Adapter-Instanz global machen
+		_global2.default.adapter = adapter;
 
-							// Eigene Objekte/States beobachten
-							adapter.subscribeStates("*");
-							adapter.subscribeObjects("*");
+		// Eigene Objekte/States beobachten
+		adapter.subscribeStates("*");
+		adapter.subscribeObjects("*");
 
-							// Custom subscriptions erlauben 
-							_global2.default.subscribe = subscribe;
-							_global2.default.unsubscribe = unsubscribe;
+		// Custom subscriptions erlauben 
+		_global2.default.subscribe = subscribe;
+		_global2.default.unsubscribe = unsubscribe;
 
-						case 5:
-						case "end":
-							return _context.stop();
-					}
-				}
-			}, _callee, this);
-		}));
-
-		function ready() {
-			return _ref.apply(this, arguments);
-		}
-
-		return ready;
-	}(),
+		// Test implementation
+		obs = new _coapResourceObserver2.default("15001/65537", function (data) {
+			_global2.default.log(`observed data: ${data}`);
+		});
+		obs.start();
+	},
 
 	message: function message(obj) {
 		// Some message was sent to adapter instance over message box. Used by email, pushover, text2speech, ...
@@ -123,6 +113,7 @@ var adapter = _utils2.default.adapter({
 		// is called when adapter shuts down - callback has to be called under any circumstances!
 		try {
 			//adapter.log.info('cleaned everything up...');
+			obs.end();
 			callback();
 		} catch (e) {
 			callback();
@@ -177,4 +168,4 @@ function unsubscribe(id) {
 process.on('unhandledRejection', function (r) {
 	adapter.log.error("unhandled promise rejection: " + r);
 });
-//# sourceMappingURL=../maps/main.js.map
+//# sourceMappingURL=maps/main.js.map

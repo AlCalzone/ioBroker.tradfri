@@ -53,4 +53,4 @@ var Light = function (_IPSODevice) {
 }(_ipsoDevice2.default);
 
 exports.default = Light;
-//# sourceMappingURL=../../maps/ipso/light.js.map
+//# sourceMappingURL=../maps/ipso/light.js.map

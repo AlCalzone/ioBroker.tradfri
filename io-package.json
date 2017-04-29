@@ -25,7 +25,8 @@
         "messagebox": true
     },
     "native": {
-
+        "host":         "",
+        "securityCode": ""
     },
     "objects": [
 

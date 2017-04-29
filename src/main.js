@@ -8,17 +8,20 @@ import { promisify } from "./lib/promises";
 //import deferred from "./lib/defer-promise";
 import { /*entries,*/ values } from "./lib/object-polyfill";
 import { getEnumValueAsName } from "./lib/enums";
+import Observer from "./lib/coapResourceObserver";
+
 // Adapter-Utils laden
 import utils from "./lib/utils";
 
 const customSubscriptions = {}; // wird unten intialisiert
+let obs;
 
 // Adapter-Objekt erstellen
 const adapter = utils.adapter({
 	name: "tradfri",
 
 	// Wird aufgerufen, wenn Adapter initialisiert wird
-	ready: async function () {
+	ready: function () {
 		// Adapter-Instanz global machen
 		_.adapter = adapter;
 
@@ -30,6 +33,11 @@ const adapter = utils.adapter({
 		_.subscribe = subscribe;
 		_.unsubscribe = unsubscribe;
 
+		// Test implementation
+		obs = new Observer("15001/65537", (data) => {
+			_.log(`observed data: ${data}`);
+		});
+		obs.start();
 	},
 
 	message: (obj) => {
@@ -68,6 +76,7 @@ const adapter = utils.adapter({
 		// is called when adapter shuts down - callback has to be called under any circumstances!
 		try {
 			//adapter.log.info('cleaned everything up...');
+			obs.end();
 			callback();
 		} catch (e) {
 			callback();

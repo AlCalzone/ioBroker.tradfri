@@ -61,4 +61,4 @@ var GatewayDetails = function (_IPSODevice) {
 }(_ipsoDevice2.default);
 
 exports.default = GatewayDetails;
-//# sourceMappingURL=../../maps/ipso/gatewayDetails.js.map
+//# sourceMappingURL=../maps/ipso/gatewayDetails.js.map
