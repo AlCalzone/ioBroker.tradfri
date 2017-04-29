@@ -6,14 +6,12 @@ import DeviceInfo from "./deviceInfo";
 // 
 export default class Notification extends IPSODevice {
 
-	constructor(source) {
-		super.defineProperties(
+	constructor(sourceObj, ...properties) {
+		super(sourceObj, ...properties,
 			["9015", "event", int], // -> notificationType
 			["9017", "details", {}, arr => parseNotificationDetails(arr)], // -> <dictionary> (from "key=value"-Array)
 			["9014", "state", 0], // => ?
-		)
-
-		super(source);
+		);
 	}
 }
 

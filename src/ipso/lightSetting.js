@@ -6,8 +6,8 @@ import DeviceInfo from "./deviceInfo";
 // 
 export default class LightSetting extends IPSODevice {
 
-	constructor(source) {
-		super.defineProperties(
+	constructor(sourceObj, ...properties) {
+		super(sourceObj, ...properties,
 			["5706", "color", "f1e0b5"], // hex string
 			["5707", "UNKNOWN1", 0], // ???
 			["5708", "UNKNOWN2", 0], // ???
@@ -16,8 +16,6 @@ export default class LightSetting extends IPSODevice {
 			["5711", "UNKNOWN3", 0], // ???
 			["5851", "dimmer", 0], // <int> [0..254]
 			["5850", "onOff", false], // <bool>
-		)
-
-		super(source);
+		);
 	}
 }

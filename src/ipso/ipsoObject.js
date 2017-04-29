@@ -1,26 +1,33 @@
 "use strict";
 
 import { entries } from "../lib/object-polyfill";
-import µ from "../lib/global";
+import _ from "../lib/global";
 
 const
 	parsers = Symbol("parsers"),
-	parse = Symbol("parse"),
+	deserialize = Symbol("deserialize"),
 	parseValue = Symbol("parseValue"),
 	getParser = Symbol("getParser"),
 	keys = Symbol("keys"),
 	propNames = Symbol("propNames"),
-	defaultValues = Symbol("defaultValues")
+	defaultValues = Symbol("defaultValues"),
+	defineProperties = Symbol("defineProperties")
 	;
 
 // common base class for all objects that are transmitted somehow
 export default class IPSOObject {
 
-	constructor(source) {
-		if (source != undefined) this[parse](source);
+	constructor(sourceObj, ...properties) {
+		// define properties if neccessary
+		if (_.isdef(properties))
+			this[defineProperties](properties);
+
+		// parse the contents of the source object
+		if (_.isdef(source))
+			this[parse](source);
 	}
 
-	defineProperties(...properties) {
+	[defineProperties](...properties) {
 		this[keys] = {}; // lookup dictionary for propName => key
 		this[propNames] = {}; // lookup dictionary for key => propName
 		this[defaultValues] = {}; // lookup dictionary for key => default property value
@@ -45,17 +52,17 @@ export default class IPSOObject {
 	//defineParser(key, fn) {
 	//	if (!this[parsers].hasOwnProperty(key)) this[parsers][key] = fn;
 	//}
-	getParser(key) {
+	[getParser](key) {
 		if (this[parsers].hasOwnProperty(key)) return this[parsers][key];
 	}
 
 	// parses an object
-	[parse](obj) {
+	[deserialize](obj) {
 		for (let [key, value] of entries(obj)) {
 			// which property are we parsing?
 			const propName = this.getPropName(key);
 			if (!propName) {
-				µ.log(`{{yellow}}found unknown property with key ${key}`);
+				_.log(`{{yellow}}found unknown property with key ${key}`);
 				continue;
 			}
 			// try to find parser for this property
@@ -76,7 +83,7 @@ export default class IPSOObject {
 			if (parser) {
 				value = parser(value);
 			} else {
-				µ.log(`{{yellow}}could not find property parser for key ${key}`);
+				_.log(`{{yellow}}could not find property parser for key ${key}`);
 				return value;
 			}
 		} else if (parser) {

@@ -6,8 +6,8 @@ import DeviceInfo from "./deviceInfo";
 // 
 export default class Light extends IPSODevice {
 
-	constructor(source) {
-		super.defineProperties(
+	constructor(sourceObj, ...properties) {
+		super(sourceObj, ...properties,
 			["5706", "color", "f1e0b5"], // hex string
 			["5709", "colorX", 0], // int
 			["5710", "colorY", 0], // int
@@ -18,8 +18,6 @@ export default class Light extends IPSODevice {
 			["5820", "powerFactor", 0.0], // <float>
 			["5712", "transitionTime", 5], // <int>
 			["5701", "unit", ""],
-		)
-
-		super(source);
+		);
 	}
 }

@@ -1,4 +1,10 @@
 ﻿{
-    "presets": [ "eslatest-node6" ],
+    "presets": [
+        ["env",{
+            "targets": {
+                "node": 4
+            }
+        }]
+    ],
     "plugins": [ "transform-class-properties", "transform-es2015-parameters" ]
 }

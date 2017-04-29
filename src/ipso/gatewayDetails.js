@@ -5,8 +5,8 @@ import IPSODevice from "./ipsoDevice";
 // contains information about the gateway
 export default class GatewayDetails extends IPSODevice {
 
-	constructor(source) {
-		super.defineProperties(
+	constructor(sourceObj, ...properties) {
+		super(sourceObj, ...properties,
 			["9023", "ntpServerUrl", ""],
 			["9029", "version", ""],
 			["9054", "updateState", 0], // <int> => which enum?
@@ -32,9 +32,7 @@ export default class GatewayDetails extends IPSODevice {
 			// are those used?
 			["9032", "FORCE_CHECK_OTA_UPDATE", ""],
 			["9035", "name", ""],
-		)
-
-		super(source);
+		);
 	}
 
 }

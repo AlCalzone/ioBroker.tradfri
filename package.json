@@ -1,60 +1,60 @@
 {
-    "name": "iobroker.tradfri",
-    "version": "0.0.1",
-    "description": "ioBroker tradfri Adapter",
-    "author": {
-        "name": "AlCalzone",
-        "email": "d.griesel@gmx.net"
-    },
-    "contributors": [
-        {
-            "name": "AlCalzone",
-            "email": "d.griesel@gmx.net"
-        }
-    ],
-    "homepage": "https://github.com/ioBroker/ioBroker.tradfri",
-    "license": "MIT",
-    "keywords": [
-        "ioBroker",
-        "tradfri",
-        "Smart Home",
-        "home automation"
-    ],
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/ioBroker/ioBroker.tradfri"
-    },
-    "dependencies": {
-        "node-coap-dtls": "git+https://github.com/neustar/node-coap-dtls"
-    },
-    "devDependencies": {
-        "babel-core": "^6.24.0",
-        "babel-eslint": "^7.2.2",
-        "babel-plugin-transform-class-properties": "^6.23.0",
-        "babel-plugin-transform-es2015-parameters": "^6.24.1",
-        "babel-preset-es2017": "^6.22.0",
-        "babel-preset-eslatest-node6": "^1.0.1",
-        "eslint": "^3.19.0",
-        "eslint-config-defaults": "^9.0.0",
-        "eslint-plugin-disable": "^0.3.0",
-        "eslint-plugin-react": "^6.10.3",
-        "gulp": "^3.9.1",
-        "gulp-babel": "^6.1.2",
-        "gulp-clean": "^0.3.2",
-        "gulp-concat": "^2.6.1",
-        "gulp-natural-sort": "^0.1.1",
-        "gulp-plumber": "^1.1.0",
-        "gulp-rename": "^1.2.2",
-        "gulp-sourcemaps": "^2.5.1",
-        "mocha": "^2.3.4",
-        "chai": "^3.4.1"
-    },
-    "main": "main.js",
-    "scripts": {
-        "test": "node node_modules/mocha/bin/mocha"
-    },
-    "bugs": {
-        "url": "https://github.com/ioBroker/ioBroker.tradfri/issues"
-    },
-    "readmeFilename": "README.md"
+  "name": "iobroker.tradfri",
+  "version": "0.0.1",
+  "description": "ioBroker tradfri Adapter",
+  "author": {
+    "name": "AlCalzone",
+    "email": "d.griesel@gmx.net"
+  },
+  "contributors": [
+    {
+      "name": "AlCalzone",
+      "email": "d.griesel@gmx.net"
+    }
+  ],
+  "homepage": "https://github.com/ioBroker/ioBroker.tradfri",
+  "license": "MIT",
+  "keywords": [
+    "ioBroker",
+    "tradfri",
+    "Smart Home",
+    "home automation"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ioBroker/ioBroker.tradfri"
+  },
+  "dependencies": {
+    "node-coap-dtls": "git+https://github.com/neustar/node-coap-dtls"
+  },
+  "devDependencies": {
+    "babel-core": "^6.24.0",
+    "babel-eslint": "^7.2.2",
+    "babel-plugin-transform-class-properties": "^6.23.0",
+    "babel-plugin-transform-es2015-parameters": "^6.24.1",
+    "babel-preset-env": "^1.4.0",
+    "babel-preset-es2017": "^6.22.0",
+    "chai": "^3.4.1",
+    "eslint": "^3.19.0",
+    "eslint-config-defaults": "^9.0.0",
+    "eslint-plugin-disable": "^0.3.0",
+    "eslint-plugin-react": "^6.10.3",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^6.1.2",
+    "gulp-clean": "^0.3.2",
+    "gulp-concat": "^2.6.1",
+    "gulp-natural-sort": "^0.1.1",
+    "gulp-plumber": "^1.1.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-sourcemaps": "^2.5.1",
+    "mocha": "^2.3.4"
+  },
+  "main": "main.js",
+  "scripts": {
+    "test": "node node_modules/mocha/bin/mocha"
+  },
+  "bugs": {
+    "url": "https://github.com/ioBroker/ioBroker.tradfri/issues"
+  },
+  "readmeFilename": "README.md"
 }

@@ -1,7 +1,7 @@
 "use strict";
 
 // Eigene Module laden
-import µ from "./lib/global";
+import _ from "./lib/global";
 import { promisify } from "./lib/promises";
 //import deferred from "./lib/defer-promise";
 import { /*entries,*/ values } from "./lib/object-polyfill";
@@ -16,7 +16,7 @@ const adapter = utils.adapter({
 	// Wird aufgerufen, wenn Adapter initialisiert wird
 	ready: async function () {
 		// Adapter-Instanz global machen
-		µ.adapter = adapter;
+		_.adapter = adapter;
 
 
 		// Eigene Objekte/States beobachten
@@ -24,8 +24,8 @@ const adapter = utils.adapter({
 		adapter.subscribeObjects("*");
 
 		// Custom subscriptions erlauben
-		µ.subscribe = subscribe;
-		µ.unsubscribe = unsubscribe;
+		_.subscribe = subscribe;
+		_.unsubscribe = unsubscribe;
 
 		// Regelung starten
 		Regelung.initialize();
@@ -59,7 +59,7 @@ const adapter = utils.adapter({
 				}
 			}
 		} catch (e) {
-			µ.log("error handling custom sub: " + e);
+			_.log("error handling custom sub: " + e);
 		}
 	},
 
@@ -94,7 +94,7 @@ function subscribe(pattern, callback) {
 			throw "must be regex or string";
 		}
 	} catch (e) {
-		µ.log("cannot subscribe with this pattern. reason: " + e);
+		_.log("cannot subscribe with this pattern. reason: " + e);
 	}
 
 	const newCounter = (++customSubscriptions.counter);
