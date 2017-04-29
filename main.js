@@ -42,14 +42,13 @@ var adapter = _utils2.default.adapter({
 							adapter.subscribeStates("*");
 							adapter.subscribeObjects("*");
 
-							// Custom subscriptions erlauben
+							// Custom subscriptions erlauben 
 							_global2.default.subscribe = subscribe;
 							_global2.default.unsubscribe = unsubscribe;
 
-							// Regelung starten
-							Regelung.initialize();
+							// did I break something?
 
-						case 6:
+						case 5:
 						case "end":
 							return _context.stop();
 					}
@@ -155,18 +154,18 @@ function subscribe(pattern, callback) {
 
 	customSubscriptions.subscriptions[id] = { pattern, callback };
 
-	//�.log(`added subscription for pattern ${pattern}. total count: ${Object.keys(customSubscriptions.subscriptions).length}`);
+	//_.log(`added subscription for pattern ${pattern}. total count: ${Object.keys(customSubscriptions.subscriptions).length}`);
 
 	return id;
 }
 function unsubscribe(id) {
-	//�.log(`unsubscribing subscription #${id}...`);
+	//_.log(`unsubscribing subscription #${id}...`);
 	if (customSubscriptions.subscriptions[id]) {
 		//const pattern = customSubscriptions.subscriptions[id].pattern;
 		delete customSubscriptions.subscriptions[id];
-		//�.log(`unsubscribe ${pattern}: success. total count: ${Object.keys(customSubscriptions.subscriptions).length}`);
+		//_.log(`unsubscribe ${pattern}: success. total count: ${Object.keys(customSubscriptions.subscriptions).length}`);
 	} else {
-			//�.log(`unsubscribe: subscription not found`);
+			//_.log(`unsubscribe: subscription not found`);
 		}
 }
 

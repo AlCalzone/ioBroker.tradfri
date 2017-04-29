@@ -18,17 +18,14 @@ const adapter = utils.adapter({
 		// Adapter-Instanz global machen
 		_.adapter = adapter;
 
-
 		// Eigene Objekte/States beobachten
 		adapter.subscribeStates("*");
 		adapter.subscribeObjects("*");
 
-		// Custom subscriptions erlauben
+		// Custom subscriptions erlauben 
 		_.subscribe = subscribe;
 		_.unsubscribe = unsubscribe;
 
-		// Regelung starten
-		Regelung.initialize();
 	},
 
 	message: (obj) => {
@@ -102,18 +99,18 @@ function subscribe(pattern, callback) {
 
 	customSubscriptions.subscriptions[id] = { pattern, callback };
 
-	//µ.log(`added subscription for pattern ${pattern}. total count: ${Object.keys(customSubscriptions.subscriptions).length}`);
+	//_.log(`added subscription for pattern ${pattern}. total count: ${Object.keys(customSubscriptions.subscriptions).length}`);
 
 	return id;
 }
 function unsubscribe(id) {
-	//µ.log(`unsubscribing subscription #${id}...`);
+	//_.log(`unsubscribing subscription #${id}...`);
 	if (customSubscriptions.subscriptions[id]) {
 		//const pattern = customSubscriptions.subscriptions[id].pattern;
 		delete customSubscriptions.subscriptions[id];
-		//µ.log(`unsubscribe ${pattern}: success. total count: ${Object.keys(customSubscriptions.subscriptions).length}`);
+		//_.log(`unsubscribe ${pattern}: success. total count: ${Object.keys(customSubscriptions.subscriptions).length}`);
 	} else {
-		//µ.log(`unsubscribe: subscription not found`);
+		//_.log(`unsubscribe: subscription not found`);
 	}
 }
 
