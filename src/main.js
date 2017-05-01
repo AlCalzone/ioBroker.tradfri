@@ -4,23 +4,28 @@ import "babel-polyfill";
 
 // Eigene Module laden
 import _ from "./lib/global";
-import { promisify, waterfall } from "./lib/promises";
+//import { promisify, waterfall } from "./lib/promises";
 import { str2regex } from "./lib/str2regex";
-import { /*entries,*/ values } from "./lib/object-polyfill";
-import { intersect, except } from "./lib/array-extensions";
+import { entries, values, filter, dig, /*bury, extend*/ } from "./lib/object-polyfill";
+import { /*intersect,*/ except } from "./lib/array-extensions";
 // import { getEnumValueAsName } from "./lib/enums";
 import Coap from "./lib/coapClient";
 import coapEndpoints from "./ipso/endpoints";
+
+// Datentypen laden
+import Accessory from "./ipso/accessory";
+import accessoryTypes from "./ipso/accessoryTypes";
 
 // Adapter-Utils laden
 import utils from "./lib/utils";
 
 const customSubscriptions = {}; // wird unten intialisiert
-const observers = {
-
-};
+// dictionary of COAP observers
+const observers = {};
 // dictionary of known devices
 const devices = {};
+// dictionary of ioBroker objects
+const objects = {};
 
 // Adapter-Objekt erstellen
 const adapter = utils.adapter({
@@ -39,29 +44,8 @@ const adapter = utils.adapter({
 		_.subscribe = subscribe;
 		_.unsubscribe = unsubscribe;
 
-		// TODO: load known devices from ioBroker into <devices>
+		// TODO: load known devices from ioBroker into <devices> & <objects>
 		observeDevices();
-		// Test code:
-		//const requests = [65536, 65537]
-		//	.map(id => new Coap(
-		//		`${coapEndpoints.devices}/${id}`,
-		//		(result, k) => {
-		//			_.log(`result (${k}) = ` + JSON.stringify(result));
-		//		}, id
-		//	))
-		//	.map(cl => cl.request())
-		//	;
-		//// internal mutex takes care of sequence
-		//Promise.all(requests).then(() => _.log("all requests done"));
-		////// run requests in serial
-		////requests.reduce(
-		////	(prev, cur) => prev.then(() => {
-		////		_.log(`cur is ${typeof cur}`);
-		////		_.log(`executing request for endpoint ${cur.endpoint}`);
-		////		return cur.request();
-		////	}),
-		////	Promise.resolve()
-		////);
 
 	},
 
@@ -79,10 +63,62 @@ const adapter = utils.adapter({
 	},
 
 	objectChange: (id, obj) => {
-		// TODO: Pr�fen
+		_.log(`{{blue}} object with id ${id} updated`);
+		if (id.startsWith(adapter.namespace)) {
+			// this is our own object, remember it!
+			objects[id] = obj;
+		}
 	},
 
 	stateChange: (id, state) => {
+		_.log(`{{blue}} state with id ${id} updated: ack=${state.ack}; val=${state.val}`);
+		if (!state.ack && id.startsWith(adapter.namespace)) {
+			// our own state was changed from within ioBroker, react to it
+
+			const stateObj = objects[id];
+			if (!(stateObj && stateObj.native && stateObj.native.path)) return;
+
+			// get "official" value for the parent object
+			const devId = getAccessoryId(id);
+			if (devId) {
+				// get the ioBroker object
+				const dev = objects[devId];
+				//// read the instanceId and get a reference value
+				const accessory = devices[dev.native.instanceId];
+
+				// for now: handle changes on a case by case basis
+				// everything else is too complicated for now
+				let val = state.val;
+				if (_.isdef(stateObj.common.min))
+					val = Math.max(stateObj.common.min, val);
+				if (_.isdef(stateObj.common.max))
+					val = Math.min(stateObj.common.max, val);
+
+				// TODO: find a way to construct these from existing accessory objects
+				let payload = null;
+				if (id.endsWith(".lightbulb.state")) {
+					payload = { "3311": [{ "5850": (val ? 1 : 0)}] };
+				} else if (id.endsWith(".lightbulb.brightness")) {
+					payload = { "3311": [{ "5851": val, "5712": 5  }] };
+				} else if (id.endsWith(".lightbulb.colorX")) {
+					const colorY = accessory.lightList[0].colorY;
+					payload = { "3311": [{ "5709": val, "5710": colorY, "5712": 5 }] };
+				} else if (id.endsWith(".lightbulb.colorY")) {
+					const colorX = accessory.lightList[0].colorX;
+					payload = { "3311": [{ "5709": colorX, "5710": val, "5712": 5 }] };
+				}
+
+				_.log("sending payload: " + JSON.stringify(payload));
+
+				const send = new Coap(
+					`${coapEndpoints.devices}/${dev.native.instanceId}`
+				);
+				send.request("put", payload);
+
+			}
+		}
+
+
 		// Custom subscriptions durchgehen, um die passenden Callbacks aufzurufen
 		try {
 			for (let sub of values(customSubscriptions.subscriptions)) {
@@ -136,11 +172,12 @@ function coapCb_getAllDevices(newDevices, _dummy, info) {
 		const observerKey = `devices/${id}`;
 		if (_.isdef(observers[observerKey])) return;
 
-		devices[id] = {}; // what should it be?
+		// make a dummy object, we'll be filling that one later
+		devices[id] = {};
 		// add observer
 		const obs = new Coap(
 			`${coapEndpoints.devices}/${id}`,
-			coapCb_getDevice,
+			coap_getDevice_cb,
 			id
 		);
 		obs.observe(); // internal mutex will take care of sequencing
@@ -165,9 +202,240 @@ function coapCb_getAllDevices(newDevices, _dummy, info) {
 	_.log(`active observers: ${Object.keys(observers).map(k => k + ": " + observers[k].endpoint)}`);
 }
 // gets called whenever "get /15001/<instanceId>" updates
-function coapCb_getDevice(result, instanceId, info) {
-	_.log(`got device details ${instanceId} (${JSON.stringify(info)}): ${JSON.stringify(result)}`);
-	// TODO: create ioBroker device
+function coap_getDevice_cb(result, instanceId, _info) {
+	//_.log(`got device details ${instanceId} (${JSON.stringify(info)}): ${JSON.stringify(result)}`);
+	// parse device info
+	const accessory = new Accessory(result);
+	// remember the device object, so we can later use it as a reference for updates
+	devices[instanceId] = accessory;
+	//_.log(`got device details for ${instanceId}:`);
+	//_.log(JSON.stringify(accessory));
+	// create ioBroker device
+	extendDevice(accessory);
+}
+
+function getAccessoryId(stateId) {
+	const match = /^tradfri\.\d+\.[\w\-\d]+/.exec(stateId);
+	if (match) return match[0];
+}
+
+function calcObjId(accessory) {
+	let prefix = (() => {
+		switch (accessory.type) {
+			case accessoryTypes.remote:
+				return "RC";
+			case accessoryTypes.lightbulb:
+				return "L";
+			default:
+				_.log("unknown accessory type " + accessory.type);
+				return "XYZ";
+		}
+	})();
+	return `${adapter.namespace}.${prefix}-${accessory.instanceId}`;
+}
+
+// creates or edits an existing <device>-object for an accessory
+function extendDevice(accessory) {
+	const objId = calcObjId(accessory);
+
+	if (_.isdef(objects[objId])) {
+		// check if we need to edit the existing object
+		const devObj = objects[objId];
+		let changed = false;
+		// update common part if neccessary
+		const newCommon = {
+			name: accessory.name
+		};
+		if (JSON.stringify(devObj.common) !== JSON.stringify(newCommon)) {
+			devObj.common = newCommon;
+			changed = true;
+		}
+		const newNative = {
+			instanceId: accessory.instanceId,
+			manufacturer: accessory.deviceInfo.manufacturer,
+			firmwareVersion: accessory.deviceInfo.firmwareVersion
+		};
+		// update native part if neccessary
+		if (JSON.stringify(devObj.native) !== JSON.stringify(newNative)) {
+			devObj.native = newNative;
+			changed = true;
+		}
+		if (changed) adapter.extendObject(objId, devObj);
+
+		// ====
+
+		// from here we can update the states
+		// filter out the ones belonging to this device with a property path
+		const stateObjs = filter(
+			objects,
+			obj => obj._id.startsWith(objId) && obj.native && obj.native.path
+		);
+		// for each property try to update the value
+		for (let [id, obj] of entries(stateObjs)) {
+			try {
+				// Object could have a default value, find it
+				let newValue = dig(accessory, obj.native.path);
+				if (obj.common.type === "boolean") {
+					// fix bool values
+					newValue = newValue === 1 || newValue === "true" || newValue === "on";
+				}
+				adapter.setState(id, newValue, true);
+			} catch (e) {/* skip this value */}
+		}
+
+	} else {
+		// create new object
+		const devObj = {
+			_id: objId,
+			type: "device",
+			common: {
+				name: accessory.name
+			},
+			native: {
+				instanceId: accessory.instanceId,
+				manufacturer: accessory.deviceInfo.manufacturer,
+				firmwareVersion: accessory.deviceInfo.firmwareVersion
+			}
+		};
+		adapter.setObject(objId, devObj);
+
+		// also create state objects, depending on the accessory type
+		const stateObjs = {
+			alive: { // alive state
+				_id: `${objId}.alive`,
+				type: "state",
+				common: {
+					name: "device alive",
+					read: true,
+					write: false,
+					type: "boolean",
+					role: "indicator.alive",
+					desc: "indicates if the device is currently alive and connected to the gateway"
+				},
+				native: {
+					path: "alive"
+				}
+			},
+			lastSeen: { // last seen state
+				_id: `${objId}.lastSeen`,
+				type: "state",
+				common: {
+					name: "last seen timestamp",
+					read: true,
+					write: false,
+					type: "number",
+					role: "indicator.lastSeen",
+					desc: "indicates when the device has last been seen by the gateway"
+				},
+				native: {
+					path: "lastSeen"
+				}
+			}
+		};
+		
+		if (accessory.type === accessoryTypes.lightbulb) {
+			stateObjs["lightbulb.color"] = {
+				_id: `${objId}.lightbulb.color`,
+				type: "state",
+				common: {
+					name: "RGB color",
+					read: true, // TODO: check
+					write: false, // TODO: check
+					type: "string",
+					role: "level.color.rgb",
+					desc: "hex representation of the lightbulb color"
+				},
+				native: {
+					path: "lightList.[0].color"
+				}
+			};
+			stateObjs["lightbulb.colorX"] = {
+				_id: `${objId}.lightbulb.colorX`,
+				type: "state",
+				common: {
+					name: "CIE 1931 x coordinate",
+					read: true, // TODO: check
+					write: true, // TODO: check
+					min: 24930,
+					max: 33135,
+					type: "number",
+					role: "level.color.temperature",
+					desc: "x coordinate of the color temperature in the CIE 1931 color space"
+				},
+				native: {
+					path: "lightList.[0].colorX"
+				}
+			};
+			stateObjs["lightbulb.colorY"] = {
+				_id: `${objId}.lightbulb.colorY`,
+				type: "state",
+				common: {
+					name: "CIE 1931 y coordinate",
+					read: true, // TODO: check
+					write: true, // TODO: check
+					min: 24694,
+					max: 27211,
+					type: "number",
+					role: "level.color.temperature",
+					desc: "y coordinate of the color temperature in the CIE 1931 color space"
+				},
+				native: {
+					path: "lightList.[0].colorY"
+				}
+			};
+			stateObjs["lightbulb.brightness"] = {
+				_id: `${objId}.lightbulb.brightness`,
+				type: "state",
+				common: {
+					name: "brightness",
+					read: true, // TODO: check
+					write: true, // TODO: check
+					min: 0,
+					max: 254,
+					type: "number",
+					role: "level",
+					desc: "brightness of the lightbulb"
+				},
+				native: {
+					path: "lightList.[0].dimmer"
+				}
+			};
+			stateObjs["lightbulb.state"] = {
+				_id: `${objId}.lightbulb.state`,
+				type: "state",
+				common: {
+					name: "on/off",
+					read: true, // TODO: check
+					write: true, // TODO: check
+					type: "boolean",
+					role: "switch",
+				},
+				native: {
+					path: "lightList.[0].onOff"
+				}
+			};
+		}
+
+		const createObjects = Object.keys(stateObjs)
+			.map((key) => {
+				const stateId = `${objId}.${key}`;
+				const obj = stateObjs[key];
+				let initialValue = null;
+				if (_.isdef(obj.native.path)) {
+					// Object could have a default value, find it
+					initialValue = dig(accessory, obj.native.path);
+					if (obj.common.type === "boolean") {
+						// fix bool values
+						initialValue = initialValue === 1 || initialValue === "true" || initialValue === "on";
+					}
+				}
+				// create object and return the promise, so we can wait
+				return adapter.$createOwnStateEx(stateId, obj, initialValue);
+			})
+			;
+		Promise.all(createObjects);
+
+	}
 }
 
 // ==================================

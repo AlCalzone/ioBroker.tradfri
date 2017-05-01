@@ -1,13 +1,26 @@
 "use strict";
 // Babel polyfill
 
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+// Eigene Module laden
+
+//import { promisify, waterfall } from "./lib/promises";
+
+// import { getEnumValueAsName } from "./lib/enums";
+
+
+// Datentypen laden
+
+
+// Adapter-Utils laden
+
+
 require("babel-polyfill");
 
 var _global = require("./lib/global");
 
 var _global2 = _interopRequireDefault(_global);
-
-var _promises = require("./lib/promises");
 
 var _str2regex = require("./lib/str2regex");
 
@@ -23,22 +36,27 @@ var _endpoints = require("./ipso/endpoints");
 
 var _endpoints2 = _interopRequireDefault(_endpoints);
 
+var _accessory = require("./ipso/accessory");
+
+var _accessory2 = _interopRequireDefault(_accessory);
+
+var _accessoryTypes = require("./ipso/accessoryTypes");
+
+var _accessoryTypes2 = _interopRequireDefault(_accessoryTypes);
+
 var _utils = require("./lib/utils");
 
 var _utils2 = _interopRequireDefault(_utils);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// Eigene Module laden
 var customSubscriptions = {}; // wird unten intialisiert
-
-
-// Adapter-Utils laden
-
-// import { getEnumValueAsName } from "./lib/enums";
+// dictionary of COAP observers
 var observers = {};
 // dictionary of known devices
 var devices = {};
+// dictionary of ioBroker objects
+var objects = {};
 
 // Adapter-Objekt erstellen
 var adapter = _utils2.default.adapter({
@@ -57,29 +75,8 @@ var adapter = _utils2.default.adapter({
 		_global2.default.subscribe = subscribe;
 		_global2.default.unsubscribe = unsubscribe;
 
-		// TODO: load known devices from ioBroker into <devices>
+		// TODO: load known devices from ioBroker into <devices> & <objects>
 		observeDevices();
-		// Test code:
-		//const requests = [65536, 65537]
-		//	.map(id => new Coap(
-		//		`${coapEndpoints.devices}/${id}`,
-		//		(result, k) => {
-		//			_.log(`result (${k}) = ` + JSON.stringify(result));
-		//		}, id
-		//	))
-		//	.map(cl => cl.request())
-		//	;
-		//// internal mutex takes care of sequence
-		//Promise.all(requests).then(() => _.log("all requests done"));
-		////// run requests in serial
-		////requests.reduce(
-		////	(prev, cur) => prev.then(() => {
-		////		_.log(`cur is ${typeof cur}`);
-		////		_.log(`executing request for endpoint ${cur.endpoint}`);
-		////		return cur.request();
-		////	}),
-		////	Promise.resolve()
-		////);
 	},
 
 	message: function message(obj) {
@@ -96,10 +93,56 @@ var adapter = _utils2.default.adapter({
 	},
 
 	objectChange: function objectChange(id, obj) {
-		// TODO: Pr�fen
+		_global2.default.log(`{{blue}} object with id ${id} updated`);
+		if (id.startsWith(adapter.namespace)) {
+			// this is our own object, remember it!
+			objects[id] = obj;
+		}
 	},
 
 	stateChange: function stateChange(id, state) {
+		_global2.default.log(`{{blue}} state with id ${id} updated: ack=${state.ack}; val=${state.val}`);
+		if (!state.ack && id.startsWith(adapter.namespace)) {
+			// our own state was changed from within ioBroker, react to it
+
+			var stateObj = objects[id];
+			if (!(stateObj && stateObj.native && stateObj.native.path)) return;
+
+			// get "official" value for the parent object
+			var devId = getAccessoryId(id);
+			if (devId) {
+				// get the ioBroker object
+				var dev = objects[devId];
+				//// read the instanceId and get a reference value
+				var accessory = devices[dev.native.instanceId];
+
+				// for now: handle changes on a case by case basis
+				// everything else is too complicated for now
+				var val = state.val;
+				if (_global2.default.isdef(stateObj.common.min)) val = Math.max(stateObj.common.min, val);
+				if (_global2.default.isdef(stateObj.common.max)) val = Math.min(stateObj.common.max, val);
+
+				// TODO: find a way to construct these from existing accessory objects
+				var payload = null;
+				if (id.endsWith(".lightbulb.state")) {
+					payload = { "3311": [{ "5850": val ? 1 : 0 }] };
+				} else if (id.endsWith(".lightbulb.brightness")) {
+					payload = { "3311": [{ "5851": val, "5712": 5 }] };
+				} else if (id.endsWith(".lightbulb.colorX")) {
+					var colorY = accessory.lightList[0].colorY;
+					payload = { "3311": [{ "5709": val, "5710": colorY, "5712": 5 }] };
+				} else if (id.endsWith(".lightbulb.colorY")) {
+					var colorX = accessory.lightList[0].colorX;
+					payload = { "3311": [{ "5709": colorX, "5710": val, "5712": 5 }] };
+				}
+
+				_global2.default.log("sending payload: " + JSON.stringify(payload));
+
+				var send = new _coapClient2.default(`${_endpoints2.default.devices}/${dev.native.instanceId}`);
+				send.request("put", payload);
+			}
+		}
+
 		// Custom subscriptions durchgehen, um die passenden Callbacks aufzurufen
 		try {
 			var _iteratorNormalCompletion = true;
@@ -197,9 +240,10 @@ function coapCb_getAllDevices(newDevices, _dummy, info) {
 		var observerKey = `devices/${id}`;
 		if (_global2.default.isdef(observers[observerKey])) return;
 
-		devices[id] = {}; // what should it be?
+		// make a dummy object, we'll be filling that one later
+		devices[id] = {};
 		// add observer
-		var obs = new _coapClient2.default(`${_endpoints2.default.devices}/${id}`, coapCb_getDevice, id);
+		var obs = new _coapClient2.default(`${_endpoints2.default.devices}/${id}`, coap_getDevice_cb, id);
 		obs.observe(); // internal mutex will take care of sequencing
 		observers[observerKey] = obs;
 	});
@@ -223,9 +267,261 @@ function coapCb_getAllDevices(newDevices, _dummy, info) {
 	})}`);
 }
 // gets called whenever "get /15001/<instanceId>" updates
-function coapCb_getDevice(result, instanceId, info) {
-	_global2.default.log(`got device details ${instanceId} (${JSON.stringify(info)}): ${JSON.stringify(result)}`);
-	// TODO: create ioBroker device
+function coap_getDevice_cb(result, instanceId, _info) {
+	//_.log(`got device details ${instanceId} (${JSON.stringify(info)}): ${JSON.stringify(result)}`);
+	// parse device info
+	var accessory = new _accessory2.default(result);
+	// remember the device object, so we can later use it as a reference for updates
+	devices[instanceId] = accessory;
+	//_.log(`got device details for ${instanceId}:`);
+	//_.log(JSON.stringify(accessory));
+	// create ioBroker device
+	extendDevice(accessory);
+}
+
+function getAccessoryId(stateId) {
+	var match = /^tradfri\.\d+\.[\w\-\d]+/.exec(stateId);
+	if (match) return match[0];
+}
+
+function calcObjId(accessory) {
+	var prefix = function () {
+		switch (accessory.type) {
+			case _accessoryTypes2.default.remote:
+				return "RC";
+			case _accessoryTypes2.default.lightbulb:
+				return "L";
+			default:
+				_global2.default.log("unknown accessory type " + accessory.type);
+				return "XYZ";
+		}
+	}();
+	return `${adapter.namespace}.${prefix}-${accessory.instanceId}`;
+}
+
+// creates or edits an existing <device>-object for an accessory
+function extendDevice(accessory) {
+	var objId = calcObjId(accessory);
+
+	if (_global2.default.isdef(objects[objId])) {
+		// check if we need to edit the existing object
+		var devObj = objects[objId];
+		var changed = false;
+		// update common part if neccessary
+		var newCommon = {
+			name: accessory.name
+		};
+		if (JSON.stringify(devObj.common) !== JSON.stringify(newCommon)) {
+			devObj.common = newCommon;
+			changed = true;
+		}
+		var newNative = {
+			instanceId: accessory.instanceId,
+			manufacturer: accessory.deviceInfo.manufacturer,
+			firmwareVersion: accessory.deviceInfo.firmwareVersion
+		};
+		// update native part if neccessary
+		if (JSON.stringify(devObj.native) !== JSON.stringify(newNative)) {
+			devObj.native = newNative;
+			changed = true;
+		}
+		if (changed) adapter.extendObject(objId, devObj);
+
+		// ====
+
+		// from here we can update the states
+		// filter out the ones belonging to this device with a property path
+		var stateObjs = (0, _objectPolyfill.filter)(objects, function (obj) {
+			return obj._id.startsWith(objId) && obj.native && obj.native.path;
+		});
+		// for each property try to update the value
+		var _iteratorNormalCompletion3 = true;
+		var _didIteratorError3 = false;
+		var _iteratorError3 = undefined;
+
+		try {
+			for (var _iterator3 = (0, _objectPolyfill.entries)(stateObjs)[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+				var _ref = _step3.value;
+
+				var _ref2 = _slicedToArray(_ref, 2);
+
+				var id = _ref2[0];
+				var obj = _ref2[1];
+
+				try {
+					// Object could have a default value, find it
+					var newValue = (0, _objectPolyfill.dig)(accessory, obj.native.path);
+					if (obj.common.type === "boolean") {
+						// fix bool values
+						newValue = newValue === 1 || newValue === "true" || newValue === "on";
+					}
+					adapter.setState(id, newValue, true);
+				} catch (e) {/* skip this value */}
+			}
+		} catch (err) {
+			_didIteratorError3 = true;
+			_iteratorError3 = err;
+		} finally {
+			try {
+				if (!_iteratorNormalCompletion3 && _iterator3.return) {
+					_iterator3.return();
+				}
+			} finally {
+				if (_didIteratorError3) {
+					throw _iteratorError3;
+				}
+			}
+		}
+	} else {
+		// create new object
+		var _devObj = {
+			_id: objId,
+			type: "device",
+			common: {
+				name: accessory.name
+			},
+			native: {
+				instanceId: accessory.instanceId,
+				manufacturer: accessory.deviceInfo.manufacturer,
+				firmwareVersion: accessory.deviceInfo.firmwareVersion
+			}
+		};
+		adapter.setObject(objId, _devObj);
+
+		// also create state objects, depending on the accessory type
+		var _stateObjs = {
+			alive: { // alive state
+				_id: `${objId}.alive`,
+				type: "state",
+				common: {
+					name: "device alive",
+					read: true,
+					write: false,
+					type: "boolean",
+					role: "indicator.alive",
+					desc: "indicates if the device is currently alive and connected to the gateway"
+				},
+				native: {
+					path: "alive"
+				}
+			},
+			lastSeen: { // last seen state
+				_id: `${objId}.lastSeen`,
+				type: "state",
+				common: {
+					name: "last seen timestamp",
+					read: true,
+					write: false,
+					type: "number",
+					role: "indicator.lastSeen",
+					desc: "indicates when the device has last been seen by the gateway"
+				},
+				native: {
+					path: "lastSeen"
+				}
+			}
+		};
+
+		if (accessory.type === _accessoryTypes2.default.lightbulb) {
+			_stateObjs["lightbulb.color"] = {
+				_id: `${objId}.lightbulb.color`,
+				type: "state",
+				common: {
+					name: "RGB color",
+					read: true, // TODO: check
+					write: false, // TODO: check
+					type: "string",
+					role: "level.color.rgb",
+					desc: "hex representation of the lightbulb color"
+				},
+				native: {
+					path: "lightList.[0].color"
+				}
+			};
+			_stateObjs["lightbulb.colorX"] = {
+				_id: `${objId}.lightbulb.colorX`,
+				type: "state",
+				common: {
+					name: "CIE 1931 x coordinate",
+					read: true, // TODO: check
+					write: true, // TODO: check
+					min: 24930,
+					max: 33135,
+					type: "number",
+					role: "level.color.temperature",
+					desc: "x coordinate of the color temperature in the CIE 1931 color space"
+				},
+				native: {
+					path: "lightList.[0].colorX"
+				}
+			};
+			_stateObjs["lightbulb.colorY"] = {
+				_id: `${objId}.lightbulb.colorY`,
+				type: "state",
+				common: {
+					name: "CIE 1931 y coordinate",
+					read: true, // TODO: check
+					write: true, // TODO: check
+					min: 24694,
+					max: 27211,
+					type: "number",
+					role: "level.color.temperature",
+					desc: "y coordinate of the color temperature in the CIE 1931 color space"
+				},
+				native: {
+					path: "lightList.[0].colorY"
+				}
+			};
+			_stateObjs["lightbulb.brightness"] = {
+				_id: `${objId}.lightbulb.brightness`,
+				type: "state",
+				common: {
+					name: "brightness",
+					read: true, // TODO: check
+					write: true, // TODO: check
+					min: 0,
+					max: 254,
+					type: "number",
+					role: "level",
+					desc: "brightness of the lightbulb"
+				},
+				native: {
+					path: "lightList.[0].dimmer"
+				}
+			};
+			_stateObjs["lightbulb.state"] = {
+				_id: `${objId}.lightbulb.state`,
+				type: "state",
+				common: {
+					name: "on/off",
+					read: true, // TODO: check
+					write: true, // TODO: check
+					type: "boolean",
+					role: "switch"
+				},
+				native: {
+					path: "lightList.[0].onOff"
+				}
+			};
+		}
+
+		var createObjects = Object.keys(_stateObjs).map(function (key) {
+			var stateId = `${objId}.${key}`;
+			var obj = _stateObjs[key];
+			var initialValue = null;
+			if (_global2.default.isdef(obj.native.path)) {
+				// Object could have a default value, find it
+				initialValue = (0, _objectPolyfill.dig)(accessory, obj.native.path);
+				if (obj.common.type === "boolean") {
+					// fix bool values
+					initialValue = initialValue === 1 || initialValue === "true" || initialValue === "on";
+				}
+			}
+			// create object and return the promise, so we can wait
+			return adapter.$createOwnStateEx(stateId, obj, initialValue);
+		});
+		Promise.all(createObjects);
+	}
 }
 
 // ==================================

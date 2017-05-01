@@ -80,7 +80,13 @@ class Global {
 				native: {},
 				type: type
 			});
-			await adapter.$setState(id, initialValue, ack);
+			if (initialValue != undefined)
+				await adapter.$setState(id, initialValue, ack);
+		};
+		adapter.$createOwnStateEx = async function (id, obj, initialValue, ack = true) {
+			await adapter.$setObject(id, obj);
+			if (initialValue != undefined)
+				await adapter.$setState(id, initialValue, ack);
 		};
 	}
 

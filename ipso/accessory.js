@@ -38,7 +38,8 @@ var Accessory = function (_IPSODevice) {
 			properties[_key - 1] = arguments[_key];
 		}
 
-		return _possibleConstructorReturn(this, (_ref = Accessory.__proto__ || Object.getPrototypeOf(Accessory)).call.apply(_ref, [this, sourceObj].concat(properties, [["3", "deviceInfo", null, function (obj) {
+		return _possibleConstructorReturn(this, (_ref = Accessory.__proto__ || Object.getPrototypeOf(Accessory)).call.apply(_ref, [this, sourceObj].concat(properties, [["5750", "type", 0], // <AccessoryType>
+		["3", "deviceInfo", null, function (obj) {
 			return new _deviceInfo2.default(obj);
 		}], // <DeviceInfo>
 		["9019", "alive", false], // <boolean>

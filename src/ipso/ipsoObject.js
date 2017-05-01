@@ -27,13 +27,14 @@ export default class IPSOObject {
 			this[deserialize](sourceObj);
 	}
 
-	[defineProperties](...properties) {
+	[defineProperties](properties) {
 		this[keys] = {}; // lookup dictionary for propName => key
 		this[propNames] = {}; // lookup dictionary for key => propName
 		this[defaultValues] = {}; // lookup dictionary for key => default property value
 		this[parsers] = {}; // // lookup dictionary for key => property parser
 
-		for (let [key, name, ...options] of properties) {
+		for (let index in properties) {
+			let [key, name, ...options] = properties[index];
 			// populate key lookup table
 			this[keys][name] = key;
 			this[propNames][key] = name;
@@ -81,10 +82,9 @@ export default class IPSOObject {
 		} else if (typeof value === "object") {
 			// Object: try to parse this, objects should be parsed in any case
 			if (parser) {
-				value = parser(value);
+				return parser(value);
 			} else {
 				_.log(`{{yellow}}could not find property parser for key ${propKey}`);
-				return value;
 			}
 		} else if (parser) {
 			// if this property needs a parser, parse the value
@@ -99,24 +99,52 @@ export default class IPSOObject {
 	getPropName(key) { return this[propNames][key]; }
 
 	// serializes this object in order to transfer it via COAP
-	serialize() {
+	serialize(reference = null) {
 		const ret = {};
+
+		const serializeValue = (key, propName, value, refValue) => {
+			if (value instanceof IPSOObject) {
+				// if the value is another IPSOObject, then serialize that
+				value = value.serialize(refValue);
+			} else {
+				// if the value is not the default one, then remember it
+				if (_.isdef(refValue)) {
+					if (refValue === value) return null;
+				} else {
+					// there is no default value, just remember the actual value
+				}
+			}
+			return value;
+		};
+
+		const refObj = reference || this[defaultValues];
 		// check all set properties
 		for (let propName of this[propNames]) {
 			if (this.hasOwnProperty(propName)) {
 				const key = this.getKey(propName);
 				let value = this[propName];
-				if (value instanceof IPSOObject) {
-					// if the value is another IPSOObject, then serialize that
-					value = value.serialize();
-				} else {
-					// if the value is not the default one, then remember it
-					if (this[defaultValues].hasOwnProperty(key)) {
-						const defaultValue = this[defaultValues][key];
-						if (defaultValue === value) continue;
+				let refValue = null;
+				if (_.isdef(refObj) && refObj.hasOwnProperty(propName))
+					refValue = refObj[propName];
+
+				if (value instanceof Array) {
+					// serialize each item
+					if (_.isdef(refValue)) {
+						// reference value exists, make sure we have the same amount of items
+						if (!(refValue instanceof Array && refValue.length === value.length)) {
+							throw "cannot serialize arrays when the reference values don't match";
+						}
+						// serialize each item with the matching reference value
+						value = value.map((v, i) => serializeValue(key, propName, v, refValue[i]));
 					} else {
-						// there is no default value, just remember the actual value
+						// no reference value, makes things easier
+						value = value.map(v => serializeValue(key, propName, v, null));
 					}
+					// now remove null items
+					value = value.filter(v => _.isdef(v));
+				} else {
+					// directly serialize the value
+					value = serializeValue(key, propName, value, refValue);
 				}
 
 				ret[key] = value;

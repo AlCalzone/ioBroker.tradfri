@@ -2,7 +2,7 @@
 
 import _ from "./global";
 import coap from "coap-dtls";
-import { promisify } from "./promises";
+//import { promisify } from "./promises";
 import deferred from "./defer-promise";
 
 // use mutex to run requests in sequence
@@ -87,7 +87,7 @@ export default class CoapClient {
 		if (this[_isObserving]) return;
 
 		// begin request
-		const reqOpts = getRequestOptions(method, this.endpoint, false);
+		const reqOpts = getRequestOptions(method, this.endpoint, true);
 		_.log(`requesting coap endpoint ${reqOpts.hostname}${reqOpts.pathname}`);
 
 		const dtlsOpts = getDTLSOptions();
@@ -103,14 +103,14 @@ export default class CoapClient {
 				this[response] = res;
 				res.on("data", data => {
 					const body = parsePayload(data);
-
-					// resume program flow
-					ret.resolve();
-
 					////_.log(`got additional data... ${JSON.stringify(body)}`);
 					// we got additional data, notify our creator
 					if (this[callback]) this[callback](body, this[_userObj], { reason: "update" });
 				});
+
+				// resume program flow
+				ret.resolve();
+
 				// also notify our creator
 				if (this[callback]) this[callback](body, this[_userObj], { reason: "initial" });
 				// TODO: handle errors
@@ -146,6 +146,7 @@ function parsePayload(payload) {
 	} else {
 		throw `unsupported payload type "${typeof payload}"`;
 	}
+	if (payload == undefined || payload == "") return {};
 	return JSON.parse(payload);
 }
 

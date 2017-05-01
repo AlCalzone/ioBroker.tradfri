@@ -48,54 +48,28 @@ var IPSOObject = function () {
 
 	_createClass(IPSOObject, [{
 		key: defineProperties,
-		value: function value() {
+		value: function value(properties) {
 			this[keys] = {}; // lookup dictionary for propName => key
 			this[propNames] = {}; // lookup dictionary for key => propName
 			this[defaultValues] = {}; // lookup dictionary for key => default property value
 			this[parsers] = {}; // // lookup dictionary for key => property parser
 
-			for (var _len2 = arguments.length, properties = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-				properties[_key2] = arguments[_key2];
-			}
+			for (var index in properties) {
+				var _properties$index = _toArray(properties[index]),
+				    key = _properties$index[0],
+				    name = _properties$index[1],
+				    options = _properties$index.slice(2);
+				// populate key lookup table
 
-			var _iteratorNormalCompletion = true;
-			var _didIteratorError = false;
-			var _iteratorError = undefined;
 
-			try {
-				for (var _iterator = properties[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-					var _ref = _step.value;
-
-					var _ref2 = _toArray(_ref);
-
-					var key = _ref2[0];
-					var name = _ref2[1];
-
-					var options = _ref2.slice(2);
-
-					// populate key lookup table
-					this[keys][name] = key;
-					this[propNames][key] = name;
-					if (options && options.length) {
-						// default value, set property
-						this[defaultValues][key] = options[0];
-						this[name] = options[0];
-						// parser
-						if (options.length >= 1) this[parsers][key] = options[1];
-					}
-				}
-			} catch (err) {
-				_didIteratorError = true;
-				_iteratorError = err;
-			} finally {
-				try {
-					if (!_iteratorNormalCompletion && _iterator.return) {
-						_iterator.return();
-					}
-				} finally {
-					if (_didIteratorError) {
-						throw _iteratorError;
-					}
+				this[keys][name] = key;
+				this[propNames][key] = name;
+				if (options && options.length) {
+					// default value, set property
+					this[defaultValues][key] = options[0];
+					this[name] = options[0];
+					// parser
+					if (options.length >= 1) this[parsers][key] = options[1];
 				}
 			}
 		}
@@ -116,18 +90,18 @@ var IPSOObject = function () {
 	}, {
 		key: deserialize,
 		value: function value(obj) {
-			var _iteratorNormalCompletion2 = true;
-			var _didIteratorError2 = false;
-			var _iteratorError2 = undefined;
+			var _iteratorNormalCompletion = true;
+			var _didIteratorError = false;
+			var _iteratorError = undefined;
 
 			try {
-				for (var _iterator2 = (0, _objectPolyfill.entries)(obj)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-					var _ref3 = _step2.value;
+				for (var _iterator = (0, _objectPolyfill.entries)(obj)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+					var _ref = _step.value;
 
-					var _ref4 = _slicedToArray(_ref3, 2);
+					var _ref2 = _slicedToArray(_ref, 2);
 
-					var key = _ref4[0];
-					var value = _ref4[1];
+					var key = _ref2[0];
+					var value = _ref2[1];
 
 					// which property are we parsing?
 					var propName = this.getPropName(key);
@@ -143,16 +117,16 @@ var IPSOObject = function () {
 					this[propName] = parsedValue;
 				}
 			} catch (err) {
-				_didIteratorError2 = true;
-				_iteratorError2 = err;
+				_didIteratorError = true;
+				_iteratorError = err;
 			} finally {
 				try {
-					if (!_iteratorNormalCompletion2 && _iterator2.return) {
-						_iterator2.return();
+					if (!_iteratorNormalCompletion && _iterator.return) {
+						_iterator.return();
 					}
 				} finally {
-					if (_didIteratorError2) {
-						throw _iteratorError2;
+					if (_didIteratorError) {
+						throw _iteratorError;
 					}
 				}
 			}
@@ -174,10 +148,9 @@ var IPSOObject = function () {
 			} else if (typeof _value === "object") {
 				// Object: try to parse this, objects should be parsed in any case
 				if (parser) {
-					_value = parser(_value);
+					return parser(_value);
 				} else {
 					_global2.default.log(`{{yellow}}could not find property parser for key ${propKey}`);
-					return _value;
 				}
 			} else if (parser) {
 				// if this property needs a parser, parse the value
@@ -203,46 +176,88 @@ var IPSOObject = function () {
 	}, {
 		key: "serialize",
 		value: function serialize() {
+			var _this2 = this;
+
+			var reference = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+
 			var ret = {};
-			// check all set properties
-			var _iteratorNormalCompletion3 = true;
-			var _didIteratorError3 = false;
-			var _iteratorError3 = undefined;
 
-			try {
-				for (var _iterator3 = this[propNames][Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-					var propName = _step3.value;
-
-					if (this.hasOwnProperty(propName)) {
-						var key = this.getKey(propName);
-						var value = this[propName];
-						if (value instanceof IPSOObject) {
-							// if the value is another IPSOObject, then serialize that
-							value = value.serialize();
-						} else {
-							// if the value is not the default one, then remember it
-							if (this[defaultValues].hasOwnProperty(key)) {
-								var defaultValue = this[defaultValues][key];
-								if (defaultValue === value) continue;
-							} else {
-								// there is no default value, just remember the actual value
-							}
-						}
-
-						ret[key] = value;
+			var serializeValue = function serializeValue(key, propName, value, refValue) {
+				if (value instanceof IPSOObject) {
+					// if the value is another IPSOObject, then serialize that
+					value = value.serialize(refValue);
+				} else {
+					// if the value is not the default one, then remember it
+					if (_global2.default.isdef(refValue)) {
+						if (refValue === value) return null;
+					} else {
+						// there is no default value, just remember the actual value
 					}
 				}
+				return value;
+			};
+
+			var refObj = reference || this[defaultValues];
+			// check all set properties
+
+			var _loop = function _loop(propName) {
+				if (_this2.hasOwnProperty(propName)) {
+					var key = _this2.getKey(propName);
+					var value = _this2[propName];
+					var refValue = null;
+					if (_global2.default.isdef(refObj) && refObj.hasOwnProperty(propName)) refValue = refObj[propName];
+
+					if (value instanceof Array) {
+						// serialize each item
+						if (_global2.default.isdef(refValue)) {
+							// reference value exists, make sure we have the same amount of items
+							if (!(refValue instanceof Array && refValue.length === value.length)) {
+								throw "cannot serialize arrays when the reference values don't match";
+							}
+							// serialize each item with the matching reference value
+							value = value.map(function (v, i) {
+								return serializeValue(key, propName, v, refValue[i]);
+							});
+						} else {
+							// no reference value, makes things easier
+							value = value.map(function (v) {
+								return serializeValue(key, propName, v, null);
+							});
+						}
+						// now remove null items
+						value = value.filter(function (v) {
+							return _global2.default.isdef(v);
+						});
+					} else {
+						// directly serialize the value
+						value = serializeValue(key, propName, value, refValue);
+					}
+
+					ret[key] = value;
+				}
+			};
+
+			var _iteratorNormalCompletion2 = true;
+			var _didIteratorError2 = false;
+			var _iteratorError2 = undefined;
+
+			try {
+				for (var _iterator2 = this[propNames][Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+					var propName = _step2.value;
+
+					_loop(propName);
+				}
 			} catch (err) {
-				_didIteratorError3 = true;
-				_iteratorError3 = err;
+				_didIteratorError2 = true;
+				_iteratorError2 = err;
 			} finally {
 				try {
-					if (!_iteratorNormalCompletion3 && _iterator3.return) {
-						_iterator3.return();
+					if (!_iteratorNormalCompletion2 && _iterator2.return) {
+						_iterator2.return();
 					}
 				} finally {
-					if (_didIteratorError3) {
-						throw _iteratorError3;
+					if (_didIteratorError2) {
+						throw _iteratorError2;
 					}
 				}
 			}
