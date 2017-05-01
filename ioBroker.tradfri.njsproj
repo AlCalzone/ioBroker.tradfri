@@ -24,9 +24,10 @@
     <Content Include="package.json" />
     <Content Include="README.md" />
     <Compile Include="gulpfile.babel.js" />
-    <Compile Include="src\lib\coapResourceObserver.js">
+    <Compile Include="src\lib\coapClient.js">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="src\lib\str2regex.js" />
     <Compile Include="_public_gulpfile.babel.js" />
     <Compile Include="main.js" />
     <Content Include="admin\index.html" />
@@ -63,7 +64,6 @@
     <Compile Include="src\ipso\notificationTypes.js" />
     <Compile Include="src\ipso\scene.js" />
     <Compile Include="src\ipso\updatePriority.js" />
-    <Compile Include="src\lib\communication.js" />
     <Compile Include="src\lib\constants.js" />
     <Compile Include="src\lib\enums.js" />
     <Compile Include="src\lib\global.js" />

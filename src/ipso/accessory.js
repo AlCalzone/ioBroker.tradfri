@@ -1,7 +1,8 @@
 "use strict";
-import IPSOObject from "./ipsoObject";
+//import IPSOObject from "./ipsoObject";
 import IPSODevice from "./ipsoDevice";
 import DeviceInfo from "./deviceInfo";
+import Light from "./light";
 
 // 
 export default class Accessory extends IPSODevice {

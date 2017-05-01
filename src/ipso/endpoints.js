@@ -1,7 +1,7 @@
 "use strict";
 
 // list of known endpoints defined on the gateway
-export default endpoints = {
+export default {
 	devices: '15001',
 	hsAccessoryLink: '15002',
 	groups: '15004',

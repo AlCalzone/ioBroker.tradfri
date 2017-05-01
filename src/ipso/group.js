@@ -1,7 +1,6 @@
 "use strict";
-import IPSOObject from "./ipsoObject";
+//import IPSOObject from "./ipsoObject";
 import IPSODevice from "./ipsoDevice";
-import DeviceInfo from "./deviceInfo";
 
 // 
 export default class Group extends IPSODevice {

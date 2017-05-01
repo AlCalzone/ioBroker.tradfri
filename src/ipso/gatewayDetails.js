@@ -1,5 +1,5 @@
 "use strict";
-import IPSOObject from "./ipsoObject";
+//import IPSOObject from "./ipsoObject";
 import IPSODevice from "./ipsoDevice";
 
 // contains information about the gateway

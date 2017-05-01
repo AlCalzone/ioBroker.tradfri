@@ -23,8 +23,8 @@ export default class IPSOObject {
 			this[defineProperties](properties);
 
 		// parse the contents of the source object
-		if (_.isdef(source))
-			this[parse](source);
+		if (_.isdef(sourceObj))
+			this[deserialize](sourceObj);
 	}
 
 	[defineProperties](...properties) {
@@ -70,20 +70,20 @@ export default class IPSOObject {
 			// parse the value
 			const parsedValue = this[parseValue](key, value, parser);
 			// and remember it
-			this[propName] = value;
+			this[propName] = parsedValue;
 		}
 	}
 	// parses a value, depending on the value type and defined parsers
 	[parseValue](propKey, value, parser = null) {
 		if (value instanceof Array) {
 			// Array: parse every element
-			return value.map(v => this[parseValue](propKey, value, parser));
+			return value.map(v => this[parseValue](propKey, v, parser));
 		} else if (typeof value === "object") {
 			// Object: try to parse this, objects should be parsed in any case
 			if (parser) {
 				value = parser(value);
 			} else {
-				_.log(`{{yellow}}could not find property parser for key ${key}`);
+				_.log(`{{yellow}}could not find property parser for key ${propKey}`);
 				return value;
 			}
 		} else if (parser) {

@@ -9,13 +9,13 @@ var _global2 = _interopRequireDefault(_global);
 
 var _promises = require("./lib/promises");
 
+var _str2regex = require("./lib/str2regex");
+
 var _objectPolyfill = require("./lib/object-polyfill");
 
-var _enums = require("./lib/enums");
+var _coapClient = require("./lib/coapClient");
 
-var _coapResourceObserver = require("./lib/coapResourceObserver");
-
-var _coapResourceObserver2 = _interopRequireDefault(_coapResourceObserver);
+var _coapClient2 = _interopRequireDefault(_coapClient);
 
 var _utils = require("./lib/utils");
 
@@ -23,14 +23,16 @@ var _utils2 = _interopRequireDefault(_utils);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-//import deferred from "./lib/defer-promise";
+// import { getEnumValueAsName } from "./lib/enums";
 
 
 // Eigene Module laden
 var customSubscriptions = {}; // wird unten intialisiert
+// dictionary of known devices
 
 
 // Adapter-Utils laden
+var devices = {};
 var obs = void 0;
 
 // Adapter-Objekt erstellen
@@ -49,12 +51,6 @@ var adapter = _utils2.default.adapter({
 		// Custom subscriptions erlauben 
 		_global2.default.subscribe = subscribe;
 		_global2.default.unsubscribe = unsubscribe;
-
-		// Test implementation
-		obs = new _coapResourceObserver2.default("15001/65537", function (data) {
-			_global2.default.log(`observed data: ${data}`);
-		});
-		obs.start();
 	},
 
 	message: function message(obj) {
@@ -133,7 +129,7 @@ function subscribe(pattern, callback) {
 
 	try {
 		if (typeof pattern === "string") {
-			pattern = str2regex(pattern);
+			pattern = (0, _str2regex.str2regex)(pattern);
 		} else if (pattern instanceof RegExp) {
 			// so sollte es sein
 		} else {

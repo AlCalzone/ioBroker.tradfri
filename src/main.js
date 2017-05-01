@@ -5,15 +5,17 @@ import "babel-polyfill";
 // Eigene Module laden
 import _ from "./lib/global";
 import { promisify } from "./lib/promises";
-//import deferred from "./lib/defer-promise";
+import { str2regex } from "./lib/str2regex";
 import { /*entries,*/ values } from "./lib/object-polyfill";
-import { getEnumValueAsName } from "./lib/enums";
-import Observer from "./lib/coapResourceObserver";
+// import { getEnumValueAsName } from "./lib/enums";
+import Coap from "./lib/coapClient";
 
 // Adapter-Utils laden
 import utils from "./lib/utils";
 
 const customSubscriptions = {}; // wird unten intialisiert
+// dictionary of known devices
+const devices = {};
 let obs;
 
 // Adapter-Objekt erstellen
@@ -33,11 +35,7 @@ const adapter = utils.adapter({
 		_.subscribe = subscribe;
 		_.unsubscribe = unsubscribe;
 
-		// Test implementation
-		obs = new Observer("15001/65537", (data) => {
-			_.log(`observed data: ${data}`);
-		});
-		obs.start();
+
 	},
 
 	message: (obj) => {
@@ -54,7 +52,7 @@ const adapter = utils.adapter({
 	},
 
 	objectChange: (id, obj) => {
-		// TODO: Prüfen
+		// TODO: Prï¿½fen
 	},
 
 	stateChange: (id, state) => {
