@@ -1,11 +1,11 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "0.0.1",
+        "version": "0.1.0",
         "news": {
-            "0.0.1": {
-                "en": "initial adapter",
-                "de": "Initiale Version"
+            "0.1.0": {
+                "en": "initial release. Functionality limited to controlling lightbulbs.",
+                "de": "Initiale Version. Funktionalität ist beschränkt auf das Steuern von Lampen."
             }
         },
         "title": "IKEA Trådfri",

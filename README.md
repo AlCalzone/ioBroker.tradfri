@@ -2,12 +2,20 @@
 # ioBroker.tradfri
 =================
 
-Overview: https://github.com/bwssytems/ha-bridge/issues/570
-Install:  https://learn.pimoroni.com/tutorial/sandyj/controlling-ikea-tradfri-lights-from-your-pi
+## Installation on Raspberry PI
+Other platforms not tested and might not be supported at all. Requires a Trådri gateway in your home network.
 
-TODO: node-coap anschauen
+0. Make sure you have git installed. If not: `sudo apt-get git-core`
+1. Install this adapter via the ioBroker GUI -> This will result in an error
+2. Open the console and navigate to `/opt/iobroker/node_modules/iobroker.tradfri`
+3. There, run `sudo npm install --production --unsafe-perm`, this will take a while.
+4. If neccessary, add an adapter instance, then configure it by entering the IP/hostname of your gateway and the security code that can be found under that.
 
 ## Changelog
+
+#### 0.1.0 (2017-05-02)
+* (AlCalzone) initial release. 
+* Functionality limited to controlling lightbulbs.
 
 #### 0.0.0
 * (AlCalzone) not ready yet!
