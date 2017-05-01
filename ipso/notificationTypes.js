@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
-exports.default = notificationTypes = {
+exports.default = /*notificationTypes =*/{
 	NEW_FIRMWARE_AVAILABLE: 1001,
 	GATEWAY_REBOOT_NOTIFICATION: 1003,
 	UNKNOWN1: 1004,

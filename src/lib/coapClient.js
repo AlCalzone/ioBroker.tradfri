@@ -2,38 +2,68 @@
 
 import _ from "./global";
 import coap from "coap-dtls";
+import { promisify } from "./promises";
+import deferred from "./defer-promise";
+
+// use mutex to run requests in sequence
+import Mutex from "./mutex";
+const socketLock = new Mutex();
 
 const
 	//request = Symbol("request"),
 	_endpoint = Symbol("_endpoint"),
+	_userObj = Symbol("_userObj"),
 	response = Symbol("response"),
 	callback = Symbol("callback"),
 	_isObserving = Symbol("_isObserving")
+	;
+const
+	__request = Symbol("__request"),
+	__observe = Symbol("__observe")
 	;
 
 // observes a resource via COAP and notifies listeners of new data
 export default class CoapClient {
 
-	constructor(endpoint, callbackFn) {
+	constructor(endpoint, callbackFn, userObj) {
 		this[_endpoint] = endpoint;
 		this[callback] = callbackFn;
+		this[_userObj] = userObj;
 	}
 
 	get endpoint() { return this[_endpoint];}
 	get isObserving() { return this[_isObserving]; }
 
-	// fires off a single one-off request
 	request(method = "get", payload) {
-		// begin request
-		const requestOptions = getRequestOptions(method, this.endpoint, false);
-		_.log(`requesting coap endpoint ${requestOptions.hostname}${requestOptions.pathname}`);
+		// make sure the requests will be done in sequence
+		return socketLock.synchronize(
+			() => this[__request](method, payload)
+		);
+	}
+	// fires off a single one-off request
+	// the returned promise has to be fulfilled before another request can be done
+	[__request](method = "get", payload) {
 
-		coap.request(requestOptions, getDTLSOptions(), req => {
+		// begin request
+		const reqOpts = getRequestOptions(method, this.endpoint, false);
+		_.log(`requesting coap endpoint ${reqOpts.hostname}${reqOpts.pathname}`);
+
+		const dtlsOpts = getDTLSOptions();
+
+		// create deferred promise. acts as return value for flow control
+		const ret = deferred();
+
+		coap.request(reqOpts, dtlsOpts, req => {
 			req.on("response", res => {
-				_.log(`got a response...`);
+				const body = parsePayload(res.payload);
+				////_.log(`got a response... ${JSON.stringify(body)}`);
 				// no need to remember response
+
+				// resume program flow
+				ret.resolve();
+
 				// notify our creator
-				if (this[callback]) this[callback](res.payload);
+				if (this[callback]) this[callback](body, this[_userObj], { reason: "initial" });
 				// TODO: handle errors
 			});
 			// potentially write payload
@@ -41,29 +71,48 @@ export default class CoapClient {
 			// finish request
 			req.end();
 		});
+
+		return ret;
 	}
 
-	// starts observing the resource
 	observe(method = "get", payload) {
+		// make sure the requests will be done in sequence
+		return socketLock.synchronize(
+			() => this[__observe](method, payload)
+		);
+	}
+	// starts observing the resource
+	[__observe](method = "get", payload) {
 		// can only observe once!
 		if (this[_isObserving]) return;
 
 		// begin request
-		const requestOptions = getRequestOptions(method, this.endpoint, true);
-		_.log(`trying to observe coap endpoint ${requestOptions.hostname}${requestOptions.pathname}`);
+		const reqOpts = getRequestOptions(method, this.endpoint, false);
+		_.log(`requesting coap endpoint ${reqOpts.hostname}${reqOpts.pathname}`);
 
-		coap.request(requestOptions, getDTLSOptions(), req => {
+		const dtlsOpts = getDTLSOptions();
+
+		// create deferred promise. acts as return value for flow control
+		const ret = deferred();
+
+		coap.request(reqOpts, dtlsOpts, req => {
 			req.on("response", res => {
-				_.log(`got a response...`);
+				const body = parsePayload(res.payload);
+				////_.log(`got a response... ${JSON.stringify(body)}`);
 				// we got a response, remember it
 				this[response] = res;
 				res.on("data", data => {
-					_.log(`got aadditional data...`);
+					const body = parsePayload(data);
+
+					// resume program flow
+					ret.resolve();
+
+					////_.log(`got additional data... ${JSON.stringify(body)}`);
 					// we got additional data, notify our creator
-					if (this[callback]) this[callback](data);
+					if (this[callback]) this[callback](body, this[_userObj], { reason: "update" });
 				});
 				// also notify our creator
-				if (this[callback]) this[callback](res.payload);
+				if (this[callback]) this[callback](body, this[_userObj], { reason: "initial" });
 				// TODO: handle errors
 			});
 			// potentially write payload
@@ -72,6 +121,8 @@ export default class CoapClient {
 			req.end();
 			this[_isObserving] = true;
 		});
+
+		return ret;
 	}
 
 	// stops observing the resource
@@ -85,6 +136,17 @@ export default class CoapClient {
 		} catch (e) {/* doesn't matter if it failed */}
 	}
 
+}
+
+function parsePayload(payload) {
+	if (payload instanceof Buffer) {
+		payload = payload.toString("utf-8");
+	} else if (typeof payload === "string") {
+		// payload = payload;
+	} else {
+		throw `unsupported payload type "${typeof payload}"`;
+	}
+	return JSON.parse(payload);
 }
 
 // constructs the "common" part of the COAP request options

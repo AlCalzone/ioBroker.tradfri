@@ -5,7 +5,7 @@
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
-exports.default = endpoints = {
+exports.default = {
 	devices: '15001',
 	hsAccessoryLink: '15002',
 	groups: '15004',

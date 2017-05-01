@@ -43,7 +43,7 @@ var IPSOObject = function () {
 		if (_global2.default.isdef(properties)) this[defineProperties](properties);
 
 		// parse the contents of the source object
-		if (_global2.default.isdef(source)) this[parse](source);
+		if (_global2.default.isdef(sourceObj)) this[deserialize](sourceObj);
 	}
 
 	_createClass(IPSOObject, [{
@@ -68,20 +68,20 @@ var IPSOObject = function () {
 
 					var _ref2 = _toArray(_ref);
 
-					var _key3 = _ref2[0];
+					var key = _ref2[0];
 					var name = _ref2[1];
 
 					var options = _ref2.slice(2);
 
 					// populate key lookup table
-					this[keys][name] = _key3;
-					this[propNames][_key3] = name;
+					this[keys][name] = key;
+					this[propNames][key] = name;
 					if (options && options.length) {
 						// default value, set property
-						this[defaultValues][_key3] = options[0];
+						this[defaultValues][key] = options[0];
 						this[name] = options[0];
 						// parser
-						if (options.length >= 1) this[parsers][_key3] = options[1];
+						if (options.length >= 1) this[parsers][key] = options[1];
 					}
 				}
 			} catch (err) {
@@ -126,21 +126,21 @@ var IPSOObject = function () {
 
 					var _ref4 = _slicedToArray(_ref3, 2);
 
-					var _key4 = _ref4[0];
+					var key = _ref4[0];
 					var value = _ref4[1];
 
 					// which property are we parsing?
-					var propName = this.getPropName(_key4);
+					var propName = this.getPropName(key);
 					if (!propName) {
-						_global2.default.log(`{{yellow}}found unknown property with key ${_key4}`);
+						_global2.default.log(`{{yellow}}found unknown property with key ${key}`);
 						continue;
 					}
 					// try to find parser for this property
-					var parser = this[getParser](_key4);
+					var parser = this[getParser](key);
 					// parse the value
-					var parsedValue = this[parseValue](_key4, value, parser);
+					var parsedValue = this[parseValue](key, value, parser);
 					// and remember it
-					this[propName] = value;
+					this[propName] = parsedValue;
 				}
 			} catch (err) {
 				_didIteratorError2 = true;
@@ -169,14 +169,14 @@ var IPSOObject = function () {
 			if (_value instanceof Array) {
 				// Array: parse every element
 				return _value.map(function (v) {
-					return _this[parseValue](propKey, _value, parser);
+					return _this[parseValue](propKey, v, parser);
 				});
 			} else if (typeof _value === "object") {
 				// Object: try to parse this, objects should be parsed in any case
 				if (parser) {
 					_value = parser(_value);
 				} else {
-					_global2.default.log(`{{yellow}}could not find property parser for key ${key}`);
+					_global2.default.log(`{{yellow}}could not find property parser for key ${propKey}`);
 					return _value;
 				}
 			} else if (parser) {
@@ -214,22 +214,22 @@ var IPSOObject = function () {
 					var propName = _step3.value;
 
 					if (this.hasOwnProperty(propName)) {
-						var _key5 = this.getKey(propName);
+						var key = this.getKey(propName);
 						var value = this[propName];
 						if (value instanceof IPSOObject) {
 							// if the value is another IPSOObject, then serialize that
 							value = value.serialize();
 						} else {
 							// if the value is not the default one, then remember it
-							if (this[defaultValues].hasOwnProperty(_key5)) {
-								var defaultValue = this[defaultValues][_key5];
+							if (this[defaultValues].hasOwnProperty(key)) {
+								var defaultValue = this[defaultValues][key];
 								if (defaultValue === value) continue;
 							} else {
 								// there is no default value, just remember the actual value
 							}
 						}
 
-						ret[_key5] = value;
+						ret[key] = value;
 					}
 				}
 			} catch (err) {

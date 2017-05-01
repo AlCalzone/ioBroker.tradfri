@@ -13,9 +13,15 @@ var _str2regex = require("./lib/str2regex");
 
 var _objectPolyfill = require("./lib/object-polyfill");
 
+var _arrayExtensions = require("./lib/array-extensions");
+
 var _coapClient = require("./lib/coapClient");
 
 var _coapClient2 = _interopRequireDefault(_coapClient);
+
+var _endpoints = require("./ipso/endpoints");
+
+var _endpoints2 = _interopRequireDefault(_endpoints);
 
 var _utils = require("./lib/utils");
 
@@ -23,17 +29,16 @@ var _utils2 = _interopRequireDefault(_utils);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// import { getEnumValueAsName } from "./lib/enums";
-
-
 // Eigene Module laden
 var customSubscriptions = {}; // wird unten intialisiert
-// dictionary of known devices
 
 
 // Adapter-Utils laden
+
+// import { getEnumValueAsName } from "./lib/enums";
+var observers = {};
+// dictionary of known devices
 var devices = {};
-var obs = void 0;
 
 // Adapter-Objekt erstellen
 var adapter = _utils2.default.adapter({
@@ -51,6 +56,30 @@ var adapter = _utils2.default.adapter({
 		// Custom subscriptions erlauben 
 		_global2.default.subscribe = subscribe;
 		_global2.default.unsubscribe = unsubscribe;
+
+		// TODO: load known devices from ioBroker into <devices>
+		observeDevices();
+		// Test code:
+		//const requests = [65536, 65537]
+		//	.map(id => new Coap(
+		//		`${coapEndpoints.devices}/${id}`,
+		//		(result, k) => {
+		//			_.log(`result (${k}) = ` + JSON.stringify(result));
+		//		}, id
+		//	))
+		//	.map(cl => cl.request())
+		//	;
+		//// internal mutex takes care of sequence
+		//Promise.all(requests).then(() => _.log("all requests done"));
+		////// run requests in serial
+		////requests.reduce(
+		////	(prev, cur) => prev.then(() => {
+		////		_.log(`cur is ${typeof cur}`);
+		////		_.log(`executing request for endpoint ${cur.endpoint}`);
+		////		return cur.request();
+		////	}),
+		////	Promise.resolve()
+		////);
 	},
 
 	message: function message(obj) {
@@ -108,14 +137,96 @@ var adapter = _utils2.default.adapter({
 	unload: function unload(callback) {
 		// is called when adapter shuts down - callback has to be called under any circumstances!
 		try {
-			//adapter.log.info('cleaned everything up...');
-			obs.end();
+
+			// stop all observers
+			var _iteratorNormalCompletion2 = true;
+			var _didIteratorError2 = false;
+			var _iteratorError2 = undefined;
+
+			try {
+				for (var _iterator2 = (0, _objectPolyfill.values)(observers)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+					var obs = _step2.value;
+
+					obs.stop();
+				}
+			} catch (err) {
+				_didIteratorError2 = true;
+				_iteratorError2 = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion2 && _iterator2.return) {
+						_iterator2.return();
+					}
+				} finally {
+					if (_didIteratorError2) {
+						throw _iteratorError2;
+					}
+				}
+			}
+
 			callback();
 		} catch (e) {
 			callback();
 		}
 	}
 });
+
+// ==================================
+// manage devices
+
+function observeDevices() {
+	observers.allDevices = new _coapClient2.default(_endpoints2.default.devices, coapCb_getAllDevices);
+	observers.allDevices.observe();
+}
+
+// gets called whenever "get /15001" updates
+function coapCb_getAllDevices(newDevices, _dummy, info) {
+
+	_global2.default.log(`got all devices (${JSON.stringify(info)}): ${JSON.stringify(newDevices)}`);
+
+	// get old keys as int array
+	var oldKeys = Object.keys(devices).map(function (k) {
+		return +k;
+	}).sort();
+	// get new keys as int array
+	var newKeys = newDevices.sort();
+	// translate that into added and removed devices
+	var addedKeys = (0, _arrayExtensions.except)(newKeys, oldKeys);
+	_global2.default.log(`adding devices with keys ${JSON.stringify(addedKeys)}`);
+	addedKeys.forEach(function (id) {
+		var observerKey = `devices/${id}`;
+		if (_global2.default.isdef(observers[observerKey])) return;
+
+		devices[id] = {}; // what should it be?
+		// add observer
+		var obs = new _coapClient2.default(`${_endpoints2.default.devices}/${id}`, coapCb_getDevice, id);
+		obs.observe(); // internal mutex will take care of sequencing
+		observers[observerKey] = obs;
+	});
+
+	var removedKeys = (0, _arrayExtensions.except)(oldKeys, newKeys);
+	_global2.default.log(`removing devices with keys ${JSON.stringify(removedKeys)}`);
+	removedKeys.forEach(function (id) {
+		var observerKey = `devices/${id}`;
+		if (!_global2.default.isdef(observers[observerKey])) return;
+		// remove device from dictionary
+		delete devices[id];
+		// remove observers
+		observers[observerKey].stop();
+		delete observers[observerKey];
+
+		// TODO: delete ioBroker device
+	});
+
+	_global2.default.log(`active observers: ${Object.keys(observers).map(function (k) {
+		return k + ": " + observers[k].endpoint;
+	})}`);
+}
+// gets called whenever "get /15001/<instanceId>" updates
+function coapCb_getDevice(result, instanceId, info) {
+	_global2.default.log(`got device details ${instanceId} (${JSON.stringify(info)}): ${JSON.stringify(result)}`);
+	// TODO: create ioBroker device
+}
 
 // ==================================
 // Custom subscriptions

@@ -9,6 +9,7 @@ export default class Accessory extends IPSODevice {
 
 	constructor(sourceObj, ...properties) {
 		super(sourceObj, ...properties,
+			["5750", "type", 0], // <AccessoryType>
 			["3", "deviceInfo", null, obj => new DeviceInfo(obj)], // <DeviceInfo>
 			["9019", "alive", false], // <boolean>
 			["9020", "lastSeen", 0], // <long>

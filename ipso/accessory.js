@@ -1,12 +1,9 @@
 "use strict";
+//import IPSOObject from "./ipsoObject";
 
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
-
-var _ipsoObject = require("./ipsoObject");
-
-var _ipsoObject2 = _interopRequireDefault(_ipsoObject);
 
 var _ipsoDevice = require("./ipsoDevice");
 
@@ -15,6 +12,10 @@ var _ipsoDevice2 = _interopRequireDefault(_ipsoDevice);
 var _deviceInfo = require("./deviceInfo");
 
 var _deviceInfo2 = _interopRequireDefault(_deviceInfo);
+
+var _light = require("./light");
+
+var _light2 = _interopRequireDefault(_light);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -43,7 +44,7 @@ var Accessory = function (_IPSODevice) {
 		["9019", "alive", false], // <boolean>
 		["9020", "lastSeen", 0], // <long>
 		["3311", "lightList", [], function (obj) {
-			return new Light(obj);
+			return new _light2.default(obj);
 		}], // <[Light]>
 		["3312", "plugList", [], function (obj) {
 			return new _ipsoDevice2.default(obj);

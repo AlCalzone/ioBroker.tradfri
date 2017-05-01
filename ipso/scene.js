@@ -1,20 +1,13 @@
 "use strict";
+//import IPSOObject from "./ipsoObject";
 
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
-var _ipsoObject = require("./ipsoObject");
-
-var _ipsoObject2 = _interopRequireDefault(_ipsoObject);
-
 var _ipsoDevice = require("./ipsoDevice");
 
 var _ipsoDevice2 = _interopRequireDefault(_ipsoDevice);
-
-var _deviceInfo = require("./deviceInfo");
-
-var _deviceInfo2 = _interopRequireDefault(_deviceInfo);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -23,6 +16,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+//import DeviceInfo from "./deviceInfo";
 
 // 
 var Scene = function (_IPSODevice) {

@@ -1,20 +1,13 @@
 "use strict";
+//import IPSOObject from "./ipsoObject";
 
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
-var _ipsoObject = require("./ipsoObject");
-
-var _ipsoObject2 = _interopRequireDefault(_ipsoObject);
-
 var _ipsoDevice = require("./ipsoDevice");
 
 var _ipsoDevice2 = _interopRequireDefault(_ipsoDevice);
-
-var _deviceInfo = require("./deviceInfo");
-
-var _deviceInfo2 = _interopRequireDefault(_deviceInfo);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -23,6 +16,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+//import DeviceInfo from "./deviceInfo";
 
 // 
 var Notification = function (_IPSODevice) {
@@ -37,7 +32,7 @@ var Notification = function (_IPSODevice) {
 			properties[_key - 1] = arguments[_key];
 		}
 
-		return _possibleConstructorReturn(this, (_ref = Notification.__proto__ || Object.getPrototypeOf(Notification)).call.apply(_ref, [this, sourceObj].concat(properties, [["9015", "event", int], // -> notificationType
+		return _possibleConstructorReturn(this, (_ref = Notification.__proto__ || Object.getPrototypeOf(Notification)).call.apply(_ref, [this, sourceObj].concat(properties, [["9015", "event", 0], // <int> -> notificationType
 		["9017", "details", {}, function (arr) {
 			return parseNotificationDetails(arr);
 		}], // -> <dictionary> (from "key=value"-Array)
@@ -58,7 +53,7 @@ function parseNotificationDetails(kvpList) {
 
 	try {
 		for (var _iterator = kvpList[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-			kvp = _step.value;
+			var kvp = _step.value;
 
 			var parts = kvp.split("=");
 			ret[parts[0]] = parts[1];

@@ -1,12 +1,9 @@
 "use strict";
+//import IPSOObject from "./ipsoObject";
 
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
-
-var _ipsoObject = require("./ipsoObject");
-
-var _ipsoObject2 = _interopRequireDefault(_ipsoObject);
 
 var _ipsoDevice = require("./ipsoDevice");
 
