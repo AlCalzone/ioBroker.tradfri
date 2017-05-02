@@ -13,6 +13,8 @@ node_js:
   - '7'
 
 before_install:
+  # enable add-apt-repository
+  - echo "yes" | sudo apt-get install software-properties-common python-software-properties
   # install specific compiler versions. credit: https://tomassetti.me/continous-integration-on-linux-and-windows-travis-and-appveyor/
   - echo "yes" | sudo add-apt-repository ppa:kalakris/cmake
   - echo "yes" | sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
