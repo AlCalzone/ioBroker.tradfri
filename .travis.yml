@@ -1,14 +1,13 @@
 language: node_js
 
-node_js:
-  - '4'
-  - '6'
-  - '7'
-
 matrix:
   include:
     # LINUX ==================
     - os: linux
+      node_js:
+        - '4'
+        - '6'
+        - '7'
       # support newer compiler
       compiler: gcc
       addons:
@@ -22,6 +21,10 @@ matrix:
         - C_COMPILER=gcc-4.8
     # OSX =================
     - os: osx
+      node_js:
+        - '4'
+        - '6'
+        - '7'
       osx_image: xcode8
       compiler: clang
       env:
