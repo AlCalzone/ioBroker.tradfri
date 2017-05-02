@@ -1,9 +1,11 @@
 ![Logo](admin/tradfri.png)
-# ioBroker.tradfri
+ioBroker.tradfri
 =================
 
+[![Build Status](https://travis-ci.org/AlCalzone/iobroker.tradfri.svg?branch=master)](https://travis-ci.org/AlCalzone/iobroker.tradfri)
+
 ## Installation on Raspberry PI
-Other platforms not tested and might not be supported at all. Requires a Trådri gateway in your home network.
+Other platforms not tested and might not be supported at all. Requires a TrÃ¥dfri gateway in your home network.
 
 0. Make sure you have git installed. If not: `sudo apt-get git-core`
 1. Install this adapter via the ioBroker GUI -> This will result in an error
