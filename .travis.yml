@@ -9,6 +9,7 @@ os:
   - osx
     
 before_install:
+  - sudo chmod +x ./travis/setup.sh
   - ./travis/setup.sh
 before_script:
   - npm install winston@2.3.0
