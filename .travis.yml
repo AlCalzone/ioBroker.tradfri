@@ -1,39 +1,15 @@
 language: node_js
+node_js:
+  - '4'
+  - '6'
+  - '7'
 
-matrix:
-  include:
-    # LINUX ==================
-    - os: linux
-      node_js:
-        - '4'
-        - '6'
-        - '7'
-      # support newer compiler
-      compiler: gcc
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-4.8
-      env:
-        - CXX_COMPILER=g++-4.8
-        - C_COMPILER=g++-4.8
-    # OSX =================
-    - os: osx
-      node_js:
-        - '4'
-        - '6'
-        - '7'
-      osx_image: xcode8
-      compiler: clang
-      env:
-        - CXX_COMPILER=clang++
-        - C_COMPILER=clang++
-        - HOMEBREW_CC=clang++
-        - HOMEBREW_CXX=clang++
-        - CXXFLAGS=-std=c++11
-        
+os:
+  - linux
+  - osx
+    
+before_install:
+  - ./travis/setup.sh
 before_script:
   - npm install winston@2.3.0
   - 'npm install https://github.com/ioBroker/ioBroker.js-controller/tarball/master --production'
