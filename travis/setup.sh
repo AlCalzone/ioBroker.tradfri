@@ -9,6 +9,7 @@ if [ "$TRAVIS_OS_NAME" == "linux" ]; then
   sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50
   sudo apt-get install g++-4.8
   sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50
-elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
-  # TODO: figure out what's neccessary here
+else
+  # TODO: figure out what's neccessary for osx
+  echo "THIS IS SPARTA!"
 fi
