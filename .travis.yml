@@ -18,7 +18,7 @@ matrix:
             - g++-4.8
       env:
         - CXX_COMPILER=g++-4.8
-        - C_COMPILER=gcc-4.8
+        - C_COMPILER=g++-4.8
     # OSX =================
     - os: osx
       node_js:
@@ -29,8 +29,8 @@ matrix:
       compiler: clang
       env:
         - CXX_COMPILER=clang++
-        - C_COMPILER=clang
-        - HOMEBREW_CC=clang
+        - C_COMPILER=clang++
+        - HOMEBREW_CC=clang++
         - HOMEBREW_CXX=clang++
         - CXXFLAGS=-std=c++11
         
