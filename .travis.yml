@@ -7,6 +7,12 @@ node_js:
 os:
   - linux
   - osx
+  
+# OSX/NodeJS 4 stalls the CI VM, might reenable it at a later point.
+matrix:
+  exclude:
+    - os: osx
+      node_js: '4'
     
 before_install:
   - sudo chmod +x ./travis/setup.sh
