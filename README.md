@@ -4,16 +4,22 @@ ioBroker.tradfri
 
 [![Build Status](https://travis-ci.org/AlCalzone/iobroker.tradfri.svg?branch=master)](https://travis-ci.org/AlCalzone/iobroker.tradfri)
 
-## Installation on Raspberry PI
-Installation tested on Linux and MacOS with NodeJS >= 6. NodeJS 4 support is in the works.
+## Requirements
+Raspberry Pi with NodeJS >= 6
+or
+OSX with NodeJS >= 6
+
+Support for NodeJS 4 is in the works.  
+Might need additional build tools. If anything is unclear, please ask and provide error details.
 
 Requires a Trådfri gateway in your home network.
 
-0. Make sure you have git installed. If not: `sudo apt-get git-core`
+## Installation on Raspberry PI
+1. Make sure you have git installed. If not: `sudo apt-get git-core`
 1. Install this adapter via the ioBroker GUI -> This will result in an error
-2. Open the console and navigate to `/opt/iobroker/node_modules/iobroker.tradfri`
-3. There, run `sudo npm install --production --unsafe-perm`, this will take a while.
-4. If neccessary, add an adapter instance, then configure it by entering the IP/hostname of your gateway and the security code that can be found under that.
+1. Open the console and navigate to `/opt/iobroker/node_modules/iobroker.tradfri`
+1. There, run `sudo npm install --production --unsafe-perm`, this will take a while.
+1. If neccessary, add an adapter instance, then configure it by entering the IP/hostname of your gateway and the security code that can be found under that.
 
 ## Changelog
 
