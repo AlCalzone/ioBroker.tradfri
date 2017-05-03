@@ -1,19 +1,16 @@
+language: node_js
+node_js:
+  # not supported atm: - '4'
+  - '6'
+  - '7'
+
 os:
   - linux
   - osx
-language: node_js
-node_js:
-  - '4'
-  - '6'
-  - '7'
+    
+before_install:
+  - sudo chmod +x ./travis/setup.sh
+  - ./travis/setup.sh
 before_script:
   - npm install winston@2.3.0
   - 'npm install https://github.com/ioBroker/ioBroker.js-controller/tarball/master --production'
-env:
-  - CXX=g++-4.8
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - g++-4.8
