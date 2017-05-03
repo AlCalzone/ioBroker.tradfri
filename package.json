@@ -26,7 +26,7 @@
     },
     "dependencies": {
         "babel-polyfill": "^6.23.0",
-        "node-coap-dtls": "git+https://github.com/neustar/node-coap-dtls"
+        "node-coap-dtls": "git+https://github.com/AlCalzone/node-coap-dtls"
     },
     "devDependencies": {
         "babel-core": "^6.24.0",
