@@ -1,11 +1,15 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "0.1.0",
+        "version": "0.1.1",
         "news": {
             "0.1.0": {
                 "en": "initial release. Functionality limited to controlling lightbulbs.",
                 "de": "Initiale Version. Funktionalität ist beschränkt auf das Steuern von Lampen."
+            },
+            "0.1.1": {
+                "en": "Added support for NodeJS 4.X and building the dependencies on Windows systems.",
+                "de": "Support für NodeJS 4.X hinzugefügt und Buildprobleme auf Windows-Systemen behoben."
             }
         },
         "title": "IKEA Trådfri",
