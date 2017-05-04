@@ -7,14 +7,11 @@ ioBroker.tradfri
 Windows: [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/AlCalzone/ioBroker.tradfri?branch=master&svg=true)](https://ci.appveyor.com/project/AlCalzone/ioBroker-tradfri/)
 
 ## Requirements
-Raspberry Pi with NodeJS >= 6
-or
-OSX with NodeJS >= 6
+* Linux (e.g. Raspberry Pi) / OSX / Windows
+* NodeJS >= 4.x
+* Trådfri gateway
 
-Support for NodeJS 4 is in the works.  
 Might need additional build tools. If anything is unclear, please ask and provide error details.
-
-Requires a Trådfri gateway in your home network.
 
 ## Installation on Raspberry PI
 1. Make sure you have git installed. If not: `sudo apt-get git-core`
