@@ -278,7 +278,7 @@ function coapCb_getAllDevices(newDevices, _dummy, info) {
 }
 // gets called whenever "get /15001/<instanceId>" updates
 function coap_getDevice_cb(result, instanceId, _info) {
-	_global2.default.log(`got device details ${instanceId} (${JSON.stringify(_info)}): ${JSON.stringify(result)}`);
+	//_.log(`got device details ${instanceId} (${JSON.stringify(_info)}): ${JSON.stringify(result)}`);
 	// parse device info
 	var accessory = new _accessory2.default(result);
 	// remember the device object, so we can later use it as a reference for updates
