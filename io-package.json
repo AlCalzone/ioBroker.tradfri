@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "0.1.1",
+        "version": "0.1.2",
         "news": {
             "0.1.0": {
                 "en": "initial release. Functionality limited to controlling lightbulbs.",
@@ -10,6 +10,10 @@
             "0.1.1": {
                 "en": "Added support for NodeJS 4.X and building the dependencies on Windows systems.",
                 "de": "Support für NodeJS 4.X hinzugefügt und Buildprobleme auf Windows-Systemen behoben."
+            },
+            "0.1.2": {
+                "en": "Color temperature of lightbulbs is now expressed in terms of 0-100%.",
+                "de": "Farbtemperatur von Lichtern wird nun als 0-100% ausgedrückt."
             }
         },
         "title": "IKEA Trådfri",
