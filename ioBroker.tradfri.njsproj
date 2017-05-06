@@ -29,7 +29,13 @@
     <Compile Include="src\lib\coapClient.js">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="src\lib\conversions.js">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="src\lib\defer-promise.js" />
+    <Compile Include="src\lib\math.js">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="src\lib\mutex.js" />
     <Compile Include="src\lib\str2regex.js" />
     <Compile Include="_public_gulpfile.babel.js" />

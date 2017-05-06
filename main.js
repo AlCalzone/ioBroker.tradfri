@@ -16,6 +16,9 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 // Adapter-Utils laden
 
 
+// Konvertierungsfunktionen
+
+
 require("babel-polyfill");
 
 var _global = require("./lib/global");
@@ -47,6 +50,10 @@ var _accessoryTypes2 = _interopRequireDefault(_accessoryTypes);
 var _utils = require("./lib/utils");
 
 var _utils2 = _interopRequireDefault(_utils);
+
+var _conversions = require("./lib/conversions");
+
+var _conversions2 = _interopRequireDefault(_conversions);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -128,13 +135,16 @@ var adapter = _utils2.default.adapter({
 					payload = { "3311": [{ "5850": val ? 1 : 0 }] };
 				} else if (id.endsWith(".lightbulb.brightness")) {
 					payload = { "3311": [{ "5851": val, "5712": 5 }] };
-				} else if (id.endsWith(".lightbulb.colorX")) {
-					var colorY = accessory.lightList[0].colorY;
-					payload = { "3311": [{ "5709": val, "5710": colorY, "5712": 5 }] };
-				} else if (id.endsWith(".lightbulb.colorY")) {
-					var colorX = accessory.lightList[0].colorX;
-					payload = { "3311": [{ "5709": colorX, "5710": val, "5712": 5 }] };
-				}
+				} else if (id.endsWith(".lightbulb.color")) {
+					var colorX = _conversions2.default.color("out", state.val);
+					payload = { "3311": [{ "5709": colorX, "5710": 27000, "5712": 5 }] };
+				} //else if (id.endsWith(".lightbulb.colorX")) {
+				//	const colorY = accessory.lightList[0].colorY;
+				//	payload = { "3311": [{ "5709": val, "5710": colorY, "5712": 5 }] };
+				//} else if (id.endsWith(".lightbulb.colorY")) {
+				//	const colorX = accessory.lightList[0].colorX;
+				//	payload = { "3311": [{ "5709": colorX, "5710": val, "5712": 5 }] };
+				//}
 
 				_global2.default.log("sending payload: " + JSON.stringify(payload));
 
@@ -268,7 +278,7 @@ function coapCb_getAllDevices(newDevices, _dummy, info) {
 }
 // gets called whenever "get /15001/<instanceId>" updates
 function coap_getDevice_cb(result, instanceId, _info) {
-	//_.log(`got device details ${instanceId} (${JSON.stringify(info)}): ${JSON.stringify(result)}`);
+	_global2.default.log(`got device details ${instanceId} (${JSON.stringify(_info)}): ${JSON.stringify(result)}`);
 	// parse device info
 	var accessory = new _accessory2.default(result);
 	// remember the device object, so we can later use it as a reference for updates
@@ -297,6 +307,26 @@ function calcObjId(accessory) {
 		}
 	}();
 	return `${adapter.namespace}.${prefix}-${accessory.instanceId}`;
+}
+
+// finds the property value for <accessory> as defined in <propPath>
+function readPropertyValue(accessory, propPath) {
+	// if path starts with "__convert:", use a custom conversion function
+	if (propPath.startsWith("__convert:")) {
+		var pathParts = propPath.substr("__convert:".length).split(",");
+		try {
+			var fnName = pathParts[0];
+			var path = pathParts[1];
+			// find initial value on the object
+			var value = (0, _objectPolyfill.dig)(accessory, path);
+			// and convert it
+			return _conversions2.default[fnName]("in", value);
+		} catch (e) {
+			_global2.default.log("invalid path definition ${propPath}");
+		}
+	} else {
+		return (0, _objectPolyfill.dig)(accessory, propPath);
+	}
 }
 
 // creates or edits an existing <device>-object for an accessory
@@ -350,7 +380,7 @@ function extendDevice(accessory) {
 
 				try {
 					// Object could have a default value, find it
-					var newValue = (0, _objectPolyfill.dig)(accessory, obj.native.path);
+					var newValue = readPropertyValue(accessory, obj.native.path);
 					if (obj.common.type === "boolean") {
 						// fix bool values
 						newValue = newValue === 1 || newValue === "true" || newValue === "on";
@@ -423,55 +453,73 @@ function extendDevice(accessory) {
 		};
 
 		if (accessory.type === _accessoryTypes2.default.lightbulb) {
+			//stateObjs["lightbulb.color"] = {
+			//	_id: `${objId}.lightbulb.color`,
+			//	type: "state",
+			//	common: {
+			//		name: "RGB color",
+			//		read: true, // TODO: check
+			//		write: false, // TODO: check
+			//		type: "string",
+			//		role: "level.color.rgb",
+			//		desc: "hex representation of the lightbulb color"
+			//	},
+			//	native: {
+			//		path: "lightList.[0].color"
+			//	}
+			//};
 			_stateObjs["lightbulb.color"] = {
 				_id: `${objId}.lightbulb.color`,
 				type: "state",
 				common: {
-					name: "RGB color",
-					read: true, // TODO: check
-					write: false, // TODO: check
-					type: "string",
-					role: "level.color.rgb",
-					desc: "hex representation of the lightbulb color"
-				},
-				native: {
-					path: "lightList.[0].color"
-				}
-			};
-			_stateObjs["lightbulb.colorX"] = {
-				_id: `${objId}.lightbulb.colorX`,
-				type: "state",
-				common: {
-					name: "CIE 1931 x coordinate",
+					name: "color temperature of the lightbulb",
 					read: true, // TODO: check
 					write: true, // TODO: check
-					min: 24930,
-					max: 33135,
+					min: 0,
+					max: 100,
+					unit: "%",
 					type: "number",
 					role: "level.color.temperature",
-					desc: "x coordinate of the color temperature in the CIE 1931 color space"
+					desc: "range: 0% = cold, 100% = warm"
 				},
 				native: {
-					path: "lightList.[0].colorX"
+					path: "__convert:color,lightList.[0].colorX"
 				}
 			};
-			_stateObjs["lightbulb.colorY"] = {
-				_id: `${objId}.lightbulb.colorY`,
-				type: "state",
-				common: {
-					name: "CIE 1931 y coordinate",
-					read: true, // TODO: check
-					write: true, // TODO: check
-					min: 24694,
-					max: 27211,
-					type: "number",
-					role: "level.color.temperature",
-					desc: "y coordinate of the color temperature in the CIE 1931 color space"
-				},
-				native: {
-					path: "lightList.[0].colorY"
-				}
-			};
+			//stateObjs["lightbulb.colorX"] = {
+			//	_id: `${objId}.lightbulb.colorX`,
+			//	type: "state",
+			//	common: {
+			//		name: "CIE 1931 x coordinate",
+			//		read: true, // TODO: check
+			//		write: true, // TODO: check
+			//		min: 24930,
+			//		max: 33135,
+			//		type: "number",
+			//		role: "level.color.temperature",
+			//		desc: "x coordinate of the color temperature in the CIE 1931 color space"
+			//	},
+			//	native: {
+			//		path: "lightList.[0].colorX"
+			//	}
+			//};
+			//stateObjs["lightbulb.colorY"] = {
+			//	_id: `${objId}.lightbulb.colorY`,
+			//	type: "state",
+			//	common: {
+			//		name: "CIE 1931 y coordinate",
+			//		read: true, // TODO: check
+			//		write: true, // TODO: check
+			//		min: 24694,
+			//		max: 27211,
+			//		type: "number",
+			//		role: "level.color.temperature",
+			//		desc: "y coordinate of the color temperature in the CIE 1931 color space"
+			//	},
+			//	native: {
+			//		path: "lightList.[0].colorY"
+			//	}
+			//};
 			_stateObjs["lightbulb.brightness"] = {
 				_id: `${objId}.lightbulb.brightness`,
 				type: "state",
@@ -511,7 +559,7 @@ function extendDevice(accessory) {
 			var initialValue = null;
 			if (_global2.default.isdef(obj.native.path)) {
 				// Object could have a default value, find it
-				initialValue = (0, _objectPolyfill.dig)(accessory, obj.native.path);
+				initialValue = readPropertyValue(accessory, obj.native.path);
 				if (obj.common.type === "boolean") {
 					// fix bool values
 					initialValue = initialValue === 1 || initialValue === "true" || initialValue === "on";
