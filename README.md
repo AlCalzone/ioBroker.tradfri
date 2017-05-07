@@ -14,7 +14,7 @@ Windows: [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/AlCalzo
 Might need additional build tools. If anything is unclear, please ask and provide error details.
 
 ## Installation on Raspberry PI
-1. Make sure you have git installed. If not: `sudo apt-get git-core`
+1. Make sure you have git installed. If not: `sudo apt-get install git-core`
 1. Install this adapter via the ioBroker GUI -> This will result in an error
 1. Open the console and navigate to `/opt/iobroker/node_modules/iobroker.tradfri`
 1. There, run `sudo npm install --production --unsafe-perm`, this will take a while.
