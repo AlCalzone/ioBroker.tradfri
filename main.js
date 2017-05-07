@@ -619,4 +619,9 @@ function unsubscribe(id) {
 process.on('unhandledRejection', function (r) {
 	adapter.log.error("unhandled promise rejection: " + r);
 });
+process.on('uncaughtException', function (err) {
+	adapter.log.error("unhandled exception:" + err.message);
+	adapter.log.error("> stack: " + err.stack);
+	process.exit(1);
+});
 //# sourceMappingURL=maps/main.js.map
