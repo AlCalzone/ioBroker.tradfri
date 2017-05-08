@@ -22,6 +22,12 @@ Might need additional build tools. If anything is unclear, please ask and provid
 
 ## Changelog
 
+#### 0.1.2 (2017-05-06)
+* (AlCalzone) Color temperature of lightbulbs is now expressed in terms of 0 (cold) - 100% (warm).
+
+#### 0.1.1 (2017-05-04)
+* (AlCalzone) Added support for NodeJS 4.X and building the dependencies on Windows systems
+
 #### 0.1.0 (2017-05-02)
 * (AlCalzone) initial release. 
 * Functionality limited to controlling lightbulbs.
