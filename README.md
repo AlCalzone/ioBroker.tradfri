@@ -8,8 +8,10 @@ Windows: [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/AlCalzo
 
 ## Requirements
 * Linux (e.g. Raspberry Pi) / OSX / Windows
-* NodeJS >= 4.x
+* NodeJS >= 6.x
 * Trådfri gateway
+
+WARNING: NodeJS 4.x doesn't seem to work (SIGABRT). Please upgrade to 6.x and reinstall this adapter if neccessary.
 
 Might need additional build tools. If anything is unclear, please ask and provide error details.
 
