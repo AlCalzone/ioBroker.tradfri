@@ -20,7 +20,8 @@ Might need additional build tools. If anything is unclear, please ask and provid
 1. Install this adapter via command line. Installation using the ioBroker admin GUI will result in errors.
     1. `cd /opt/iobroker`
     1. `sudo npm install https://github.com/AlCalzone/iobroker.tradfri --production --unsafe-perm`
-1. In the ioBroker GUI, add an adapter instance, then configure it by entering the IP/hostname of your gateway and the security code that can be found under that.
+1. In the ioBroker GUI, add an adapter instance. If this results in an error, try again.
+1. Configure the instance by entering the IP/hostname of your gateway and the security code that can be found under that.
 
 ## Changelog
 
