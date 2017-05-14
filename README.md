@@ -17,10 +17,10 @@ Might need additional build tools. If anything is unclear, please ask and provid
 
 ## Installation on Raspberry PI
 1. Make sure you have git installed. If not: `sudo apt-get install git-core`
-1. Install this adapter via the ioBroker GUI -> This will result in an error
-1. Open the console and navigate to `/opt/iobroker/node_modules/iobroker.tradfri`
-1. There, run `sudo npm install --production --unsafe-perm`, this will take a while.
-1. If neccessary, add an adapter instance, then configure it by entering the IP/hostname of your gateway and the security code that can be found under that.
+1. Install this adapter via command line. Installation using the ioBroker admin GUI will result in errors.
+    1. `cd /opt/iobroker`
+    1. `sudo npm install https://github.com/AlCalzone/iobroker.tradfri --production --unsafe-perm`
+1. In the ioBroker GUI, add an adapter instance, then configure it by entering the IP/hostname of your gateway and the security code that can be found under that.
 
 ## Changelog
 
