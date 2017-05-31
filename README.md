@@ -6,6 +6,14 @@ ioBroker.tradfri
 **Tests:** Linux/Mac: [![Build Status](https://travis-ci.org/AlCalzone/iobroker.tradfri.svg?branch=master)](https://travis-ci.org/AlCalzone/iobroker.tradfri) 
 Windows: [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/AlCalzone/ioBroker.tradfri?branch=master&svg=true)](https://ci.appveyor.com/project/AlCalzone/ioBroker-tradfri/)
 
+================
+
+WARNING: The adapter is currently **not working** due to some problems with 3rd party packages.
+I'm in the process of implementing that functionality myself but it will take some time.
+
+================
+
+
 ## Requirements
 * Linux (e.g. Raspberry Pi) / OSX / Windows
 * NodeJS >= 6.x
