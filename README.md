@@ -3,13 +3,14 @@ ioBroker.tradfri
 =================
 
 
-**Tests:** Linux/Mac: [![Build Status](https://travis-ci.org/AlCalzone/iobroker.tradfri.svg?branch=master)](https://travis-ci.org/AlCalzone/iobroker.tradfri) 
-Windows: [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/AlCalzone/ioBroker.tradfri?branch=master&svg=true)](https://ci.appveyor.com/project/AlCalzone/ioBroker-tradfri/)
+**WARNING**: The adapter is currently **not working** due to some problems with 3rd party packages. I will replace those with self-written code, but it will take some time. You can follow my progress here:
+- [ ] [node-dtls-client](https://github.com/AlCalzone/node-dtls-client): Clientside implementation of the DTLS protocol (~50% done...)
+- [ ] [node-coap-client](https://github.com/AlCalzone/node-coap-client): Clientside implementation of the COAP protocol with DTLS support (not started yet...)
 
 ================
 
-WARNING: The adapter is currently **not working** due to some problems with 3rd party packages.
-I'm in the process of implementing that functionality myself but it will take some time.
+**Tests:** Linux/Mac: [![Build Status](https://travis-ci.org/AlCalzone/iobroker.tradfri.svg?branch=master)](https://travis-ci.org/AlCalzone/iobroker.tradfri) 
+Windows: [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/AlCalzone/ioBroker.tradfri?branch=master&svg=true)](https://ci.appveyor.com/project/AlCalzone/ioBroker-tradfri/)
 
 ================
 
