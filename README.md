@@ -4,7 +4,7 @@ ioBroker.tradfri
 
 
 **WARNING**: The adapter is currently **not working** due to some problems with 3rd party packages. I will replace those with self-written code, but it will take some time. You can follow my progress here:
-- [x] [node-dtls-client](https://github.com/AlCalzone/node-dtls-client): Clientside implementation of the DTLS protocol (~50% done...)
+- [x] [node-dtls-client](https://github.com/AlCalzone/node-dtls-client): Clientside implementation of the DTLS protocol
 - [ ] [node-coap-client](https://github.com/AlCalzone/node-coap-client): Clientside implementation of the COAP protocol with DTLS support (not started yet...)
 
 ================
