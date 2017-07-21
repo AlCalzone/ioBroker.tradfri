@@ -1,10 +1,13 @@
 {
     "name": "iobroker.tradfri",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "description": "ioBroker tradfri Adapter",
     "author": {
         "name": "AlCalzone",
         "email": "d.griesel@gmx.net"
+    },
+    "bugs": {
+        "url": "https://github.com/AlCalzone/ioBroker.tradfri/issues"
     },
     "contributors": [
         {
@@ -12,21 +15,9 @@
             "email": "d.griesel@gmx.net"
         }
     ],
-    "homepage": "https://github.com/AlCalzone/ioBroker.tradfri",
-    "license": "MIT",
-    "keywords": [
-        "ioBroker",
-        "tradfri",
-        "Smart Home",
-        "home automation"
-    ],
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/AlCalzone/ioBroker.tradfri"
-    },
     "dependencies": {
         "babel-polyfill": "^6.23.0",
-        "coap-dtls": "git+https://github.com/AlCalzone/node-coap-dtls"
+        "node-coap-client": "git+https://github.com/AlCalzone/node-coap-client"
     },
     "devDependencies": {
         "babel-core": "^6.24.0",
@@ -52,12 +43,21 @@
         "mocha": "^2.3.4",
         "stream-filter": "^2.1.0"
     },
+    "homepage": "https://github.com/AlCalzone/ioBroker.tradfri",
+    "keywords": [
+        "ioBroker",
+        "tradfri",
+        "Smart Home",
+        "home automation"
+    ],
+    "license": "MIT",
     "main": "main.js",
+    "readmeFilename": "README.md",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/AlCalzone/ioBroker.tradfri"
+    },
     "scripts": {
         "test": "node node_modules/mocha/bin/mocha"
-    },
-    "bugs": {
-        "url": "https://github.com/AlCalzone/ioBroker.tradfri/issues"
-    },
-    "readmeFilename": "README.md"
+    }
 }

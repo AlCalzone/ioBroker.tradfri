@@ -1,7 +1,7 @@
 ﻿"use strict";
 
 import _ from "./global";
-import coap from "coap-dtls";
+import {CoapClient as coap} from "node-coap-client";
 //import { promisify } from "./promises";
 import deferred from "./defer-promise";
 
@@ -29,6 +29,8 @@ export default class CoapClient {
 		this[_endpoint] = endpoint;
 		this[callback] = callbackFn;
 		this[_userObj] = userObj;
+
+		coap.setSecurityParams()
 	}
 
 	get endpoint() { return this[_endpoint];}

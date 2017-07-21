@@ -5,7 +5,7 @@ ioBroker.tradfri
 
 **WARNING**: The adapter is currently **not working** due to some problems with 3rd party packages. I will replace those with self-written code, but it will take some time. You can follow my progress here:
 - [x] [node-dtls-client](https://github.com/AlCalzone/node-dtls-client): Clientside implementation of the DTLS protocol
-- [ ] [node-coap-client](https://github.com/AlCalzone/node-coap-client): Clientside implementation of the COAP protocol with DTLS support (not started yet...)
+- [x] [node-coap-client](https://github.com/AlCalzone/node-coap-client): Clientside implementation of the COAP protocol with DTLS support (not started yet...)
 
 ================
 
@@ -17,10 +17,8 @@ Windows: [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/AlCalzo
 
 ## Requirements
 * Linux (e.g. Raspberry Pi) / OSX / Windows
-* NodeJS >= 6.x
+* NodeJS >= 4.x
 * Trådfri gateway
-
-WARNING: NodeJS 4.x doesn't seem to work (SIGABRT). Please upgrade to 6.x and reinstall this adapter if neccessary.
 
 Might need additional build tools. If anything is unclear, please ask and provide error details.
 

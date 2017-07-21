@@ -8,6 +8,7 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 //import { promisify, waterfall } from "./lib/promises";
 
 // import { getEnumValueAsName } from "./lib/enums";
+//import Coap from "./lib/coapClient";
 
 
 // Datentypen laden
@@ -31,13 +32,11 @@ var _objectPolyfill = require("./lib/object-polyfill");
 
 var _arrayExtensions = require("./lib/array-extensions");
 
-var _coapClient = require("./lib/coapClient");
-
-var _coapClient2 = _interopRequireDefault(_coapClient);
-
 var _endpoints = require("./ipso/endpoints");
 
 var _endpoints2 = _interopRequireDefault(_endpoints);
+
+var _nodeCoapClient = require("node-coap-client");
 
 var _accessory = require("./ipso/accessory");
 
@@ -59,11 +58,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var customSubscriptions = {}; // wird unten intialisiert
 // dictionary of COAP observers
-var observers = {};
+var observers = []; //{};
 // dictionary of known devices
 var devices = {};
 // dictionary of ioBroker objects
 var objects = {};
+
+// the base of all requests
+var requestBase = void 0;
 
 // Adapter-Objekt erstellen
 var adapter = _utils2.default.adapter({
@@ -81,6 +83,13 @@ var adapter = _utils2.default.adapter({
 		// Custom subscriptions erlauben 
 		_global2.default.subscribe = subscribe;
 		_global2.default.unsubscribe = unsubscribe;
+
+		// initialize CoAP client
+		_nodeCoapClient.CoapClient.setSecurityParams(adapter.config.host, {
+			psk: { "Client_identity": adapter.config.securityCode }
+		});
+		requestBase = `coaps://${adapter.config.host}:5684/`;
+		// TODO: replace our coapClient with the imported one
 
 		// TODO: load known devices from ioBroker into <devices> & <objects>
 		observeDevices();
@@ -148,8 +157,12 @@ var adapter = _utils2.default.adapter({
 
 				_global2.default.log("sending payload: " + JSON.stringify(payload));
 
-				var send = new _coapClient2.default(`${_endpoints2.default.devices}/${dev.native.instanceId}`);
-				send.request("put", payload);
+				_nodeCoapClient.CoapClient.request(`${requestBase}${_endpoints2.default.devices}/${dev.native.instanceId}`, "put", payload);
+
+				//const send = new Coap(
+				//	`${coapEndpoints.devices}/${dev.native.instanceId}`
+				//);
+				//send.request("put", payload);
 			}
 		}
 
@@ -190,18 +203,21 @@ var adapter = _utils2.default.adapter({
 	unload: function unload(callback) {
 		// is called when adapter shuts down - callback has to be called under any circumstances!
 		try {
-
-			// stop all observers
 			var _iteratorNormalCompletion2 = true;
 			var _didIteratorError2 = false;
 			var _iteratorError2 = undefined;
 
 			try {
-				for (var _iterator2 = (0, _objectPolyfill.values)(observers)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-					var obs = _step2.value;
 
-					obs.stop();
+				for (var _iterator2 = observers[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+					var url = _step2.value;
+
+					_nodeCoapClient.CoapClient.stopObserving(url);
 				}
+				//// stop all observers
+				//for (let obs of values(observers)) {
+				//	obs.stop();
+				//}
 			} catch (err) {
 				_didIteratorError2 = true;
 				_iteratorError2 = err;
@@ -228,14 +244,26 @@ var adapter = _utils2.default.adapter({
 // manage devices
 
 function observeDevices() {
-	observers.allDevices = new _coapClient2.default(_endpoints2.default.devices, coapCb_getAllDevices);
-	observers.allDevices.observe();
+	var allDevicesUrl = `${requestBase}${_endpoints2.default.devices}`;
+	if (observers.indexOf(allDevicesUrl) === -1) {
+		observers.push(allDevicesUrl);
+		_nodeCoapClient.CoapClient.observe(allDevicesUrl, "get", coapCb_getAllDevices);
+	}
+	//observers.allDevices = new Coap(coapEndpoints.devices, coapCb_getAllDevices);
+	//observers.allDevices.observe();
 }
 
 // gets called whenever "get /15001" updates
-function coapCb_getAllDevices(newDevices, _dummy, info) {
+//function coapCb_getAllDevices(newDevices, _dummy, info) {
+function coapCb_getAllDevices(response) {
 
-	_global2.default.log(`got all devices (${JSON.stringify(info)}): ${JSON.stringify(newDevices)}`);
+	if (response.code.toString() !== "2.05") {
+		_global2.default.log(`unexpected response (${response.code.toString}) to getAllDevices.`, { severity: _global2.default.severity.error });
+		return;
+	}
+	var newDevices = parsePayload(response);
+
+	_global2.default.log(`got all devices: ${JSON.stringify(newDevices)}`);
 
 	// get old keys as int array
 	var oldKeys = Object.keys(devices).map(function (k) {
@@ -247,37 +275,62 @@ function coapCb_getAllDevices(newDevices, _dummy, info) {
 	var addedKeys = (0, _arrayExtensions.except)(newKeys, oldKeys);
 	_global2.default.log(`adding devices with keys ${JSON.stringify(addedKeys)}`);
 	addedKeys.forEach(function (id) {
-		var observerKey = `devices/${id}`;
-		if (_global2.default.isdef(observers[observerKey])) return;
+		var observerUrl = `${requestBase}${_endpoints2.default.devices}/${id}`;
+		if (observers.indexOf(observerUrl) > -1) return;
+		//const observerKey = `devices/${id}`;
+		//if (_.isdef(observers[observerKey])) return;
 
 		// make a dummy object, we'll be filling that one later
 		devices[id] = {};
-		// add observer
-		var obs = new _coapClient2.default(`${_endpoints2.default.devices}/${id}`, coap_getDevice_cb, id);
-		obs.observe(); // internal mutex will take care of sequencing
-		observers[observerKey] = obs;
+		// start observing
+		_nodeCoapClient.CoapClient.observe(observerUrl, "get", function (resp) {
+			return coap_getDevice_cb(id, resp);
+		});
+		observers.push(observerUrl);
+		//// add observer
+		//const obs = new Coap(
+		//	`${coapEndpoints.devices}/${id}`,
+		//	coap_getDevice_cb,
+		//	id
+		//);
+		//obs.observe(); // internal mutex will take care of sequencing
+		//observers[observerKey] = obs;
 	});
 
 	var removedKeys = (0, _arrayExtensions.except)(oldKeys, newKeys);
 	_global2.default.log(`removing devices with keys ${JSON.stringify(removedKeys)}`);
 	removedKeys.forEach(function (id) {
-		var observerKey = `devices/${id}`;
-		if (!_global2.default.isdef(observers[observerKey])) return;
 		// remove device from dictionary
-		delete devices[id];
+		if (devices.hasOwnProperty(id)) delete devices[id];
+
+		// remove observer
+		var observerUrl = `${requestBase}${_endpoints2.default.devices}/${id}`;
+		var index = observers.indexOf(observerUrl);
+		if (index === -1) return;
+
+		_nodeCoapClient.CoapClient.stopObserving(observerUrl);
+		observers.splice(index, 1);
+		//const observerKey = `devices/${id}`;
+		//if (!_.isdef(observers[observerKey])) return;
 		// remove observers
-		observers[observerKey].stop();
-		delete observers[observerKey];
+		//observers[observerKey].stop();
+
+		//delete observers[observerKey];
 
 		// TODO: delete ioBroker device
 	});
 
-	_global2.default.log(`active observers: ${Object.keys(observers).map(function (k) {
-		return k + ": " + observers[k].endpoint;
-	})}`);
+	//_.log(`active observers: ${Object.keys(observers).map(k => k + ": " + observers[k].endpoint)}`);
 }
 // gets called whenever "get /15001/<instanceId>" updates
-function coap_getDevice_cb(result, instanceId, _info) {
+//function coap_getDevice_cb(result, instanceId, _info) {
+function coap_getDevice_cb(instanceId, response) {
+
+	if (response.code.toString() !== "2.05") {
+		_global2.default.log(`unexpected response (${response.code.toString}) to getDevice(${instanceId}).`, { severity: _global2.default.severity.error });
+		return;
+	}
+	var result = parsePayload(response);
 	//_.log(`got device details ${instanceId} (${JSON.stringify(_info)}): ${JSON.stringify(result)}`);
 	// parse device info
 	var accessory = new _accessory2.default(result);
@@ -613,6 +666,21 @@ function unsubscribe(id) {
 	} else {
 			//_.log(`unsubscribe: subscription not found`);
 		}
+}
+
+function parsePayload(response) {
+	switch (response.format) {
+		case 0:
+			// text/plain
+			return response.payload.toString("utf-8");
+		case 50:
+			// application/json
+			var json = response.payload.toString("utf-8");
+			return JSON.parse(json);
+		default:
+			// dunno how to parse this
+			return response.payload;
+	}
 }
 
 // Unbehandelte Fehler tracen

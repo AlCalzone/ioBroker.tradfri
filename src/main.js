@@ -9,8 +9,9 @@ import { str2regex } from "./lib/str2regex";
 import { entries, values, filter, dig, /*bury, extend*/ } from "./lib/object-polyfill";
 import { /*intersect,*/ except } from "./lib/array-extensions";
 // import { getEnumValueAsName } from "./lib/enums";
-import Coap from "./lib/coapClient";
+//import Coap from "./lib/coapClient";
 import coapEndpoints from "./ipso/endpoints";
+import { CoapClient as coap } from "node-coap-client";
 
 // Datentypen laden
 import Accessory from "./ipso/accessory";
@@ -24,11 +25,14 @@ import conversions from "./lib/conversions";
 
 const customSubscriptions = {}; // wird unten intialisiert
 // dictionary of COAP observers
-const observers = {};
+const observers = [];//{};
 // dictionary of known devices
 const devices = {};
 // dictionary of ioBroker objects
 const objects = {};
+
+// the base of all requests
+let requestBase;
 
 // Adapter-Objekt erstellen
 const adapter = utils.adapter({
@@ -46,6 +50,13 @@ const adapter = utils.adapter({
 		// Custom subscriptions erlauben 
 		_.subscribe = subscribe;
 		_.unsubscribe = unsubscribe;
+
+		// initialize CoAP client
+		coap.setSecurityParams(adapter.config.host, {
+			psk: { "Client_identity": adapter.config.securityCode }
+		});
+		requestBase = `coaps://${adapter.config.host}:5684/`;
+		// TODO: replace our coapClient with the imported one
 
 		// TODO: load known devices from ioBroker into <devices> & <objects>
 		observeDevices();
@@ -116,10 +127,14 @@ const adapter = utils.adapter({
 
 				_.log("sending payload: " + JSON.stringify(payload));
 
-				const send = new Coap(
-					`${coapEndpoints.devices}/${dev.native.instanceId}`
+				coap.request(
+					`${requestBase}${coapEndpoints.devices}/${dev.native.instanceId}`, "put", payload
 				);
-				send.request("put", payload);
+
+				//const send = new Coap(
+				//	`${coapEndpoints.devices}/${dev.native.instanceId}`
+				//);
+				//send.request("put", payload);
 
 			}
 		}
@@ -142,11 +157,14 @@ const adapter = utils.adapter({
 	unload: (callback) => {
 		// is called when adapter shuts down - callback has to be called under any circumstances!
 		try {
-			
-			// stop all observers
-			for (let obs of values(observers)) {
-				obs.stop();
+
+			for (let url of observers) {
+				coap.stopObserving(url);
 			}
+			//// stop all observers
+			//for (let obs of values(observers)) {
+			//	obs.stop();
+			//}
 			callback();
 		} catch (e) {
 			callback();
@@ -158,14 +176,26 @@ const adapter = utils.adapter({
 // manage devices
 
 function observeDevices() {
-	observers.allDevices = new Coap(coapEndpoints.devices, coapCb_getAllDevices);
-	observers.allDevices.observe();
+	const allDevicesUrl = `${requestBase}${coapEndpoints.devices}`;
+	if (observers.indexOf(allDevicesUrl) === -1) {
+		observers.push(allDevicesUrl);
+		coap.observe(allDevicesUrl, "get", coapCb_getAllDevices);
+	}
+	//observers.allDevices = new Coap(coapEndpoints.devices, coapCb_getAllDevices);
+	//observers.allDevices.observe();
 }
 
 // gets called whenever "get /15001" updates
-function coapCb_getAllDevices(newDevices, _dummy, info) {
+//function coapCb_getAllDevices(newDevices, _dummy, info) {
+function coapCb_getAllDevices(response) {
 
-	_.log(`got all devices (${JSON.stringify(info)}): ${JSON.stringify(newDevices)}`);
+	if (response.code.toString() !== "2.05") {
+		_.log(`unexpected response (${response.code.toString}) to getAllDevices.`, { severity: _.severity.error });
+		return
+	}
+	const newDevices = parsePayload(response);
+
+	_.log(`got all devices: ${JSON.stringify(newDevices)}`);
 
 	// get old keys as int array
 	const oldKeys = Object.keys(devices).map(k => +k).sort();
@@ -175,40 +205,64 @@ function coapCb_getAllDevices(newDevices, _dummy, info) {
 	const addedKeys = except(newKeys, oldKeys);
 	_.log(`adding devices with keys ${JSON.stringify(addedKeys)}`);
 	addedKeys.forEach(id => {
-		const observerKey = `devices/${id}`;
-		if (_.isdef(observers[observerKey])) return;
+		const observerUrl = `${requestBase}${coapEndpoints.devices}/${id}`;
+		if (observers.indexOf(observerUrl) > -1) return;
+		//const observerKey = `devices/${id}`;
+		//if (_.isdef(observers[observerKey])) return;
 
 		// make a dummy object, we'll be filling that one later
 		devices[id] = {};
-		// add observer
-		const obs = new Coap(
-			`${coapEndpoints.devices}/${id}`,
-			coap_getDevice_cb,
-			id
-		);
-		obs.observe(); // internal mutex will take care of sequencing
-		observers[observerKey] = obs;
+		// start observing
+		coap.observe(
+			observerUrl, "get",
+			(resp) => coap_getDevice_cb(id, resp)
+		)
+		observers.push(observerUrl);
+		//// add observer
+		//const obs = new Coap(
+		//	`${coapEndpoints.devices}/${id}`,
+		//	coap_getDevice_cb,
+		//	id
+		//);
+		//obs.observe(); // internal mutex will take care of sequencing
+		//observers[observerKey] = obs;
 	});
 
 
 	const removedKeys = except(oldKeys, newKeys);
 	_.log(`removing devices with keys ${JSON.stringify(removedKeys)}`);
 	removedKeys.forEach(id => {
-		const observerKey = `devices/${id}`;
-		if (!_.isdef(observers[observerKey])) return;
 		// remove device from dictionary
-		delete devices[id];
+		if (devices.hasOwnProperty(id)) delete devices[id];
+
+		// remove observer
+		const observerUrl = `${requestBase}${coapEndpoints.devices}/${id}`;
+		const index = observers.indexOf(observerUrl);
+		if (index === -1) return;
+
+		coap.stopObserving(observerUrl);
+		observers.splice(index, 1);
+		//const observerKey = `devices/${id}`;
+		//if (!_.isdef(observers[observerKey])) return;
 		// remove observers
-		observers[observerKey].stop();
-		delete observers[observerKey];
+		//observers[observerKey].stop();
+
+		//delete observers[observerKey];
 
 		// TODO: delete ioBroker device
 	});
 
-	_.log(`active observers: ${Object.keys(observers).map(k => k + ": " + observers[k].endpoint)}`);
+	//_.log(`active observers: ${Object.keys(observers).map(k => k + ": " + observers[k].endpoint)}`);
 }
 // gets called whenever "get /15001/<instanceId>" updates
-function coap_getDevice_cb(result, instanceId, _info) {
+//function coap_getDevice_cb(result, instanceId, _info) {
+function coap_getDevice_cb(instanceId, response) {
+
+	if (response.code.toString() !== "2.05") {
+		_.log(`unexpected response (${response.code.toString}) to getDevice(${instanceId}).`, { severity: _.severity.error });
+		return
+	}
+	const result = parsePayload(response);
 	//_.log(`got device details ${instanceId} (${JSON.stringify(_info)}): ${JSON.stringify(result)}`);
 	// parse device info
 	const accessory = new Accessory(result);
@@ -525,6 +579,19 @@ function unsubscribe(id) {
 		//_.log(`unsubscribe: subscription not found`);
 	}
 }
+
+function parsePayload(response) {
+	switch (response.format) {
+		case 0: // text/plain
+			return response.payload.toString("utf-8");
+		case 50: // application/json
+			const json = response.payload.toString("utf-8");
+			return JSON.parse(json);
+		default: // dunno how to parse this
+			return response.payload;
+	}
+}
+
 
 // Unbehandelte Fehler tracen
 process.on('unhandledRejection', r => {
