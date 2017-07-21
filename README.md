@@ -2,13 +2,6 @@
 ioBroker.tradfri
 =================
 
-
-**WARNING**: The adapter is currently **not working** due to some problems with 3rd party packages. I will replace those with self-written code, but it will take some time. You can follow my progress here:
-- [x] [node-dtls-client](https://github.com/AlCalzone/node-dtls-client): Clientside implementation of the DTLS protocol
-- [x] [node-coap-client](https://github.com/AlCalzone/node-coap-client): Clientside implementation of the COAP protocol with DTLS support (not started yet...)
-
-================
-
 **Tests:** Linux/Mac: [![Build Status](https://travis-ci.org/AlCalzone/iobroker.tradfri.svg?branch=master)](https://travis-ci.org/AlCalzone/iobroker.tradfri) 
 Windows: [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/AlCalzone/ioBroker.tradfri?branch=master&svg=true)](https://ci.appveyor.com/project/AlCalzone/ioBroker-tradfri/)
 
@@ -22,15 +15,20 @@ Windows: [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/AlCalzo
 
 Might need additional build tools. If anything is unclear, please ask and provide error details.
 
-## Installation on Raspberry PI
-1. Make sure you have git installed. If not: `sudo apt-get install git-core`
-1. Install this adapter via command line. Installation using the ioBroker admin GUI will result in errors.
-    1. `cd /opt/iobroker`
-    1. `sudo npm install https://github.com/AlCalzone/iobroker.tradfri --production --unsafe-perm`
-1. In the ioBroker GUI, add an adapter instance. If this results in an error, try again.
-1. Configure the instance by entering the IP/hostname of your gateway and the security code that can be found under that.
+## Installation
+1. Install prerequisites
+	1. Linux/Raspberry Pi: Make sure you have git installed. If not: `sudo apt-get install git-core`
+	1. Windows: Make sure you have git installed. If not, download the correct version at https://git-scm.com/download/win
+	1. OSX: ??? Probably like Linux.
+1. Install this adapter over the iobroker admin GUI or via  
+`iobroker url https://github.com/AlCalzone/ioBroker.tradfri ` 
+1. In the ioBroker GUI, add an adapter instance. 
+1. Configure the instance by entering the IP/hostname of your gateway and the security code that can be found on the label at the bottom.
 
 ## Changelog
+
+#### 0.1.3 (2017-07-21)
+* (AlCalzone) Reboot of the adapter without 3rd party libraries.
 
 #### 0.1.2 (2017-05-06)
 * (AlCalzone) Color temperature of lightbulbs is now expressed in terms of 0 (cold) - 100% (warm).
