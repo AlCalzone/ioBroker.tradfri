@@ -1,5 +1,7 @@
 ﻿"use strict";
 
+// TODO: check if we still need this.
+
 // source: https://blog.jcoglan.com/2016/07/12/mutexes-and-javascript/
 
 const

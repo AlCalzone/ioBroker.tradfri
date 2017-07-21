@@ -109,7 +109,7 @@ var adapter = _utils2.default.adapter({
 	},
 
 	objectChange: function objectChange(id, obj) {
-		_global2.default.log(`{{blue}} object with id ${id} updated`);
+		_global2.default.log(`{{blue}} object with id ${id} updated`, { level: _global2.default.loglevels.debug });
 		if (id.startsWith(adapter.namespace)) {
 			// this is our own object, remember it!
 			objects[id] = obj;
@@ -117,7 +117,7 @@ var adapter = _utils2.default.adapter({
 	},
 
 	stateChange: function stateChange(id, state) {
-		_global2.default.log(`{{blue}} state with id ${id} updated: ack=${state.ack}; val=${state.val}`);
+		_global2.default.log(`{{blue}} state with id ${id} updated: ack=${state.ack}; val=${state.val}`, { level: _global2.default.loglevels.debug });
 		if (!state.ack && id.startsWith(adapter.namespace)) {
 			// our own state was changed from within ioBroker, react to it
 
@@ -147,22 +147,13 @@ var adapter = _utils2.default.adapter({
 				} else if (id.endsWith(".lightbulb.color")) {
 					var colorX = _conversions2.default.color("out", state.val);
 					payload = { "3311": [{ "5709": colorX, "5710": 27000, "5712": 5 }] };
-				} //else if (id.endsWith(".lightbulb.colorX")) {
-				//	const colorY = accessory.lightList[0].colorY;
-				//	payload = { "3311": [{ "5709": val, "5710": colorY, "5712": 5 }] };
-				//} else if (id.endsWith(".lightbulb.colorY")) {
-				//	const colorX = accessory.lightList[0].colorX;
-				//	payload = { "3311": [{ "5709": colorX, "5710": val, "5712": 5 }] };
-				//}
+				}
 
-				_global2.default.log("sending payload: " + JSON.stringify(payload));
+				payload = JSON.stringify(payload);
+				_global2.default.log("sending payload: " + payload, { level: _global2.default.loglevels.debug });
 
+				payload = Buffer.from(payload);
 				_nodeCoapClient.CoapClient.request(`${requestBase}${_endpoints2.default.devices}/${dev.native.instanceId}`, "put", payload);
-
-				//const send = new Coap(
-				//	`${coapEndpoints.devices}/${dev.native.instanceId}`
-				//);
-				//send.request("put", payload);
 			}
 		}
 
@@ -203,21 +194,17 @@ var adapter = _utils2.default.adapter({
 	unload: function unload(callback) {
 		// is called when adapter shuts down - callback has to be called under any circumstances!
 		try {
+			// stop all observers
 			var _iteratorNormalCompletion2 = true;
 			var _didIteratorError2 = false;
 			var _iteratorError2 = undefined;
 
 			try {
-
 				for (var _iterator2 = observers[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
 					var url = _step2.value;
 
 					_nodeCoapClient.CoapClient.stopObserving(url);
 				}
-				//// stop all observers
-				//for (let obs of values(observers)) {
-				//	obs.stop();
-				//}
 			} catch (err) {
 				_didIteratorError2 = true;
 				_iteratorError2 = err;
@@ -249,16 +236,13 @@ function observeDevices() {
 		observers.push(allDevicesUrl);
 		_nodeCoapClient.CoapClient.observe(allDevicesUrl, "get", coapCb_getAllDevices);
 	}
-	//observers.allDevices = new Coap(coapEndpoints.devices, coapCb_getAllDevices);
-	//observers.allDevices.observe();
 }
 
 // gets called whenever "get /15001" updates
-//function coapCb_getAllDevices(newDevices, _dummy, info) {
 function coapCb_getAllDevices(response) {
 
 	if (response.code.toString() !== "2.05") {
-		_global2.default.log(`unexpected response (${response.code.toString}) to getAllDevices.`, { severity: _global2.default.severity.error });
+		_global2.default.log(`unexpected response (${response.code.toString()}) to getAllDevices.`, { severity: _global2.default.severity.error });
 		return;
 	}
 	var newDevices = parsePayload(response);
@@ -273,12 +257,11 @@ function coapCb_getAllDevices(response) {
 	var newKeys = newDevices.sort();
 	// translate that into added and removed devices
 	var addedKeys = (0, _arrayExtensions.except)(newKeys, oldKeys);
-	_global2.default.log(`adding devices with keys ${JSON.stringify(addedKeys)}`);
+	_global2.default.log(`adding devices with keys ${JSON.stringify(addedKeys)}`, { level: _global2.default.loglevels.debug });
+
 	addedKeys.forEach(function (id) {
 		var observerUrl = `${requestBase}${_endpoints2.default.devices}/${id}`;
 		if (observers.indexOf(observerUrl) > -1) return;
-		//const observerKey = `devices/${id}`;
-		//if (_.isdef(observers[observerKey])) return;
 
 		// make a dummy object, we'll be filling that one later
 		devices[id] = {};
@@ -287,18 +270,10 @@ function coapCb_getAllDevices(response) {
 			return coap_getDevice_cb(id, resp);
 		});
 		observers.push(observerUrl);
-		//// add observer
-		//const obs = new Coap(
-		//	`${coapEndpoints.devices}/${id}`,
-		//	coap_getDevice_cb,
-		//	id
-		//);
-		//obs.observe(); // internal mutex will take care of sequencing
-		//observers[observerKey] = obs;
 	});
 
 	var removedKeys = (0, _arrayExtensions.except)(oldKeys, newKeys);
-	_global2.default.log(`removing devices with keys ${JSON.stringify(removedKeys)}`);
+	_global2.default.log(`removing devices with keys ${JSON.stringify(removedKeys)}`, { level: _global2.default.loglevels.debug });
 	removedKeys.forEach(function (id) {
 		// remove device from dictionary
 		if (devices.hasOwnProperty(id)) delete devices[id];
@@ -310,34 +285,22 @@ function coapCb_getAllDevices(response) {
 
 		_nodeCoapClient.CoapClient.stopObserving(observerUrl);
 		observers.splice(index, 1);
-		//const observerKey = `devices/${id}`;
-		//if (!_.isdef(observers[observerKey])) return;
-		// remove observers
-		//observers[observerKey].stop();
-
-		//delete observers[observerKey];
 
 		// TODO: delete ioBroker device
 	});
-
-	//_.log(`active observers: ${Object.keys(observers).map(k => k + ": " + observers[k].endpoint)}`);
 }
 // gets called whenever "get /15001/<instanceId>" updates
-//function coap_getDevice_cb(result, instanceId, _info) {
 function coap_getDevice_cb(instanceId, response) {
 
 	if (response.code.toString() !== "2.05") {
-		_global2.default.log(`unexpected response (${response.code.toString}) to getDevice(${instanceId}).`, { severity: _global2.default.severity.error });
+		_global2.default.log(`unexpected response (${response.code.toString()}) to getDevice(${instanceId}).`, { severity: _global2.default.severity.error });
 		return;
 	}
 	var result = parsePayload(response);
-	//_.log(`got device details ${instanceId} (${JSON.stringify(_info)}): ${JSON.stringify(result)}`);
 	// parse device info
 	var accessory = new _accessory2.default(result);
 	// remember the device object, so we can later use it as a reference for updates
 	devices[instanceId] = accessory;
-	//_.log(`got device details for ${instanceId}:`);
-	//_.log(JSON.stringify(accessory));
 	// create ioBroker device
 	extendDevice(accessory);
 }
@@ -653,19 +616,14 @@ function subscribe(pattern, callback) {
 
 	customSubscriptions.subscriptions[id] = { pattern, callback };
 
-	//_.log(`added subscription for pattern ${pattern}. total count: ${Object.keys(customSubscriptions.subscriptions).length}`);
-
 	return id;
 }
 function unsubscribe(id) {
-	//_.log(`unsubscribing subscription #${id}...`);
 	if (customSubscriptions.subscriptions[id]) {
-		//const pattern = customSubscriptions.subscriptions[id].pattern;
 		delete customSubscriptions.subscriptions[id];
-		//_.log(`unsubscribe ${pattern}: success. total count: ${Object.keys(customSubscriptions.subscriptions).length}`);
 	} else {
-			//_.log(`unsubscribe: subscription not found`);
-		}
+		_global2.default.log(`unsubscribe: subscription not found`, { level: _global2.default.loglevels.debug });
+	}
 }
 
 function parsePayload(response) {

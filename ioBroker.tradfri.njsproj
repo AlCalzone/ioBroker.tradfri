@@ -26,9 +26,6 @@
     <Compile Include="gulpfile.babel.js" />
     <Compile Include="src\ipso\accessoryTypes.js" />
     <Compile Include="src\lib\array-extensions.js" />
-    <Compile Include="src\lib\coapClient.js">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="src\lib\conversions.js">
       <SubType>Code</SubType>
     </Compile>

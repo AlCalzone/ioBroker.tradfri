@@ -77,7 +77,7 @@ const adapter = utils.adapter({
 	},
 
 	objectChange: (id, obj) => {
-		_.log(`{{blue}} object with id ${id} updated`);
+		_.log(`{{blue}} object with id ${id} updated`, { level: _.loglevels.debug });
 		if (id.startsWith(adapter.namespace)) {
 			// this is our own object, remember it!
 			objects[id] = obj;
@@ -85,7 +85,7 @@ const adapter = utils.adapter({
 	},
 
 	stateChange: (id, state) => {
-		_.log(`{{blue}} state with id ${id} updated: ack=${state.ack}; val=${state.val}`);
+		_.log(`{{blue}} state with id ${id} updated: ack=${state.ack}; val=${state.val}`, { level: _.loglevels.debug });
 		if (!state.ack && id.startsWith(adapter.namespace)) {
 			// our own state was changed from within ioBroker, react to it
 
@@ -117,24 +117,15 @@ const adapter = utils.adapter({
 				} else if (id.endsWith(".lightbulb.color")) {
 					const colorX = conversions.color("out", state.val);
 					payload = { "3311": [{ "5709": colorX, "5710": 27000, "5712": 5 }] };
-				} //else if (id.endsWith(".lightbulb.colorX")) {
-				//	const colorY = accessory.lightList[0].colorY;
-				//	payload = { "3311": [{ "5709": val, "5710": colorY, "5712": 5 }] };
-				//} else if (id.endsWith(".lightbulb.colorY")) {
-				//	const colorX = accessory.lightList[0].colorX;
-				//	payload = { "3311": [{ "5709": colorX, "5710": val, "5712": 5 }] };
-				//}
+				}
 
-				_.log("sending payload: " + JSON.stringify(payload));
+				payload = JSON.stringify(payload);
+				_.log("sending payload: " + payload, { level: _.loglevels.debug });
 
+				payload = Buffer.from(payload)
 				coap.request(
 					`${requestBase}${coapEndpoints.devices}/${dev.native.instanceId}`, "put", payload
 				);
-
-				//const send = new Coap(
-				//	`${coapEndpoints.devices}/${dev.native.instanceId}`
-				//);
-				//send.request("put", payload);
 
 			}
 		}
@@ -157,14 +148,10 @@ const adapter = utils.adapter({
 	unload: (callback) => {
 		// is called when adapter shuts down - callback has to be called under any circumstances!
 		try {
-
+			// stop all observers
 			for (let url of observers) {
 				coap.stopObserving(url);
 			}
-			//// stop all observers
-			//for (let obs of values(observers)) {
-			//	obs.stop();
-			//}
 			callback();
 		} catch (e) {
 			callback();
@@ -181,16 +168,13 @@ function observeDevices() {
 		observers.push(allDevicesUrl);
 		coap.observe(allDevicesUrl, "get", coapCb_getAllDevices);
 	}
-	//observers.allDevices = new Coap(coapEndpoints.devices, coapCb_getAllDevices);
-	//observers.allDevices.observe();
 }
 
 // gets called whenever "get /15001" updates
-//function coapCb_getAllDevices(newDevices, _dummy, info) {
 function coapCb_getAllDevices(response) {
 
 	if (response.code.toString() !== "2.05") {
-		_.log(`unexpected response (${response.code.toString}) to getAllDevices.`, { severity: _.severity.error });
+		_.log(`unexpected response (${response.code.toString()}) to getAllDevices.`, { severity: _.severity.error });
 		return
 	}
 	const newDevices = parsePayload(response);
@@ -203,12 +187,11 @@ function coapCb_getAllDevices(response) {
 	const newKeys = newDevices.sort();
 	// translate that into added and removed devices
 	const addedKeys = except(newKeys, oldKeys);
-	_.log(`adding devices with keys ${JSON.stringify(addedKeys)}`);
+	_.log(`adding devices with keys ${JSON.stringify(addedKeys)}`, { level: _.loglevels.debug });
+
 	addedKeys.forEach(id => {
 		const observerUrl = `${requestBase}${coapEndpoints.devices}/${id}`;
 		if (observers.indexOf(observerUrl) > -1) return;
-		//const observerKey = `devices/${id}`;
-		//if (_.isdef(observers[observerKey])) return;
 
 		// make a dummy object, we'll be filling that one later
 		devices[id] = {};
@@ -216,21 +199,13 @@ function coapCb_getAllDevices(response) {
 		coap.observe(
 			observerUrl, "get",
 			(resp) => coap_getDevice_cb(id, resp)
-		)
+		);
 		observers.push(observerUrl);
-		//// add observer
-		//const obs = new Coap(
-		//	`${coapEndpoints.devices}/${id}`,
-		//	coap_getDevice_cb,
-		//	id
-		//);
-		//obs.observe(); // internal mutex will take care of sequencing
-		//observers[observerKey] = obs;
 	});
 
 
 	const removedKeys = except(oldKeys, newKeys);
-	_.log(`removing devices with keys ${JSON.stringify(removedKeys)}`);
+	_.log(`removing devices with keys ${JSON.stringify(removedKeys)}`, { level: _.loglevels.debug });
 	removedKeys.forEach(id => {
 		// remove device from dictionary
 		if (devices.hasOwnProperty(id)) delete devices[id];
@@ -242,34 +217,23 @@ function coapCb_getAllDevices(response) {
 
 		coap.stopObserving(observerUrl);
 		observers.splice(index, 1);
-		//const observerKey = `devices/${id}`;
-		//if (!_.isdef(observers[observerKey])) return;
-		// remove observers
-		//observers[observerKey].stop();
-
-		//delete observers[observerKey];
 
 		// TODO: delete ioBroker device
 	});
 
-	//_.log(`active observers: ${Object.keys(observers).map(k => k + ": " + observers[k].endpoint)}`);
 }
 // gets called whenever "get /15001/<instanceId>" updates
-//function coap_getDevice_cb(result, instanceId, _info) {
 function coap_getDevice_cb(instanceId, response) {
 
 	if (response.code.toString() !== "2.05") {
-		_.log(`unexpected response (${response.code.toString}) to getDevice(${instanceId}).`, { severity: _.severity.error });
+		_.log(`unexpected response (${response.code.toString()}) to getDevice(${instanceId}).`, { severity: _.severity.error });
 		return
 	}
 	const result = parsePayload(response);
-	//_.log(`got device details ${instanceId} (${JSON.stringify(_info)}): ${JSON.stringify(result)}`);
 	// parse device info
 	const accessory = new Accessory(result);
 	// remember the device object, so we can later use it as a reference for updates
 	devices[instanceId] = accessory;
-	//_.log(`got device details for ${instanceId}:`);
-	//_.log(JSON.stringify(accessory));
 	// create ioBroker device
 	extendDevice(accessory);
 }
@@ -565,18 +529,13 @@ function subscribe(pattern, callback) {
 
 	customSubscriptions.subscriptions[id] = { pattern, callback };
 
-	//_.log(`added subscription for pattern ${pattern}. total count: ${Object.keys(customSubscriptions.subscriptions).length}`);
-
 	return id;
 }
 function unsubscribe(id) {
-	//_.log(`unsubscribing subscription #${id}...`);
 	if (customSubscriptions.subscriptions[id]) {
-		//const pattern = customSubscriptions.subscriptions[id].pattern;
 		delete customSubscriptions.subscriptions[id];
-		//_.log(`unsubscribe ${pattern}: success. total count: ${Object.keys(customSubscriptions.subscriptions).length}`);
 	} else {
-		//_.log(`unsubscribe: subscription not found`);
+		_.log(`unsubscribe: subscription not found`, { level: _.loglevels.debug });
 	}
 }
 

@@ -48,7 +48,7 @@ class Global {
 		}
 		__instance = this;
 
-		this.loglevels = { "off": 0, "on": 1, "ridiculous": 2 };
+		this.loglevels = { "off": 0, "on": 1, "debug": 2 };
 		this.severity = { "normal": 0, "warn": 1, "error": 2 };
 		this[_loglevel] = this.loglevels.on;
 
@@ -115,6 +115,8 @@ class Global {
 			default:
 				logFn = "info";
 		}
+		// Debug überschreibt severity
+		if (level === this.loglevels.debug) logFn = "debug";
 
 		if (message) {
 			// Farben und Formatierungen
@@ -151,4 +153,3 @@ class Global {
 
 const stuff = new Global();
 export default stuff;
-//export default const stuff = new Global();
