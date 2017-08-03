@@ -1,24 +1,18 @@
 language: node_js
 node_js:
-  #- '4'
   - '6'
-  - '7'
-
+  - '8'
 os:
   - linux
   - osx
-  
-# OSX/NodeJS 4 stalls the Travis VM pretty often - but not always...
 allow_failures:
   - os: osx
     node_js: '4'
-    
 before_install:
   - sudo chmod +x ./travis/setup.sh
   - ./travis/setup.sh
 before_script:
-  - npm install winston@2.3.0
+  - npm install winston@2.3.1
   - 'npm install https://github.com/ioBroker/ioBroker.js-controller/tarball/master --production'
-
 notifications:
   email: false
