@@ -35,7 +35,7 @@
         "home automation"
     ],
     "license": "MIT",
-    "main": "main.js",
+    "main": "build/main.js",
     "readmeFilename": "README.md",
     "repository": {
         "type": "git",
