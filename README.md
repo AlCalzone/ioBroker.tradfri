@@ -27,8 +27,8 @@ Might need additional build tools. If anything is unclear, please ask and provid
 
 ## Changelog
 
-#### 0.1.4 (2017-08-09)
-* (AlCalzone) Switched to TypeScript (unreleased)
+#### 0.1.4 (2017-08-12)
+* (AlCalzone) Switched to TypeScript
 
 #### 0.1.3 (2017-07-21)
 * (AlCalzone) Reboot of the adapter without 3rd party libraries.
