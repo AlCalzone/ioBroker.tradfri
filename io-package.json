@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "0.1.3",
+        "version": "0.1.4",
         "news": {
             "0.1.0": {
                 "en": "initial release. Functionality limited to controlling lightbulbs.",
@@ -29,9 +29,9 @@
         "mode": "daemon",
         "icon": "tradfri.png",
         "enabled": true,
-        "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.tradfri/master/admin/tradfri.png",
+        "extIcon": "https://raw.githubusercontent.com/AlCalzone/ioBroker.tradfri/master/admin/tradfri.png",
         "keywords": [ "ikea", "tradfri" ],
-        "readme": "https://github.com/ioBroker/ioBroker.tradfri/blob/master/README.md",
+        "readme": "https://github.com/AlCalzone/ioBroker.tradfri/blob/master/README.md",
         "loglevel": "info",
         "type": "hardware",
         "messagebox": true
