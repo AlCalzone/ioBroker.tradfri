@@ -56,6 +56,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 		// redirect console output
 		// console.log = (msg) => adapter.log.debug("STDOUT > " + msg);
 		// console.error = (msg) => adapter.log.error("STDERR > " + msg);
+		_.log(`startfile = ${process.argv[1]}`);
 
 		// Eigene Objekte/States beobachten
 		adapter.subscribeStates("*");

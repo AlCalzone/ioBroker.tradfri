@@ -1,15 +1,13 @@
+// tslint:disable:object-literal-key-quotes
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 // Eigene Module laden
-var global_1 = require("./lib/global");
-//import { promisify, waterfall } from "./lib/promises";
-var str2regex_1 = require("./lib/str2regex");
-var object_polyfill_1 = require("./lib/object-polyfill");
-var array_extensions_1 = require("./lib/array-extensions");
-// import { getEnumValueAsName } from "./lib/enums";
-//import Coap from "./lib/coapClient";
-var endpoints_1 = require("./ipso/endpoints");
 var node_coap_client_1 = require("node-coap-client");
+var endpoints_1 = require("./ipso/endpoints");
+var array_extensions_1 = require("./lib/array-extensions");
+var global_1 = require("./lib/global");
+var object_polyfill_1 = require("./lib/object-polyfill");
+var str2regex_1 = require("./lib/str2regex");
 // Datentypen laden
 var accessory_1 = require("./ipso/accessory");
 var accessoryTypes_1 = require("./ipso/accessoryTypes");
@@ -26,7 +24,7 @@ var customObjectSubscriptions = {
     counter: 0,
 };
 // dictionary of COAP observers
-var observers = []; //{};
+var observers = [];
 // dictionary of known devices
 var devices = {};
 // dictionary of ioBroker objects
@@ -42,19 +40,20 @@ var adapter = utils_1.default.adapter({
         adapter = global_1.Global.extend(adapter);
         global_1.Global.adapter = adapter;
         // redirect console output
-        //console.log = (msg) => adapter.log.debug("STDOUT > " + msg);
-        //console.error = (msg) => adapter.log.error("STDERR > " + msg);
+        // console.log = (msg) => adapter.log.debug("STDOUT > " + msg);
+        // console.error = (msg) => adapter.log.error("STDERR > " + msg);
+        global_1.Global.log("startfile = " + process.argv[1]);
         // Eigene Objekte/States beobachten
         adapter.subscribeStates("*");
         adapter.subscribeObjects("*");
-        // Custom subscriptions erlauben 
+        // Custom subscriptions erlauben
         global_1.Global.subscribeStates = subscribeStates;
         global_1.Global.unsubscribeStates = unsubscribeStates;
         global_1.Global.subscribeObjects = subscribeObjects;
         global_1.Global.unsubscribeObjects = unsubscribeObjects;
         // initialize CoAP client
         node_coap_client_1.CoapClient.setSecurityParams(adapter.config.host, {
-            psk: { "Client_identity": adapter.config.securityCode }
+            psk: { "Client_identity": adapter.config.securityCode },
         });
         requestBase = "coaps://" + adapter.config.host + ":5684/";
         // TODO: replace our coapClient with the imported one
@@ -63,13 +62,13 @@ var adapter = utils_1.default.adapter({
     },
     message: function (obj) {
         // Some message was sent to adapter instance over message box. Used by email, pushover, text2speech, ...
-        if (typeof obj == 'object' && obj.message) {
-            if (obj.command == 'send') {
+        if (typeof obj === "object" && obj.message) {
+            if (obj.command === "send") {
                 // e.g. send email or pushover or whatever
-                //console.log('send command');
+                // console.log('send command');
                 // Send response in callback if required
                 if (obj.callback)
-                    adapter.sendTo(obj.from, obj.command, 'Message received', obj.callback);
+                    adapter.sendTo(obj.from, obj.command, "Message received", obj.callback);
             }
         }
     },
@@ -276,7 +275,7 @@ function extendDevice(accessory) {
         var changed = false;
         // update common part if neccessary
         var newCommon = {
-            name: accessory.name
+            name: accessory.name,
         };
         if (JSON.stringify(devObj.common) !== JSON.stringify(newCommon)) {
             devObj.common = newCommon;
@@ -285,7 +284,7 @@ function extendDevice(accessory) {
         var newNative = {
             instanceId: accessory.instanceId,
             manufacturer: accessory.deviceInfo.manufacturer,
-            firmwareVersion: accessory.deviceInfo.firmwareVersion
+            firmwareVersion: accessory.deviceInfo.firmwareVersion,
         };
         // update native part if neccessary
         if (JSON.stringify(devObj.native) !== JSON.stringify(newNative)) {
@@ -319,13 +318,13 @@ function extendDevice(accessory) {
             _id: objId,
             type: "device",
             common: {
-                name: accessory.name
+                name: accessory.name,
             },
             native: {
                 instanceId: accessory.instanceId,
                 manufacturer: accessory.deviceInfo.manufacturer,
-                firmwareVersion: accessory.deviceInfo.firmwareVersion
-            }
+                firmwareVersion: accessory.deviceInfo.firmwareVersion,
+            },
         };
         adapter.setObject(objId, devObj);
         // also create state objects, depending on the accessory type
@@ -339,11 +338,11 @@ function extendDevice(accessory) {
                     write: false,
                     type: "boolean",
                     role: "indicator.alive",
-                    desc: "indicates if the device is currently alive and connected to the gateway"
+                    desc: "indicates if the device is currently alive and connected to the gateway",
                 },
                 native: {
-                    path: "alive"
-                }
+                    path: "alive",
+                },
             },
             lastSeen: {
                 _id: objId + ".lastSeen",
@@ -354,29 +353,29 @@ function extendDevice(accessory) {
                     write: false,
                     type: "number",
                     role: "indicator.lastSeen",
-                    desc: "indicates when the device has last been seen by the gateway"
+                    desc: "indicates when the device has last been seen by the gateway",
                 },
                 native: {
-                    path: "lastSeen"
-                }
-            }
+                    path: "lastSeen",
+                },
+            },
         };
         if (accessory.type === accessoryTypes_1.accessoryTypes.lightbulb) {
-            //stateObjs["lightbulb.color"] = {
-            //	_id: `${objId}.lightbulb.color`,
-            //	type: "state",
-            //	common: {
-            //		name: "RGB color",
-            //		read: true, // TODO: check
-            //		write: false, // TODO: check
-            //		type: "string",
-            //		role: "level.color.rgb",
-            //		desc: "hex representation of the lightbulb color"
-            //	},
-            //	native: {
-            //		path: "lightList.[0].color"
-            //	}
-            //};
+            // stateObjs["lightbulb.color"] = {
+            // 	_id: `${objId}.lightbulb.color`,
+            // 	type: "state",
+            // 	common: {
+            // 		name: "RGB color",
+            // 		read: true, // TODO: check
+            // 		write: false, // TODO: check
+            // 		type: "string",
+            // 		role: "level.color.rgb",
+            // 		desc: "hex representation of the lightbulb color"
+            // 	},
+            // 	native: {
+            // 		path: "lightList.[0].color"
+            // 	}
+            // };
             stateObjs_1["lightbulb.color"] = {
                 _id: objId + ".lightbulb.color",
                 type: "state",
@@ -389,46 +388,46 @@ function extendDevice(accessory) {
                     unit: "%",
                     type: "number",
                     role: "level.color.temperature",
-                    desc: "range: 0% = cold, 100% = warm"
+                    desc: "range: 0% = cold, 100% = warm",
                 },
                 native: {
-                    path: "__convert:color,lightList.[0].colorX"
-                }
+                    path: "__convert:color,lightList.[0].colorX",
+                },
             };
-            //stateObjs["lightbulb.colorX"] = {
-            //	_id: `${objId}.lightbulb.colorX`,
-            //	type: "state",
-            //	common: {
-            //		name: "CIE 1931 x coordinate",
-            //		read: true, // TODO: check
-            //		write: true, // TODO: check
-            //		min: 24930,
-            //		max: 33135,
-            //		type: "number",
-            //		role: "level.color.temperature",
-            //		desc: "x coordinate of the color temperature in the CIE 1931 color space"
-            //	},
-            //	native: {
-            //		path: "lightList.[0].colorX"
-            //	}
-            //};
-            //stateObjs["lightbulb.colorY"] = {
-            //	_id: `${objId}.lightbulb.colorY`,
-            //	type: "state",
-            //	common: {
-            //		name: "CIE 1931 y coordinate",
-            //		read: true, // TODO: check
-            //		write: true, // TODO: check
-            //		min: 24694,
-            //		max: 27211,
-            //		type: "number",
-            //		role: "level.color.temperature",
-            //		desc: "y coordinate of the color temperature in the CIE 1931 color space"
-            //	},
-            //	native: {
-            //		path: "lightList.[0].colorY"
-            //	}
-            //};
+            // stateObjs["lightbulb.colorX"] = {
+            // 	_id: `${objId}.lightbulb.colorX`,
+            // 	type: "state",
+            // 	common: {
+            // 		name: "CIE 1931 x coordinate",
+            // 		read: true, // TODO: check
+            // 		write: true, // TODO: check
+            // 		min: 24930,
+            // 		max: 33135,
+            // 		type: "number",
+            // 		role: "level.color.temperature",
+            // 		desc: "x coordinate of the color temperature in the CIE 1931 color space"
+            // 	},
+            // 	native: {
+            // 		path: "lightList.[0].colorX"
+            // 	}
+            // };
+            // stateObjs["lightbulb.colorY"] = {
+            // 	_id: `${objId}.lightbulb.colorY`,
+            // 	type: "state",
+            // 	common: {
+            // 		name: "CIE 1931 y coordinate",
+            // 		read: true, // TODO: check
+            // 		write: true, // TODO: check
+            // 		min: 24694,
+            // 		max: 27211,
+            // 		type: "number",
+            // 		role: "level.color.temperature",
+            // 		desc: "y coordinate of the color temperature in the CIE 1931 color space"
+            // 	},
+            // 	native: {
+            // 		path: "lightList.[0].colorY"
+            // 	}
+            // };
             stateObjs_1["lightbulb.brightness"] = {
                 _id: objId + ".lightbulb.brightness",
                 type: "state",
@@ -440,11 +439,11 @@ function extendDevice(accessory) {
                     max: 254,
                     type: "number",
                     role: "level",
-                    desc: "brightness of the lightbulb"
+                    desc: "brightness of the lightbulb",
                 },
                 native: {
-                    path: "lightList.[0].dimmer"
-                }
+                    path: "lightList.[0].dimmer",
+                },
             };
             stateObjs_1["lightbulb.state"] = {
                 _id: objId + ".lightbulb.state",
@@ -457,8 +456,8 @@ function extendDevice(accessory) {
                     role: "switch",
                 },
                 native: {
-                    path: "lightList.[0].onOff"
-                }
+                    path: "lightList.[0].onOff",
+                },
             };
         }
         var createObjects = Object.keys(stateObjs_1)
@@ -583,10 +582,10 @@ function parsePayload(response) {
     }
 }
 // Unbehandelte Fehler tracen
-process.on('unhandledRejection', function (r) {
+process.on("unhandledRejection", function (r) {
     adapter.log.error("unhandled promise rejection: " + r);
 });
-process.on('uncaughtException', function (err) {
+process.on("uncaughtException", function (err) {
     adapter.log.error("unhandled exception:" + err.message);
     adapter.log.error("> stack: " + err.stack);
     process.exit(1);
