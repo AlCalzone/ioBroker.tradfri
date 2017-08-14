@@ -27,6 +27,10 @@ Might need additional build tools. If anything is unclear, please ask and provid
 
 ## Changelog
 
+#### 0.1.5 (2017-08-14)
+* (AlCalzone) Ensure only whole numbers are sent (fixes #6)
+* (AlCalzone) Fix connection to the gateway using the hostname
+
 #### 0.1.4 (2017-08-12)
 * (AlCalzone) Switched to TypeScript
 

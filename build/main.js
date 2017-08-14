@@ -36,6 +36,16 @@ var adapter = utils_1.default.adapter({
     name: "tradfri",
     // Wird aufgerufen, wenn Adapter initialisiert wird
     ready: function () {
+        // Sicherstellen, dass die Optionen vollständig ausgefüllt sind.
+        if (adapter.config
+            && adapter.config.host != null && adapter.config.host !== ""
+            && adapter.config.securityCode != null && adapter.config.securityCode !== "") {
+            // alles gut
+        }
+        else {
+            adapter.log.error("Please set the connection params in the adapter options before starting the adapter!");
+            return;
+        }
         // Adapter-Instanz global machen
         adapter = global_1.Global.extend(adapter);
         global_1.Global.adapter = adapter;
@@ -52,11 +62,11 @@ var adapter = utils_1.default.adapter({
         global_1.Global.subscribeObjects = subscribeObjects;
         global_1.Global.unsubscribeObjects = unsubscribeObjects;
         // initialize CoAP client
-        node_coap_client_1.CoapClient.setSecurityParams(adapter.config.host, {
+        var hostname = adapter.config.host.toLowerCase();
+        node_coap_client_1.CoapClient.setSecurityParams(hostname, {
             psk: { "Client_identity": adapter.config.securityCode },
         });
-        requestBase = "coaps://" + adapter.config.host + ":5684/";
-        // TODO: replace our coapClient with the imported one
+        requestBase = "coaps://" + hostname + ":5684/";
         // TODO: load known devices from ioBroker into <devices> & <objects>
         observeDevices();
     },
@@ -105,15 +115,19 @@ var adapter = utils_1.default.adapter({
             if (devId) {
                 // get the ioBroker object
                 var dev = objects[devId];
-                //// read the instanceId and get a reference value
+                // read the instanceId and get a reference value
                 var accessory = devices[dev.native.instanceId];
                 // for now: handle changes on a case by case basis
                 // everything else is too complicated for now
                 var val = state.val;
-                if (global_1.Global.isdef(stateObj.common.min))
-                    val = Math.max(stateObj.common.min, val);
-                if (global_1.Global.isdef(stateObj.common.max))
-                    val = Math.min(stateObj.common.max, val);
+                // make sure we have whole numbers
+                if (stateObj.common.type === "number") {
+                    val = Math.round(val); // TODO: check if there are situations where decimal numbers are allowed
+                    if (global_1.Global.isdef(stateObj.common.min))
+                        val = Math.max(stateObj.common.min, val);
+                    if (global_1.Global.isdef(stateObj.common.max))
+                        val = Math.min(stateObj.common.max, val);
+                }
                 // TODO: find a way to construct these from existing accessory objects
                 var payload = null;
                 if (id.endsWith(".lightbulb.state")) {
@@ -361,21 +375,6 @@ function extendDevice(accessory) {
             },
         };
         if (accessory.type === accessoryTypes_1.accessoryTypes.lightbulb) {
-            // stateObjs["lightbulb.color"] = {
-            // 	_id: `${objId}.lightbulb.color`,
-            // 	type: "state",
-            // 	common: {
-            // 		name: "RGB color",
-            // 		read: true, // TODO: check
-            // 		write: false, // TODO: check
-            // 		type: "string",
-            // 		role: "level.color.rgb",
-            // 		desc: "hex representation of the lightbulb color"
-            // 	},
-            // 	native: {
-            // 		path: "lightList.[0].color"
-            // 	}
-            // };
             stateObjs_1["lightbulb.color"] = {
                 _id: objId + ".lightbulb.color",
                 type: "state",
@@ -394,40 +393,6 @@ function extendDevice(accessory) {
                     path: "__convert:color,lightList.[0].colorX",
                 },
             };
-            // stateObjs["lightbulb.colorX"] = {
-            // 	_id: `${objId}.lightbulb.colorX`,
-            // 	type: "state",
-            // 	common: {
-            // 		name: "CIE 1931 x coordinate",
-            // 		read: true, // TODO: check
-            // 		write: true, // TODO: check
-            // 		min: 24930,
-            // 		max: 33135,
-            // 		type: "number",
-            // 		role: "level.color.temperature",
-            // 		desc: "x coordinate of the color temperature in the CIE 1931 color space"
-            // 	},
-            // 	native: {
-            // 		path: "lightList.[0].colorX"
-            // 	}
-            // };
-            // stateObjs["lightbulb.colorY"] = {
-            // 	_id: `${objId}.lightbulb.colorY`,
-            // 	type: "state",
-            // 	common: {
-            // 		name: "CIE 1931 y coordinate",
-            // 		read: true, // TODO: check
-            // 		write: true, // TODO: check
-            // 		min: 24694,
-            // 		max: 27211,
-            // 		type: "number",
-            // 		role: "level.color.temperature",
-            // 		desc: "y coordinate of the color temperature in the CIE 1931 color space"
-            // 	},
-            // 	native: {
-            // 		path: "lightList.[0].colorY"
-            // 	}
-            // };
             stateObjs_1["lightbulb.brightness"] = {
                 _id: objId + ".lightbulb.brightness",
                 type: "state",

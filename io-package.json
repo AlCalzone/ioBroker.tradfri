@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "0.1.4",
+        "version": "0.1.5",
         "news": {
             "0.1.0": {
                 "en": "initial release. Functionality limited to controlling lightbulbs.",
@@ -18,6 +18,10 @@
             "0.1.3": {
                 "en": "Reboot of the adapter without 3rd party libraries",
                 "de": "Neuauflage des Adapters ohne Dritt-Software"
+            },
+            "0.1.5": {
+                "en": "Ensure only whole numbers are sent. Fix connection by hostname.",
+                "de": "Sichergehen, dass nur Ganzzahlen gesendet werden. Verbindung mit Hostname gefixt."
             }
         },
         "title": "IKEA Trådfri",
@@ -28,7 +32,7 @@
         "platform": "Javascript/Node.js",
         "mode": "daemon",
         "icon": "tradfri.png",
-        "enabled": true,
+        "enabled": false,
         "extIcon": "https://raw.githubusercontent.com/AlCalzone/ioBroker.tradfri/master/admin/tradfri.png",
         "keywords": [ "ikea", "tradfri" ],
         "readme": "https://github.com/AlCalzone/ioBroker.tradfri/blob/master/README.md",
