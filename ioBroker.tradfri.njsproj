@@ -12,36 +12,51 @@
     <ProjectTypeGuids>{3AF33F2E-1136-4D97-BBB7-1795711AC8B8};{349c5851-65df-11da-9384-00065b846f21};{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}</ProjectTypeGuids>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">14.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <EnableTypeScript>true</EnableTypeScript>
+    <TypeScriptSourceMap>true</TypeScriptSourceMap>
+    <TypeScriptModuleKind>CommonJS</TypeScriptModuleKind>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
   <ItemGroup>
-    <Content Include=".eslintrc.json" />
     <Content Include=".travis.yml" />
     <Content Include="appveyor.yml" />
     <Content Include="io-package.json" />
     <Content Include="LICENSE" />
     <Content Include="package.json" />
     <Content Include="README.md" />
-    <Compile Include="gulpfile.babel.js" />
-    <Compile Include="src\ipso\accessoryTypes.js" />
-    <Compile Include="src\lib\array-extensions.js" />
-    <Compile Include="src\lib\conversions.js">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="src\lib\defer-promise.js" />
-    <Compile Include="src\lib\math.js">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="src\lib\mutex.js" />
-    <Compile Include="src\lib\str2regex.js" />
-    <Compile Include="_public_gulpfile.babel.js" />
-    <Compile Include="main.js" />
     <Content Include="admin\index.html" />
     <Content Include="admin\tradfri.png" />
     <Compile Include="admin\words.js" />
-    <Compile Include="lib\utils.js" />
-    <Compile Include="src\main.js" />
+    <TypeScriptCompile Include="src\ipso\accessory.ts" />
+    <TypeScriptCompile Include="src\ipso\accessoryTypes.ts" />
+    <TypeScriptCompile Include="src\ipso\deviceInfo.ts" />
+    <TypeScriptCompile Include="src\ipso\endpoints.ts" />
+    <TypeScriptCompile Include="src\ipso\gatewayDetails.ts" />
+    <TypeScriptCompile Include="src\ipso\group.ts" />
+    <TypeScriptCompile Include="src\ipso\ipsoDevice.ts" />
+    <TypeScriptCompile Include="src\ipso\ipsoObject.ts" />
+    <TypeScriptCompile Include="src\ipso\light.ts" />
+    <TypeScriptCompile Include="src\ipso\lightSetting.ts" />
+    <TypeScriptCompile Include="src\ipso\notification.ts" />
+    <TypeScriptCompile Include="src\ipso\notificationTypes.ts" />
+    <TypeScriptCompile Include="src\ipso\scene.ts" />
+    <TypeScriptCompile Include="src\ipso\updatePriority.ts" />
+    <TypeScriptCompile Include="src\lib\array-extensions.ts" />
+    <TypeScriptCompile Include="src\lib\constants.ts" />
+    <TypeScriptCompile Include="src\lib\conversions.ts" />
+    <TypeScriptCompile Include="src\lib\defer-promise.ts" />
+    <TypeScriptCompile Include="src\lib\enums.ts" />
+    <TypeScriptCompile Include="src\lib\global.ts" />
+    <TypeScriptCompile Include="src\lib\ioBroker.d.ts" />
+    <TypeScriptCompile Include="src\lib\math.ts" />
+    <TypeScriptCompile Include="src\lib\mutex.ts" />
+    <TypeScriptCompile Include="src\lib\object-polyfill.ts" />
+    <TypeScriptCompile Include="src\lib\promises.ts" />
+    <TypeScriptCompile Include="src\lib\str2regex.ts" />
+    <TypeScriptCompile Include="src\lib\utils.ts" />
+    <TypeScriptCompile Include="src\main.ts" />
+    <Compile Include="main.js" />
     <Compile Include="test\testAdapter.js" />
     <Compile Include="test\testPackageFiles.js" />
     <Content Include="docs\de\template.md" />
@@ -58,25 +73,9 @@
     <Content Include="src\flow\scenes.txt" />
     <Content Include="src\flow\startup.txt" />
     <Content Include="src\flow\timetable.txt" />
-    <Compile Include="src\ipso\accessory.js" />
-    <Compile Include="src\ipso\deviceInfo.js" />
-    <Compile Include="src\ipso\endpoints.js" />
-    <Compile Include="src\ipso\gatewayDetails.js" />
-    <Compile Include="src\ipso\group.js" />
-    <Compile Include="src\ipso\ipsoDevice.js" />
-    <Compile Include="src\ipso\ipsoObject.js" />
-    <Compile Include="src\ipso\light.js" />
-    <Compile Include="src\ipso\lightSetting.js" />
-    <Compile Include="src\ipso\notification.js" />
-    <Compile Include="src\ipso\notificationTypes.js" />
-    <Compile Include="src\ipso\scene.js" />
-    <Compile Include="src\ipso\updatePriority.js" />
-    <Compile Include="src\lib\constants.js" />
-    <Compile Include="src\lib\enums.js" />
-    <Compile Include="src\lib\global.js" />
-    <Compile Include="src\lib\object-polyfill.js" />
-    <Compile Include="src\lib\promises.js" />
     <Compile Include="test\lib\setup.js" />
+    <Content Include="tsconfig.json" />
+    <Content Include="tslint.json" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="admin" />
@@ -87,11 +86,10 @@
     <Folder Include="docs\en\img" />
     <Folder Include="docs\ru" />
     <Folder Include="docs\ru\img" />
-    <Folder Include="lib" />
     <Folder Include="src" />
     <Folder Include="src\flow" />
-    <Folder Include="src\ipso" />
-    <Folder Include="src\lib" />
+    <Folder Include="src\ipso\" />
+    <Folder Include="src\lib\" />
     <Folder Include="test" />
     <Folder Include="test\lib" />
   </ItemGroup>
