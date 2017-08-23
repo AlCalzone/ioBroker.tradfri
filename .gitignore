@@ -269,7 +269,5 @@ typings/
 # Sourcemaps
 maps/
 
-# private gulpfile (contains private stuff)
-# rename _public_gulpfile.babel.js to gulpfile.babel.js to develop
-_private_gulpfile*.js
-gulpfile*.js
+# npm package files
+iobroker.*.tgz
