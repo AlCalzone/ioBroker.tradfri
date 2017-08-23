@@ -4,10 +4,11 @@ node_modules
 .idea
 .git
 /node_modules
-test
+test/
+src/
+travis/
 .travis.yml
 appveyor.yml
-travis/
 obj/
 bin/
 .vs*/
@@ -16,5 +17,4 @@ tsconfig.json
 *.sln
 *.njsproj*
 iobroker.*.tgz
-src/
 build/**/*.map
