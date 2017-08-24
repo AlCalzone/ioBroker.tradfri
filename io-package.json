@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "0.1.5",
+        "version": "0.2.0",
         "news": {
             "0.1.0": {
                 "en": "initial release. Functionality limited to controlling lightbulbs.",
@@ -22,6 +22,10 @@
             "0.1.5": {
                 "en": "Ensure only whole numbers are sent. Fix connection by hostname.",
                 "de": "Sichergehen, dass nur Ganzzahlen gesendet werden. Verbindung mit Hostname gefixt."
+            },
+            "0.2.0": {
+                "en": "Removed git dependency, published to npm.",
+                "de": "Git-Abhängigkeit entfernt, auf npm veröffentlicht."
             }
         },
         "title": "IKEA Trådfri",

@@ -13,19 +13,15 @@ Windows: [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/AlCalzo
 * NodeJS >= 6.x
 * Trådfri gateway
 
-Might need additional build tools. If anything is unclear, please ask and provide error details.
-
 ## Installation
-1. Install prerequisites
-	1. Linux/Raspberry Pi: Make sure you have git installed. If not: `sudo apt-get install git-core`
-	1. Windows: Make sure you have git installed. If not, download the correct version at https://git-scm.com/download/win
-	1. OSX: ??? Probably like Linux.
-1. Install this adapter over the iobroker admin GUI or via  
-`iobroker url https://github.com/AlCalzone/ioBroker.tradfri ` 
+1. Install this adapter over the iobroker admin GUI or via `npm install iobroker.tradfri --production` 
 1. In the ioBroker GUI, add an adapter instance. 
 1. Configure the instance by entering the IP/hostname of your gateway and the security code that can be found on the label at the bottom.
 
 ## Changelog
+
+#### 0.2.0 (2017-08-14)
+* (AlCalzone) Remove git dependency, publish on npm
 
 #### 0.1.5 (2017-08-14)
 * (AlCalzone) Ensure only whole numbers are sent (fixes #6)

@@ -15,6 +15,6 @@ exports.default = {
             // extrapolate 0-100% to [min..max]
             return math_1.roundTo(min + value / 100 * (max - min), 0);
         }
-    }
+    },
 };
 //# sourceMappingURL=conversions.js.map
