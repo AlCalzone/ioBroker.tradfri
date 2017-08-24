@@ -9,12 +9,12 @@ src/
 travis/
 .travis.yml
 appveyor.yml
-tsconfig.json
-tslint.json
+obj/
+bin/
 .vs*/
-*.njsproj
+tslint.json
+tsconfig.json
 *.sln
-build/**/.map
-
-# npm package files
+*.njsproj*
 iobroker.*.tgz
+build/**/*.map
