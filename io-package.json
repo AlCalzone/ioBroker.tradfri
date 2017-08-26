@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "0.2.0",
+        "version": "0.2.1",
         "news": {
             "0.1.0": {
                 "en": "initial release. Functionality limited to controlling lightbulbs.",
@@ -26,6 +26,10 @@
             "0.2.0": {
                 "en": "Removed git dependency, published to npm.",
                 "de": "Git-Abhängigkeit entfernt, auf npm veröffentlicht."
+            },
+            "0.2.1": {
+                "en": "Sync io-package and package version",
+                "de": "io-package und package-Version synchronisiert"
             }
         },
         "title": "IKEA Trådfri",
