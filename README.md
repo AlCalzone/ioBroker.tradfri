@@ -20,6 +20,9 @@ Windows: [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/AlCalzo
 
 ## Changelog
 
+#### 0.2.1 (2017-08-26)
+* (AlCalzone) Sync io-package and package version
+
 #### 0.2.0 (2017-08-14)
 * (AlCalzone) Remove git dependency, publish on npm
 
