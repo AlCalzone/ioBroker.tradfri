@@ -1,15 +1,23 @@
-import IPSODevice from "./ipsoDevice";
-import {IPSOObject, PropertyDefinition} from "./ipsoObject";
+import { IPSODevice } from "./ipsoDevice";
+import { LightSetting } from "./lightSetting";
+import { IPSOObject, ipsoKey, serializeWith, deserializeWith, PropertyTransform, required } from "./ipsoObject";
 
 export default class Scene extends IPSODevice {
 
-	constructor(sourceObj, ...properties: PropertyDefinition[]) {
-		super(sourceObj, ...properties,
-			["9058", "isActive", false], // <bool>
-			["9068", "isPredefined", true], // <bool>
-			["15013", "lightSettings", []], // [<LightSetting>]
-			["9057", "sceneIndex", 0], // <int>
-			["9070", "useCurrentLightSettings", false], // <bool>
-		);
-	}
+	@ipsoKey("9058")
+	public isActive: boolean = false; // <bool>
+
+	@ipsoKey("9068")
+	public isPredefined: boolean = true; // <bool>
+
+	@ipsoKey("15013")
+	@deserializeWith(obj => new LightSetting().parse(obj))
+	public lightSettings: LightSetting[];
+
+	@ipsoKey("9057")
+	public sceneIndex: number = 0; // <int>
+
+	@ipsoKey("9070")
+	public useCurrentLightSettings: boolean = false; // <bool>
+
 }

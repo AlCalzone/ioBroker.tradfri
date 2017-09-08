@@ -1,5 +1,9 @@
-import IPSODevice from "./ipsoDevice";
-import { PropertyDefinition } from "./ipsoObject";
+import { IPSODevice } from "./ipsoDevice";
+import { LightSetting } from "./lightSetting";
 export default class Scene extends IPSODevice {
-    constructor(sourceObj: any, ...properties: PropertyDefinition[]);
+    isActive: boolean;
+    isPredefined: boolean;
+    lightSettings: LightSetting[];
+    sceneIndex: number;
+    useCurrentLightSettings: boolean;
 }

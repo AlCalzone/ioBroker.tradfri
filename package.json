@@ -16,12 +16,14 @@
     }
   ],
   "dependencies": {
-    "node-coap-client": "^0.1.0"
+    "node-coap-client": "^0.1.0",
+    "reflect-metadata": "^0.1.10"
   },
   "devDependencies": {
     "@types/chai": "^4.0.0",
     "@types/mocha": "^2.2.41",
     "@types/node": "^6.0.78",
+    "@types/reflect-metadata": "0.0.5",
     "chai": "^4.0.2",
     "mocha": "^3.4.2",
     "tslint": "^5.6.0",

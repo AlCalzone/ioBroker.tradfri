@@ -1,5 +1,7 @@
-import IPSODevice from "./ipsoDevice";
-import { PropertyDefinition } from "./ipsoObject";
-export default class Group extends IPSODevice {
-    constructor(sourceObj: any, ...properties: PropertyDefinition[]);
+import { IPSODevice } from "./ipsoDevice";
+export declare class Group extends IPSODevice {
+    onOff: boolean;
+    dimmer: number;
+    sceneId: number | number[];
+    deviceIDs: number[];
 }

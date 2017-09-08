@@ -1,4 +1,7 @@
 ﻿import { clamp, roundTo } from "./math";
+import { DictionaryLike } from "./object-polyfill";
+
+export type Conversion = (direction: "in" | "out", value: any) => any;
 
 // custom conversions for tradfri states
 export default {
@@ -14,4 +17,4 @@ export default {
 			return roundTo(min + value / 100 * (max - min), 0);
 		}
 	},
-};
+} as DictionaryLike<Conversion>;

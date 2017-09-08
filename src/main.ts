@@ -1,16 +1,20 @@
 // tslint:disable:object-literal-key-quotes
 
+// Reflect-polyfill laden
+require("reflect-metadata");
+
 // Eigene Module laden
-import { CoapClient as coap } from "node-coap-client";
+import { CoapClient as coap, CoapResponse } from "node-coap-client";
 import coapEndpoints from "./ipso/endpoints";
 import { except } from "./lib/array-extensions";
 import { ExtendedAdapter, Global as _ } from "./lib/global";
-import { dig, entries, filter, values } from "./lib/object-polyfill";
+import { dig, entries, filter, values, DictionaryLike } from "./lib/object-polyfill";
 import { str2regex } from "./lib/str2regex";
 
 // Datentypen laden
-import Accessory from "./ipso/accessory";
-import { accessoryTypes } from "./ipso/accessoryTypes";
+import { Accessory, AccessoryTypes } from "./ipso/accessory";
+import { IPSOObject } from "./ipso/ipsoObject";
+import { Light } from "./ipso/light";
 
 // Adapter-Utils laden
 import utils from "./lib/utils";
@@ -34,14 +38,14 @@ const customObjectSubscriptions: {
 	};
 
 // dictionary of COAP observers
-const observers = [];
+const observers: string[] = [];
 // dictionary of known devices
-const devices = {};
+const devices: {[id: string]: Accessory} = {};
 // dictionary of ioBroker objects
 const objects: { [objId: string]: ioBroker.Object } = {};
 
 // the base of all requests
-let requestBase;
+let requestBase: string;
 
 // Adapter-Objekt erstellen
 let adapter: ExtendedAdapter = utils.adapter({
@@ -50,7 +54,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 	// Wird aufgerufen, wenn Adapter initialisiert wird
 	ready: () => {
 
-		// Sicherstellen, dass die Optionen vollständig ausgefüllt sind.
+		// Sicherstellen, dass die Optionen vollstï¿½ndig ausgefï¿½llt sind.
 		if (adapter.config
 			&& adapter.config.host != null && adapter.config.host !== ""
 			&& adapter.config.securityCode != null && adapter.config.securityCode !== ""
@@ -126,7 +130,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 
 	},
 
-	stateChange: (id, state) => {
+	stateChange: async (id, state) => {
 		_.log(`{{blue}} state with id ${id} updated: ack=${state.ack}; val=${state.val}`, { level: _.loglevels.ridiculous });
 		if (!state.ack && id.startsWith(adapter.namespace)) {
 			// our own state was changed from within ioBroker, react to it
@@ -152,18 +156,38 @@ let adapter: ExtendedAdapter = utils.adapter({
 					if (_.isdef(stateObj.common.max)) val = Math.min(stateObj.common.max, val);
 				}
 
-				// TODO: find a way to construct these from existing accessory objects
-				let payload = null;
-				if (id.endsWith(".lightbulb.state")) {
-					payload = { "3311": [{ "5850": (val ? 1 : 0)}] };
-				} else if (id.endsWith(".lightbulb.brightness")) {
-					payload = { "3311": [{ "5851": val, "5712": 5  }] };
-				} else if (id.endsWith(".lightbulb.color")) {
-					const colorX = conversions.color("out", state.val);
-					payload = { "3311": [{ "5709": colorX, "5710": 27000, "5712": 5 }] };
+				// create a copy to modify
+				const newAccessory = accessory.clone();
+				if (id.indexOf(".lightbulb.") > -1) {
+					// get the Light instance to modify
+					const light = newAccessory.lightList[0];
+
+					if (id.endsWith(".state")) {
+						light.merge({ onOff: val });
+					} else if (id.endsWith(".brightness")) {
+						light.merge({
+							dimmer: val,
+							transitionTime: 5 // TODO: <- make this configurable
+						});
+					} else if (id.endsWith(".color")) {
+						const colorX = conversions.color("out", state.val);
+						light.merge({
+							colorX: colorX,
+							colorY: 27000,
+							transitionTime: 5 // TODO: <- make this configurable
+						});
+					}
+				}
+				
+				const serializedObj = newAccessory.serialize(accessory); // serialize with the old object as a reference
+				// If the serialized object contains no properties, we don't need to send anything
+				if (!serializedObj || Object.keys(serializedObj).length === 0) {
+					_.log("empty object, not sending any payload", { level: _.loglevels.ridiculous });
+					await adapter.$setState(id, state.val, true);
+					return;
 				}
 
-				payload = JSON.stringify(payload);
+				let payload: string | Buffer = JSON.stringify(serializedObj);
 				_.log("sending payload: " + payload, { level: _.loglevels.ridiculous });
 
 				payload = Buffer.from(payload);
@@ -214,7 +238,7 @@ function observeDevices() {
 }
 
 // gets called whenever "get /15001" updates
-function coapCb_getAllDevices(response) {
+function coapCb_getAllDevices(response: CoapResponse) {
 
 	if (response.code.toString() !== "2.05") {
 		_.log(`unexpected response (${response.code.toString()}) to getAllDevices.`, { severity: _.severity.error });
@@ -236,8 +260,6 @@ function coapCb_getAllDevices(response) {
 		const observerUrl = `${requestBase}${coapEndpoints.devices}/${id}`;
 		if (observers.indexOf(observerUrl) > -1) return;
 
-		// make a dummy object, we'll be filling that one later
-		devices[id] = {};
 		// start observing
 		coap.observe(
 			observerUrl, "get",
@@ -265,7 +287,7 @@ function coapCb_getAllDevices(response) {
 
 }
 // gets called whenever "get /15001/<instanceId>" updates
-function coap_getDevice_cb(instanceId, response) {
+function coap_getDevice_cb(instanceId: number, response: CoapResponse) {
 
 	if (response.code.toString() !== "2.05") {
 		_.log(`unexpected response (${response.code.toString()}) to getDevice(${instanceId}).`, { severity: _.severity.error });
@@ -273,24 +295,26 @@ function coap_getDevice_cb(instanceId, response) {
 	}
 	const result = parsePayload(response);
 	// parse device info
-	const accessory = new Accessory(result);
+	const accessory = new Accessory();
+	accessory.parse(result);
 	// remember the device object, so we can later use it as a reference for updates
 	devices[instanceId] = accessory;
 	// create ioBroker device
 	extendDevice(accessory);
 }
 
-function getAccessoryId(stateId) {
+function getAccessoryId(stateId: string) {
 	const match = /^tradfri\.\d+\.[\w\-\d]+/.exec(stateId);
 	if (match) return match[0];
 }
 
-function calcObjId(accessory) {
+function calcObjId(accessory: any) {
+	// TODO: Make strongly typed objects so we can define this as <Accessory>
 	const prefix = (() => {
 		switch (accessory.type) {
-			case accessoryTypes.remote:
+			case AccessoryTypes.remote:
 				return "RC";
-			case accessoryTypes.lightbulb:
+			case AccessoryTypes.lightbulb:
 				return "L";
 			default:
 				_.log("unknown accessory type " + accessory.type);
@@ -301,7 +325,8 @@ function calcObjId(accessory) {
 }
 
 // finds the property value for <accessory> as defined in <propPath>
-function readPropertyValue(accessory, propPath) {
+function readPropertyValue(accessory: any, propPath: string) {
+	// TODO: Make strongly typed objects so we can define this as <Accessory>
 	// if path starts with "__convert:", use a custom conversion function
 	if (propPath.startsWith("__convert:")) {
 		const pathParts = propPath.substr("__convert:".length).split(",");
@@ -321,7 +346,8 @@ function readPropertyValue(accessory, propPath) {
 }
 
 // creates or edits an existing <device>-object for an accessory
-function extendDevice(accessory) {
+function extendDevice(accessory: any) {
+	// TODO: Make strongly typed objects so we can define this as <Accessory>
 	const objId = calcObjId(accessory);
 
 	if (_.isdef(objects[objId])) {
@@ -361,10 +387,6 @@ function extendDevice(accessory) {
 			try {
 				// Object could have a default value, find it
 				let newValue = readPropertyValue(accessory, obj.native.path);
-				if (obj.type === "state" && obj.common.type === "boolean") {
-					// fix bool values
-					newValue = newValue === 1 || newValue === "true" || newValue === "on";
-				}
 				adapter.setState(id, newValue, true);
 			} catch (e) {/* skip this value */}
 		}
@@ -386,7 +408,7 @@ function extendDevice(accessory) {
 		adapter.setObject(objId, devObj);
 
 		// also create state objects, depending on the accessory type
-		const stateObjs = {
+		const stateObjs: DictionaryLike<ioBroker.Object> = {
 			alive: { // alive state
 				_id: `${objId}.alive`,
 				type: "state",
@@ -419,7 +441,7 @@ function extendDevice(accessory) {
 			},
 		};
 
-		if (accessory.type === accessoryTypes.lightbulb) {
+		if (accessory.type === AccessoryTypes.lightbulb) {
 			stateObjs["lightbulb.color"] = {
 				_id: `${objId}.lightbulb.color`,
 				type: "state",
@@ -479,10 +501,6 @@ function extendDevice(accessory) {
 				if (_.isdef(obj.native.path)) {
 					// Object could have a default value, find it
 					initialValue = readPropertyValue(accessory, obj.native.path);
-					if (obj.common.type === "boolean") {
-						// fix bool values
-						initialValue = initialValue === 1 || initialValue === "true" || initialValue === "on";
-					}
 				}
 				// create object and return the promise, so we can wait
 				return adapter.$createOwnStateEx(stateId, obj, initialValue);
@@ -495,12 +513,6 @@ function extendDevice(accessory) {
 
 // ==================================
 // Custom subscriptions
-// Object.assign(customSubscriptions, {
-// 	counter: 0,
-// 	subscriptions: {
-// 		// "<id>" : {pattern, callback}
-// 	},
-// });
 
 /**
  * Ensures the subscription pattern is valid
@@ -537,8 +549,6 @@ function subscribeStates(pattern: string | RegExp, callback: (id: string, state:
 
 	customStateSubscriptions.subscriptions[id] = { pattern, callback };
 
-	// _.log(`added subscription for pattern ${pattern}. total count: ${Object.keys(customSubscriptions.subscriptions).length}`);
-
 	return id;
 }
 
@@ -547,13 +557,8 @@ function subscribeStates(pattern: string | RegExp, callback: (id: string, state:
  * @param id The subscription ID returned by @link{subscribeStates}
  */
 function unsubscribeStates(id: string) {
-	// _.log(`unsubscribing subscription #${id}...`);
 	if (customStateSubscriptions.subscriptions[id]) {
-		// const pattern = customSubscriptions.subscriptions[id].pattern;
 		delete customStateSubscriptions.subscriptions[id];
-		// _.log(`unsubscribe ${pattern}: success. total count: ${Object.keys(customSubscriptions.subscriptions).length}`);
-	} else {
-		// _.log(`unsubscribe: subscription not found`);
 	}
 }
 
@@ -573,8 +578,6 @@ function subscribeObjects(pattern: string | RegExp, callback: (id: string, objec
 
 	customObjectSubscriptions.subscriptions[id] = { pattern, callback };
 
-	// _.log(`added subscription for pattern ${pattern}. total count: ${Object.keys(customSubscriptions.subscriptions).length}`);
-
 	return id;
 }
 
@@ -583,17 +586,12 @@ function subscribeObjects(pattern: string | RegExp, callback: (id: string, objec
  * @param id The subscription ID returned by @link{subscribeObjects}
  */
 function unsubscribeObjects(id: string) {
-	// _.log(`unsubscribing subscription #${id}...`);
 	if (customObjectSubscriptions.subscriptions[id]) {
-		// const pattern = customSubscriptions.subscriptions[id].pattern;
 		delete customObjectSubscriptions.subscriptions[id];
-		// _.log(`unsubscribe ${pattern}: success. total count: ${Object.keys(customSubscriptions.subscriptions).length}`);
-	} else {
-		// _.log(`unsubscribe: subscription not found`);
 	}
 }
 
-function parsePayload(response) {
+function parsePayload(response: CoapResponse) {
 	switch (response.format) {
 		case 0: // text/plain
 			return response.payload.toString("utf-8");
@@ -606,10 +604,10 @@ function parsePayload(response) {
 }
 
 // Unbehandelte Fehler tracen
-process.on("unhandledRejection", r => {
+process.on("unhandledRejection", (r: Error) => {
 	adapter.log.error("unhandled promise rejection: " + r);
 });
-process.on("uncaughtException", err => {
+process.on("uncaughtException", (err: Error) => {
 	adapter.log.error("unhandled exception:" + err.message);
 	adapter.log.error("> stack: " + err.stack);
 	process.exit(1);
