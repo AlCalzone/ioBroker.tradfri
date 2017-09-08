@@ -1,119 +1,111 @@
 import { Global as _ } from "../lib/global";
-import { entries, values } from "../lib/object-polyfill";
+import { entries, values, DictionaryLike, composeObject } from "../lib/object-polyfill";
 
-export type PropertyDefinition = [string, string, any];
 
 // common base class for all objects that are transmitted somehow
 export class IPSOObject {
 
-	constructor(sourceObj, ...properties: PropertyDefinition[]) {
-		// define properties if neccessary
-		if (_.isdef(properties)) this.defineProperties(properties);
-
-		// parse the contents of the source object
-		if (_.isdef(sourceObj)) this.deserialize(sourceObj);
-	}
-
-	/** lookup dictionary for propName => key */
-	private keys: {[propName: string]: string} = {};
-	/** lookup dictionary for key => propName */
-	private propNames: {[key: string]: string} = {};
-	/** lookup dictionary for key => default property value */
-	private defaultValues: {[key: string]: string} = {};
-	/** lookup dictionary for key => property parser */
-	private parsers: {[key: string]: string} = {};
-
-	protected defineProperties(properties: PropertyDefinition[]) {
-
-		for (const prop of properties) {
-			const [key, propName, ...options] = prop;
-			// populate key lookup table
-			this.keys[propName] = key;
-			this.propNames[key] = propName;
-			if (options && options.length) {
-				// default value, set property
-				this.defaultValues[key] = options[0];
-				this[propName] = options[0];
-				// parser
-				if (options.length >= 1) this.parsers[key] = options[1];
-			}
-		}
-	}
-
-	private getParser(key) {
-		if (this.parsers.hasOwnProperty(key)) return this.parsers[key];
-	}
-
-	// parses an object
-	private deserialize(obj) {
+	/**
+	 * Reads this instance's properties from the given object
+	 */
+	public parse(obj: DictionaryLike<any>): this {
 		for (const [key, value] of entries(obj)) {
-			// which property are we parsing?
-			const propName = this.getPropName(key);
-			if (!propName) {
-				_.log(`{{yellow}}found unknown property with key ${key}`);
-				continue;
+			// key might be ipso key or property name
+			let deserializer: PropertyTransform = getDeserializer(this, key);
+			let propName: string | symbol;
+			if (deserializer == null) {
+				// deserializers are defined by property name, so key is actually the key
+				propName = lookupKeyOrProperty(this, key);
+				if (!propName) {
+					_.log(`{{yellow}}found unknown property with key ${key}`);
+					continue;
+				}
+				deserializer = getDeserializer(this, propName);
+			} else {
+				// the deserializer was found, so key is actually the property name
+				propName = key;
 			}
-			// try to find parser for this property
-			const parser = this.getParser(key);
 			// parse the value
-			const parsedValue = this.parseValue(key, value, parser);
+			const parsedValue = this.parseValue(key, value, deserializer);
 			// and remember it
 			this[propName] = parsedValue;
 		}
+		return this;
 	}
+
 	// parses a value, depending on the value type and defined parsers
-	private parseValue(propKey, value, parser = null) {
+	private parseValue(propKey, value, deserializer?: PropertyTransform): any {
 		if (value instanceof Array) {
 			// Array: parse every element
-			return value.map(v => this.parseValue(propKey, v, parser));
+			return value.map(v => this.parseValue(propKey, v, deserializer));
 		} else if (typeof value === "object") {
 			// Object: try to parse this, objects should be parsed in any case
-			if (parser) {
-				return parser(value);
+			if (deserializer) {
+				return deserializer(value);
 			} else {
-				_.log(`{{yellow}}could not find property parser for key ${propKey}`);
+				_.log(`{{yellow}}could not find deserializer for key ${propKey}`);
 			}
-		} else if (parser) {
+		} else if (deserializer) {
 			// if this property needs a parser, parse the value
-			return parser(value);
+			return deserializer(value);
 		} else {
 			// otherwise just return the value
 			return value;
 		}
 	}
 
-	public getKey(propName) { return this.keys[propName]; }
-	public getPropName(key) { return this.propNames[key]; }
+	/**
+	 * Overrides this object's properties with those from another partial one
+	 */
+	public merge(obj: Partial<this>): this {
+		for (const [key, value] of entries(obj as DictionaryLike<any>)) {
+			if (this.hasOwnProperty(key)) {
+				this[key] = value;
+			}
+		}
+		return this;
+	}
 
-	// serializes this object in order to transfer it via COAP
-	public serialize(reference = null) {
+
+	/** serializes this object in order to transfer it via COAP */
+	public serialize(reference = null): DictionaryLike<any> {
 		const ret = {};
 
-		const serializeValue = (key, propName, value, refValue) => {
+		const serializeValue = (key, propName, value, refValue, transform?: PropertyTransform) => {
+			const required = isRequired(this, propName);
+			let ret = value;
 			if (value instanceof IPSOObject) {
 				// if the value is another IPSOObject, then serialize that
-				value = value.serialize(refValue);
+				ret = value.serialize(refValue);
+				// if the serialized object contains no required properties, don't remember it
+				if (value.isSerializedObjectEmpty(ret)) return null;
 			} else {
 				// if the value is not the default one, then remember it
 				if (_.isdef(refValue)) {
-					if (refValue === value) return null;
+					if (!required && refValue === value) return null;
 				} else {
 					// there is no default value, just remember the actual value
 				}
 			}
-			return value;
+			if (transform) ret = transform(ret);
+			return ret;
 		};
 
-		const refObj = reference || this.defaultValues;
+		//const refObj = reference || getDefaultValues(this); //this.defaultValues;
 		// check all set properties
-		for (const propName of values(this.propNames)) {
+		for (const propName of Object.keys(this)) {
 			if (this.hasOwnProperty(propName)) {
-				const key = this.getKey(propName);
+				// find IPSO key
+				const key = lookupKeyOrProperty(this, propName);
+				// find value and reference (default) value
 				let value = this[propName];
 				let refValue = null;
-				if (_.isdef(refObj) && refObj.hasOwnProperty(propName)) {
-					refValue = refObj[propName];
+				if (_.isdef(reference) && reference.hasOwnProperty(propName)) {
+					refValue = reference[propName];
 				}
+
+				// try to find serializer for this property
+				const serializer = getSerializer(this, propName);
 
 				if (value instanceof Array) {
 					// serialize each item
@@ -123,23 +115,203 @@ export class IPSOObject {
 							throw new Error("cannot serialize arrays when the reference values don't match");
 						}
 						// serialize each item with the matching reference value
-						value = value.map((v, i) => serializeValue(key, propName, v, refValue[i]));
+						value = value.map((v, i) => serializeValue(key, propName, v, refValue[i], serializer));
 					} else {
 						// no reference value, makes things easier
-						value = value.map(v => serializeValue(key, propName, v, null));
+						value = value.map(v => serializeValue(key, propName, v, null, serializer));
 					}
 					// now remove null items
 					value = value.filter(v => _.isdef(v));
+					if (value.length === 0) value = null;
 				} else {
 					// directly serialize the value
-					value = serializeValue(key, propName, value, refValue);
+					value = serializeValue(key, propName, value, refValue, serializer);
 				}
 
-				ret[key] = value;
+				// only output the value if it's != null
+				if (value != null) ret[key] = value;
 			}
 		}
 
 		return ret;
 	}
 
+	/**
+	 * Deeply clones an IPSO Object
+	 */
+	public clone(): this {
+		// create a new instance of the same object as this
+		const constructor = (this as Object).constructor;
+		function F(): void {
+			return constructor.apply(this);
+		}
+		F.prototype = constructor.prototype;
+		const ret = new F();
+		// serialize the old values
+		const serialized = this.serialize();
+		// and parse them back
+		return (ret as IPSOObject).parse(serialized) as this;
+	}
+
+
+	private isSerializedObjectEmpty(obj: DictionaryLike<any>): boolean {
+		// Prüfen, ob eine nicht-benötigte Eigenschaft angegeben ist. => nicht leer
+		for (const key of Object.keys(obj)) {
+			const propName = lookupKeyOrProperty(this, key);
+			if (!isRequired(this, propName)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+}
+
+
+// ===========================================================
+// define decorators so we can define all properties type-safe
+const METADATA_ipsoKey = Symbol("ipsoKey");
+const METADATA_required = Symbol("required");
+const METADATA_serializeWith = Symbol("serializeWith");
+const METADATA_deserializeWith = Symbol("deserializeWith");
+
+export type PropertyTransform = (value: any) => any;
+
+/**
+ * Defines the ipso key neccessary to serialize a property to a CoAP object
+ */
+export const ipsoKey = (key: string): PropertyDecorator => {
+	return (target: Object, property: string | symbol) => {
+		// get the class constructor
+		const constr = target.constructor;
+		// retrieve the current metadata
+		const metadata = Reflect.getMetadata(METADATA_ipsoKey, constr) || {};
+		// and enhance it (both ways)
+		metadata[property] = key;
+		metadata[key] = property;
+		// store back to the object
+		Reflect.defineMetadata(METADATA_ipsoKey, metadata, constr);
+	}
+}
+/**
+ * Looks up previously stored property ipso key definitions.
+ * Returns a property name if the key was given, or the key if a property name was given.
+ * @param keyOrProperty - ipso key or property name to lookup
+ */
+function lookupKeyOrProperty(target: Object, keyOrProperty: string | symbol): string | symbol {
+	// get the class constructor
+	const constr = target.constructor;
+	// retrieve the current metadata
+	const metadata = Reflect.getMetadata(METADATA_ipsoKey, constr) || {};
+	if (metadata.hasOwnProperty(keyOrProperty)) return metadata[keyOrProperty];
+	return null;
+}
+
+/**
+ * Declares that a property is required to be present in a serialized CoAP object
+ */
+export function required(target: Object, property: string | symbol): void {
+	// get the class constructor
+	const constr = target.constructor;
+	// retrieve the current metadata
+	const metadata = Reflect.getMetadata(METADATA_required, constr) || {};
+	// and enhance it (both ways)
+	metadata[property] = true;
+	// store back to the object
+	Reflect.defineMetadata(METADATA_required, metadata, constr);
+}
+/**
+ * Checks if a property is required to be present in a serialized CoAP object
+ * @param property - property name to lookup
+ */
+function isRequired(target: Object, property: string | symbol): boolean {
+	// get the class constructor
+	const constr = target.constructor;
+	console.log(`${(constr as Function).name}: checking if ${property} is required...`);
+	// retrieve the current metadata
+	const metadata = Reflect.getMetadata(METADATA_required, constr) || {};
+	if (metadata.hasOwnProperty(property)) return metadata[property];
+	return false;
+}
+
+/**
+ * Defines the required transformations to serialize a property to a CoAP object
+ */
+export const serializeWith = (transform: PropertyTransform): PropertyDecorator => {
+	return (target: Object, property: string | symbol) => {
+		// get the class constructor
+		const constr = target.constructor;
+		// retrieve the current metadata
+		const metadata = Reflect.getMetadata(METADATA_serializeWith, constr) || {};
+
+		metadata[property] = transform;
+		// store back to the object
+		Reflect.defineMetadata(METADATA_serializeWith, metadata, constr);
+	}
+}
+
+export const defaultSerializers: DictionaryLike<PropertyTransform> = {
+	"Boolean": (bool: boolean) => bool ? 1 : 0,
+}
+
+/**
+ * Retrieves the serializer for a given property
+ */
+function getSerializer(target: Object, property: string | symbol): PropertyTransform {
+	// get the class constructor
+	const constr = target.constructor;
+	// retrieve the current metadata
+	const metadata = Reflect.getMetadata(METADATA_serializeWith, constr) || {};
+	if (metadata.hasOwnProperty(property)) return metadata[property];
+	// If there's no custom serializer, try to find a default one
+	const type = getPropertyType(target, property);
+	if (type && type.name in defaultSerializers)
+		return defaultSerializers[type.name];
+}
+
+/**
+ * Defines the required transformations to deserialize a property from a CoAP object
+ */
+export const deserializeWith = (transform: PropertyTransform): PropertyDecorator => {
+	return (target: Object, property: string | symbol) => {
+		// get the class constructor
+		const constr = target.constructor;
+		// retrieve the current metadata
+		const metadata = Reflect.getMetadata(METADATA_deserializeWith, constr) || {};
+
+		metadata[property] = transform;
+		// store back to the object
+		Reflect.defineMetadata(METADATA_deserializeWith, metadata, constr);
+	}
+}
+
+export const defaultDeserializers: DictionaryLike<PropertyTransform> = {
+	"Boolean": (raw: any) => raw === 1 || raw === "true" || raw === "on" || raw === true,
+}
+
+
+/**
+ * Retrieves the deserializer for a given property
+ */
+function getDeserializer(target: Object, property: string | symbol): PropertyTransform {
+	// get the class constructor
+	const constr = target.constructor;
+	// retrieve the current metadata
+	const metadata = Reflect.getMetadata(METADATA_deserializeWith, constr) || {};
+
+	if (metadata.hasOwnProperty(property)) {
+		return metadata[property];
+	}
+	// If there's no custom deserializer, try to find a default one
+	const type = getPropertyType(target, property);
+	if (type && type.name in defaultDeserializers) {
+		return defaultDeserializers[type.name];
+	}
+}
+
+/**
+ * Finds the design type for a given property
+ */
+function getPropertyType(target: Object, property: string | symbol): Function {
+	return Reflect.getMetadata("design:type", target, property);
 }

@@ -1,17 +1,24 @@
-import {IPSOObject, PropertyDefinition} from "./ipsoObject";
+import { IPSOObject, ipsoKey, serializeWith, deserializeWith, PropertyTransform, required } from "./ipsoObject";
 
 // contains information about a specific device
-export default class DeviceInfo extends IPSOObject {
+export class DeviceInfo extends IPSOObject {
 
-	constructor(sourceObj, ...properties: PropertyDefinition[]) {
-		super(sourceObj, ...properties,
-			["9", "battery", 0], // <int>
-			["3", "firmwareVersion", ""], // <string>
-			["0", "manufacturer", ""], // <string>
-			["1", "modelNumber", ""], // <string>
-			["6", "power", 0], // <int>
-			["2", "serialNumber", ""], // <string>
-		);
-	}
+	@ipsoKey("9")
+	public battery: number = 0;
+
+	@ipsoKey("3")
+	public firmwareVersion: string = "";
+
+	@ipsoKey("0")
+	public manufacturer: string = "";
+
+	@ipsoKey("1")
+	public modelNumber: string = "";
+
+	@ipsoKey("6")
+	public power: number = 0;
+
+	@ipsoKey("2")
+	public serialNumber: string = "";
 
 }

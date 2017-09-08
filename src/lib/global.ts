@@ -139,7 +139,7 @@ export class Global {
 	*/
 	public static log(message: string, {level = Global.loglevels.on, severity = Global.severity.normal} = {}) {
 		if (!Global.adapter) return;
-		if (level < Global._loglevel) return;
+		if (level > Global._loglevel) return;
 
 		// Warnstufe auswählen
 		let logFn;

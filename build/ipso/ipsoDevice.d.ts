@@ -1,4 +1,6 @@
-import { IPSOObject, PropertyDefinition } from "./ipsoObject";
-export default class IPSODevice extends IPSOObject {
-    constructor(sourceObj: any, ...properties: PropertyDefinition[]);
+import { IPSOObject } from "./ipsoObject";
+export declare class IPSODevice extends IPSOObject {
+    name: string;
+    createdAt: number;
+    instanceId: number;
 }

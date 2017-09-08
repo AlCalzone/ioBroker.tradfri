@@ -9,6 +9,10 @@
         "outDir": "build/",
         "removeComments": false,
 
+        // enable the new reflection API
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+
         // Source maps are for debugging
         // use *EITHER* sourceMap = true (generates .map file)
         // or inlineSourceMap = true (includes map files in js files)
