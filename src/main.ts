@@ -54,7 +54,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 	// Wird aufgerufen, wenn Adapter initialisiert wird
 	ready: () => {
 
-		// Sicherstellen, dass die Optionen vollst�ndig ausgef�llt sind.
+		// Sicherstellen, dass die Optionen vollständig ausgefüllt sind.
 		if (adapter.config
 			&& adapter.config.host != null && adapter.config.host !== ""
 			&& adapter.config.securityCode != null && adapter.config.securityCode !== ""
