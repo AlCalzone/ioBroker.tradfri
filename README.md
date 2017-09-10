@@ -20,6 +20,9 @@ Windows: [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/AlCalzo
 
 ## Changelog
 
+#### 0.2.2 (2017-09-10)
+* (AlCalzone) Changed internal handling of objects to prepare the next updates
+
 #### 0.2.1 (2017-08-26)
 * (AlCalzone) Sync io-package and package version
 
