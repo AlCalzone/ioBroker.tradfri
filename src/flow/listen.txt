@@ -1,2 +1,0 @@
-coap-client ... -s <duration> "endpoint"
-<- new object after changes

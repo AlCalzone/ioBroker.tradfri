@@ -66,8 +66,6 @@
     <Content Include="docs\ru\img\picture.png" />
     <Content Include="src\flow\add_device.txt" />
     <Content Include="src\flow\app_setup.txt" />
-    <Content Include="src\flow\listen.txt" />
-    <Content Include="src\flow\modifylight.txt" />
     <Content Include="src\flow\renamegroup.txt" />
     <Content Include="src\flow\scenes.txt" />
     <Content Include="src\flow\startup.txt" />
