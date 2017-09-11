@@ -237,6 +237,6 @@ var Global = (function () {
 }());
 Global.loglevels = Object.freeze({ off: 0, on: 1, ridiculous: 2 });
 Global.severity = Object.freeze({ normal: 0, warn: 1, error: 2 });
-Global._loglevel = Global.loglevels.ridiculous;
+Global._loglevel = Global.loglevels.on;
 exports.Global = Global;
 //# sourceMappingURL=global.js.map

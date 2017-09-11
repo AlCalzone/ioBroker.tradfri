@@ -46,6 +46,10 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### 0.2.4 (2017-09-11)
+* (AlCalzone) Add support for groups (renaming, switching)
+* (AlCalzone) Partial support for scenes (switching when id is known)
+
 #### 0.2.3 (2017-09-11)
 * (AlCalzone) Send custom CoAP packets by using sendTo
 
