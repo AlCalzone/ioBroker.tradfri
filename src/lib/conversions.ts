@@ -1,4 +1,4 @@
-﻿import { clamp, roundTo } from "./math";
+import { clamp, roundTo } from "./math";
 import { DictionaryLike } from "./object-polyfill";
 
 export type Conversion = (direction: "in" | "out", value: any) => any;

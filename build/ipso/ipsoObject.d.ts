@@ -25,7 +25,7 @@ export declare const ipsoKey: (key: string) => PropertyDecorator;
 /**
  * Declares that a property is required to be present in a serialized CoAP object
  */
-export declare function required(target: Object, property: string | symbol): void;
+export declare function required(target: object, property: string | symbol): void;
 /**
  * Defines the required transformations to serialize a property to a CoAP object
  */

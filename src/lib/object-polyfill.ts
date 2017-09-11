@@ -1,4 +1,4 @@
-﻿export interface DictionaryLike<T> {
+export interface DictionaryLike<T> {
 	[key: string]: T;
 }
 export type Predicate<T> = (value: T) => boolean;

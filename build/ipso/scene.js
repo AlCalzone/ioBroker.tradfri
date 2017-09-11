@@ -20,8 +20,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var ipsoDevice_1 = require("./ipsoDevice");
-var lightSetting_1 = require("./lightSetting");
 var ipsoObject_1 = require("./ipsoObject");
+var lightSetting_1 = require("./lightSetting");
 var Scene = (function (_super) {
     __extends(Scene, _super);
     function Scene() {

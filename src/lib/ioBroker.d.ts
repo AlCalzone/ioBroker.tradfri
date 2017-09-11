@@ -1,7 +1,11 @@
-﻿import fs = require('fs');
+import fs = require('fs');
 
-declare global { 
+declare global {
 	namespace ioBroker {
+
+		interface DictionaryLike<T> {
+			[id: string]: T;
+		}
 
 		enum StateQuality {
 			good = 0x00, // or undefined or null
@@ -91,25 +95,25 @@ declare global {
 		type Object = {
 			/** The ID of this object */
 			_id?: string;
-			native: { [id: string]: any };
-			enums?: { [id: string]: string };
+			native: DictionaryLike<any>;
+			enums?: DictionaryLike<string>;
 			type: "state";
 			common: StateCommon;
 		} | {
-			/** The ID of this object */
-			_id?: string;
-			native: { [id: string]: any };
-			enums?: { [id: string]: string };
-			type: "channel";
-			common: ChannelCommon;
-		} | {
-			/** The ID of this object */
-			_id?: string;
-			native: { [id: string]: any };
-			enums?: { [id: string]: string };
-			type: "device";
-			common: ObjectCommon; //TODO: any definition for device?
-		};
+				/** The ID of this object */
+				_id?: string;
+				native: DictionaryLike<any>;
+				enums?: DictionaryLike<string>;
+				type: "channel";
+				common: ChannelCommon;
+			} | {
+				/** The ID of this object */
+				_id?: string;
+				native: DictionaryLike<any>;
+				enums?: DictionaryLike<string>;
+				type: "device";
+				common: ObjectCommon; //TODO: any definition for device?
+			};
 		//interface Objects { }
 		type Objects = any; // TODO implement
 
@@ -134,11 +138,38 @@ declare global {
 			ca: (string | Buffer)[];
 		}
 
+		/** Callback information for a passed message */
+		interface MessageCallbackInfo {
+			/** The original message payload */
+			message: string | object;
+			/** ID of this callback */
+			id: number;
+			// ???
+			ack: boolean;
+			/** Timestamp of this message */
+			time: number;
+		}
+		type MessageCallback = (result?: any) => void;
+
+		/** A message being passed between adapter instances */
+		interface Message {
+			/** The command to be executed */
+			command: string;
+			/** The message payload */
+			message: string | object;
+			/** The source of this message */
+			from: string;
+			/** ID of this message */
+			_id: number;
+			/** Callback information. This is set when the source expects a response */
+			callback: MessageCallbackInfo;
+		}
+
 
 
 		type EnumList = string | string[];
 
-		interface Enum { } 
+		interface Enum { }
 
 		interface DirectoryEntry {
 			file: string;
@@ -190,8 +221,8 @@ declare global {
 
 			/** Handler for changes of subscribed objects */
 			objectChange?: ObjectChangeHandler;
-			/** Handler for received adapter messages */
-			message?: (obj: any) => void;
+			/** Handler for received adapter messages. Can only be used if messagebox in io-package.json is set to true. */
+			message?: MessageHandler;
 			/** Handler for changes of subscribed states */
 			stateChange?: StateChangeHandler;
 			/** Will be called when the adapter is intialized */
@@ -263,15 +294,17 @@ declare global {
 
 			/**
 			 * Sends a message to a specific instance or all instances of some specific adapter.
+			 * If the ID of an instance is given (e.g. "admin.0"), only this instance will receive the message.
+			 * If the name of an adapter is given (e.g. "admin"), all instances of this adapter will receive it.
 			 */
-			sendTo(instanceName: string, message: string | object, callback?: (result?: any) => void): void;
-			sendTo(instanceName: string, command: string, message: string | object, callback?: (result?: any) => void): void;
+			sendTo(instanceName: string, message: string | object, callback?: MessageCallback | MessageCallbackInfo): void;
+			sendTo(instanceName: string, command: string, message: string | object, callback?: MessageCallback | MessageCallbackInfo): void;
 
 			/**
 			 * Sends a message to a specific host or all hosts.
 			 */
-			sendToHost(hostName: string, message: string | object, callback?: (result?: any) => void): void;
-			sendToHost(hostName: string, command: string, message: string | object, callback?: (result?: any) => void): void;
+			sendToHost(hostName: string, message: string | object, callback?: MessageCallback | MessageCallbackInfo): void;
+			sendToHost(hostName: string, command: string, message: string | object, callback?: MessageCallback | MessageCallbackInfo): void;
 
 			/** Convert ID to {device: D, channel: C, state: S} */
 			idToDCS(id: string): {
@@ -470,24 +503,23 @@ declare global {
 
 		type ObjectChangeHandler = (id: string, obj: Object) => void;
 		type StateChangeHandler = (id: string, obj: State) => void;
+		type MessageHandler = (obj: Message) => void;
 
 		type SetObjectCallback = (err: string, obj: { id: string }) => void;
 		type GetObjectCallback = (err: string, obj: Object) => void;
 		type GenericCallback = (err?: string) => void;
-		type GetEnumCallback = (err: string, enums: { [name: string]: Enum }, requestedEnum: string) => void;
+		type GetEnumCallback = (err: string, enums: DictionaryLike<Enum>, requestedEnum: string) => void;
 		type GetEnumsCallback = (
 			err: string,
 			result: {
-				[groupName: string]: {
-					[name: string]: Enum
-				}
+				[groupName: string]: DictionaryLike<Enum>
 			}
 		) => void;
-		type GetObjectsCallback = (err: string, objects: { [id: string]: Object }) => void;
+		type GetObjectsCallback = (err: string, objects: DictionaryLike<Object>) => void;
 		type FindObjectCallback = (err: string, id?: string, name?: string) => void;
 
 		type GetStateCallback = (err: string, state: State) => void;
-		type GetStatesCallback = (err: string, states: { [id: string]: State }) => void;
+		type GetStatesCallback = (err: string, states: DictionaryLike<State>) => void;
 		type SetStateCallback = (err: string, id: string) => void;
 		type SetStateChangedCallback = (err: string, id: string, notChanged: boolean) => void;
 		type DeleteStateCallback = (err: string, id?: string) => void;

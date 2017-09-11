@@ -1,4 +1,4 @@
-﻿///
+///
 /// Stellt einen Promise-Wrapper für asynchrone Node-Funktionen zur Verfügung
 ///
 

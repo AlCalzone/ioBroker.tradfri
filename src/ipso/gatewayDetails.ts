@@ -1,5 +1,5 @@
 import { IPSODevice } from "./ipsoDevice";
-import { IPSOObject, ipsoKey, serializeWith, deserializeWith, PropertyTransform, required } from "./ipsoObject";
+import { deserializeWith, ipsoKey, IPSOObject, PropertyTransform, required, serializeWith } from "./ipsoObject";
 
 /** contains information about the gateway */
 export class GatewayDetails extends IPSODevice {
@@ -32,7 +32,7 @@ export class GatewayDetails extends IPSODevice {
 	public UNKNOWN2: number = 0; // <int> => something more with commissioning?
 
 	@ipsoKey("9066")
-	public updatePriority: updatePriority = updatePriority.normal; 
+	public updatePriority: updatePriority = updatePriority.normal;
 
 	@ipsoKey("9069")
 	public updateAcceptedTimestamp: number = 0; // <int>

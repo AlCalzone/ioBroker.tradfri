@@ -1,5 +1,5 @@
 import { IPSODevice } from "./ipsoDevice";
-import { IPSOObject, ipsoKey, serializeWith, deserializeWith, PropertyTransform, required } from "./ipsoObject";
+import { deserializeWith, ipsoKey, IPSOObject, PropertyTransform, required, serializeWith } from "./ipsoObject";
 
 export class Light extends IPSODevice {
 

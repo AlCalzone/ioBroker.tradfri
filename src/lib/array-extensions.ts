@@ -1,4 +1,4 @@
-﻿// tslint:disable:curly
+// tslint:disable:curly
 
 ///
 /// Stellt Erweiterungsmethoden für Arrays bereit
