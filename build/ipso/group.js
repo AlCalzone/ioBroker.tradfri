@@ -9,23 +9,47 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var ipsoDevice_1 = require("./ipsoDevice");
+var ipsoObject_1 = require("./ipsoObject");
 var Group = (function (_super) {
     __extends(Group, _super);
-    function Group(sourceObj) {
-        var properties = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            properties[_i - 1] = arguments[_i];
-        }
-        return _super.apply(this, [sourceObj].concat(properties, [["5850", "onOff", false],
-            ["5851", "dimmer", 0],
-            ["9039", "sceneId", []],
-            ["9018", "deviceIDs", [], function (obj) { return parseAccessoryLink(obj); }]])) || this;
+    function Group() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.onOff = false; // <bool>
+        _this.dimmer = 0; // <int> [0..254]
+        return _this;
     }
     return Group;
-}(ipsoDevice_1.default));
-exports.default = Group;
+}(ipsoDevice_1.IPSODevice));
+__decorate([
+    ipsoObject_1.ipsoKey("5850"),
+    __metadata("design:type", Boolean)
+], Group.prototype, "onOff", void 0);
+__decorate([
+    ipsoObject_1.ipsoKey("5851"),
+    __metadata("design:type", Number)
+], Group.prototype, "dimmer", void 0);
+__decorate([
+    ipsoObject_1.ipsoKey("9039"),
+    __metadata("design:type", Object)
+], Group.prototype, "sceneId", void 0);
+__decorate([
+    ipsoObject_1.ipsoKey("9018"),
+    ipsoObject_1.deserializeWith(function (obj) { return parseAccessoryLink(obj); }),
+    __metadata("design:type", Array)
+], Group.prototype, "deviceIDs", void 0);
+exports.Group = Group;
+// TODO: Type annotation
 function parseAccessoryLink(link) {
     var hsLink = link["15002"];
     var deviceIDs = hsLink["9003"];

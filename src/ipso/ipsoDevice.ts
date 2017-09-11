@@ -1,14 +1,15 @@
-import {IPSOObject, PropertyDefinition} from "./ipsoObject";
+import { IPSOObject, ipsoKey, serializeWith, deserializeWith, PropertyTransform, required } from "./ipsoObject";
 
 // common base class for all devices
-export default class IPSODevice extends IPSOObject {
+export class IPSODevice extends IPSOObject {
 
-	constructor(sourceObj, ...properties: PropertyDefinition[]) {
-		super(sourceObj, ...properties,
-			["9001", "name", ""],
-			["9002", "createdAt", 0], // <long>
-			["9003", "instanceId", ""], // <int>
-		);
-	}
+	@ipsoKey("9001")
+	public name: string = "";
+
+	@ipsoKey("9002")
+	public createdAt: number = 0;
+
+	@ipsoKey("9003")
+	public instanceId: number = 0;
 
 }

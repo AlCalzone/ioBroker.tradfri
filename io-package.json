@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "0.2.1",
+        "version": "0.2.2",
         "news": {
             "0.1.0": {
                 "en": "initial release. Functionality limited to controlling lightbulbs.",
@@ -30,6 +30,10 @@
             "0.2.1": {
                 "en": "Sync io-package and package version",
                 "de": "io-package und package-Version synchronisiert"
+            },
+            "0.2.2": {
+                "en": "Changed internal handling of objects to prepare the next updates",
+                "de": "Interne Behandlung von Objekte verändert, um die nächsten Updates vorzubereiten"
             }
         },
         "title": "IKEA Trådfri",

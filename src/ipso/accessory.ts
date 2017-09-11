@@ -1,21 +1,47 @@
-import DeviceInfo from "./deviceInfo";
-import IPSODevice from "./ipsoDevice";
-import {IPSOObject, PropertyDefinition} from "./ipsoObject";
-import Light from "./light";
+import { IPSOObject, ipsoKey, serializeWith, deserializeWith, PropertyTransform, required } from "./ipsoObject";
+import { DeviceInfo } from "./deviceInfo";
+import { IPSODevice } from "./ipsoDevice";
+import { Light } from "./light";
 
-export default class Accessory extends IPSODevice {
+// list of known endpoints defined on the gateway
+export enum AccessoryTypes {
+	remote = 0,
+	lightbulb = 2,
+	// TODO: find out the other ones
+}
 
-	constructor(sourceObj, ...properties: PropertyDefinition[]) {
-		super(sourceObj, ...properties,
-			["5750", "type", 0], // <AccessoryType>
-			["3", "deviceInfo", null, obj => new DeviceInfo(obj)], // <DeviceInfo>
-			["9019", "alive", false], // <boolean>
-			["9020", "lastSeen", 0], // <long>
-			["3311", "lightList", [], obj => new Light(obj)], // <[Light]>
-			["3312", "plugList", [], obj => new IPSODevice(obj)], // <[Plug]> // seems unsupported atm.
-			["3300", "sensorList", [], obj => new IPSODevice(obj)], // <[Sensor]> // seems unsupported atm.
-			["15009", "switchList", [], obj => new IPSODevice(obj)], // <[Switch]> // seems unsupported atm.
-			["9054", "otaUpdateState", 0], // <boolean?>
-		);
-	}
+export class Accessory extends IPSODevice {
+
+	@ipsoKey("5750")
+	public type: AccessoryTypes = AccessoryTypes.remote;
+
+	@ipsoKey("3")
+	@deserializeWith(obj => new DeviceInfo().parse(obj))
+	public deviceInfo: DeviceInfo = null;
+
+	@ipsoKey("9019")
+	public alive: boolean = false;
+
+	@ipsoKey("9020")
+	public lastSeen: number = 0;
+
+	@ipsoKey("3311")
+	@deserializeWith(obj => new Light().parse(obj))
+	public lightList: Light[];
+
+	@ipsoKey("3312")
+	@deserializeWith(obj => new IPSODevice().parse(obj))
+	public plugList: IPSODevice[]; // <[Plug]> // seems unsupported atm.
+
+	@ipsoKey("3300")
+	@deserializeWith(obj => new IPSODevice().parse(obj))
+	public sensorList: IPSODevice[]; // <[Sensor]> // seems unsupported atm.
+
+	@ipsoKey("15009")
+	@deserializeWith(obj => new IPSODevice().parse(obj))
+	public switchList: IPSODevice[]; // <[Switch]> // seems unsupported atm.
+
+	@ipsoKey("9054")
+	public otaUpdateState: number = 0; // boolean?
+
 }

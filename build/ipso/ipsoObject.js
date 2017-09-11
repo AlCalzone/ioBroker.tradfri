@@ -4,123 +4,115 @@ var global_1 = require("../lib/global");
 var object_polyfill_1 = require("../lib/object-polyfill");
 // common base class for all objects that are transmitted somehow
 var IPSOObject = (function () {
-    function IPSOObject(sourceObj) {
-        var properties = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            properties[_i - 1] = arguments[_i];
-        }
-        /** lookup dictionary for propName => key */
-        this.keys = {};
-        /** lookup dictionary for key => propName */
-        this.propNames = {};
-        /** lookup dictionary for key => default property value */
-        this.defaultValues = {};
-        /** lookup dictionary for key => property parser */
-        this.parsers = {};
-        // define properties if neccessary
-        if (global_1.Global.isdef(properties))
-            this.defineProperties(properties);
-        // parse the contents of the source object
-        if (global_1.Global.isdef(sourceObj))
-            this.deserialize(sourceObj);
+    function IPSOObject() {
     }
-    IPSOObject.prototype.defineProperties = function (properties) {
-        for (var _i = 0, properties_1 = properties; _i < properties_1.length; _i++) {
-            var prop = properties_1[_i];
-            var key = prop[0], propName = prop[1], options = prop.slice(2);
-            // populate key lookup table
-            this.keys[propName] = key;
-            this.propNames[key] = propName;
-            if (options && options.length) {
-                // default value, set property
-                this.defaultValues[key] = options[0];
-                this[propName] = options[0];
-                // parser
-                if (options.length >= 1)
-                    this.parsers[key] = options[1];
-            }
-        }
-    };
-    IPSOObject.prototype.getParser = function (key) {
-        if (this.parsers.hasOwnProperty(key))
-            return this.parsers[key];
-    };
-    // parses an object
-    IPSOObject.prototype.deserialize = function (obj) {
+    /**
+     * Reads this instance's properties from the given object
+     */
+    IPSOObject.prototype.parse = function (obj) {
         for (var _i = 0, _a = object_polyfill_1.entries(obj); _i < _a.length; _i++) {
             var _b = _a[_i], key = _b[0], value = _b[1];
-            // which property are we parsing?
-            var propName = this.getPropName(key);
-            if (!propName) {
-                global_1.Global.log("{{yellow}}found unknown property with key " + key);
-                continue;
+            // key might be ipso key or property name
+            var deserializer = getDeserializer(this, key);
+            var propName = void 0;
+            if (deserializer == null) {
+                // deserializers are defined by property name, so key is actually the key
+                propName = lookupKeyOrProperty(this, key);
+                if (!propName) {
+                    global_1.Global.log("{{yellow}}found unknown property with key " + key);
+                    continue;
+                }
+                deserializer = getDeserializer(this, propName);
             }
-            // try to find parser for this property
-            var parser = this.getParser(key);
+            else {
+                // the deserializer was found, so key is actually the property name
+                propName = key;
+            }
             // parse the value
-            var parsedValue = this.parseValue(key, value, parser);
+            var parsedValue = this.parseValue(key, value, deserializer);
             // and remember it
             this[propName] = parsedValue;
         }
+        return this;
     };
     // parses a value, depending on the value type and defined parsers
-    IPSOObject.prototype.parseValue = function (propKey, value, parser) {
+    IPSOObject.prototype.parseValue = function (propKey, value, deserializer) {
         var _this = this;
-        if (parser === void 0) { parser = null; }
         if (value instanceof Array) {
             // Array: parse every element
-            return value.map(function (v) { return _this.parseValue(propKey, v, parser); });
+            return value.map(function (v) { return _this.parseValue(propKey, v, deserializer); });
         }
         else if (typeof value === "object") {
             // Object: try to parse this, objects should be parsed in any case
-            if (parser) {
-                return parser(value);
+            if (deserializer) {
+                return deserializer(value);
             }
             else {
-                global_1.Global.log("{{yellow}}could not find property parser for key " + propKey);
+                global_1.Global.log("{{yellow}}could not find deserializer for key " + propKey);
             }
         }
-        else if (parser) {
+        else if (deserializer) {
             // if this property needs a parser, parse the value
-            return parser(value);
+            return deserializer(value);
         }
         else {
             // otherwise just return the value
             return value;
         }
     };
-    IPSOObject.prototype.getKey = function (propName) { return this.keys[propName]; };
-    IPSOObject.prototype.getPropName = function (key) { return this.propNames[key]; };
-    // serializes this object in order to transfer it via COAP
+    /**
+     * Overrides this object's properties with those from another partial one
+     */
+    IPSOObject.prototype.merge = function (obj) {
+        for (var _i = 0, _a = object_polyfill_1.entries(obj); _i < _a.length; _i++) {
+            var _b = _a[_i], key = _b[0], value = _b[1];
+            if (this.hasOwnProperty(key)) {
+                this[key] = value;
+            }
+        }
+        return this;
+    };
+    /** serializes this object in order to transfer it via COAP */
     IPSOObject.prototype.serialize = function (reference) {
+        var _this = this;
         if (reference === void 0) { reference = null; }
         var ret = {};
-        var serializeValue = function (key, propName, value, refValue) {
+        var serializeValue = function (key, propName, value, refValue, transform) {
+            var required = isRequired(_this, propName);
+            var ret = value;
             if (value instanceof IPSOObject) {
                 // if the value is another IPSOObject, then serialize that
-                value = value.serialize(refValue);
+                ret = value.serialize(refValue);
+                // if the serialized object contains no required properties, don't remember it
+                if (value.isSerializedObjectEmpty(ret))
+                    return null;
             }
             else {
                 // if the value is not the default one, then remember it
                 if (global_1.Global.isdef(refValue)) {
-                    if (refValue === value)
+                    if (!required && refValue === value)
                         return null;
                 }
                 else {
                     // there is no default value, just remember the actual value
                 }
             }
-            return value;
+            if (transform)
+                ret = transform(ret);
+            return ret;
         };
-        var refObj = reference || this.defaultValues;
         var _loop_1 = function (propName) {
             if (this_1.hasOwnProperty(propName)) {
-                var key_1 = this_1.getKey(propName);
+                // find IPSO key
+                var key_1 = lookupKeyOrProperty(this_1, propName);
+                // find value and reference (default) value
                 var value = this_1[propName];
                 var refValue_1 = null;
-                if (global_1.Global.isdef(refObj) && refObj.hasOwnProperty(propName)) {
-                    refValue_1 = refObj[propName];
+                if (global_1.Global.isdef(reference) && reference.hasOwnProperty(propName)) {
+                    refValue_1 = reference[propName];
                 }
+                // try to find serializer for this property
+                var serializer_1 = getSerializer(this_1, propName);
                 if (value instanceof Array) {
                     // serialize each item
                     if (global_1.Global.isdef(refValue_1)) {
@@ -129,31 +121,199 @@ var IPSOObject = (function () {
                             throw new Error("cannot serialize arrays when the reference values don't match");
                         }
                         // serialize each item with the matching reference value
-                        value = value.map(function (v, i) { return serializeValue(key_1, propName, v, refValue_1[i]); });
+                        value = value.map(function (v, i) { return serializeValue(key_1, propName, v, refValue_1[i], serializer_1); });
                     }
                     else {
                         // no reference value, makes things easier
-                        value = value.map(function (v) { return serializeValue(key_1, propName, v, null); });
+                        value = value.map(function (v) { return serializeValue(key_1, propName, v, null, serializer_1); });
                     }
                     // now remove null items
                     value = value.filter(function (v) { return global_1.Global.isdef(v); });
+                    if (value.length === 0)
+                        value = null;
                 }
                 else {
                     // directly serialize the value
-                    value = serializeValue(key_1, propName, value, refValue_1);
+                    value = serializeValue(key_1, propName, value, refValue_1, serializer_1);
                 }
-                ret[key_1] = value;
+                // only output the value if it's != null
+                if (value != null)
+                    ret[key_1] = value;
             }
         };
         var this_1 = this;
+        //const refObj = reference || getDefaultValues(this); //this.defaultValues;
         // check all set properties
-        for (var _i = 0, _a = object_polyfill_1.values(this.propNames); _i < _a.length; _i++) {
+        for (var _i = 0, _a = Object.keys(this); _i < _a.length; _i++) {
             var propName = _a[_i];
             _loop_1(propName);
         }
         return ret;
     };
+    /**
+     * Deeply clones an IPSO Object
+     */
+    IPSOObject.prototype.clone = function () {
+        // create a new instance of the same object as this
+        var constructor = this.constructor;
+        function F() {
+            return constructor.apply(this);
+        }
+        F.prototype = constructor.prototype;
+        var ret = new F();
+        // serialize the old values
+        var serialized = this.serialize();
+        // and parse them back
+        return ret.parse(serialized);
+    };
+    IPSOObject.prototype.isSerializedObjectEmpty = function (obj) {
+        // Pr�fen, ob eine nicht-ben�tigte Eigenschaft angegeben ist. => nicht leer
+        for (var _i = 0, _a = Object.keys(obj); _i < _a.length; _i++) {
+            var key = _a[_i];
+            var propName = lookupKeyOrProperty(this, key);
+            if (!isRequired(this, propName)) {
+                return false;
+            }
+        }
+        return true;
+    };
     return IPSOObject;
 }());
 exports.IPSOObject = IPSOObject;
+// ===========================================================
+// define decorators so we can define all properties type-safe
+var METADATA_ipsoKey = Symbol("ipsoKey");
+var METADATA_required = Symbol("required");
+var METADATA_serializeWith = Symbol("serializeWith");
+var METADATA_deserializeWith = Symbol("deserializeWith");
+/**
+ * Defines the ipso key neccessary to serialize a property to a CoAP object
+ */
+exports.ipsoKey = function (key) {
+    return function (target, property) {
+        // get the class constructor
+        var constr = target.constructor;
+        // retrieve the current metadata
+        var metadata = Reflect.getMetadata(METADATA_ipsoKey, constr) || {};
+        // and enhance it (both ways)
+        metadata[property] = key;
+        metadata[key] = property;
+        // store back to the object
+        Reflect.defineMetadata(METADATA_ipsoKey, metadata, constr);
+    };
+};
+/**
+ * Looks up previously stored property ipso key definitions.
+ * Returns a property name if the key was given, or the key if a property name was given.
+ * @param keyOrProperty - ipso key or property name to lookup
+ */
+function lookupKeyOrProperty(target, keyOrProperty) {
+    // get the class constructor
+    var constr = target.constructor;
+    // retrieve the current metadata
+    var metadata = Reflect.getMetadata(METADATA_ipsoKey, constr) || {};
+    if (metadata.hasOwnProperty(keyOrProperty))
+        return metadata[keyOrProperty];
+    return null;
+}
+/**
+ * Declares that a property is required to be present in a serialized CoAP object
+ */
+function required(target, property) {
+    // get the class constructor
+    var constr = target.constructor;
+    // retrieve the current metadata
+    var metadata = Reflect.getMetadata(METADATA_required, constr) || {};
+    // and enhance it (both ways)
+    metadata[property] = true;
+    // store back to the object
+    Reflect.defineMetadata(METADATA_required, metadata, constr);
+}
+exports.required = required;
+/**
+ * Checks if a property is required to be present in a serialized CoAP object
+ * @param property - property name to lookup
+ */
+function isRequired(target, property) {
+    // get the class constructor
+    var constr = target.constructor;
+    console.log(constr.name + ": checking if " + property + " is required...");
+    // retrieve the current metadata
+    var metadata = Reflect.getMetadata(METADATA_required, constr) || {};
+    if (metadata.hasOwnProperty(property))
+        return metadata[property];
+    return false;
+}
+/**
+ * Defines the required transformations to serialize a property to a CoAP object
+ */
+exports.serializeWith = function (transform) {
+    return function (target, property) {
+        // get the class constructor
+        var constr = target.constructor;
+        // retrieve the current metadata
+        var metadata = Reflect.getMetadata(METADATA_serializeWith, constr) || {};
+        metadata[property] = transform;
+        // store back to the object
+        Reflect.defineMetadata(METADATA_serializeWith, metadata, constr);
+    };
+};
+exports.defaultSerializers = {
+    "Boolean": function (bool) { return bool ? 1 : 0; },
+};
+/**
+ * Retrieves the serializer for a given property
+ */
+function getSerializer(target, property) {
+    // get the class constructor
+    var constr = target.constructor;
+    // retrieve the current metadata
+    var metadata = Reflect.getMetadata(METADATA_serializeWith, constr) || {};
+    if (metadata.hasOwnProperty(property))
+        return metadata[property];
+    // If there's no custom serializer, try to find a default one
+    var type = getPropertyType(target, property);
+    if (type && type.name in exports.defaultSerializers)
+        return exports.defaultSerializers[type.name];
+}
+/**
+ * Defines the required transformations to deserialize a property from a CoAP object
+ */
+exports.deserializeWith = function (transform) {
+    return function (target, property) {
+        // get the class constructor
+        var constr = target.constructor;
+        // retrieve the current metadata
+        var metadata = Reflect.getMetadata(METADATA_deserializeWith, constr) || {};
+        metadata[property] = transform;
+        // store back to the object
+        Reflect.defineMetadata(METADATA_deserializeWith, metadata, constr);
+    };
+};
+exports.defaultDeserializers = {
+    "Boolean": function (raw) { return raw === 1 || raw === "true" || raw === "on" || raw === true; },
+};
+/**
+ * Retrieves the deserializer for a given property
+ */
+function getDeserializer(target, property) {
+    // get the class constructor
+    var constr = target.constructor;
+    // retrieve the current metadata
+    var metadata = Reflect.getMetadata(METADATA_deserializeWith, constr) || {};
+    if (metadata.hasOwnProperty(property)) {
+        return metadata[property];
+    }
+    // If there's no custom deserializer, try to find a default one
+    var type = getPropertyType(target, property);
+    if (type && type.name in exports.defaultDeserializers) {
+        return exports.defaultDeserializers[type.name];
+    }
+}
+/**
+ * Finds the design type for a given property
+ */
+function getPropertyType(target, property) {
+    return Reflect.getMetadata("design:type", target, property);
+}
 //# sourceMappingURL=ipsoObject.js.map

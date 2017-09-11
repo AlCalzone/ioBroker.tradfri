@@ -1,6 +1,44 @@
 // tslint:disable:object-literal-key-quotes
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t;
+    return { next: verb(0), "throw": verb(1), "return": verb(2) };
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [0, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
+// Reflect-polyfill laden
+require("reflect-metadata");
 // Eigene Module laden
 var node_coap_client_1 = require("node-coap-client");
 var endpoints_1 = require("./ipso/endpoints");
@@ -10,7 +48,6 @@ var object_polyfill_1 = require("./lib/object-polyfill");
 var str2regex_1 = require("./lib/str2regex");
 // Datentypen laden
 var accessory_1 = require("./ipso/accessory");
-var accessoryTypes_1 = require("./ipso/accessoryTypes");
 // Adapter-Utils laden
 var utils_1 = require("./lib/utils");
 // Konvertierungsfunktionen
@@ -36,7 +73,7 @@ var adapter = utils_1.default.adapter({
     name: "tradfri",
     // Wird aufgerufen, wenn Adapter initialisiert wird
     ready: function () {
-        // Sicherstellen, dass die Optionen vollst�ndig ausgef�llt sind.
+        // Sicherstellen, dass die Optionen vollständig ausgefüllt sind.
         if (adapter.config
             && adapter.config.host != null && adapter.config.host !== ""
             && adapter.config.securityCode != null && adapter.config.securityCode !== "") {
@@ -103,64 +140,82 @@ var adapter = utils_1.default.adapter({
             global_1.Global.log("error handling custom sub: " + e);
         }
     },
-    stateChange: function (id, state) {
-        global_1.Global.log("{{blue}} state with id " + id + " updated: ack=" + state.ack + "; val=" + state.val, { level: global_1.Global.loglevels.ridiculous });
-        if (!state.ack && id.startsWith(adapter.namespace)) {
-            // our own state was changed from within ioBroker, react to it
-            var stateObj = objects[id];
-            if (!(stateObj && stateObj.type === "state" && stateObj.native && stateObj.native.path))
-                return;
-            // get "official" value for the parent object
-            var devId = getAccessoryId(id);
-            if (devId) {
-                // get the ioBroker object
-                var dev = objects[devId];
-                // read the instanceId and get a reference value
-                var accessory = devices[dev.native.instanceId];
-                // for now: handle changes on a case by case basis
-                // everything else is too complicated for now
-                var val = state.val;
-                // make sure we have whole numbers
-                if (stateObj.common.type === "number") {
-                    val = Math.round(val); // TODO: check if there are situations where decimal numbers are allowed
-                    if (global_1.Global.isdef(stateObj.common.min))
-                        val = Math.max(stateObj.common.min, val);
-                    if (global_1.Global.isdef(stateObj.common.max))
-                        val = Math.min(stateObj.common.max, val);
-                }
-                // TODO: find a way to construct these from existing accessory objects
-                var payload = null;
-                if (id.endsWith(".lightbulb.state")) {
-                    payload = { "3311": [{ "5850": (val ? 1 : 0) }] };
-                }
-                else if (id.endsWith(".lightbulb.brightness")) {
-                    payload = { "3311": [{ "5851": val, "5712": 5 }] };
-                }
-                else if (id.endsWith(".lightbulb.color")) {
-                    var colorX = conversions_1.default.color("out", state.val);
-                    payload = { "3311": [{ "5709": colorX, "5710": 27000, "5712": 5 }] };
-                }
-                payload = JSON.stringify(payload);
-                global_1.Global.log("sending payload: " + payload, { level: global_1.Global.loglevels.ridiculous });
-                payload = Buffer.from(payload);
-                node_coap_client_1.CoapClient.request("" + requestBase + endpoints_1.default.devices + "/" + dev.native.instanceId, "put", payload);
+    stateChange: function (id, state) { return __awaiter(_this, void 0, void 0, function () {
+        var stateObj, devId, dev, accessory, val, newAccessory, light, colorX, serializedObj, payload, _i, _a, sub;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    global_1.Global.log("{{blue}} state with id " + id + " updated: ack=" + state.ack + "; val=" + state.val, { level: global_1.Global.loglevels.ridiculous });
+                    if (!(!state.ack && id.startsWith(adapter.namespace))) return [3 /*break*/, 3];
+                    stateObj = objects[id];
+                    if (!(stateObj && stateObj.type === "state" && stateObj.native && stateObj.native.path))
+                        return [2 /*return*/];
+                    devId = getAccessoryId(id);
+                    if (!devId) return [3 /*break*/, 3];
+                    dev = objects[devId];
+                    accessory = devices[dev.native.instanceId];
+                    val = state.val;
+                    // make sure we have whole numbers
+                    if (stateObj.common.type === "number") {
+                        val = Math.round(val); // TODO: check if there are situations where decimal numbers are allowed
+                        if (global_1.Global.isdef(stateObj.common.min))
+                            val = Math.max(stateObj.common.min, val);
+                        if (global_1.Global.isdef(stateObj.common.max))
+                            val = Math.min(stateObj.common.max, val);
+                    }
+                    newAccessory = accessory.clone();
+                    if (id.indexOf(".lightbulb.") > -1) {
+                        light = newAccessory.lightList[0];
+                        if (id.endsWith(".state")) {
+                            light.merge({ onOff: val });
+                        }
+                        else if (id.endsWith(".brightness")) {
+                            light.merge({
+                                dimmer: val,
+                                transitionTime: 5 // TODO: <- make this configurable
+                            });
+                        }
+                        else if (id.endsWith(".color")) {
+                            colorX = conversions_1.default.color("out", state.val);
+                            light.merge({
+                                colorX: colorX,
+                                colorY: 27000,
+                                transitionTime: 5 // TODO: <- make this configurable
+                            });
+                        }
+                    }
+                    serializedObj = newAccessory.serialize(accessory);
+                    if (!(!serializedObj || Object.keys(serializedObj).length === 0)) return [3 /*break*/, 2];
+                    global_1.Global.log("empty object, not sending any payload", { level: global_1.Global.loglevels.ridiculous });
+                    return [4 /*yield*/, adapter.$setState(id, state.val, true)];
+                case 1:
+                    _b.sent();
+                    return [2 /*return*/];
+                case 2:
+                    payload = JSON.stringify(serializedObj);
+                    global_1.Global.log("sending payload: " + payload, { level: global_1.Global.loglevels.ridiculous });
+                    payload = Buffer.from(payload);
+                    node_coap_client_1.CoapClient.request("" + requestBase + endpoints_1.default.devices + "/" + dev.native.instanceId, "put", payload);
+                    _b.label = 3;
+                case 3:
+                    // Custom subscriptions durchgehen, um die passenden Callbacks aufzurufen
+                    try {
+                        for (_i = 0, _a = object_polyfill_1.values(customStateSubscriptions.subscriptions); _i < _a.length; _i++) {
+                            sub = _a[_i];
+                            if (sub && sub.pattern && sub.callback) {
+                                // Wenn die ID zum aktuellen Pattern passt, dann Callback aufrufen
+                                if (sub.pattern.test(id))
+                                    sub.callback(id, state);
+                            }
+                        }
+                    }
+                    catch (e) {
+                        global_1.Global.log("error handling custom sub: " + e);
+                    }
+                    return [2 /*return*/];
             }
-        }
-        // Custom subscriptions durchgehen, um die passenden Callbacks aufzurufen
-        try {
-            for (var _i = 0, _a = object_polyfill_1.values(customStateSubscriptions.subscriptions); _i < _a.length; _i++) {
-                var sub = _a[_i];
-                if (sub && sub.pattern && sub.callback) {
-                    // Wenn die ID zum aktuellen Pattern passt, dann Callback aufrufen
-                    if (sub.pattern.test(id))
-                        sub.callback(id, state);
-                }
-            }
-        }
-        catch (e) {
-            global_1.Global.log("error handling custom sub: " + e);
-        }
-    },
+        });
+    }); },
     unload: function (callback) {
         // is called when adapter shuts down - callback has to be called under any circumstances!
         try {
@@ -204,8 +259,6 @@ function coapCb_getAllDevices(response) {
         var observerUrl = "" + requestBase + endpoints_1.default.devices + "/" + id;
         if (observers.indexOf(observerUrl) > -1)
             return;
-        // make a dummy object, we'll be filling that one later
-        devices[id] = {};
         // start observing
         node_coap_client_1.CoapClient.observe(observerUrl, "get", function (resp) { return coap_getDevice_cb(id, resp); });
         observers.push(observerUrl);
@@ -234,7 +287,8 @@ function coap_getDevice_cb(instanceId, response) {
     }
     var result = parsePayload(response);
     // parse device info
-    var accessory = new accessory_1.default(result);
+    var accessory = new accessory_1.Accessory();
+    accessory.parse(result);
     // remember the device object, so we can later use it as a reference for updates
     devices[instanceId] = accessory;
     // create ioBroker device
@@ -246,11 +300,12 @@ function getAccessoryId(stateId) {
         return match[0];
 }
 function calcObjId(accessory) {
+    // TODO: Make strongly typed objects so we can define this as <Accessory>
     var prefix = (function () {
         switch (accessory.type) {
-            case accessoryTypes_1.accessoryTypes.remote:
+            case accessory_1.AccessoryTypes.remote:
                 return "RC";
-            case accessoryTypes_1.accessoryTypes.lightbulb:
+            case accessory_1.AccessoryTypes.lightbulb:
                 return "L";
             default:
                 global_1.Global.log("unknown accessory type " + accessory.type);
@@ -261,6 +316,7 @@ function calcObjId(accessory) {
 }
 // finds the property value for <accessory> as defined in <propPath>
 function readPropertyValue(accessory, propPath) {
+    // TODO: Make strongly typed objects so we can define this as <Accessory>
     // if path starts with "__convert:", use a custom conversion function
     if (propPath.startsWith("__convert:")) {
         var pathParts = propPath.substr("__convert:".length).split(",");
@@ -282,6 +338,7 @@ function readPropertyValue(accessory, propPath) {
 }
 // creates or edits an existing <device>-object for an accessory
 function extendDevice(accessory) {
+    // TODO: Make strongly typed objects so we can define this as <Accessory>
     var objId = calcObjId(accessory);
     if (global_1.Global.isdef(objects[objId])) {
         // check if we need to edit the existing object
@@ -317,10 +374,6 @@ function extendDevice(accessory) {
             try {
                 // Object could have a default value, find it
                 var newValue = readPropertyValue(accessory, obj.native.path);
-                if (obj.type === "state" && obj.common.type === "boolean") {
-                    // fix bool values
-                    newValue = newValue === 1 || newValue === "true" || newValue === "on";
-                }
                 adapter.setState(id, newValue, true);
             }
             catch (e) { }
@@ -374,7 +427,7 @@ function extendDevice(accessory) {
                 },
             },
         };
-        if (accessory.type === accessoryTypes_1.accessoryTypes.lightbulb) {
+        if (accessory.type === accessory_1.AccessoryTypes.lightbulb) {
             stateObjs_1["lightbulb.color"] = {
                 _id: objId + ".lightbulb.color",
                 type: "state",
@@ -433,10 +486,6 @@ function extendDevice(accessory) {
             if (global_1.Global.isdef(obj.native.path)) {
                 // Object could have a default value, find it
                 initialValue = readPropertyValue(accessory, obj.native.path);
-                if (obj.common.type === "boolean") {
-                    // fix bool values
-                    initialValue = initialValue === 1 || initialValue === "true" || initialValue === "on";
-                }
             }
             // create object and return the promise, so we can wait
             return adapter.$createOwnStateEx(stateId, obj, initialValue);
@@ -446,12 +495,6 @@ function extendDevice(accessory) {
 }
 // ==================================
 // Custom subscriptions
-// Object.assign(customSubscriptions, {
-// 	counter: 0,
-// 	subscriptions: {
-// 		// "<id>" : {pattern, callback}
-// 	},
-// });
 /**
  * Ensures the subscription pattern is valid
  */
@@ -486,7 +529,6 @@ function subscribeStates(pattern, callback) {
     var newCounter = (++customStateSubscriptions.counter);
     var id = "" + newCounter;
     customStateSubscriptions.subscriptions[id] = { pattern: pattern, callback: callback };
-    // _.log(`added subscription for pattern ${pattern}. total count: ${Object.keys(customSubscriptions.subscriptions).length}`);
     return id;
 }
 /**
@@ -494,14 +536,8 @@ function subscribeStates(pattern, callback) {
  * @param id The subscription ID returned by @link{subscribeStates}
  */
 function unsubscribeStates(id) {
-    // _.log(`unsubscribing subscription #${id}...`);
     if (customStateSubscriptions.subscriptions[id]) {
-        // const pattern = customSubscriptions.subscriptions[id].pattern;
         delete customStateSubscriptions.subscriptions[id];
-        // _.log(`unsubscribe ${pattern}: success. total count: ${Object.keys(customSubscriptions.subscriptions).length}`);
-    }
-    else {
-        // _.log(`unsubscribe: subscription not found`);
     }
 }
 /**
@@ -517,7 +553,6 @@ function subscribeObjects(pattern, callback) {
     var newCounter = (++customObjectSubscriptions.counter);
     var id = "" + newCounter;
     customObjectSubscriptions.subscriptions[id] = { pattern: pattern, callback: callback };
-    // _.log(`added subscription for pattern ${pattern}. total count: ${Object.keys(customSubscriptions.subscriptions).length}`);
     return id;
 }
 /**
@@ -525,14 +560,8 @@ function subscribeObjects(pattern, callback) {
  * @param id The subscription ID returned by @link{subscribeObjects}
  */
 function unsubscribeObjects(id) {
-    // _.log(`unsubscribing subscription #${id}...`);
     if (customObjectSubscriptions.subscriptions[id]) {
-        // const pattern = customSubscriptions.subscriptions[id].pattern;
         delete customObjectSubscriptions.subscriptions[id];
-        // _.log(`unsubscribe ${pattern}: success. total count: ${Object.keys(customSubscriptions.subscriptions).length}`);
-    }
-    else {
-        // _.log(`unsubscribe: subscription not found`);
     }
 }
 function parsePayload(response) {

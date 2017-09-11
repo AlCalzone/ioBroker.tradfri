@@ -1,19 +1,25 @@
-import IPSODevice from "./ipsoDevice";
-import {IPSOObject, PropertyDefinition} from "./ipsoObject";
+import { IPSODevice } from "./ipsoDevice";
+import { IPSOObject, ipsoKey, serializeWith, deserializeWith, PropertyTransform, required } from "./ipsoObject";
 
-export default class Group extends IPSODevice {
+export class Group extends IPSODevice {
 
-	constructor(sourceObj, ...properties: PropertyDefinition[]) {
-		super(sourceObj, ...properties,
-			["5850", "onOff", false], // <bool>
-			["5851", "dimmer", 0], // <int> [0..254]
-			["9039", "sceneId", []], // <int> or [<int>]
-			["9018", "deviceIDs", [], obj => parseAccessoryLink(obj)], // [<int>] (after parsing)
-		);
-	}
+	@ipsoKey("5850")
+	public onOff: boolean = false; // <bool>
+
+	@ipsoKey("5851")
+	public dimmer: number = 0; // <int> [0..254]
+
+	@ipsoKey("9039")
+	public sceneId: number | number[];
+
+	@ipsoKey("9018")
+	@deserializeWith(obj => parseAccessoryLink(obj))
+	public deviceIDs: number[];
+
 }
 
-function parseAccessoryLink(link) {
+// TODO: Type annotation
+function parseAccessoryLink(link): number[] {
 	const hsLink = link["15002"];
 	const deviceIDs = hsLink["9003"];
 	return deviceIDs;

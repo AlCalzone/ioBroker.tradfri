@@ -1,5 +1,11 @@
-import IPSODevice from "./ipsoDevice";
-import { PropertyDefinition } from "./ipsoObject";
-export default class LightSetting extends IPSODevice {
-    constructor(sourceObj: any, ...properties: PropertyDefinition[]);
+import { IPSODevice } from "./ipsoDevice";
+export declare class LightSetting extends IPSODevice {
+    color: string;
+    UNKNOWN1: number;
+    UNKNOWN2: number;
+    colorX: number;
+    colorY: number;
+    UNKNOWN3: number;
+    dimmer: number;
+    onOff: boolean;
 }

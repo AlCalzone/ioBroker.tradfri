@@ -165,7 +165,7 @@ var Global = (function () {
         var _b = _a === void 0 ? {} : _a, _c = _b.level, level = _c === void 0 ? Global.loglevels.on : _c, _d = _b.severity, severity = _d === void 0 ? Global.severity.normal : _d;
         if (!Global.adapter)
             return;
-        if (level < Global._loglevel)
+        if (level > Global._loglevel)
             return;
         // Warnstufe auswählen
         var logFn;

@@ -116,13 +116,13 @@ declare global {
 
 		interface Logger {
 			/** log message with debug level */
-			debug(message: string);
+			debug(message: string): void;
 			/** log message with info level (default output level for all adapters) */
-			info(message: string);
+			info(message: string): void;
 			/** log message with warning severity */
-			warn(message: string);
+			warn(message: string): void;
 			/** log message with error severity */
-			error(message: string);
+			error(message: string): void;
 		}
 
 		interface Certificates {
@@ -242,36 +242,36 @@ declare global {
 			 * @param port - The port to start with
 			 * @param callback - gets called when a free port is found
 			 */
-			getPort(port: number, callback: (port: number) => void);
+			getPort(port: number, callback: (port: number) => void): void;
 
 			// ==============================
 			// GENERAL
 
 			/** Validates username and password */
-			checkPassword(user: string, password: string, callback: (result: boolean) => void);
-			checkPassword(user: string, password: string, options: any, callback: (result: boolean) => void);
+			checkPassword(user: string, password: string, callback: (result: boolean) => void): void;
+			checkPassword(user: string, password: string, options: any, callback: (result: boolean) => void): void;
 			/** Sets a new password for the given user */
-			setPassword(user: string, password: string, options?: any, callback?: (err?: any) => void);
+			setPassword(user: string, password: string, options?: any, callback?: (err?: any) => void): void;
 			/** <INTERNAL> Checks if a user exists and is in the given group. */
-			checkGroup(user: string, group: string, callback: (result: boolean) => void);
-			checkGroup(user: string, group: string, options: any, callback: (result: boolean) => void);
+			checkGroup(user: string, group: string, callback: (result: boolean) => void): void;
+			checkGroup(user: string, group: string, options: any, callback: (result: boolean) => void): void;
 			/** <INTERNAL> Determines the users permissions */
-			calculatePermissions(user: string, commandsPermissions: any, callback: (result: any) => void);
-			calculatePermissions(user: string, commandsPermissions: any, options: any, callback: (result: any) => void);
+			calculatePermissions(user: string, commandsPermissions: any, callback: (result: any) => void): void;
+			calculatePermissions(user: string, commandsPermissions: any, options: any, callback: (result: any) => void): void;
 			/** Returns SSL certificates by name (private key, public cert and chained certificate) for creation of HTTPS servers */
-			getCertificates(publicName: string, privateName: string, chainedName: string, callback: (err: string, certs?: Certificates, useLetsEncryptCert?: boolean) => void);
+			getCertificates(publicName: string, privateName: string, chainedName: string, callback: (err: string, certs?: Certificates, useLetsEncryptCert?: boolean) => void): void;
 
 			/**
 			 * Sends a message to a specific instance or all instances of some specific adapter.
 			 */
-			sendTo(instanceName: string, message: string | object, callback?: (result?: any) => void);
-			sendTo(instanceName: string, command: string, message: string | object, callback?: (result?: any) => void);
+			sendTo(instanceName: string, message: string | object, callback?: (result?: any) => void): void;
+			sendTo(instanceName: string, command: string, message: string | object, callback?: (result?: any) => void): void;
 
 			/**
 			 * Sends a message to a specific host or all hosts.
 			 */
-			sendToHost(hostName: string, message: string | object, callback?: (result?: any) => void);
-			sendToHost(hostName: string, command: string, message: string | object, callback?: (result?: any) => void);
+			sendToHost(hostName: string, message: string | object, callback?: (result?: any) => void): void;
+			sendToHost(hostName: string, command: string, message: string | object, callback?: (result?: any) => void): void;
 
 			/** Convert ID to {device: D, channel: C, state: S} */
 			idToDCS(id: string): {
@@ -291,7 +291,7 @@ declare global {
 			/** Creates an object in the object db. Existing objects are not overwritten. */
 			setObjectNotExists(id: string, obj: Object, options?: any, callback?: SetObjectCallback): void;
 			/** Get all states, channels and devices of this adapter */
-			getAdapterObjects(callback: (objects: { [id: string]: Object }) => void);
+			getAdapterObjects(callback: (objects: { [id: string]: Object }) => void): void;
 			/** Extend an object and create it if it might not exist */
 			extendObject(id: string, objPart: Partial<Object>, options?: any, callback?: SetObjectCallback): void;
 			/** 
@@ -350,11 +350,11 @@ declare global {
 			getForeignState(id: string, callback: GetStateCallback): void;
 			getForeignState(id: string, options: any, callback: GetStateCallback): void;
 			/** Read all states of this adapter which match the given pattern */
-			getStates(pattern: string, callback: GetStatesCallback)
-			getStates(pattern: string, options: any, callback: GetStatesCallback)
+			getStates(pattern: string, callback: GetStatesCallback): void;
+			getStates(pattern: string, options: any, callback: GetStatesCallback): void;
 			/** Read all states (which might not belong to this adapter) which match the given pattern */
-			getForeignStates(pattern: string, callback: GetStatesCallback)
-			getForeignStates(pattern: string, options: any, callback: GetStatesCallback)
+			getForeignStates(pattern: string, callback: GetStatesCallback): void;
+			getForeignStates(pattern: string, options: any, callback: GetStatesCallback): void;
 
 			/** Deletes a state from the states DB, but not the associated object. Consider using @link{deleteState} instead */
 			delState(id: string, options?: any, callback?: GenericCallback): void;
@@ -386,13 +386,13 @@ declare global {
 			// subscriptions
 
 			/** Subscribe to changes of objects in this instance */
-			subscribeObjects(pattern: string, options?: any);
+			subscribeObjects(pattern: string, options?: any): void;
 			/** Subscribe to changes of objects (which might not belong to this adapter) */
-			subscribeForeignObjects(pattern: string, options?: any);
+			subscribeForeignObjects(pattern: string, options?: any): void;
 			/** Unsubscribe from changes of objects in this instance */
-			unsubscribeObjects(pattern: string, options?: any);
+			unsubscribeObjects(pattern: string, options?: any): void;
 			/** Unsubscribe from changes of objects (which might not belong to this adapter) */
-			unsubscribeForeignObjects(pattern: string, options?: any);
+			unsubscribeForeignObjects(pattern: string, options?: any): void;
 
 			/** Subscribe to changes of states in this instance */
 			subscribeStates(pattern: string, options?: any, callback?: GenericCallback): void;
@@ -462,10 +462,10 @@ declare global {
 			// ==============================
 			// formatting
 
-			formatValue(value: number | string, format: any);
-			formatValue(value: number | string, decimals: number, format: any);
-			formatDate(dateObj: string | Date | number, format: string);
-			formatDate(dateObj: string | Date | number, isDuration: boolean | string, format: string);
+			formatValue(value: number | string, format: any): string;
+			formatValue(value: number | string, decimals: number, format: any): string;
+			formatDate(dateObj: string | Date | number, format: string): string;
+			formatDate(dateObj: string | Date | number, isDuration: boolean | string, format: string): string;
 		}
 
 		type ObjectChangeHandler = (id: string, obj: Object) => void;

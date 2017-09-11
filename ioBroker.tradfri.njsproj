@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{53e51c2f-73aa-4803-9a77-5431efc98998}</ProjectGuid>
     <ProjectHome />
-    <ProjectView>ShowAllFiles</ProjectView>
+    <ProjectView>ProjectFiles</ProjectView>
     <StartupFile />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -19,6 +19,7 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
   <ItemGroup>
+    <Content Include=".gitignore" />
     <Content Include=".npmignore" />
     <Content Include=".travis.yml" />
     <Content Include="appveyor.yml" />
@@ -30,7 +31,6 @@
     <Content Include="admin\tradfri.png" />
     <Compile Include="admin\words.js" />
     <TypeScriptCompile Include="src\ipso\accessory.ts" />
-    <TypeScriptCompile Include="src\ipso\accessoryTypes.ts" />
     <TypeScriptCompile Include="src\ipso\deviceInfo.ts" />
     <TypeScriptCompile Include="src\ipso\endpoints.ts" />
     <TypeScriptCompile Include="src\ipso\gatewayDetails.ts" />
@@ -40,9 +40,7 @@
     <TypeScriptCompile Include="src\ipso\light.ts" />
     <TypeScriptCompile Include="src\ipso\lightSetting.ts" />
     <TypeScriptCompile Include="src\ipso\notification.ts" />
-    <TypeScriptCompile Include="src\ipso\notificationTypes.ts" />
     <TypeScriptCompile Include="src\ipso\scene.ts" />
-    <TypeScriptCompile Include="src\ipso\updatePriority.ts" />
     <TypeScriptCompile Include="src\lib\array-extensions.ts" />
     <TypeScriptCompile Include="src\lib\constants.ts" />
     <TypeScriptCompile Include="src\lib\conversions.ts" />
