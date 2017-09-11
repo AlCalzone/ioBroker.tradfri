@@ -14,6 +14,7 @@ export class Group extends IPSODevice {
 
 	@ipsoKey("9018")
 	@deserializeWith(obj => parseAccessoryLink(obj))
+	@serializeWith(ids => toAccessoryLink(ids))
 	public deviceIDs: number[];
 
 }
@@ -23,4 +24,11 @@ function parseAccessoryLink(link): number[] {
 	const hsLink = link["15002"];
 	const deviceIDs = hsLink["9003"];
 	return deviceIDs;
+}
+function toAccessoryLink(ids: number[]): any {
+	return {
+		15002: {
+			9003: ids,
+		},
+	};
 }
