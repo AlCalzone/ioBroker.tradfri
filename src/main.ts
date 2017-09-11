@@ -1,6 +1,7 @@
 // tslint:disable:object-literal-key-quotes
 
 // Reflect-polyfill laden
+// tslint:disable-next-line:no-var-requires
 require("reflect-metadata");
 
 // Eigene Module laden
@@ -8,7 +9,7 @@ import { CoapClient as coap, CoapResponse } from "node-coap-client";
 import coapEndpoints from "./ipso/endpoints";
 import { except } from "./lib/array-extensions";
 import { ExtendedAdapter, Global as _ } from "./lib/global";
-import { dig, entries, filter, values, DictionaryLike } from "./lib/object-polyfill";
+import { DictionaryLike, dig, entries, filter, values } from "./lib/object-polyfill";
 import { str2regex } from "./lib/str2regex";
 
 // Datentypen laden
@@ -96,15 +97,70 @@ let adapter: ExtendedAdapter = utils.adapter({
 
 	},
 
-	message: (obj) => {
-		// Some message was sent to adapter instance over message box. Used by email, pushover, text2speech, ...
-		if (typeof obj === "object" && obj.message) {
-			if (obj.command === "send") {
-				// e.g. send email or pushover or whatever
-				// console.log('send command');
+	message: async (obj) => {
+		// responds to the adapter that sent the original message
+		function respond(response) {
+			if (obj.callback) adapter.sendTo(obj.from, obj.command, response, obj.callback);
+		}
+		// some predefined responses so we only have to define them once
+		const predefinedResponses = {
+			ACK: { error: null },
+			OK: { error: null, result: "ok" },
+			ERROR_UNKNOWN_COMMAND: { error: "Unknown command!" },
+			MISSING_PARAMETER: (paramName) => {
+				return { error: 'missing parameter "' + paramName + '"!' };
+			},
+			COMMAND_RUNNING: { error: "command running" },
+		};
+		// make required parameters easier
+		function requireParams(...params: string[]) {
+			if (!(params && params.length)) return true;
+			for (const param of params) {
+				if (!(obj.message && obj.message.hasOwnProperty(param))) {
+					respond(predefinedResponses.MISSING_PARAMETER(param));
+					return false;
+				}
+			}
+			return true;
+		}
 
-				// Send response in callback if required
-				if (obj.callback) adapter.sendTo(obj.from, obj.command, "Message received", obj.callback);
+		// handle the message
+		if (obj) {
+			switch (obj.command) {
+				case "request":
+					// require the path to be given
+					if (!requireParams("path")) return;
+
+					// check the given params
+					const params = obj.message as any;
+					params.method = params.method || "get";
+					if (["get", "post", "put", "delete"].indexOf(params.method) === -1) {
+						respond({ error: `unsupported request method "${params.method}"` });
+						return;
+					}
+
+					_.log(`custom coap request: ${params.method.toUpperCase()} "${requestBase}${params.path}"`, { level: _.loglevels.on });
+
+					// create payload
+					let payload: string | Buffer;
+					if (params.payload) {
+						payload = JSON.stringify(params.payload);
+						_.log("sending custom payload: " + payload, { level: _.loglevels.on });
+						payload = Buffer.from(payload);
+					}
+
+					// wait for the CoAP response and respond to the message
+					const resp = await coap.request(`${requestBase}${params.path}`, params.method, payload as Buffer);
+					respond({
+						error: null, result: {
+							code: resp.code.toString(),
+							payload: parsePayload(resp),
+						},
+					});
+					return;
+				default:
+					respond(predefinedResponses.ERROR_UNKNOWN_COMMAND);
+					return;
 			}
 		}
 	},
@@ -167,18 +223,18 @@ let adapter: ExtendedAdapter = utils.adapter({
 					} else if (id.endsWith(".brightness")) {
 						light.merge({
 							dimmer: val,
-							transitionTime: 5 // TODO: <- make this configurable
+							transitionTime: 5, // TODO: <- make this configurable
 						});
 					} else if (id.endsWith(".color")) {
 						const colorX = conversions.color("out", state.val);
 						light.merge({
 							colorX: colorX,
 							colorY: 27000,
-							transitionTime: 5 // TODO: <- make this configurable
+							transitionTime: 5, // TODO: <- make this configurable
 						});
 					}
 				}
-				
+
 				const serializedObj = newAccessory.serialize(accessory); // serialize with the old object as a reference
 				// If the serialized object contains no properties, we don't need to send anything
 				if (!serializedObj || Object.keys(serializedObj).length === 0) {
@@ -386,7 +442,7 @@ function extendDevice(accessory: any) {
 		for (const [id, obj] of entries(stateObjs)) {
 			try {
 				// Object could have a default value, find it
-				let newValue = readPropertyValue(accessory, obj.native.path);
+				const newValue = readPropertyValue(accessory, obj.native.path);
 				adapter.setState(id, newValue, true);
 			} catch (e) {/* skip this value */}
 		}
@@ -591,14 +647,17 @@ function unsubscribeObjects(id: string) {
 	}
 }
 
-function parsePayload(response: CoapResponse) {
+function parsePayload(response: CoapResponse): any {
 	switch (response.format) {
 		case 0: // text/plain
+		case null: // assume text/plain
 			return response.payload.toString("utf-8");
 		case 50: // application/json
 			const json = response.payload.toString("utf-8");
 			return JSON.parse(json);
-		default: // dunno how to parse this
+		default: 
+			// dunno how to parse this
+			_.log(`unknown CoAP response format ${response.format}`, { severity: _.severity.warn });
 			return response.payload;
 	}
 }

@@ -38,6 +38,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 // Reflect-polyfill laden
+// tslint:disable-next-line:no-var-requires
 require("reflect-metadata");
 // Eigene Module laden
 var node_coap_client_1 = require("node-coap-client");
@@ -107,18 +108,82 @@ var adapter = utils_1.default.adapter({
         // TODO: load known devices from ioBroker into <devices> & <objects>
         observeDevices();
     },
-    message: function (obj) {
-        // Some message was sent to adapter instance over message box. Used by email, pushover, text2speech, ...
-        if (typeof obj === "object" && obj.message) {
-            if (obj.command === "send") {
-                // e.g. send email or pushover or whatever
-                // console.log('send command');
-                // Send response in callback if required
-                if (obj.callback)
-                    adapter.sendTo(obj.from, obj.command, "Message received", obj.callback);
-            }
+    message: function (obj) { return __awaiter(_this, void 0, void 0, function () {
+        // responds to the adapter that sent the original message
+        function respond(response) {
+            if (obj.callback)
+                adapter.sendTo(obj.from, obj.command, response, obj.callback);
         }
-    },
+        // make required parameters easier
+        function requireParams() {
+            var params = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                params[_i] = arguments[_i];
+            }
+            if (!(params && params.length))
+                return true;
+            for (var _a = 0, params_1 = params; _a < params_1.length; _a++) {
+                var param = params_1[_a];
+                if (!(obj.message && obj.message.hasOwnProperty(param))) {
+                    respond(predefinedResponses.MISSING_PARAMETER(param));
+                    return false;
+                }
+            }
+            return true;
+        }
+        var predefinedResponses, _a, params, payload, resp;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    predefinedResponses = {
+                        ACK: { error: null },
+                        OK: { error: null, result: "ok" },
+                        ERROR_UNKNOWN_COMMAND: { error: "Unknown command!" },
+                        MISSING_PARAMETER: function (paramName) {
+                            return { error: 'missing parameter "' + paramName + '"!' };
+                        },
+                        COMMAND_RUNNING: { error: "command running" },
+                    };
+                    if (!obj) return [3 /*break*/, 4];
+                    _a = obj.command;
+                    switch (_a) {
+                        case "request": return [3 /*break*/, 1];
+                    }
+                    return [3 /*break*/, 3];
+                case 1:
+                    // require the path to be given
+                    if (!requireParams("path"))
+                        return [2 /*return*/];
+                    params = obj.message;
+                    params.method = params.method || "get";
+                    if (["get", "post", "put", "delete"].indexOf(params.method) === -1) {
+                        respond({ error: "unsupported request method \"" + params.method + "\"" });
+                        return [2 /*return*/];
+                    }
+                    global_1.Global.log("custom coap request: " + params.method.toUpperCase() + " \"" + requestBase + params.path + "\"", { level: global_1.Global.loglevels.on });
+                    payload = void 0;
+                    if (params.payload) {
+                        payload = JSON.stringify(params.payload);
+                        global_1.Global.log("sending custom payload: " + payload, { level: global_1.Global.loglevels.on });
+                        payload = Buffer.from(payload);
+                    }
+                    return [4 /*yield*/, node_coap_client_1.CoapClient.request("" + requestBase + params.path, params.method, payload)];
+                case 2:
+                    resp = _b.sent();
+                    respond({
+                        error: null, result: {
+                            code: resp.code.toString(),
+                            payload: parsePayload(resp),
+                        },
+                    });
+                    return [2 /*return*/];
+                case 3:
+                    respond(predefinedResponses.ERROR_UNKNOWN_COMMAND);
+                    return [2 /*return*/];
+                case 4: return [2 /*return*/];
+            }
+        });
+    }); },
     objectChange: function (id, obj) {
         global_1.Global.log("{{blue}} object with id " + id + " updated", { level: global_1.Global.loglevels.ridiculous });
         if (id.startsWith(adapter.namespace)) {
@@ -172,7 +237,7 @@ var adapter = utils_1.default.adapter({
                         else if (id.endsWith(".brightness")) {
                             light.merge({
                                 dimmer: val,
-                                transitionTime: 5 // TODO: <- make this configurable
+                                transitionTime: 5,
                             });
                         }
                         else if (id.endsWith(".color")) {
@@ -180,7 +245,7 @@ var adapter = utils_1.default.adapter({
                             light.merge({
                                 colorX: colorX,
                                 colorY: 27000,
-                                transitionTime: 5 // TODO: <- make this configurable
+                                transitionTime: 5,
                             });
                         }
                     }
@@ -566,12 +631,15 @@ function unsubscribeObjects(id) {
 }
 function parsePayload(response) {
     switch (response.format) {
-        case 0:
+        case 0: // text/plain
+        case null:
             return response.payload.toString("utf-8");
         case 50:
             var json = response.payload.toString("utf-8");
             return JSON.parse(json);
         default:
+            // dunno how to parse this
+            global_1.Global.log("unknown CoAP response format " + response.format, { severity: global_1.Global.severity.warn });
             return response.payload;
     }
 }
