@@ -44,6 +44,8 @@
     "url": "https://github.com/AlCalzone/ioBroker.tradfri"
   },
   "scripts": {
-    "test": "node node_modules/mocha/bin/mocha"
+    "test": "node node_modules/mocha/bin/mocha",
+    "lint": "npm run tslint \"src/**/*.ts\"",
+    "tslint": "tslint"
   }
 }

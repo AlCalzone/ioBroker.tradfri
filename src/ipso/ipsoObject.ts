@@ -1,6 +1,5 @@
 import { Global as _ } from "../lib/global";
-import { entries, values, DictionaryLike, composeObject } from "../lib/object-polyfill";
-
+import { composeObject, DictionaryLike, entries, values } from "../lib/object-polyfill";
 
 // common base class for all objects that are transmitted somehow
 export class IPSOObject {
@@ -66,32 +65,31 @@ export class IPSOObject {
 		return this;
 	}
 
-
 	/** serializes this object in order to transfer it via COAP */
 	public serialize(reference = null): DictionaryLike<any> {
 		const ret = {};
 
 		const serializeValue = (key, propName, value, refValue, transform?: PropertyTransform) => {
-			const required = isRequired(this, propName);
-			let ret = value;
+			const _required = isRequired(this, propName);
+			let _ret = value;
 			if (value instanceof IPSOObject) {
 				// if the value is another IPSOObject, then serialize that
-				ret = value.serialize(refValue);
+				_ret = value.serialize(refValue);
 				// if the serialized object contains no required properties, don't remember it
-				if (value.isSerializedObjectEmpty(ret)) return null;
+				if (value.isSerializedObjectEmpty(_ret)) return null;
 			} else {
 				// if the value is not the default one, then remember it
 				if (_.isdef(refValue)) {
-					if (!required && refValue === value) return null;
+					if (!_required && refValue === value) return null;
 				} else {
 					// there is no default value, just remember the actual value
 				}
 			}
-			if (transform) ret = transform(ret);
-			return ret;
+			if (transform) _ret = transform(_ret);
+			return _ret;
 		};
 
-		//const refObj = reference || getDefaultValues(this); //this.defaultValues;
+		// const refObj = reference || getDefaultValues(this); //this.defaultValues;
 		// check all set properties
 		for (const propName of Object.keys(this)) {
 			if (this.hasOwnProperty(propName)) {
@@ -141,7 +139,7 @@ export class IPSOObject {
 	 */
 	public clone(): this {
 		// create a new instance of the same object as this
-		const constructor = (this as Object).constructor;
+		const constructor = (this as object).constructor;
 		function F(): void {
 			return constructor.apply(this);
 		}
@@ -153,9 +151,8 @@ export class IPSOObject {
 		return (ret as IPSOObject).parse(serialized) as this;
 	}
 
-
 	private isSerializedObjectEmpty(obj: DictionaryLike<any>): boolean {
-		// Prüfen, ob eine nicht-benötigte Eigenschaft angegeben ist. => nicht leer
+		// PrÃ¼fen, ob eine nicht-benÃ¶tigte Eigenschaft angegeben ist. => nicht leer
 		for (const key of Object.keys(obj)) {
 			const propName = lookupKeyOrProperty(this, key);
 			if (!isRequired(this, propName)) {
@@ -167,13 +164,14 @@ export class IPSOObject {
 
 }
 
-
 // ===========================================================
 // define decorators so we can define all properties type-safe
+// tslint:disable:variable-name
 const METADATA_ipsoKey = Symbol("ipsoKey");
 const METADATA_required = Symbol("required");
 const METADATA_serializeWith = Symbol("serializeWith");
 const METADATA_deserializeWith = Symbol("deserializeWith");
+// tslint:enable:variable-name
 
 export type PropertyTransform = (value: any) => any;
 
@@ -181,7 +179,7 @@ export type PropertyTransform = (value: any) => any;
  * Defines the ipso key neccessary to serialize a property to a CoAP object
  */
 export const ipsoKey = (key: string): PropertyDecorator => {
-	return (target: Object, property: string | symbol) => {
+	return (target: object, property: string | symbol) => {
 		// get the class constructor
 		const constr = target.constructor;
 		// retrieve the current metadata
@@ -191,14 +189,14 @@ export const ipsoKey = (key: string): PropertyDecorator => {
 		metadata[key] = property;
 		// store back to the object
 		Reflect.defineMetadata(METADATA_ipsoKey, metadata, constr);
-	}
-}
+	};
+};
 /**
  * Looks up previously stored property ipso key definitions.
  * Returns a property name if the key was given, or the key if a property name was given.
  * @param keyOrProperty - ipso key or property name to lookup
  */
-function lookupKeyOrProperty(target: Object, keyOrProperty: string | symbol): string | symbol {
+function lookupKeyOrProperty(target: object, keyOrProperty: string | symbol): string | symbol {
 	// get the class constructor
 	const constr = target.constructor;
 	// retrieve the current metadata
@@ -210,7 +208,7 @@ function lookupKeyOrProperty(target: Object, keyOrProperty: string | symbol): st
 /**
  * Declares that a property is required to be present in a serialized CoAP object
  */
-export function required(target: Object, property: string | symbol): void {
+export function required(target: object, property: string | symbol): void {
 	// get the class constructor
 	const constr = target.constructor;
 	// retrieve the current metadata
@@ -224,10 +222,10 @@ export function required(target: Object, property: string | symbol): void {
  * Checks if a property is required to be present in a serialized CoAP object
  * @param property - property name to lookup
  */
-function isRequired(target: Object, property: string | symbol): boolean {
+function isRequired(target: object, property: string | symbol): boolean {
 	// get the class constructor
 	const constr = target.constructor;
-	console.log(`${(constr as Function).name}: checking if ${property} is required...`);
+	console.log(`${constr.name}: checking if ${property} is required...`);
 	// retrieve the current metadata
 	const metadata = Reflect.getMetadata(METADATA_required, constr) || {};
 	if (metadata.hasOwnProperty(property)) return metadata[property];
@@ -238,7 +236,7 @@ function isRequired(target: Object, property: string | symbol): boolean {
  * Defines the required transformations to serialize a property to a CoAP object
  */
 export const serializeWith = (transform: PropertyTransform): PropertyDecorator => {
-	return (target: Object, property: string | symbol) => {
+	return (target: object, property: string | symbol) => {
 		// get the class constructor
 		const constr = target.constructor;
 		// retrieve the current metadata
@@ -247,17 +245,19 @@ export const serializeWith = (transform: PropertyTransform): PropertyDecorator =
 		metadata[property] = transform;
 		// store back to the object
 		Reflect.defineMetadata(METADATA_serializeWith, metadata, constr);
-	}
-}
+	};
+};
 
+// tslint:disable:object-literal-key-quotes
 export const defaultSerializers: DictionaryLike<PropertyTransform> = {
 	"Boolean": (bool: boolean) => bool ? 1 : 0,
-}
+};
+// tslint:enable:object-literal-key-quotes
 
 /**
  * Retrieves the serializer for a given property
  */
-function getSerializer(target: Object, property: string | symbol): PropertyTransform {
+function getSerializer(target: object, property: string | symbol): PropertyTransform {
 	// get the class constructor
 	const constr = target.constructor;
 	// retrieve the current metadata
@@ -265,15 +265,16 @@ function getSerializer(target: Object, property: string | symbol): PropertyTrans
 	if (metadata.hasOwnProperty(property)) return metadata[property];
 	// If there's no custom serializer, try to find a default one
 	const type = getPropertyType(target, property);
-	if (type && type.name in defaultSerializers)
+	if (type && type.name in defaultSerializers) {
 		return defaultSerializers[type.name];
+	}
 }
 
 /**
  * Defines the required transformations to deserialize a property from a CoAP object
  */
 export const deserializeWith = (transform: PropertyTransform): PropertyDecorator => {
-	return (target: Object, property: string | symbol) => {
+	return (target: object, property: string | symbol) => {
 		// get the class constructor
 		const constr = target.constructor;
 		// retrieve the current metadata
@@ -282,18 +283,19 @@ export const deserializeWith = (transform: PropertyTransform): PropertyDecorator
 		metadata[property] = transform;
 		// store back to the object
 		Reflect.defineMetadata(METADATA_deserializeWith, metadata, constr);
-	}
-}
+	};
+};
 
+// tslint:disable:object-literal-key-quotes
 export const defaultDeserializers: DictionaryLike<PropertyTransform> = {
 	"Boolean": (raw: any) => raw === 1 || raw === "true" || raw === "on" || raw === true,
-}
-
+};
+// tslint:enable:object-literal-key-quotes
 
 /**
  * Retrieves the deserializer for a given property
  */
-function getDeserializer(target: Object, property: string | symbol): PropertyTransform {
+function getDeserializer(target: object, property: string | symbol): PropertyTransform {
 	// get the class constructor
 	const constr = target.constructor;
 	// retrieve the current metadata
@@ -312,6 +314,7 @@ function getDeserializer(target: Object, property: string | symbol): PropertyTra
 /**
  * Finds the design type for a given property
  */
-function getPropertyType(target: Object, property: string | symbol): Function {
+// tslint:disable-next-line:ban-types
+function getPropertyType(target: object, property: string | symbol): Function {
 	return Reflect.getMetadata("design:type", target, property);
 }

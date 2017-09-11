@@ -54,7 +54,6 @@ var NotificationTypes;
     NotificationTypes[NotificationTypes["UNKNOWN2"] = 1005] = "UNKNOWN2";
     NotificationTypes[NotificationTypes["LOSS_OF_INTERNET_CONNECTIVITY"] = 5001] = "LOSS_OF_INTERNET_CONNECTIVITY";
 })(NotificationTypes = exports.NotificationTypes || (exports.NotificationTypes = {}));
-;
 /**
  * Turns a key=value-Array into a Dictionary object
  */

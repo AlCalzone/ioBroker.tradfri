@@ -1,6 +1,6 @@
-import { IPSODevice } from "./ipsoDevice";
-import { IPSOObject, ipsoKey, serializeWith, deserializeWith, PropertyTransform, required } from "./ipsoObject";
 import { DictionaryLike } from "../lib/object-polyfill";
+import { IPSODevice } from "./ipsoDevice";
+import { deserializeWith, ipsoKey, IPSOObject, PropertyTransform, required, serializeWith } from "./ipsoObject";
 
 export class Notification extends IPSODevice {
 
@@ -22,8 +22,7 @@ export enum NotificationTypes {
 	UNKNOWN1 = 1004,
 	UNKNOWN2 = 1005,
 	LOSS_OF_INTERNET_CONNECTIVITY = 5001,
-};
-
+}
 
 /**
  * Turns a key=value-Array into a Dictionary object

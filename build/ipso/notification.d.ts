@@ -1,5 +1,5 @@
-import { IPSODevice } from "./ipsoDevice";
 import { DictionaryLike } from "../lib/object-polyfill";
+import { IPSODevice } from "./ipsoDevice";
 export declare class Notification extends IPSODevice {
     event: NotificationTypes;
     details: DictionaryLike<string>;

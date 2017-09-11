@@ -1,4 +1,4 @@
-﻿import { DictionaryLike, entries, filter as objFilter } from "./object-polyfill";
+import { DictionaryLike, entries, filter as objFilter } from "./object-polyfill";
 import { promisify, promisifyNoError } from "./promises";
 
 // ==================================
