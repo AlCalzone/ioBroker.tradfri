@@ -55,5 +55,5 @@ __decorate([
     ipsoObject_1.ipsoKey("9070"),
     __metadata("design:type", Boolean)
 ], Scene.prototype, "useCurrentLightSettings", void 0);
-exports.default = Scene;
+exports.Scene = Scene;
 //# sourceMappingURL=scene.js.map

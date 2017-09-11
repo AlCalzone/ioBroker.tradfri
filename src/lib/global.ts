@@ -73,7 +73,7 @@ export class Global {
 		Global._adapter = adapter;
 	}
 
-	private static _loglevel = Global.loglevels.on;
+	private static _loglevel = Global.loglevels.ridiculous;
 	public static get loglevel() { return Global._loglevel; }
 	public static set loglevel(value) { Global._loglevel = value; }
 

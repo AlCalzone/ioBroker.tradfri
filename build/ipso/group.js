@@ -46,6 +46,7 @@ __decorate([
 __decorate([
     ipsoObject_1.ipsoKey("9018"),
     ipsoObject_1.deserializeWith(function (obj) { return parseAccessoryLink(obj); }),
+    ipsoObject_1.serializeWith(function (ids) { return toAccessoryLink(ids); }),
     __metadata("design:type", Array)
 ], Group.prototype, "deviceIDs", void 0);
 exports.Group = Group;
@@ -54,5 +55,12 @@ function parseAccessoryLink(link) {
     var hsLink = link["15002"];
     var deviceIDs = hsLink["9003"];
     return deviceIDs;
+}
+function toAccessoryLink(ids) {
+    return {
+        "15002": {
+            "9003": ids
+        }
+    };
 }
 //# sourceMappingURL=group.js.map

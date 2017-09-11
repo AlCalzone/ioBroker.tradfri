@@ -1,4 +1,4 @@
-import fs = require('fs');
+import fs = require("fs");
 
 declare global {
 	namespace ioBroker {
@@ -16,7 +16,7 @@ declare global {
 			device_not_connected = 0x42,
 			sensor_not_connected = 0x82,
 			device_reports_error = 0x44,
-			sensor_reports_error = 0x84
+			sensor_reports_error = 0x84,
 		}
 
 		interface State {
@@ -44,7 +44,7 @@ declare global {
 			/** Optional comment */
 			c?: string;
 		}
-		//interface States { }
+
 		type States = any; // TODO implement
 
 		type ObjectType = "state" | "channel" | "device";
@@ -100,23 +100,22 @@ declare global {
 			type: "state";
 			common: StateCommon;
 		} | {
-				/** The ID of this object */
-				_id?: string;
-				native: DictionaryLike<any>;
-				enums?: DictionaryLike<string>;
-				type: "channel";
-				common: ChannelCommon;
-			} | {
-				/** The ID of this object */
-				_id?: string;
-				native: DictionaryLike<any>;
-				enums?: DictionaryLike<string>;
-				type: "device";
-				common: ObjectCommon; //TODO: any definition for device?
-			};
-		//interface Objects { }
-		type Objects = any; // TODO implement
+			/** The ID of this object */
+			_id?: string;
+			native: DictionaryLike<any>;
+			enums?: DictionaryLike<string>;
+			type: "channel";
+			common: ChannelCommon;
+		} | {
+			/** The ID of this object */
+			_id?: string;
+			native: DictionaryLike<any>;
+			enums?: DictionaryLike<string>;
+			type: "device";
+			common: ObjectCommon; // TODO: any definition for device?
+		};
 
+		type Objects = any; // TODO implement
 
 		interface Logger {
 			/** log message with debug level */
@@ -165,8 +164,6 @@ declare global {
 			callback: MessageCallbackInfo;
 		}
 
-
-
 		type EnumList = string | string[];
 
 		interface Enum { }
@@ -179,7 +176,6 @@ declare global {
 			modifiedAt: number;
 			createdAt: number;
 		}
-
 
 		interface GetHistoryOptions {
 			instance?: string;
@@ -363,7 +359,6 @@ declare global {
 			 * @param id - The id of the object including namespace
 			 */
 			delForeignObject(id: string, options?: any, callback?: GenericCallback): void;
-
 
 			// ==============================
 			// states
