@@ -978,7 +978,7 @@ function extendGroup(group: Group) {
 	}
 }
 
-function updatePossibleScenes(group: Group): void {
+async function updatePossibleScenes(group: Group): Promise<void> {
 	// if this group is not in the dictionary, don't do anything
 	if (!(group.instanceId in groups)) return;
 	// find out which is the root object id
@@ -991,9 +991,10 @@ function updatePossibleScenes(group: Group): void {
 		const activeSceneObj = objects[scenesId];
 		const scenes = groups[group.instanceId].scenes;
 		// map scene ids and names to the dropdown
-		(activeSceneObj.common as ioBroker.StateCommon).states = composeObject(
+		const states = composeObject(
 			Object.keys(scenes).map(id => [id, scenes[id].name] as [string, string]),
 		);
+		await adapter.extendObject(scenesId, { common: { states } } as any /* This is a partial of a partial, not correctly defined in ioBroker.d.ts */);
 	}
 }
 

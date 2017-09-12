@@ -50,6 +50,7 @@ var str2regex_1 = require("./lib/str2regex");
 // Datentypen laden
 var accessory_1 = require("./ipso/accessory");
 var group_1 = require("./ipso/group");
+var scene_1 = require("./ipso/scene");
 // Adapter-Utils laden
 var utils_1 = require("./lib/utils");
 // Konvertierungsfunktionen
@@ -66,7 +67,6 @@ var customObjectSubscriptions = {
 var observers = [];
 // dictionary of known devices
 var devices = {};
-// dictionary of known groups
 var groups = {};
 // dictionary of ioBroker objects
 var objects = {};
@@ -219,7 +219,7 @@ var adapter = utils_1.default.adapter({
                 }
                 else if (obj.type === "channel" && instanceId in groups && groups[instanceId] != null) {
                     // if this group is in the groups list, check for changed properties
-                    var grp = groups[instanceId];
+                    var grp = groups[instanceId].group;
                     if (obj.common && obj.common.name !== grp.name) {
                         // the name has changed, notify the gateway
                         global_1.Global.log("the group " + id + " was renamed to \"" + obj.common.name + "\"");
@@ -281,7 +281,7 @@ var adapter = utils_1.default.adapter({
                     url = void 0;
                     switch (rootObj.native.type) {
                         case "group":
-                            group = groups[rootObj.native.instanceId];
+                            group = groups[rootObj.native.instanceId].group;
                             newGroup = group.clone();
                             if (id.endsWith("state")) {
                                 // just turn on or off
@@ -378,20 +378,57 @@ var adapter = utils_1.default.adapter({
 });
 // ==================================
 // manage devices
+/** Normalizes the path to a resource, so it can be used for storing the observer */
+function normalizeResourcePath(path) {
+    path = path || "";
+    while (path.startsWith("/"))
+        path = path.substring(1);
+    while (path.endsWith("/"))
+        path = path.substring(0, -1);
+    return path;
+}
+/**
+ * Observes a resource at the given url and calls the callback when the information is updated
+ * @param path The path of the resource (without requestBase)
+ * @param callback The callback to be invoked when the resource updates
+ */
+function observeResource(path, callback) {
+    return __awaiter(this, void 0, void 0, function () {
+        var observerUrl;
+        return __generator(this, function (_a) {
+            path = normalizeResourcePath(path);
+            observerUrl = "" + requestBase + path;
+            if (observers.indexOf(observerUrl) > -1)
+                return [2 /*return*/];
+            // start observing
+            observers.push(observerUrl);
+            return [2 /*return*/, node_coap_client_1.CoapClient.observe(observerUrl, "get", callback)];
+        });
+    });
+}
+/**
+ * Stops observing a resource
+ * @param path The path of the resource (without requestBase)
+ */
+function stopObservingResource(path) {
+    path = normalizeResourcePath(path);
+    // remove observer
+    var observerUrl = "" + requestBase + path;
+    var index = observers.indexOf(observerUrl);
+    if (index === -1)
+        return;
+    node_coap_client_1.CoapClient.stopObserving(observerUrl);
+    observers.splice(index, 1);
+}
+/** Sets up an observer for all devices */
 function observeDevices() {
     return __awaiter(this, void 0, void 0, function () {
-        var allDevicesUrl;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0:
-                    allDevicesUrl = "" + requestBase + endpoints_1.default.devices;
-                    if (!(observers.indexOf(allDevicesUrl) === -1)) return [3 /*break*/, 2];
-                    observers.push(allDevicesUrl);
-                    return [4 /*yield*/, node_coap_client_1.CoapClient.observe(allDevicesUrl, "get", coapCb_getAllDevices)];
+                case 0: return [4 /*yield*/, observeResource(endpoints_1.default.devices, coapCb_getAllDevices)];
                 case 1:
                     _a.sent();
-                    _a.label = 2;
-                case 2: return [2 /*return*/];
+                    return [2 /*return*/];
             }
         });
     });
@@ -414,12 +451,7 @@ function coapCb_getAllDevices(response) {
                     addedKeys = array_extensions_1.except(newKeys, oldKeys);
                     global_1.Global.log("adding devices with keys " + JSON.stringify(addedKeys), { level: global_1.Global.loglevels.ridiculous });
                     addDevices = addedKeys.map(function (id) {
-                        var observerUrl = "" + requestBase + endpoints_1.default.devices + "/" + id;
-                        if (observers.indexOf(observerUrl) > -1)
-                            return;
-                        // start observing
-                        observers.push(observerUrl);
-                        return node_coap_client_1.CoapClient.observe(observerUrl, "get", function (resp) { return coap_getDevice_cb(id, resp); });
+                        return observeResource(endpoints_1.default.devices + "/" + id, function (resp) { return coap_getDevice_cb(id, resp); });
                     });
                     return [4 /*yield*/, Promise.all(addDevices)];
                 case 1:
@@ -431,12 +463,7 @@ function coapCb_getAllDevices(response) {
                         if (devices.hasOwnProperty(id))
                             delete devices[id];
                         // remove observer
-                        var observerUrl = "" + requestBase + endpoints_1.default.devices + "/" + id;
-                        var index = observers.indexOf(observerUrl);
-                        if (index === -1)
-                            return;
-                        node_coap_client_1.CoapClient.stopObserving(observerUrl);
-                        observers.splice(index, 1);
+                        stopObservingResource(endpoints_1.default.devices + "/" + id);
                         // TODO: delete ioBroker device
                     });
                     return [2 /*return*/];
@@ -459,20 +486,15 @@ function coap_getDevice_cb(instanceId, response) {
     // create ioBroker device
     extendDevice(accessory);
 }
+/** Sets up an observer for all groups */
 function observeGroups() {
     return __awaiter(this, void 0, void 0, function () {
-        var allGroups;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0:
-                    allGroups = "" + requestBase + endpoints_1.default.groups;
-                    if (!(observers.indexOf(allGroups) === -1)) return [3 /*break*/, 2];
-                    observers.push(allGroups);
-                    return [4 /*yield*/, node_coap_client_1.CoapClient.observe(allGroups, "get", coapCb_getAllGroups)];
+                case 0: return [4 /*yield*/, observeResource(endpoints_1.default.groups, coapCb_getAllGroups)];
                 case 1:
                     _a.sent();
-                    _a.label = 2;
-                case 2: return [2 /*return*/];
+                    return [2 /*return*/];
             }
         });
     });
@@ -495,12 +517,7 @@ function coapCb_getAllGroups(response) {
                     addedKeys = array_extensions_1.except(newKeys, oldKeys);
                     global_1.Global.log("adding groups with keys " + JSON.stringify(addedKeys), { level: global_1.Global.loglevels.ridiculous });
                     addGroups = addedKeys.map(function (id) {
-                        var observerUrl = "" + requestBase + endpoints_1.default.groups + "/" + id;
-                        if (observers.indexOf(observerUrl) > -1)
-                            return;
-                        // start observing
-                        observers.push(observerUrl);
-                        return node_coap_client_1.CoapClient.observe(observerUrl, "get", function (resp) { return coap_getGroup_cb(id, resp); });
+                        return observeResource(endpoints_1.default.groups + "/" + id, function (resp) { return coap_getGroup_cb(id, resp); });
                     });
                     return [4 /*yield*/, Promise.all(addGroups)];
                 case 1:
@@ -512,12 +529,7 @@ function coapCb_getAllGroups(response) {
                         if (devices.hasOwnProperty(id))
                             delete devices[id];
                         // remove observer
-                        var observerUrl = "" + requestBase + endpoints_1.default.groups + "/" + id;
-                        var index = observers.indexOf(observerUrl);
-                        if (index === -1)
-                            return;
-                        node_coap_client_1.CoapClient.stopObserving(observerUrl);
-                        observers.splice(index, 1);
+                        stopObservingResource(endpoints_1.default.groups + "/" + id);
                         // TODO: delete ioBroker device
                     });
                     return [2 /*return*/];
@@ -535,9 +547,67 @@ function coap_getGroup_cb(instanceId, response) {
     // parse group info
     var group = (new group_1.Group()).parse(result);
     // remember the group object, so we can later use it as a reference for updates
-    groups[instanceId] = group;
+    groups[instanceId] = {
+        group: group,
+        scenes: {},
+    };
     // create ioBroker states
     extendGroup(group);
+    // and load scene information
+    observeResource(endpoints_1.default.scenes + "/" + instanceId, function (resp) { return coap_getAllScenes_cb(instanceId, resp); });
+}
+// gets called whenever "get /15005/<groupId>" updates
+function coap_getAllScenes_cb(groupId, response) {
+    return __awaiter(this, void 0, void 0, function () {
+        var groupInfo, newScenes, oldKeys, newKeys, addedKeys, addScenes, removedKeys;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    if (response.code.toString() !== "2.05") {
+                        global_1.Global.log("unexpected response (" + response.code.toString() + ") to getAllScenes(" + groupId + ").", { severity: global_1.Global.severity.error });
+                        return [2 /*return*/];
+                    }
+                    groupInfo = groups[groupId];
+                    newScenes = parsePayload(response);
+                    global_1.Global.log("got all scenes in group " + groupId + ": " + JSON.stringify(newScenes));
+                    oldKeys = Object.keys(groupInfo.scenes).map(function (k) { return +k; }).sort();
+                    newKeys = newScenes.sort();
+                    addedKeys = array_extensions_1.except(newKeys, oldKeys);
+                    global_1.Global.log("adding scenes with keys " + JSON.stringify(addedKeys) + " to group " + groupId, { level: global_1.Global.loglevels.ridiculous });
+                    addScenes = addedKeys.map(function (id) {
+                        return observeResource(endpoints_1.default.scenes + "/" + groupId + "/" + id, function (resp) { return coap_getScene_cb(groupId, id, resp); });
+                    });
+                    return [4 /*yield*/, Promise.all(addScenes)];
+                case 1:
+                    _a.sent();
+                    removedKeys = array_extensions_1.except(oldKeys, newKeys);
+                    global_1.Global.log("removing scenes with keys " + JSON.stringify(removedKeys) + " from group " + groupId, { level: global_1.Global.loglevels.ridiculous });
+                    removedKeys.forEach(function (id) {
+                        // remove device from dictionary
+                        if (groupInfo.scenes.hasOwnProperty(id))
+                            delete groupInfo.scenes[id];
+                        // remove observer
+                        stopObservingResource(endpoints_1.default.scenes + "/" + groupId + "/" + id);
+                        // TODO: delete ioBroker device
+                    });
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+// gets called whenever "get /15005/<groupId>/<instanceId>" updates
+function coap_getScene_cb(groupId, instanceId, response) {
+    if (response.code.toString() !== "2.05") {
+        global_1.Global.log("unexpected response (" + response.code.toString() + ") to getScene(" + groupId + ", " + instanceId + ").", { severity: global_1.Global.severity.error });
+        return;
+    }
+    var result = parsePayload(response);
+    // parse scene info
+    var scene = (new scene_1.Scene()).parse(result);
+    // remember the scene object, so we can later use it as a reference for updates
+    groups[groupId].scenes[instanceId] = scene;
+    // Update the scene dropdown for the group
+    updatePossibleScenes(groups[groupId].group);
 }
 /**
  * Returns the ioBroker id of the root object for the given state
@@ -898,6 +968,30 @@ function extendGroup(group) {
         });
         Promise.all(createObjects);
     }
+}
+function updatePossibleScenes(group) {
+    return __awaiter(this, void 0, void 0, function () {
+        var objId, scenesId, activeSceneObj, scenes_1, states;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    // if this group is not in the dictionary, don't do anything
+                    if (!(group.instanceId in groups))
+                        return [2 /*return*/];
+                    objId = calcGroupId(group);
+                    scenesId = objId + ".activeScene";
+                    if (!global_1.Global.isdef(objects[scenesId])) return [3 /*break*/, 2];
+                    activeSceneObj = objects[scenesId];
+                    scenes_1 = groups[group.instanceId].scenes;
+                    states = object_polyfill_1.composeObject(Object.keys(scenes_1).map(function (id) { return [id, scenes_1[id].name]; }));
+                    return [4 /*yield*/, adapter.extendObject(scenesId, { common: { states: states } } /* This is a partial of a partial, not correctly defined in ioBroker.d.ts */)];
+                case 1:
+                    _a.sent();
+                    _a.label = 2;
+                case 2: return [2 /*return*/];
+            }
+        });
+    });
 }
 /**
  * Renames a device
