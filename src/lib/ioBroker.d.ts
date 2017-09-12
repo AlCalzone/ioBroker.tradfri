@@ -76,8 +76,19 @@ declare global {
 			/** role of the state (used in user interfaces to indicate which widget to choose) */
 			role: string;
 
-			/** all possible states */
-			states?: any[];
+			/**
+			 * Dictionary of possible values for this state in the form
+			 * <pre>
+			 * {
+			 *     "internal value 1": "displayed value 1",
+			 *     "internal value 2": "displayed value 2",
+			 *     ...
+			 * }
+			 * </pre>
+			 * In old ioBroker versions, this could also be a string of the form
+			 * "val1:text1;val2:text2" (now deprecated)
+			 */
+			states?: DictionaryLike<string> | string;
 
 			/** ID of a helper state indicating if the handler of this state is working */
 			workingID?: string;

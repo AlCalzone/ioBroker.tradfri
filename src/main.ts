@@ -9,7 +9,7 @@ import { CoapClient as coap, CoapResponse } from "node-coap-client";
 import coapEndpoints from "./ipso/endpoints";
 import { except } from "./lib/array-extensions";
 import { ExtendedAdapter, Global as _ } from "./lib/global";
-import { DictionaryLike, dig, entries, filter, values } from "./lib/object-polyfill";
+import { composeObject, DictionaryLike, dig, entries, filter, values } from "./lib/object-polyfill";
 import { str2regex } from "./lib/str2regex";
 
 // Datentypen laden
@@ -45,7 +45,11 @@ const observers: string[] = [];
 // dictionary of known devices
 const devices: DictionaryLike<Accessory> = {};
 // dictionary of known groups
-const groups: DictionaryLike<Group> = {};
+interface GroupInfo {
+	group: Group;
+	scenes: DictionaryLike<Scene>;
+}
+const groups: DictionaryLike<GroupInfo> = {};
 // dictionary of ioBroker objects
 const objects: DictionaryLike<ioBroker.Object> = {};
 
@@ -189,7 +193,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 					}
 				} else if (obj.type === "channel" && instanceId in groups && groups[instanceId] != null) {
 					// if this group is in the groups list, check for changed properties
-					const grp = groups[instanceId];
+					const grp = groups[instanceId].group;
 					if (obj.common && obj.common.name !== grp.name) {
 						// the name has changed, notify the gateway
 						_.log(`the group ${id} was renamed to "${obj.common.name}"`);
@@ -256,7 +260,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 				switch (rootObj.native.type) {
 					case "group":
 						// read the instanceId and get a reference value
-						const group = groups[rootObj.native.instanceId];
+						const group = groups[rootObj.native.instanceId].group;
 						// create a copy to modify
 						const newGroup = group.clone();
 
@@ -355,12 +359,55 @@ let adapter: ExtendedAdapter = utils.adapter({
 // ==================================
 // manage devices
 
+/** Normalizes the path to a resource, so it can be used for storing the observer */
+function normalizeResourcePath(path: string): string {
+	path = path || "";
+	while (path.startsWith("/")) path = path.substring(1);
+	while (path.endsWith("/")) path = path.substring(0, -1);
+	return path;
+}
+
+/**
+ * Observes a resource at the given url and calls the callback when the information is updated
+ * @param path The path of the resource (without requestBase)
+ * @param callback The callback to be invoked when the resource updates
+ */
+async function observeResource(path: string, callback: (resp: CoapResponse) => void): Promise<void> {
+
+	path = normalizeResourcePath(path);
+
+	// check if we are already observing this resource
+	const observerUrl = `${requestBase}${path}`;
+	if (observers.indexOf(observerUrl) > -1) return;
+
+	// start observing
+	observers.push(observerUrl);
+	return coap.observe(observerUrl, "get", callback);
+}
+
+/**
+ * Stops observing a resource
+ * @param path The path of the resource (without requestBase)
+ */
+function stopObservingResource(path: string): void {
+
+	path = normalizeResourcePath(path);
+
+	// remove observer
+	const observerUrl = `${requestBase}${path}`;
+	const index = observers.indexOf(observerUrl);
+	if (index === -1) return;
+
+	coap.stopObserving(observerUrl);
+	observers.splice(index, 1);
+}
+
+/** Sets up an observer for all devices */
 async function observeDevices() {
-	const allDevicesUrl = `${requestBase}${coapEndpoints.devices}`;
-	if (observers.indexOf(allDevicesUrl) === -1) {
-		observers.push(allDevicesUrl);
-		await coap.observe(allDevicesUrl, "get", coapCb_getAllDevices);
-	}
+	await observeResource(
+		coapEndpoints.devices,
+		coapCb_getAllDevices,
+	);
 }
 // gets called whenever "get /15001" updates
 async function coapCb_getAllDevices(response: CoapResponse) {
@@ -382,13 +429,8 @@ async function coapCb_getAllDevices(response: CoapResponse) {
 	_.log(`adding devices with keys ${JSON.stringify(addedKeys)}`, { level: _.loglevels.ridiculous });
 
 	const addDevices = addedKeys.map(id => {
-		const observerUrl = `${requestBase}${coapEndpoints.devices}/${id}`;
-		if (observers.indexOf(observerUrl) > -1) return;
-
-		// start observing
-		observers.push(observerUrl);
-		return coap.observe(
-			observerUrl, "get",
+		return observeResource(
+			`${coapEndpoints.devices}/${id}`,
 			(resp) => coap_getDevice_cb(id, resp),
 		);
 	});
@@ -401,12 +443,7 @@ async function coapCb_getAllDevices(response: CoapResponse) {
 		if (devices.hasOwnProperty(id)) delete devices[id];
 
 		// remove observer
-		const observerUrl = `${requestBase}${coapEndpoints.devices}/${id}`;
-		const index = observers.indexOf(observerUrl);
-		if (index === -1) return;
-
-		coap.stopObserving(observerUrl);
-		observers.splice(index, 1);
+		stopObservingResource(`${coapEndpoints.devices}/${id}`);
 
 		// TODO: delete ioBroker device
 	});
@@ -429,12 +466,12 @@ function coap_getDevice_cb(instanceId: number, response: CoapResponse) {
 	extendDevice(accessory);
 }
 
+/** Sets up an observer for all groups */
 async function observeGroups() {
-	const allGroups = `${requestBase}${coapEndpoints.groups}`;
-	if (observers.indexOf(allGroups) === -1) {
-		observers.push(allGroups);
-		await coap.observe(allGroups, "get", coapCb_getAllGroups);
-	}
+	await observeResource(
+		coapEndpoints.groups,
+		coapCb_getAllGroups,
+	);
 }
 // gets called whenever "get /15004" updates
 async function coapCb_getAllGroups(response: CoapResponse) {
@@ -456,13 +493,8 @@ async function coapCb_getAllGroups(response: CoapResponse) {
 	_.log(`adding groups with keys ${JSON.stringify(addedKeys)}`, { level: _.loglevels.ridiculous });
 
 	const addGroups = addedKeys.map(id => {
-		const observerUrl = `${requestBase}${coapEndpoints.groups}/${id}`;
-		if (observers.indexOf(observerUrl) > -1) return;
-
-		// start observing
-		observers.push(observerUrl);
-		return coap.observe(
-			observerUrl, "get",
+		return observeResource(
+			`${coapEndpoints.groups}/${id}`,
 			(resp) => coap_getGroup_cb(id, resp),
 		);
 	});
@@ -475,12 +507,7 @@ async function coapCb_getAllGroups(response: CoapResponse) {
 		if (devices.hasOwnProperty(id)) delete devices[id];
 
 		// remove observer
-		const observerUrl = `${requestBase}${coapEndpoints.groups}/${id}`;
-		const index = observers.indexOf(observerUrl);
-		if (index === -1) return;
-
-		coap.stopObserving(observerUrl);
-		observers.splice(index, 1);
+		stopObservingResource(`${coapEndpoints.groups}/${id}`);
 
 		// TODO: delete ioBroker device
 	});
@@ -497,9 +524,74 @@ function coap_getGroup_cb(instanceId: number, response: CoapResponse) {
 	// parse group info
 	const group = (new Group()).parse(result);
 	// remember the group object, so we can later use it as a reference for updates
-	groups[instanceId] = group;
+	groups[instanceId] = {
+		group,
+		scenes: {},
+	};
 	// create ioBroker states
 	extendGroup(group);
+	// and load scene information
+	observeResource(
+		`${coapEndpoints.scenes}/${instanceId}`,
+		(resp) => coap_getAllScenes_cb(instanceId, resp),
+	);
+}
+
+// gets called whenever "get /15005/<groupId>" updates
+async function coap_getAllScenes_cb(groupId: number, response: CoapResponse) {
+	if (response.code.toString() !== "2.05") {
+		_.log(`unexpected response (${response.code.toString()}) to getAllScenes(${groupId}).`, { severity: _.severity.error });
+		return;
+	}
+
+	const groupInfo = groups[groupId];
+	const newScenes = parsePayload(response);
+
+	_.log(`got all scenes in group ${groupId}: ${JSON.stringify(newScenes)}`);
+
+	// get old keys as int array
+	const oldKeys = Object.keys(groupInfo.scenes).map(k => +k).sort();
+	// get new keys as int array
+	const newKeys = newScenes.sort();
+	// translate that into added and removed devices
+	const addedKeys = except(newKeys, oldKeys);
+	_.log(`adding scenes with keys ${JSON.stringify(addedKeys)} to group ${groupId}`, { level: _.loglevels.ridiculous });
+
+	const addScenes = addedKeys.map(id => {
+		return observeResource(
+			`${coapEndpoints.scenes}/${groupId}/${id}`,
+			(resp) => coap_getScene_cb(groupId, id, resp),
+		);
+	});
+	await Promise.all(addScenes);
+
+	const removedKeys = except(oldKeys, newKeys);
+	_.log(`removing scenes with keys ${JSON.stringify(removedKeys)} from group ${groupId}`, { level: _.loglevels.ridiculous });
+	removedKeys.forEach(id => {
+		// remove device from dictionary
+		if (groupInfo.scenes.hasOwnProperty(id)) delete groupInfo.scenes[id];
+
+		// remove observer
+		stopObservingResource(`${coapEndpoints.scenes}/${groupId}/${id}`);
+
+		// TODO: delete ioBroker device
+	});
+}
+
+// gets called whenever "get /15005/<groupId>/<instanceId>" updates
+function coap_getScene_cb(groupId: number, instanceId: number, response: CoapResponse) {
+
+	if (response.code.toString() !== "2.05") {
+		_.log(`unexpected response (${response.code.toString()}) to getScene(${groupId}, ${instanceId}).`, { severity: _.severity.error });
+		return;
+	}
+	const result = parsePayload(response);
+	// parse scene info
+	const scene = (new Scene()).parse(result);
+	// remember the scene object, so we can later use it as a reference for updates
+	groups[groupId].scenes[instanceId] = scene;
+	// Update the scene dropdown for the group
+	updatePossibleScenes(groups[groupId].group);
 }
 
 /**
@@ -883,6 +975,25 @@ function extendGroup(group: Group) {
 			;
 		Promise.all(createObjects);
 
+	}
+}
+
+function updatePossibleScenes(group: Group): void {
+	// if this group is not in the dictionary, don't do anything
+	if (!(group.instanceId in groups)) return;
+	// find out which is the root object id
+	const objId = calcGroupId(group);
+	// scenes are stored under <objId>.activeScene
+	const scenesId = `${objId}.activeScene`;
+
+	// only extend that object if it exists already
+	if (_.isdef(objects[scenesId])) {
+		const activeSceneObj = objects[scenesId];
+		const scenes = groups[group.instanceId].scenes;
+		// map scene ids and names to the dropdown
+		(activeSceneObj.common as ioBroker.StateCommon).states = composeObject(
+			Object.keys(scenes).map(id => [id, scenes[id].name] as [string, string]),
+		);
 	}
 }
 
