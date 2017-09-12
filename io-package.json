@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "0.2.4",
+        "version": "0.2.5",
         "news": {
             "0.1.0": {
                 "en": "initial release. Functionality limited to controlling lightbulbs.",
@@ -42,6 +42,10 @@
             "0.2.4": {
                 "en": "Add support for groups and scenes (partial)",
                 "de": "Unterstützung für Gruppen und Szenen (partiell) hinzugefügt."
+            },
+            "0.2.5": {
+                "en": "Selection of scenes from the admin UI is now possible.",
+                "de": "Auswahl von Szenen in der Admin UI ist jetzt möglich."
             }
         },
         "title": "IKEA Trådfri",
