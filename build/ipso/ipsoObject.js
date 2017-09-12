@@ -78,19 +78,19 @@ var IPSOObject = (function () {
         if (reference === void 0) { reference = null; }
         var ret = {};
         var serializeValue = function (key, propName, value, refValue, transform) {
-            var required = isRequired(_this, propName);
-            var ret = value;
+            var _required = isRequired(_this, propName);
+            var _ret = value;
             if (value instanceof IPSOObject) {
                 // if the value is another IPSOObject, then serialize that
-                ret = value.serialize(refValue);
+                _ret = value.serialize(refValue);
                 // if the serialized object contains no required properties, don't remember it
-                if (value.isSerializedObjectEmpty(ret))
+                if (value.isSerializedObjectEmpty(_ret))
                     return null;
             }
             else {
                 // if the value is not the default one, then remember it
                 if (global_1.Global.isdef(refValue)) {
-                    if (!required && refValue === value)
+                    if (!_required && refValue === value)
                         return null;
                 }
                 else {
@@ -98,8 +98,8 @@ var IPSOObject = (function () {
                 }
             }
             if (transform)
-                ret = transform(ret);
-            return ret;
+                _ret = transform(_ret);
+            return _ret;
         };
         var _loop_1 = function (propName) {
             if (this_1.hasOwnProperty(propName)) {
@@ -142,7 +142,7 @@ var IPSOObject = (function () {
             }
         };
         var this_1 = this;
-        //const refObj = reference || getDefaultValues(this); //this.defaultValues;
+        // const refObj = reference || getDefaultValues(this); //this.defaultValues;
         // check all set properties
         for (var _i = 0, _a = Object.keys(this); _i < _a.length; _i++) {
             var propName = _a[_i];
@@ -167,7 +167,7 @@ var IPSOObject = (function () {
         return ret.parse(serialized);
     };
     IPSOObject.prototype.isSerializedObjectEmpty = function (obj) {
-        // Pr�fen, ob eine nicht-ben�tigte Eigenschaft angegeben ist. => nicht leer
+        // Prüfen, ob eine nicht-benötigte Eigenschaft angegeben ist. => nicht leer
         for (var _i = 0, _a = Object.keys(obj); _i < _a.length; _i++) {
             var key = _a[_i];
             var propName = lookupKeyOrProperty(this, key);
@@ -182,6 +182,7 @@ var IPSOObject = (function () {
 exports.IPSOObject = IPSOObject;
 // ===========================================================
 // define decorators so we can define all properties type-safe
+// tslint:disable:variable-name
 var METADATA_ipsoKey = Symbol("ipsoKey");
 var METADATA_required = Symbol("required");
 var METADATA_serializeWith = Symbol("serializeWith");
@@ -258,9 +259,11 @@ exports.serializeWith = function (transform) {
         Reflect.defineMetadata(METADATA_serializeWith, metadata, constr);
     };
 };
+// tslint:disable:object-literal-key-quotes
 exports.defaultSerializers = {
     "Boolean": function (bool) { return bool ? 1 : 0; },
 };
+// tslint:enable:object-literal-key-quotes
 /**
  * Retrieves the serializer for a given property
  */
@@ -273,8 +276,9 @@ function getSerializer(target, property) {
         return metadata[property];
     // If there's no custom serializer, try to find a default one
     var type = getPropertyType(target, property);
-    if (type && type.name in exports.defaultSerializers)
+    if (type && type.name in exports.defaultSerializers) {
         return exports.defaultSerializers[type.name];
+    }
 }
 /**
  * Defines the required transformations to deserialize a property from a CoAP object
@@ -290,9 +294,11 @@ exports.deserializeWith = function (transform) {
         Reflect.defineMetadata(METADATA_deserializeWith, metadata, constr);
     };
 };
+// tslint:disable:object-literal-key-quotes
 exports.defaultDeserializers = {
     "Boolean": function (raw) { return raw === 1 || raw === "true" || raw === "on" || raw === true; },
 };
+// tslint:enable:object-literal-key-quotes
 /**
  * Retrieves the deserializer for a given property
  */
@@ -313,6 +319,7 @@ function getDeserializer(target, property) {
 /**
  * Finds the design type for a given property
  */
+// tslint:disable-next-line:ban-types
 function getPropertyType(target, property) {
     return Reflect.getMetadata("design:type", target, property);
 }

@@ -1,4 +1,4 @@
-﻿import { entries } from "./object-polyfill";
+import { entries } from "./object-polyfill";
 
 export interface Enumeration { [id: string]: number; }
 

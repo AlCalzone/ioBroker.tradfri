@@ -20,8 +20,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var ipsoDevice_1 = require("./ipsoDevice");
-var lightSetting_1 = require("./lightSetting");
 var ipsoObject_1 = require("./ipsoObject");
+var lightSetting_1 = require("./lightSetting");
 var Scene = (function (_super) {
     __extends(Scene, _super);
     function Scene() {
@@ -55,5 +55,5 @@ __decorate([
     ipsoObject_1.ipsoKey("9070"),
     __metadata("design:type", Boolean)
 ], Scene.prototype, "useCurrentLightSettings", void 0);
-exports.default = Scene;
+exports.Scene = Scene;
 //# sourceMappingURL=scene.js.map

@@ -18,7 +18,40 @@ Windows: [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/AlCalzo
 1. In the ioBroker GUI, add an adapter instance. 
 1. Configure the instance by entering the IP/hostname of your gateway and the security code that can be found on the label at the bottom.
 
+## Sending custom CoAP packets
+You can send custom CoAP packets from other adapters by using `sendTo`. Example from JavaScript:
+```
+sendTo("tradfri.0", "request", options, (ret) => {
+	// do something with the result
+});
+```
+The `options` object looks as follows:
+```
+{
+	path: string,
+	method?: "get" | "post" | "put" | "delete", // optional, default = "get"
+	payload?: object                            // optional, should be a JSON object
+}
+```
+The result object `ret` looks as follows:
+```
+{
+	error: string | null,
+	result: {
+		code: string,            // see https://tools.ietf.org/html/rfc7252#section-12.1.2
+		payload: object | Buffer
+	}
+}
+```
+
 ## Changelog
+
+#### 0.2.4 (2017-09-11)
+* (AlCalzone) Add support for groups (renaming, switching)
+* (AlCalzone) Partial support for scenes (switching when id is known)
+
+#### 0.2.3 (2017-09-11)
+* (AlCalzone) Send custom CoAP packets by using sendTo
 
 #### 0.2.2 (2017-09-10)
 * (AlCalzone) Changed internal handling of objects to prepare the next updates

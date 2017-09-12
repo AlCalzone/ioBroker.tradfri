@@ -1,6 +1,6 @@
 import { IPSODevice } from "./ipsoDevice";
 import { LightSetting } from "./lightSetting";
-export default class Scene extends IPSODevice {
+export declare class Scene extends IPSODevice {
     isActive: boolean;
     isPredefined: boolean;
     lightSettings: LightSetting[];

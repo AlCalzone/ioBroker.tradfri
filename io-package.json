@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "0.2.2",
+        "version": "0.2.4",
         "news": {
             "0.1.0": {
                 "en": "initial release. Functionality limited to controlling lightbulbs.",
@@ -34,6 +34,14 @@
             "0.2.2": {
                 "en": "Changed internal handling of objects to prepare the next updates",
                 "de": "Interne Behandlung von Objekte verändert, um die nächsten Updates vorzubereiten"
+            },
+            "0.2.3": {
+                "en": "Send custom CoAP packets by using sendTo",
+                "de": "Unterstützung eigener CoAP-Pakete mittels sendTo"
+            },
+            "0.2.4": {
+                "en": "Add support for groups and scenes (partial)",
+                "de": "Unterstützung für Gruppen und Szenen (partiell) hinzugefügt."
             }
         },
         "title": "IKEA Trådfri",

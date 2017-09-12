@@ -19,9 +19,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var ipsoObject_1 = require("./ipsoObject");
 var deviceInfo_1 = require("./deviceInfo");
 var ipsoDevice_1 = require("./ipsoDevice");
+var ipsoObject_1 = require("./ipsoObject");
 var light_1 = require("./light");
 // list of known endpoints defined on the gateway
 var AccessoryTypes;

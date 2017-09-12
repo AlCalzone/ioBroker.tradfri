@@ -1,4 +1,4 @@
-import { IPSOObject, ipsoKey, serializeWith, deserializeWith, PropertyTransform, required } from "./ipsoObject";
+import { deserializeWith, ipsoKey, IPSOObject, PropertyTransform, required, serializeWith } from "./ipsoObject";
 
 // contains information about a specific device
 export class DeviceInfo extends IPSOObject {
