@@ -7,7 +7,7 @@
         "indent": [true, "tabs", 4],
         "object-literal-sort-keys": false,
         "object-literal-shorthand": false,
-        "array-type": ["array"],
+        "array-type": [true, "array"],
         "max-line-length": [false],
         "interface-name": [false],
         "variable-name": [
