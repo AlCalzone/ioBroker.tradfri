@@ -2,7 +2,7 @@
 ioBroker.tradfri
 =================
 
-**Tests:** Linux/Mac: [![Build Status](https://travis-ci.org/AlCalzone/iobroker.tradfri.svg?branch=master)](https://travis-ci.org/AlCalzone/iobroker.tradfri) 
+**Tests:** Linux/Mac: [![Build Status](https://travis-ci.org/AlCalzone/ioBroker.tradfri.svg?branch=master)](https://travis-ci.org/AlCalzone/ioBroker.tradfri) 
 Windows: [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/AlCalzone/ioBroker.tradfri?branch=master&svg=true)](https://ci.appveyor.com/project/AlCalzone/ioBroker-tradfri/)
 
 ================
@@ -45,6 +45,9 @@ The result object `ret` looks as follows:
 ```
 
 ## Changelog
+
+#### 0.2.5 (2017-09-12)
+* (AlCalzone) Selection of scenes from the admin UI is now possible
 
 #### 0.2.4 (2017-09-11)
 * (AlCalzone) Add support for groups (renaming, switching)

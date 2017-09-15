@@ -76,14 +76,25 @@ declare global {
 			/** role of the state (used in user interfaces to indicate which widget to choose) */
 			role: string;
 
-			/** all possible states */
-			states?: any[];
+			/**
+			 * Dictionary of possible values for this state in the form
+			 * <pre>
+			 * {
+			 *     "internal value 1": "displayed value 1",
+			 *     "internal value 2": "displayed value 2",
+			 *     ...
+			 * }
+			 * </pre>
+			 * In old ioBroker versions, this could also be a string of the form
+			 * "val1:text1;val2:text2" (now deprecated)
+			 */
+			states?: DictionaryLike<string> | string;
 
 			/** ID of a helper state indicating if the handler of this state is working */
 			workingID?: string;
 
 			/** attached history information */
-			history?: any
+			history?: any;
 		}
 		interface ChannelCommon extends ObjectCommon {
 			/** role of the channel */
@@ -166,7 +177,7 @@ declare global {
 
 		type EnumList = string | string[];
 
-		interface Enum { }
+		type Enum = any; // TODO: implement this
 
 		interface DirectoryEntry {
 			file: string;
@@ -224,7 +235,7 @@ declare global {
 			/** Will be called when the adapter is intialized */
 			ready?: () => void;
 			/** Will be called on adapter termination */
-			unload?: (callback: Function) => void;
+			unload?: (callback: () => void) => void;
 
 			/** if true, stateChange will be called with an id that has no namespace, e.g. "state" instead of "adapter.0.state". Default: false */
 			noNamespace?: boolean;
@@ -307,7 +318,7 @@ declare global {
 				device: string;
 				channel: string;
 				state: string;
-			}
+			};
 
 			// ==============================
 			// own objects
@@ -316,14 +327,14 @@ declare global {
 			getObject(id: string, callback: GetObjectCallback): void;
 			getObject(id: string, options: any, callback: GetObjectCallback): void;
 			/** Creates or overwrites an object in the object db */
-			setObject(id: string, obj: Object, options?: any, callback?: SetObjectCallback): void;
+			setObject(id: string, obj: ioBroker.Object, options?: any, callback?: SetObjectCallback): void;
 			/** Creates an object in the object db. Existing objects are not overwritten. */
-			setObjectNotExists(id: string, obj: Object, options?: any, callback?: SetObjectCallback): void;
+			setObjectNotExists(id: string, obj: ioBroker.Object, options?: any, callback?: SetObjectCallback): void;
 			/** Get all states, channels and devices of this adapter */
-			getAdapterObjects(callback: (objects: { [id: string]: Object }) => void): void;
+			getAdapterObjects(callback: (objects: DictionaryLike<ioBroker.Object>) => void): void;
 			/** Extend an object and create it if it might not exist */
-			extendObject(id: string, objPart: Partial<Object>, options?: any, callback?: SetObjectCallback): void;
-			/** 
+			extendObject(id: string, objPart: Partial<ioBroker.Object>, options?: any, callback?: SetObjectCallback): void;
+			/**
 			 * Deletes an object from the object db
 			 * @param id - The id of the object without namespace
 			 */
@@ -332,6 +343,7 @@ declare global {
 			// ==============================
 			// foreign objects
 
+			// tslint:disable:unified-signatures
 			/** Reads an object (which might not belong to this adapter) from the object db */
 			getForeignObject(id: string, callback: GetObjectCallback): void;
 			getForeignObject(id: string, options: any, callback: GetObjectCallback): void;
@@ -343,18 +355,19 @@ declare global {
 			getForeignObjects(pattern: string, type: ObjectType, options: any, callback: GetObjectsCallback): void;
 			getForeignObjects(pattern: string, type: ObjectType, enums: EnumList, options: any, callback: GetObjectsCallback): void;
 			/** Creates or overwrites an object (which might not belong to this adapter) in the object db */
-			setForeignObject(id: string, obj: Object, options?: any, callback?: SetObjectCallback): void;
+			setForeignObject(id: string, obj: ioBroker.Object, options?: any, callback?: SetObjectCallback): void;
 			/** Creates an object (which might not belong to this adapter) in the object db. Existing objects are not overwritten. */
-			setForeignObjectNotExists(id: string, obj: Object, options?: any, callback?: SetObjectCallback): void;
+			setForeignObjectNotExists(id: string, obj: ioBroker.Object, options?: any, callback?: SetObjectCallback): void;
 			/** Extend an object (which might not belong to this adapter) and create it if it might not exist */
-			extendForeignObject(id: string, objPart: Partial<Object>, options?: any, callback?: SetObjectCallback): void;
+			extendForeignObject(id: string, objPart: Partial<ioBroker.Object>, options?: any, callback?: SetObjectCallback): void;
+			// tslint:enable:unified-signatures
 			/**
 			 * Finds an object by its ID or name
 			 * @param type - common.type of the state
 			 */
 			findForeignObject(idOrName: string, type: string, callback: FindObjectCallback): void;
 			findForeignObject(idOrName: string, type: string, options: any, callback: FindObjectCallback): void;
-			/**  
+			/**
 			 * Deletes an object (which might not belong to this adapter) from the object db
 			 * @param id - The id of the object including namespace
 			 */
@@ -459,7 +472,6 @@ declare global {
 			deleteState(parentChannel: string, stateName: string, options?: any, callback?: GenericCallback): void;
 			deleteState(parentDevice: string, parentChannel: string, stateName: string, options?: any, callback?: GenericCallback): void;
 
-
 			// ==============================
 			// filesystem
 
@@ -486,7 +498,6 @@ declare global {
 			rename(adapterName: string, oldName: string, newName: string, callback: GenericCallback): void;
 			rename(adapterName: string, oldName: string, newName: string, options: any, callback: GenericCallback): void;
 
-
 			// ==============================
 			// formatting
 
@@ -496,21 +507,21 @@ declare global {
 			formatDate(dateObj: string | Date | number, isDuration: boolean | string, format: string): string;
 		}
 
-		type ObjectChangeHandler = (id: string, obj: Object) => void;
+		type ObjectChangeHandler = (id: string, obj: ioBroker.Object) => void;
 		type StateChangeHandler = (id: string, obj: State) => void;
 		type MessageHandler = (obj: Message) => void;
 
 		type SetObjectCallback = (err: string, obj: { id: string }) => void;
-		type GetObjectCallback = (err: string, obj: Object) => void;
+		type GetObjectCallback = (err: string, obj: ioBroker.Object) => void;
 		type GenericCallback = (err?: string) => void;
 		type GetEnumCallback = (err: string, enums: DictionaryLike<Enum>, requestedEnum: string) => void;
 		type GetEnumsCallback = (
 			err: string,
 			result: {
-				[groupName: string]: DictionaryLike<Enum>
-			}
+				[groupName: string]: DictionaryLike<Enum>,
+			},
 		) => void;
-		type GetObjectsCallback = (err: string, objects: DictionaryLike<Object>) => void;
+		type GetObjectsCallback = (err: string, objects: DictionaryLike<ioBroker.Object>) => void;
 		type FindObjectCallback = (err: string, id?: string, name?: string) => void;
 
 		type GetStateCallback = (err: string, state: State) => void;
@@ -519,7 +530,6 @@ declare global {
 		type SetStateChangedCallback = (err: string, id: string, notChanged: boolean) => void;
 		type DeleteStateCallback = (err: string, id?: string) => void;
 		type GetHistoryCallback = (err: string, result: (State & { id?: string })[], step: number, sessionId?: string) => void;
-
 
 		type ReadDirCallback = (err: string, entries: DirectoryEntry[]) => void;
 		type ReadFileCallback = (err: string, file?: Buffer | string, mimeType?: string) => void;

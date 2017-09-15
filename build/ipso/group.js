@@ -58,9 +58,9 @@ function parseAccessoryLink(link) {
 }
 function toAccessoryLink(ids) {
     return {
-        "15002": {
-            "9003": ids
-        }
+        15002: {
+            9003: ids,
+        },
     };
 }
 //# sourceMappingURL=group.js.map
