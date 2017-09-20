@@ -25,6 +25,9 @@ import utils from "./lib/utils";
 // Konvertierungsfunktionen
 import conversions from "./lib/conversions";
 
+// debugger-Modul laden
+import * as debugPackage from "debug";
+
 const customStateSubscriptions: {
 	subscriptions: { [id: string]: { pattern: RegExp, callback: (id: string, state: ioBroker.State) => void } },
 	counter: number,
@@ -78,9 +81,14 @@ let adapter: ExtendedAdapter = utils.adapter({
 		adapter = _.extend(adapter);
 		_.adapter = adapter;
 
-		// redirect console output
-		// console.log = (msg) => adapter.log.debug("STDOUT > " + msg);
-		// console.error = (msg) => adapter.log.error("STDERR > " + msg);
+		// Bei Debug-Loglevel die Debugausgaben der Module umleiten
+		if (adapter.log.level === "debug") {
+			process.env.DEBUG = "*";
+			const debuggers = [debugPackage("node-coap-client"), debugPackage("node-dtls-client")];
+			for (const d of debuggers) {
+				d.log = adapter.log.debug.bind(adapter);
+			}
+		}
 		_.log(`startfile = ${process.argv[1]}`);
 
 		// Eigene Objekte/States beobachten
