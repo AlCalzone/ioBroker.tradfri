@@ -55,8 +55,6 @@ var scene_1 = require("./ipso/scene");
 var utils_1 = require("./lib/utils");
 // Konvertierungsfunktionen
 var conversions_1 = require("./lib/conversions");
-// debugger-Modul laden
-var debugPackage = require("debug");
 var customStateSubscriptions = {
     subscriptions: {},
     counter: 0,
@@ -79,7 +77,7 @@ var adapter = utils_1.default.adapter({
     name: "tradfri",
     // Wird aufgerufen, wenn Adapter initialisiert wird
     ready: function () { return __awaiter(_this, void 0, void 0, function () {
-        var debuggers, _i, debuggers_1, d, hostname;
+        var debugPackage, debuggers, _i, debuggers_1, d, hostname;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -98,11 +96,13 @@ var adapter = utils_1.default.adapter({
                     global_1.Global.adapter = adapter;
                     // Bei Debug-Loglevel die Debugausgaben der Module umleiten
                     if (adapter.log.level === "debug") {
+                        global_1.Global.log("== debug mode active ==");
                         process.env.DEBUG = "*";
+                        debugPackage = require("debug");
                         debuggers = [debugPackage("node-coap-client"), debugPackage("node-dtls-client")];
                         for (_i = 0, debuggers_1 = debuggers; _i < debuggers_1.length; _i++) {
                             d = debuggers_1[_i];
-                            d.log = adapter.log.debug.bind(adapter);
+                            d.log = function (str) { return global_1.Global.log(str); };
                         }
                     }
                     global_1.Global.log("startfile = " + process.argv[1]);
