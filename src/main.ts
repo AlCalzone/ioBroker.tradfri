@@ -85,7 +85,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 			const debugPackage = require("debug");
 			const debuggers = [debugPackage("node-coap-client"), debugPackage("node-dtls-client")];
 			for (const d of debuggers) {
-				d.log = (str) => _.log(str);
+				d.log = adapter.log.debug.bind(adapter);
 			}
 		}
 		_.log(`startfile = ${process.argv[1]}`);

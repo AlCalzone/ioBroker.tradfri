@@ -102,7 +102,7 @@ var adapter = utils_1.default.adapter({
                         debuggers = [debugPackage("node-coap-client"), debugPackage("node-dtls-client")];
                         for (_i = 0, debuggers_1 = debuggers; _i < debuggers_1.length; _i++) {
                             d = debuggers_1[_i];
-                            d.log = function (str) { return global_1.Global.log(str); };
+                            d.log = adapter.log.debug.bind(adapter);
                         }
                     }
                     global_1.Global.log("startfile = " + process.argv[1]);
