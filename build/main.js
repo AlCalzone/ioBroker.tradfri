@@ -369,6 +369,8 @@ var adapter = utils_1.default.adapter({
                 var url = observers_1[_i];
                 node_coap_client_1.CoapClient.stopObserving(url);
             }
+            // close all sockets
+            node_coap_client_1.CoapClient.reset();
             callback();
         }
         catch (e) {

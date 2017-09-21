@@ -349,6 +349,8 @@ let adapter: ExtendedAdapter = utils.adapter({
 			for (const url of observers) {
 				coap.stopObserving(url);
 			}
+			// close all sockets
+			coap.reset();
 			callback();
 		} catch (e) {
 			callback();
