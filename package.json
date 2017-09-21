@@ -16,7 +16,7 @@
     }
   ],
   "dependencies": {
-    "node-coap-client": "^0.3.2-alpha.0",
+    "node-coap-client": "^0.3.2",
     "reflect-metadata": "^0.1.10"
   },
   "devDependencies": {
