@@ -82,7 +82,7 @@ export class Global {
 
 		let ret = adapter as ExtendedAdapter;
 		if (!ret.__isExtended) {
-			ret.objects.$getObjectList = promisify(adapter.objects.getObjectList, adapter.objects);
+			//ret.objects.$getObjectList = promisify(adapter.objects.getObjectList, adapter.objects);
 			ret = Object.assign(ret, {
 				$getObject: promisify<ioBroker.Object>(adapter.getObject, adapter),
 				$setObject: promisify<{ id: string }>(adapter.setObject, adapter),
