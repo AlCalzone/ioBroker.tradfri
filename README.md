@@ -46,6 +46,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### 0.2.6 (2017-09-21)
+* (AlCalzone) Update CoAP and DTLS library for the next features
+
 #### 0.2.5 (2017-09-12)
 * (AlCalzone) Selection of scenes from the admin UI is now possible
 
