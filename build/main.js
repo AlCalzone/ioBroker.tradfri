@@ -79,50 +79,40 @@ var adapter = utils_1.default.adapter({
     ready: function () { return __awaiter(_this, void 0, void 0, function () {
         var hostname;
         return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    // Sicherstellen, dass die Optionen vollständig ausgefüllt sind.
-                    if (adapter.config
-                        && adapter.config.host != null && adapter.config.host !== ""
-                        && adapter.config.securityCode != null && adapter.config.securityCode !== "") {
-                        // alles gut
-                    }
-                    else {
-                        adapter.log.error("Please set the connection params in the adapter options before starting the adapter!");
-                        return [2 /*return*/];
-                    }
-                    // Adapter-Instanz global machen
-                    adapter = global_1.Global.extend(adapter);
-                    global_1.Global.adapter = adapter;
-                    // redirect console output
-                    // console.log = (msg) => adapter.log.debug("STDOUT > " + msg);
-                    // console.error = (msg) => adapter.log.error("STDERR > " + msg);
-                    global_1.Global.log("startfile = " + process.argv[1]);
-                    // Eigene Objekte/States beobachten
-                    adapter.subscribeStates("*");
-                    adapter.subscribeObjects("*");
-                    // Custom subscriptions erlauben
-                    global_1.Global.subscribeStates = subscribeStates;
-                    global_1.Global.unsubscribeStates = unsubscribeStates;
-                    global_1.Global.subscribeObjects = subscribeObjects;
-                    global_1.Global.unsubscribeObjects = unsubscribeObjects;
-                    hostname = adapter.config.host.toLowerCase();
-                    node_coap_client_1.CoapClient.setSecurityParams(hostname, {
-                        psk: { "Client_identity": adapter.config.securityCode },
-                    });
-                    requestBase = "coaps://" + hostname + ":5684/";
-                    // TODO: load known devices from ioBroker into <devices> & <objects>
-                    // TODO: we might need the send-queue branch of node-coap-client at some point
-                    return [4 /*yield*/, observeDevices()];
-                case 1:
-                    // TODO: load known devices from ioBroker into <devices> & <objects>
-                    // TODO: we might need the send-queue branch of node-coap-client at some point
-                    _a.sent();
-                    return [4 /*yield*/, observeGroups()];
-                case 2:
-                    _a.sent();
-                    return [2 /*return*/];
+            // Sicherstellen, dass die Optionen vollständig ausgefüllt sind.
+            if (adapter.config
+                && adapter.config.host != null && adapter.config.host !== ""
+                && adapter.config.securityCode != null && adapter.config.securityCode !== "") {
+                // alles gut
             }
+            else {
+                adapter.log.error("Please set the connection params in the adapter options before starting the adapter!");
+                return [2 /*return*/];
+            }
+            // Adapter-Instanz global machen
+            adapter = global_1.Global.extend(adapter);
+            global_1.Global.adapter = adapter;
+            // redirect console output
+            // console.log = (msg) => adapter.log.debug("STDOUT > " + msg);
+            // console.error = (msg) => adapter.log.error("STDERR > " + msg);
+            global_1.Global.log("startfile = " + process.argv[1]);
+            // Eigene Objekte/States beobachten
+            adapter.subscribeStates("*");
+            adapter.subscribeObjects("*");
+            // Custom subscriptions erlauben
+            global_1.Global.subscribeStates = subscribeStates;
+            global_1.Global.unsubscribeStates = unsubscribeStates;
+            global_1.Global.subscribeObjects = subscribeObjects;
+            global_1.Global.unsubscribeObjects = unsubscribeObjects;
+            hostname = adapter.config.host.toLowerCase();
+            node_coap_client_1.CoapClient.setSecurityParams(hostname, {
+                psk: { "Client_identity": adapter.config.securityCode },
+            });
+            requestBase = "coaps://" + hostname + ":5684/";
+            // TODO: load known devices from ioBroker into <devices> & <objects>
+            observeDevices();
+            observeGroups();
+            return [2 /*return*/];
         });
     }); },
     message: function (obj) { return __awaiter(_this, void 0, void 0, function () {
@@ -424,16 +414,7 @@ function stopObservingResource(path) {
 }
 /** Sets up an observer for all devices */
 function observeDevices() {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, observeResource(endpoints_1.default.devices, coapCb_getAllDevices)];
-                case 1:
-                    _a.sent();
-                    return [2 /*return*/];
-            }
-        });
-    });
+    observeResource(endpoints_1.default.devices, coapCb_getAllDevices);
 }
 // gets called whenever "get /15001" updates
 function coapCb_getAllDevices(response) {
@@ -490,16 +471,7 @@ function coap_getDevice_cb(instanceId, response) {
 }
 /** Sets up an observer for all groups */
 function observeGroups() {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, observeResource(endpoints_1.default.groups, coapCb_getAllGroups)];
-                case 1:
-                    _a.sent();
-                    return [2 /*return*/];
-            }
-        });
-    });
+    observeResource(endpoints_1.default.groups, coapCb_getAllGroups);
 }
 // gets called whenever "get /15004" updates
 function coapCb_getAllGroups(response) {

@@ -101,9 +101,8 @@ let adapter: ExtendedAdapter = utils.adapter({
 		requestBase = `coaps://${hostname}:5684/`;
 
 		// TODO: load known devices from ioBroker into <devices> & <objects>
-		// TODO: we might need the send-queue branch of node-coap-client at some point
-		await observeDevices();
-		await observeGroups();
+		observeDevices();
+		observeGroups();
 
 	},
 
@@ -405,8 +404,8 @@ function stopObservingResource(path: string): void {
 }
 
 /** Sets up an observer for all devices */
-async function observeDevices() {
-	await observeResource(
+function observeDevices() {
+	observeResource(
 		coapEndpoints.devices,
 		coapCb_getAllDevices,
 	);
@@ -469,8 +468,8 @@ function coap_getDevice_cb(instanceId: number, response: CoapResponse) {
 }
 
 /** Sets up an observer for all groups */
-async function observeGroups() {
-	await observeResource(
+function observeGroups() {
+	observeResource(
 		coapEndpoints.groups,
 		coapCb_getAllGroups,
 	);
