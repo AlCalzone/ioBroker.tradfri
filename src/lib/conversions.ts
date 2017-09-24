@@ -17,4 +17,11 @@ export default {
 			return roundTo(min + value / 100 * (max - min), 0);
 		}
 	},
+	transitionTime: (direction, value) => {
+		if (direction === "in") {
+			return value / 10;
+		} else {
+			return value * 10;
+		}
+	}
 } as DictionaryLike<Conversion>;

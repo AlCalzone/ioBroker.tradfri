@@ -55,6 +55,9 @@ const remoteRoot = `/opt/iobroker/node_modules/iobroker.${ADAPTER_NAME}`;
 	execResult = await ssh.execCommand(`iobroker upload ${ADAPTER_NAME}`);
 	console.log(execResult.stdout);
 	console.log(execResult.stderr);
+	execResult = await ssh.execCommand(`iobroker restart ${ADAPTER_NAME}`);
+	console.log(execResult.stdout);
+	console.log(execResult.stderr);
 
 	console.log("done");
 	process.exit(0);

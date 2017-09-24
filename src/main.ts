@@ -263,6 +263,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 						// create a copy to modify
 						const newGroup = group.clone();
 
+						// TODO: check if we can change the transition duration here
 						if (id.endsWith("state")) {
 							// just turn on or off
 							newGroup.onOff = val;
@@ -288,19 +289,27 @@ let adapter: ExtendedAdapter = utils.adapter({
 							const light = newAccessory.lightList[0];
 
 							if (id.endsWith(".state")) {
-								light.merge({ onOff: val });
+								light.merge({
+									onOff: val,
+									transitionTime: await getTransitionDuration(accessory),
+								});
 							} else if (id.endsWith(".brightness")) {
 								light.merge({
 									dimmer: val,
-									transitionTime: 5, // TODO: <- make this configurable
+									transitionTime: await getTransitionDuration(accessory),
 								});
 							} else if (id.endsWith(".color")) {
 								const colorX = conversions.color("out", state.val);
 								light.merge({
 									colorX: colorX,
 									colorY: 27000,
-									transitionTime: 5, // TODO: <- make this configurable
+									transitionTime: await getTransitionDuration(accessory),
 								});
+							} else if (id.endsWith(".transitionDuration")) {
+								// TODO: check if we need to buffer this somehow
+								// for now just ack the change
+								await adapter.$setState(id, state, true);
+								return;
 							}
 						}
 
@@ -679,6 +688,24 @@ function calcSceneName(scene: Scene): string {
 }
 
 /**
+ * Returns the configured transition duration for an accessory or a group
+ */
+async function getTransitionDuration(accessoryOrGroup: Accessory | Group): Promise<number> {
+	let stateId: string;
+	if (accessoryOrGroup instanceof Accessory) {
+		switch (accessoryOrGroup.type) {
+			case AccessoryTypes.lightbulb:
+				stateId = calcObjId(accessoryOrGroup) + ".lightbulb.transitionDuration";
+		}
+	} else if (accessoryOrGroup instanceof Group) {
+		stateId = calcGroupId(accessoryOrGroup) + ".transitionDuration";
+	}
+	const ret = await readStateValue(stateId);
+	if (ret != null) return ret;
+	return 5;
+}
+
+/**
  * finds the property value for @link{accessory} as defined in @link{propPath}
  * @param source The accessory to be searched for the property
  * @param propPath The property path under which the property is accessible
@@ -695,10 +722,31 @@ function readPropertyValue(source: DictionaryLike<any>, propPath: string) {
 			// and convert it
 			return conversions[fnName]("in", value);
 		} catch (e) {
-			_.log(`invalid path definition ${propPath}`);
+			_.log(`invalid path definition ${propPath}`, "warn");
 		}
 	} else {
 		return dig(source, propPath);
+	}
+}
+
+/**
+ * Reads the value of a state with possible defined conversions
+ */
+async function readStateValue(stateId: string): Promise<any> {
+	const obj = await adapter.$getObject(stateId);
+	if (obj != null && obj.native.path != null && obj.native.path.startsWith("__convert")) {
+		const propPath = obj.native.path;
+		const pathParts = propPath.substr("__convert:".length).split(",");
+		try {
+			const fnName = pathParts[0];
+			// find the state value
+			const state = await adapter.$getState(stateId);
+			// and convert it
+			return conversions[fnName]("out", state.val);
+		} catch (e) {
+			_.log(`invalid path definition ${propPath}`, "warn");
+		}
+		return null;
 	}
 }
 
@@ -870,6 +918,25 @@ function extendDevice(accessory: Accessory) {
 				},
 				native: {
 					path: "lightList.[0].onOff",
+				},
+			};
+			stateObjs["lightbulb.transitionDuration"] = {
+				_id: `${objId}.lightbulb.transitionDuration`,
+				type: "state",
+				common: {
+					name: "Transition duration",
+					read: true, 
+					write: true,
+					type: "number",
+					min: 0,
+					max: 100, // TODO: check
+					def: 5,
+					role: "light.dimmer", // TODO: better role?
+					desc: "Duration of a state change",
+					unit: "s",
+				},
+				native: {
+					path: "__convert:transitionTime,lightList.[0].transitionTime",
 				},
 			};
 		}

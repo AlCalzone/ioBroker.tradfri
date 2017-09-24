@@ -108,6 +108,11 @@ var remoteRoot = "/opt/iobroker/node_modules/iobroker." + ADAPTER_NAME;
                     execResult = _b.sent();
                     console.log(execResult.stdout);
                     console.log(execResult.stderr);
+                    return [4 /*yield*/, ssh.execCommand("iobroker restart " + ADAPTER_NAME)];
+                case 11:
+                    execResult = _b.sent();
+                    console.log(execResult.stdout);
+                    console.log(execResult.stderr);
                     console.log("done");
                     process.exit(0);
                     return [2 /*return*/];

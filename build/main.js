@@ -241,9 +241,9 @@ var adapter = utils_1.default.adapter({
         }
     },
     stateChange: function (id, state) { return __awaiter(_this, void 0, void 0, function () {
-        var stateObj, rootId, rootObj, val, serializedObj, url, group, newGroup, accessory, newAccessory, light, colorX, payload, _i, _a, sub;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
+        var stateObj, rootId, rootObj, val, serializedObj, url, _a, group, newGroup, accessory, newAccessory, light, _b, _c, _d, _e, _f, _g, colorX, _h, _j, _k, payload, _i, _l, sub;
+        return __generator(this, function (_m) {
+            switch (_m.label) {
                 case 0:
                     if (state) {
                         global_1.Global.log("{{blue}} state with id " + id + " updated: ack=" + state.ack + "; val=" + state.val, "debug");
@@ -251,12 +251,12 @@ var adapter = utils_1.default.adapter({
                     else {
                         global_1.Global.log("{{blue}} state with id " + id + " deleted", "debug");
                     }
-                    if (!(state && !state.ack && id.startsWith(adapter.namespace))) return [3 /*break*/, 4];
+                    if (!(state && !state.ack && id.startsWith(adapter.namespace))) return [3 /*break*/, 15];
                     stateObj = objects[id];
                     if (!(stateObj && stateObj.type === "state" && stateObj.native && stateObj.native.path))
                         return [2 /*return*/];
                     rootId = getRootId(id);
-                    if (!rootId) return [3 /*break*/, 3];
+                    if (!rootId) return [3 /*break*/, 14];
                     rootObj = objects[rootId];
                     val = state.val;
                     // make sure we have whole numbers
@@ -269,74 +269,106 @@ var adapter = utils_1.default.adapter({
                     }
                     serializedObj = void 0;
                     url = void 0;
-                    switch (rootObj.native.type) {
-                        case "group":
-                            group = groups[rootObj.native.instanceId].group;
-                            newGroup = group.clone();
-                            if (id.endsWith("state")) {
-                                // just turn on or off
-                                newGroup.onOff = val;
-                            }
-                            else if (id.endsWith("activeScene")) {
-                                // turn on and activate a scene
-                                newGroup.merge({
-                                    onOff: true,
-                                    sceneId: val,
-                                });
-                            }
-                            serializedObj = newGroup.serialize(group); // serialize with the old object as a reference
-                            url = "" + requestBase + endpoints_1.default.groups + "/" + rootObj.native.instanceId;
-                            break;
-                        default:
-                            accessory = devices[rootObj.native.instanceId];
-                            newAccessory = accessory.clone();
-                            if (id.indexOf(".lightbulb.") > -1) {
-                                light = newAccessory.lightList[0];
-                                if (id.endsWith(".state")) {
-                                    light.merge({ onOff: val });
-                                }
-                                else if (id.endsWith(".brightness")) {
-                                    light.merge({
-                                        dimmer: val,
-                                        transitionTime: 5,
-                                    });
-                                }
-                                else if (id.endsWith(".color")) {
-                                    colorX = conversions_1.default.color("out", state.val);
-                                    light.merge({
-                                        colorX: colorX,
-                                        colorY: 27000,
-                                        transitionTime: 5,
-                                    });
-                                }
-                            }
-                            serializedObj = newAccessory.serialize(accessory); // serialize with the old object as a reference
-                            url = "" + requestBase + endpoints_1.default.devices + "/" + rootObj.native.instanceId;
-                            break;
+                    _a = rootObj.native.type;
+                    switch (_a) {
+                        case "group": return [3 /*break*/, 1];
                     }
-                    if (!(!serializedObj || Object.keys(serializedObj).length === 0)) return [3 /*break*/, 2];
+                    return [3 /*break*/, 2];
+                case 1:
+                    group = groups[rootObj.native.instanceId].group;
+                    newGroup = group.clone();
+                    // TODO: check if we can change the transition duration here
+                    if (id.endsWith("state")) {
+                        // just turn on or off
+                        newGroup.onOff = val;
+                    }
+                    else if (id.endsWith("activeScene")) {
+                        // turn on and activate a scene
+                        newGroup.merge({
+                            onOff: true,
+                            sceneId: val,
+                        });
+                    }
+                    serializedObj = newGroup.serialize(group); // serialize with the old object as a reference
+                    url = "" + requestBase + endpoints_1.default.groups + "/" + rootObj.native.instanceId;
+                    return [3 /*break*/, 11];
+                case 2:
+                    accessory = devices[rootObj.native.instanceId];
+                    newAccessory = accessory.clone();
+                    if (!(id.indexOf(".lightbulb.") > -1)) return [3 /*break*/, 10];
+                    light = newAccessory.lightList[0];
+                    if (!id.endsWith(".state")) return [3 /*break*/, 4];
+                    _c = (_b = light).merge;
+                    _d = {
+                        onOff: val
+                    };
+                    return [4 /*yield*/, getTransitionDuration(accessory)];
+                case 3:
+                    _c.apply(_b, [(_d.transitionTime = _m.sent(),
+                            _d)]);
+                    return [3 /*break*/, 10];
+                case 4:
+                    if (!id.endsWith(".brightness")) return [3 /*break*/, 6];
+                    _f = (_e = light).merge;
+                    _g = {
+                        dimmer: val
+                    };
+                    return [4 /*yield*/, getTransitionDuration(accessory)];
+                case 5:
+                    _f.apply(_e, [(_g.transitionTime = _m.sent(),
+                            _g)]);
+                    return [3 /*break*/, 10];
+                case 6:
+                    if (!id.endsWith(".color")) return [3 /*break*/, 8];
+                    colorX = conversions_1.default.color("out", state.val);
+                    _j = (_h = light).merge;
+                    _k = {
+                        colorX: colorX,
+                        colorY: 27000
+                    };
+                    return [4 /*yield*/, getTransitionDuration(accessory)];
+                case 7:
+                    _j.apply(_h, [(_k.transitionTime = _m.sent(),
+                            _k)]);
+                    return [3 /*break*/, 10];
+                case 8:
+                    if (!id.endsWith(".transitionDuration")) return [3 /*break*/, 10];
+                    // TODO: check if we need to buffer this somehow
+                    // for now just ack the change
+                    return [4 /*yield*/, adapter.$setState(id, state, true)];
+                case 9:
+                    // TODO: check if we need to buffer this somehow
+                    // for now just ack the change
+                    _m.sent();
+                    return [2 /*return*/];
+                case 10:
+                    serializedObj = newAccessory.serialize(accessory); // serialize with the old object as a reference
+                    url = "" + requestBase + endpoints_1.default.devices + "/" + rootObj.native.instanceId;
+                    return [3 /*break*/, 11];
+                case 11:
+                    if (!(!serializedObj || Object.keys(serializedObj).length === 0)) return [3 /*break*/, 13];
                     global_1.Global.log("stateChange > empty object, not sending any payload", "debug");
                     return [4 /*yield*/, adapter.$setState(id, state.val, true)];
-                case 1:
-                    _b.sent();
+                case 12:
+                    _m.sent();
                     return [2 /*return*/];
-                case 2:
+                case 13:
                     payload = JSON.stringify(serializedObj);
                     global_1.Global.log("stateChange > sending payload: " + payload, "debug");
                     payload = Buffer.from(payload);
                     node_coap_client_1.CoapClient.request(url, "put", payload);
-                    _b.label = 3;
-                case 3: return [3 /*break*/, 5];
-                case 4:
+                    _m.label = 14;
+                case 14: return [3 /*break*/, 16];
+                case 15:
                     if (!state) {
                         // TODO: find out what to do when states are deleted
                     }
-                    _b.label = 5;
-                case 5:
+                    _m.label = 16;
+                case 16:
                     // Custom subscriptions durchgehen, um die passenden Callbacks aufzurufen
                     try {
-                        for (_i = 0, _a = object_polyfill_1.values(customStateSubscriptions.subscriptions); _i < _a.length; _i++) {
-                            sub = _a[_i];
+                        for (_i = 0, _l = object_polyfill_1.values(customStateSubscriptions.subscriptions); _i < _l.length; _i++) {
+                            sub = _l[_i];
                             if (sub && sub.pattern && sub.callback) {
                                 // Wenn die ID zum aktuellen Pattern passt, dann Callback aufrufen
                                 if (sub.pattern.test(id))
@@ -684,6 +716,34 @@ function calcSceneName(scene) {
     return "S-" + scene.instanceId;
 }
 /**
+ * Returns the configured transition duration for an accessory or a group
+ */
+function getTransitionDuration(accessoryOrGroup) {
+    return __awaiter(this, void 0, void 0, function () {
+        var stateId, ret;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    if (accessoryOrGroup instanceof accessory_1.Accessory) {
+                        switch (accessoryOrGroup.type) {
+                            case accessory_1.AccessoryTypes.lightbulb:
+                                stateId = calcObjId(accessoryOrGroup) + ".lightbulb.transitionDuration";
+                        }
+                    }
+                    else if (accessoryOrGroup instanceof group_1.Group) {
+                        stateId = calcGroupId(accessoryOrGroup) + ".transitionDuration";
+                    }
+                    return [4 /*yield*/, readStateValue(stateId)];
+                case 1:
+                    ret = _a.sent();
+                    if (ret != null)
+                        return [2 /*return*/, ret];
+                    return [2 /*return*/, 5];
+            }
+        });
+    });
+}
+/**
  * finds the property value for @link{accessory} as defined in @link{propPath}
  * @param source The accessory to be searched for the property
  * @param propPath The property path under which the property is accessible
@@ -701,12 +761,45 @@ function readPropertyValue(source, propPath) {
             return conversions_1.default[fnName]("in", value);
         }
         catch (e) {
-            global_1.Global.log("invalid path definition " + propPath);
+            global_1.Global.log("invalid path definition " + propPath, "warn");
         }
     }
     else {
         return object_polyfill_1.dig(source, propPath);
     }
+}
+/**
+ * Reads the value of a state with possible defined conversions
+ */
+function readStateValue(stateId) {
+    return __awaiter(this, void 0, void 0, function () {
+        var obj, propPath, pathParts, fnName, state, e_1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, adapter.$getObject(stateId)];
+                case 1:
+                    obj = _a.sent();
+                    if (!(obj != null && obj.native.path != null && obj.native.path.startsWith("__convert"))) return [3 /*break*/, 6];
+                    propPath = obj.native.path;
+                    pathParts = propPath.substr("__convert:".length).split(",");
+                    _a.label = 2;
+                case 2:
+                    _a.trys.push([2, 4, , 5]);
+                    fnName = pathParts[0];
+                    return [4 /*yield*/, adapter.$getState(stateId)];
+                case 3:
+                    state = _a.sent();
+                    // and convert it
+                    return [2 /*return*/, conversions_1.default[fnName]("out", state.val)];
+                case 4:
+                    e_1 = _a.sent();
+                    global_1.Global.log("invalid path definition " + propPath, "warn");
+                    return [3 /*break*/, 5];
+                case 5: return [2 /*return*/, null];
+                case 6: return [2 /*return*/];
+            }
+        });
+    });
 }
 /**
  * Returns the common part of the ioBroker object representing the given accessory
@@ -867,6 +960,25 @@ function extendDevice(accessory) {
                 },
                 native: {
                     path: "lightList.[0].onOff",
+                },
+            };
+            stateObjs_1["lightbulb.transitionDuration"] = {
+                _id: objId + ".lightbulb.transitionDuration",
+                type: "state",
+                common: {
+                    name: "Transition duration",
+                    read: true,
+                    write: true,
+                    type: "number",
+                    min: 0,
+                    max: 100,
+                    def: 5,
+                    role: "light.dimmer",
+                    desc: "Duration of a state change",
+                    unit: "s",
+                },
+                native: {
+                    path: "__convert:transitionTime,lightList.[0].transitionTime",
                 },
             };
         }

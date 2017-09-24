@@ -16,5 +16,13 @@ exports.default = {
             return math_1.roundTo(min + value / 100 * (max - min), 0);
         }
     },
+    transitionTime: function (direction, value) {
+        if (direction === "in") {
+            return value / 10;
+        }
+        else {
+            return value * 10;
+        }
+    }
 };
 //# sourceMappingURL=conversions.js.map
