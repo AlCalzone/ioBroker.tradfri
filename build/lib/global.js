@@ -73,12 +73,6 @@ var Global = (function () {
         enumerable: true,
         configurable: true
     });
-    Object.defineProperty(Global, "loglevel", {
-        get: function () { return Global._loglevel; },
-        set: function (value) { Global._loglevel = value; },
-        enumerable: true,
-        configurable: true
-    });
     Global.extend = function (adapter) {
         // Eine Handvoll Funktionen promisifizieren
         var _this = this;
@@ -88,9 +82,11 @@ var Global = (function () {
             ret = Object.assign(ret, {
                 $getObject: promises_1.promisify(adapter.getObject, adapter),
                 $setObject: promises_1.promisify(adapter.setObject, adapter),
+                $extendObject: promises_1.promisify(adapter.extendObject, adapter),
                 $getAdapterObjects: promises_1.promisify(adapter.getAdapterObjects, adapter),
                 $getForeignObject: promises_1.promisify(adapter.getForeignObject, adapter),
                 $setForeignObject: promises_1.promisify(adapter.setForeignObject, adapter),
+                $extendForeignObject: promises_1.promisify(adapter.extendForeignObject, adapter),
                 $getForeignObjects: promises_1.promisify(adapter.getForeignObjects, adapter),
                 $createDevice: promises_1.promisify(adapter.createDevice, adapter),
                 $deleteDevice: promises_1.promisify(adapter.deleteDevice, adapter),
@@ -161,29 +157,14 @@ var Global = (function () {
         **fett**, ##kursiv##, __unterstrichen__, ~~durchgestrichen~~
         schwarz{{farbe|bunt}}schwarz, {{farbe}}bunt
     */
-    Global.log = function (message, _a) {
-        var _b = _a === void 0 ? {} : _a, _c = _b.level, level = _c === void 0 ? Global.loglevels.on : _c, _d = _b.severity, severity = _d === void 0 ? Global.severity.normal : _d;
+    Global.log = function (message, level) {
+        if (level === void 0) { level = "info"; }
         if (!Global.adapter)
             return;
-        if (level > Global._loglevel)
-            return;
-        // Warnstufe auswählen
-        var logFn;
-        switch (severity) {
-            case Global.severity.warn:
-                logFn = "warn";
-                break;
-            case Global.severity.error:
-                logFn = "error";
-                break;
-            case Global.severity.normal:
-            default:
-                logFn = "info";
-        }
         if (message) {
             // Farben und Formatierungen
-            for (var _i = 0, _e = object_polyfill_1.entries(replacements); _i < _e.length; _i++) {
-                var _f = _e[_i], _g = _f[1], regex = _g[0], repl = _g[1];
+            for (var _i = 0, _a = object_polyfill_1.entries(replacements); _i < _a.length; _i++) {
+                var _b = _a[_i], _c = _b[1], regex = _c[0], repl = _c[1];
                 if (typeof repl === "string") {
                     message = message.replace(regex, repl);
                 }
@@ -192,7 +173,7 @@ var Global = (function () {
                 }
             }
         }
-        Global._adapter.log[logFn](message);
+        Global._adapter.log[level](message);
     };
     /**
      * Kurzschreibweise für die Ermittlung eines Objekts
@@ -235,8 +216,5 @@ var Global = (function () {
     Global.isdef = function (value) { return value != undefined; };
     return Global;
 }());
-Global.loglevels = Object.freeze({ off: 0, on: 1, ridiculous: 2 });
-Global.severity = Object.freeze({ normal: 0, warn: 1, error: 2 });
-Global._loglevel = Global.loglevels.on;
 exports.Global = Global;
 //# sourceMappingURL=global.js.map
