@@ -46,6 +46,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### 0.2.8 (2017-09-24)
+* (AlCalzone) Fixed group and scene deletion
+
 #### 0.2.7 (2017-09-23)
 * (AlCalzone) Update CoAP and DTLS library for the next features
 * (AlCalzone) Offloaded concurrency handling to CoAP lib
