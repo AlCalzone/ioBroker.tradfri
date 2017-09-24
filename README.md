@@ -46,6 +46,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### 0.2.9 (2017-09-25)
+* (AlCalzone) Support changing the transition duration
+
 #### 0.2.8 (2017-09-24)
 * (AlCalzone) Fixed group and scene deletion
 

@@ -1,6 +1,6 @@
 {
   "name": "iobroker.tradfri",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "description": "ioBroker tradfri Adapter",
   "author": {
     "name": "AlCalzone",
