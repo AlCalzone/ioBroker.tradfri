@@ -271,3 +271,6 @@ maps/
 
 # npm package files
 iobroker.*.tgz
+
+# Local debugging password
+*_password.json
