@@ -500,7 +500,7 @@ function coapCb_getAllGroups(response) {
                     }
                     newGroups = parsePayload(response);
                     global_1.Global.log("got all groups: " + JSON.stringify(newGroups));
-                    oldKeys = Object.keys(devices).map(function (k) { return +k; }).sort();
+                    oldKeys = Object.keys(groups).map(function (k) { return +k; }).sort();
                     newKeys = newGroups.sort();
                     addedKeys = array_extensions_1.except(newKeys, oldKeys);
                     global_1.Global.log("adding groups with keys " + JSON.stringify(addedKeys), "debug");

@@ -489,7 +489,7 @@ async function coapCb_getAllGroups(response: CoapResponse) {
 	_.log(`got all groups: ${JSON.stringify(newGroups)}`);
 
 	// get old keys as int array
-	const oldKeys = Object.keys(devices).map(k => +k).sort();
+	const oldKeys = Object.keys(groups).map(k => +k).sort();
 	// get new keys as int array
 	const newKeys = newGroups.sort();
 	// translate that into added and removed devices
