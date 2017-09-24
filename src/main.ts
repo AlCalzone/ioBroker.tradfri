@@ -101,9 +101,8 @@ let adapter: ExtendedAdapter = utils.adapter({
 		requestBase = `coaps://${hostname}:5684/`;
 
 		// TODO: load known devices from ioBroker into <devices> & <objects>
-		// TODO: we might need the send-queue branch of node-coap-client at some point
-		await observeDevices();
-		await observeGroups();
+		observeDevices();
+		observeGroups();
 
 	},
 
@@ -149,13 +148,13 @@ let adapter: ExtendedAdapter = utils.adapter({
 						return;
 					}
 
-					_.log(`custom coap request: ${params.method.toUpperCase()} "${requestBase}${params.path}"`, { level: _.loglevels.on });
+					_.log(`custom coap request: ${params.method.toUpperCase()} "${requestBase}${params.path}"`);
 
 					// create payload
 					let payload: string | Buffer;
 					if (params.payload) {
 						payload = JSON.stringify(params.payload);
-						_.log("sending custom payload: " + payload, { level: _.loglevels.on });
+						_.log("sending custom payload: " + payload);
 						payload = Buffer.from(payload);
 					}
 
@@ -176,7 +175,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 	},
 
 	objectChange: (id, obj) => {
-		_.log(`{{blue}} object with id ${id} ${obj ? "updated" : "deleted"}`, { level: _.loglevels.ridiculous });
+		_.log(`{{blue}} object with id ${id} ${obj ? "updated" : "deleted"}`, "debug");
 		if (id.startsWith(adapter.namespace)) {
 			// this is our own object.
 
@@ -225,9 +224,9 @@ let adapter: ExtendedAdapter = utils.adapter({
 
 	stateChange: async (id, state) => {
 		if (state) {
-			_.log(`{{blue}} state with id ${id} updated: ack=${state.ack}; val=${state.val}`, { level: _.loglevels.ridiculous });
+			_.log(`{{blue}} state with id ${id} updated: ack=${state.ack}; val=${state.val}`, "debug");
 		} else {
-			_.log(`{{blue}} state with id ${id} deleted`, { level: _.loglevels.ridiculous });
+			_.log(`{{blue}} state with id ${id} deleted`, "debug");
 		}
 
 		if (state && !state.ack && id.startsWith(adapter.namespace)) {
@@ -312,13 +311,13 @@ let adapter: ExtendedAdapter = utils.adapter({
 
 				// If the serialized object contains no properties, we don't need to send anything
 				if (!serializedObj || Object.keys(serializedObj).length === 0) {
-					_.log("stateChange > empty object, not sending any payload", { level: _.loglevels.ridiculous });
+					_.log("stateChange > empty object, not sending any payload", "debug");
 					await adapter.$setState(id, state.val, true);
 					return;
 				}
 
 				let payload: string | Buffer = JSON.stringify(serializedObj);
-				_.log("stateChange > sending payload: " + payload, { level: _.loglevels.ridiculous });
+				_.log("stateChange > sending payload: " + payload, "debug");
 
 				payload = Buffer.from(payload);
 				coap.request(url, "put", payload);
@@ -349,6 +348,8 @@ let adapter: ExtendedAdapter = utils.adapter({
 			for (const url of observers) {
 				coap.stopObserving(url);
 			}
+			// close all sockets
+			coap.reset();
 			callback();
 		} catch (e) {
 			callback();
@@ -403,8 +404,8 @@ function stopObservingResource(path: string): void {
 }
 
 /** Sets up an observer for all devices */
-async function observeDevices() {
-	await observeResource(
+function observeDevices() {
+	observeResource(
 		coapEndpoints.devices,
 		coapCb_getAllDevices,
 	);
@@ -413,7 +414,7 @@ async function observeDevices() {
 async function coapCb_getAllDevices(response: CoapResponse) {
 
 	if (response.code.toString() !== "2.05") {
-		_.log(`unexpected response (${response.code.toString()}) to getAllDevices.`, { severity: _.severity.error });
+		_.log(`unexpected response (${response.code.toString()}) to getAllDevices.`, "error");
 		return;
 	}
 	const newDevices = parsePayload(response);
@@ -426,7 +427,7 @@ async function coapCb_getAllDevices(response: CoapResponse) {
 	const newKeys = newDevices.sort();
 	// translate that into added and removed devices
 	const addedKeys = except(newKeys, oldKeys);
-	_.log(`adding devices with keys ${JSON.stringify(addedKeys)}`, { level: _.loglevels.ridiculous });
+	_.log(`adding devices with keys ${JSON.stringify(addedKeys)}`, "debug");
 
 	const addDevices = addedKeys.map(id => {
 		return observeResource(
@@ -437,15 +438,18 @@ async function coapCb_getAllDevices(response: CoapResponse) {
 	await Promise.all(addDevices);
 
 	const removedKeys = except(oldKeys, newKeys);
-	_.log(`removing devices with keys ${JSON.stringify(removedKeys)}`, { level: _.loglevels.ridiculous });
-	removedKeys.forEach(id => {
-		// remove device from dictionary
-		if (devices.hasOwnProperty(id)) delete devices[id];
+	_.log(`removing devices with keys ${JSON.stringify(removedKeys)}`, "debug");
+	removedKeys.forEach(async (id) => {
+		if (id in devices) {
+			// delete ioBroker device
+			const deviceName = calcObjName(devices[id]);
+			await adapter.$deleteDevice(deviceName);
+			// remove device from dictionary
+			delete groups[id];
+		}
 
 		// remove observer
 		stopObservingResource(`${coapEndpoints.devices}/${id}`);
-
-		// TODO: delete ioBroker device
 	});
 
 }
@@ -453,7 +457,7 @@ async function coapCb_getAllDevices(response: CoapResponse) {
 function coap_getDevice_cb(instanceId: number, response: CoapResponse) {
 
 	if (response.code.toString() !== "2.05") {
-		_.log(`unexpected response (${response.code.toString()}) to getDevice(${instanceId}).`, { severity: _.severity.error });
+		_.log(`unexpected response (${response.code.toString()}) to getDevice(${instanceId}).`, "error");
 		return;
 	}
 	const result = parsePayload(response);
@@ -467,8 +471,8 @@ function coap_getDevice_cb(instanceId: number, response: CoapResponse) {
 }
 
 /** Sets up an observer for all groups */
-async function observeGroups() {
-	await observeResource(
+function observeGroups() {
+	observeResource(
 		coapEndpoints.groups,
 		coapCb_getAllGroups,
 	);
@@ -477,7 +481,7 @@ async function observeGroups() {
 async function coapCb_getAllGroups(response: CoapResponse) {
 
 	if (response.code.toString() !== "2.05") {
-		_.log(`unexpected response (${response.code.toString()}) to getAllGroups.`, { severity: _.severity.error });
+		_.log(`unexpected response (${response.code.toString()}) to getAllGroups.`, "error");
 		return;
 	}
 	const newGroups = parsePayload(response);
@@ -485,12 +489,12 @@ async function coapCb_getAllGroups(response: CoapResponse) {
 	_.log(`got all groups: ${JSON.stringify(newGroups)}`);
 
 	// get old keys as int array
-	const oldKeys = Object.keys(devices).map(k => +k).sort();
+	const oldKeys = Object.keys(groups).map(k => +k).sort();
 	// get new keys as int array
 	const newKeys = newGroups.sort();
 	// translate that into added and removed devices
 	const addedKeys = except(newKeys, oldKeys);
-	_.log(`adding groups with keys ${JSON.stringify(addedKeys)}`, { level: _.loglevels.ridiculous });
+	_.log(`adding groups with keys ${JSON.stringify(addedKeys)}`, "debug");
 
 	const addGroups = addedKeys.map(id => {
 		return observeResource(
@@ -501,15 +505,18 @@ async function coapCb_getAllGroups(response: CoapResponse) {
 	await Promise.all(addGroups);
 
 	const removedKeys = except(oldKeys, newKeys);
-	_.log(`removing groups with keys ${JSON.stringify(removedKeys)}`, { level: _.loglevels.ridiculous });
-	removedKeys.forEach(id => {
-		// remove device from dictionary
-		if (devices.hasOwnProperty(id)) delete devices[id];
+	_.log(`removing groups with keys ${JSON.stringify(removedKeys)}`, "debug");
+	removedKeys.forEach(async (id) => {
+		if (id in groups) {
+			// delete ioBroker group
+			const groupName = calcGroupName(groups[id].group);
+			await adapter.$deleteChannel(groupName);
+			// remove group from dictionary
+			delete groups[id];
+		}
 
 		// remove observer
 		stopObservingResource(`${coapEndpoints.groups}/${id}`);
-
-		// TODO: delete ioBroker device
 	});
 
 }
@@ -517,17 +524,24 @@ async function coapCb_getAllGroups(response: CoapResponse) {
 function coap_getGroup_cb(instanceId: number, response: CoapResponse) {
 
 	if (response.code.toString() !== "2.05") {
-		_.log(`unexpected response (${response.code.toString()}) to getGroup(${instanceId}).`, { severity: _.severity.error });
+		_.log(`unexpected response (${response.code.toString()}) to getGroup(${instanceId}).`, "error");
 		return;
 	}
 	const result = parsePayload(response);
 	// parse group info
 	const group = (new Group()).parse(result);
 	// remember the group object, so we can later use it as a reference for updates
-	groups[instanceId] = {
-		group,
-		scenes: {},
-	};
+	let groupInfo: GroupInfo;
+	if (!(instanceId in groups)) {
+		// if there's none, create one
+		groups[instanceId] = {
+			group: null,
+			scenes: {},
+		};
+	}
+	groupInfo = groups[instanceId];
+	groupInfo.group = group;
+
 	// create ioBroker states
 	extendGroup(group);
 	// and load scene information
@@ -540,7 +554,7 @@ function coap_getGroup_cb(instanceId: number, response: CoapResponse) {
 // gets called whenever "get /15005/<groupId>" updates
 async function coap_getAllScenes_cb(groupId: number, response: CoapResponse) {
 	if (response.code.toString() !== "2.05") {
-		_.log(`unexpected response (${response.code.toString()}) to getAllScenes(${groupId}).`, { severity: _.severity.error });
+		_.log(`unexpected response (${response.code.toString()}) to getAllScenes(${groupId}).`, "error");
 		return;
 	}
 
@@ -555,7 +569,8 @@ async function coap_getAllScenes_cb(groupId: number, response: CoapResponse) {
 	const newKeys = newScenes.sort();
 	// translate that into added and removed devices
 	const addedKeys = except(newKeys, oldKeys);
-	_.log(`adding scenes with keys ${JSON.stringify(addedKeys)} to group ${groupId}`, { level: _.loglevels.ridiculous });
+
+	_.log(`adding scenes with keys ${JSON.stringify(addedKeys)} to group ${groupId}`, "debug");
 
 	const addScenes = addedKeys.map(id => {
 		return observeResource(
@@ -566,23 +581,23 @@ async function coap_getAllScenes_cb(groupId: number, response: CoapResponse) {
 	await Promise.all(addScenes);
 
 	const removedKeys = except(oldKeys, newKeys);
-	_.log(`removing scenes with keys ${JSON.stringify(removedKeys)} from group ${groupId}`, { level: _.loglevels.ridiculous });
+	_.log(`removing scenes with keys ${JSON.stringify(removedKeys)} from group ${groupId}`, "debug");
 	removedKeys.forEach(id => {
-		// remove device from dictionary
+		// remove scene from dictionary
 		if (groupInfo.scenes.hasOwnProperty(id)) delete groupInfo.scenes[id];
 
 		// remove observer
 		stopObservingResource(`${coapEndpoints.scenes}/${groupId}/${id}`);
-
-		// TODO: delete ioBroker device
 	});
+	// Update the scene dropdown for the group
+	updatePossibleScenes(groupInfo);
 }
 
 // gets called whenever "get /15005/<groupId>/<instanceId>" updates
 function coap_getScene_cb(groupId: number, instanceId: number, response: CoapResponse) {
 
 	if (response.code.toString() !== "2.05") {
-		_.log(`unexpected response (${response.code.toString()}) to getScene(${groupId}, ${instanceId}).`, { severity: _.severity.error });
+		_.log(`unexpected response (${response.code.toString()}) to getScene(${groupId}, ${instanceId}).`, "error");
 		return;
 	}
 	const result = parsePayload(response);
@@ -591,7 +606,7 @@ function coap_getScene_cb(groupId: number, instanceId: number, response: CoapRes
 	// remember the scene object, so we can later use it as a reference for updates
 	groups[groupId].scenes[instanceId] = scene;
 	// Update the scene dropdown for the group
-	updatePossibleScenes(groups[groupId].group);
+	updatePossibleScenes(groups[groupId]);
 }
 
 /**
@@ -613,7 +628,14 @@ function getInstanceId(id: string): number {
 /**
  * Determines the object ID under which the given accessory should be stored
  */
-function calcObjId(accessory: Accessory) {
+function calcObjId(accessory: Accessory): string {
+	return `${adapter.namespace}.${calcObjName(accessory)}`;
+}
+/**
+ * Determines the object name under which the given group accessory be stored,
+ * excluding the adapter namespace
+ */
+function calcObjName(accessory: Accessory): string {
 	const prefix = (() => {
 		switch (accessory.type) {
 			case AccessoryTypes.remote:
@@ -625,27 +647,41 @@ function calcObjId(accessory: Accessory) {
 				return "XYZ";
 		}
 	})();
-	return `${adapter.namespace}.${prefix}-${accessory.instanceId}`;
+	return `${prefix}-${accessory.instanceId}`;
 }
 
 /**
  * Determines the object ID under which the given group should be stored
  */
-function calcGroupId(group: Group) {
-	return `${adapter.namespace}.G-${group.instanceId}`;
+function calcGroupId(group: Group): string {
+	return `${adapter.namespace}.${calcGroupName(group)}`;
+}
+/**
+ * Determines the object name under which the given group should be stored,
+ * excluding the adapter namespace
+ */
+function calcGroupName(group: Group): string {
+	return `G-${group.instanceId}`;
 }
 
 /**
  * Determines the object ID under which the given scene should be stored
  */
-function calcSceneId(scene: Scene) {
-	return `${adapter.namespace}.S-${scene.instanceId}`;
+function calcSceneId(scene: Scene): string {
+	return `${adapter.namespace}.${calcSceneName(scene)}`;
+}
+/**
+ * Determines the object name under which the given scene should be stored,
+ * excluding the adapter namespace
+ */
+function calcSceneName(scene: Scene): string {
+	return `S-${scene.instanceId}`;
 }
 
 /**
  * finds the property value for @link{accessory} as defined in @link{propPath}
- * @param The accessory to be searched for the property
- * @param The property path under which the property is accessible
+ * @param source The accessory to be searched for the property
+ * @param propPath The property path under which the property is accessible
  */
 function readPropertyValue(source: DictionaryLike<any>, propPath: string) {
 	// if path starts with "__convert:", use a custom conversion function
@@ -978,7 +1014,8 @@ function extendGroup(group: Group) {
 	}
 }
 
-async function updatePossibleScenes(group: Group): Promise<void> {
+async function updatePossibleScenes(groupInfo: GroupInfo): Promise<void> {
+	const group = groupInfo.group;
 	// if this group is not in the dictionary, don't do anything
 	if (!(group.instanceId in groups)) return;
 	// find out which is the root object id
@@ -988,13 +1025,17 @@ async function updatePossibleScenes(group: Group): Promise<void> {
 
 	// only extend that object if it exists already
 	if (_.isdef(objects[scenesId])) {
+		_.log(`updating possible scenes for group ${group.instanceId}: ${JSON.stringify(Object.keys(groupInfo.scenes))}`);
+
 		const activeSceneObj = objects[scenesId];
-		const scenes = groups[group.instanceId].scenes;
+		const scenes = groupInfo.scenes;
 		// map scene ids and names to the dropdown
 		const states = composeObject(
 			Object.keys(scenes).map(id => [id, scenes[id].name] as [string, string]),
 		);
-		await adapter.extendObject(scenesId, { common: { states } } as any /* This is a partial of a partial, not correctly defined in ioBroker.d.ts */);
+		const obj = await adapter.$getObject(scenesId) as ioBroker.StateObject;
+		obj.common.states = states;
+		await adapter.$setObject(scenesId, obj);
 	}
 }
 
@@ -1012,13 +1053,13 @@ function renameDevice(accessory: Accessory, newName: string): void {
 	const serializedObj = newAccessory.serialize(accessory);
 	// If the serialized object contains no properties, we don't need to send anything
 	if (!serializedObj || Object.keys(serializedObj).length === 0) {
-		_.log("renameDevice > empty object, not sending any payload", { level: _.loglevels.ridiculous });
+		_.log("renameDevice > empty object, not sending any payload", "debug");
 		return;
 	}
 
 	// get the payload
 	let payload: string | Buffer = JSON.stringify(serializedObj);
-	_.log("renameDevice > sending payload: " + payload, { level: _.loglevels.ridiculous });
+	_.log("renameDevice > sending payload: " + payload, "debug");
 	payload = Buffer.from(payload);
 
 	coap.request(
@@ -1041,13 +1082,13 @@ function renameGroup(group: Group, newName: string): void {
 	const serializedObj = newGroup.serialize(group);
 	// If the serialized object contains no properties, we don't need to send anything
 	if (!serializedObj || Object.keys(serializedObj).length === 0) {
-		_.log("renameGroup > empty object, not sending any payload", { level: _.loglevels.ridiculous });
+		_.log("renameGroup > empty object, not sending any payload", "debug");
 		return;
 	}
 
 	// get the payload
 	let payload: string | Buffer = JSON.stringify(serializedObj);
-	_.log("renameDevice > sending payload: " + payload, { level: _.loglevels.ridiculous });
+	_.log("renameDevice > sending payload: " + payload, "debug");
 	payload = Buffer.from(payload);
 
 	coap.request(
@@ -1146,7 +1187,7 @@ function parsePayload(response: CoapResponse): any {
 			return JSON.parse(json);
 		default:
 			// dunno how to parse this
-			_.log(`unknown CoAP response format ${response.format}`, { severity: _.severity.warn });
+			_.log(`unknown CoAP response format ${response.format}`, "warn");
 			return response.payload;
 	}
 }

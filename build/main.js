@@ -1,5 +1,5 @@
-// tslint:disable:object-literal-key-quotes
 "use strict";
+// tslint:disable:object-literal-key-quotes
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -9,8 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t;
-    return { next: verb(0), "throw": verb(1), "return": verb(2) };
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
@@ -79,50 +79,40 @@ var adapter = utils_1.default.adapter({
     ready: function () { return __awaiter(_this, void 0, void 0, function () {
         var hostname;
         return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    // Sicherstellen, dass die Optionen vollständig ausgefüllt sind.
-                    if (adapter.config
-                        && adapter.config.host != null && adapter.config.host !== ""
-                        && adapter.config.securityCode != null && adapter.config.securityCode !== "") {
-                        // alles gut
-                    }
-                    else {
-                        adapter.log.error("Please set the connection params in the adapter options before starting the adapter!");
-                        return [2 /*return*/];
-                    }
-                    // Adapter-Instanz global machen
-                    adapter = global_1.Global.extend(adapter);
-                    global_1.Global.adapter = adapter;
-                    // redirect console output
-                    // console.log = (msg) => adapter.log.debug("STDOUT > " + msg);
-                    // console.error = (msg) => adapter.log.error("STDERR > " + msg);
-                    global_1.Global.log("startfile = " + process.argv[1]);
-                    // Eigene Objekte/States beobachten
-                    adapter.subscribeStates("*");
-                    adapter.subscribeObjects("*");
-                    // Custom subscriptions erlauben
-                    global_1.Global.subscribeStates = subscribeStates;
-                    global_1.Global.unsubscribeStates = unsubscribeStates;
-                    global_1.Global.subscribeObjects = subscribeObjects;
-                    global_1.Global.unsubscribeObjects = unsubscribeObjects;
-                    hostname = adapter.config.host.toLowerCase();
-                    node_coap_client_1.CoapClient.setSecurityParams(hostname, {
-                        psk: { "Client_identity": adapter.config.securityCode },
-                    });
-                    requestBase = "coaps://" + hostname + ":5684/";
-                    // TODO: load known devices from ioBroker into <devices> & <objects>
-                    // TODO: we might need the send-queue branch of node-coap-client at some point
-                    return [4 /*yield*/, observeDevices()];
-                case 1:
-                    // TODO: load known devices from ioBroker into <devices> & <objects>
-                    // TODO: we might need the send-queue branch of node-coap-client at some point
-                    _a.sent();
-                    return [4 /*yield*/, observeGroups()];
-                case 2:
-                    _a.sent();
-                    return [2 /*return*/];
+            // Sicherstellen, dass die Optionen vollständig ausgefüllt sind.
+            if (adapter.config
+                && adapter.config.host != null && adapter.config.host !== ""
+                && adapter.config.securityCode != null && adapter.config.securityCode !== "") {
+                // alles gut
             }
+            else {
+                adapter.log.error("Please set the connection params in the adapter options before starting the adapter!");
+                return [2 /*return*/];
+            }
+            // Adapter-Instanz global machen
+            adapter = global_1.Global.extend(adapter);
+            global_1.Global.adapter = adapter;
+            // redirect console output
+            // console.log = (msg) => adapter.log.debug("STDOUT > " + msg);
+            // console.error = (msg) => adapter.log.error("STDERR > " + msg);
+            global_1.Global.log("startfile = " + process.argv[1]);
+            // Eigene Objekte/States beobachten
+            adapter.subscribeStates("*");
+            adapter.subscribeObjects("*");
+            // Custom subscriptions erlauben
+            global_1.Global.subscribeStates = subscribeStates;
+            global_1.Global.unsubscribeStates = unsubscribeStates;
+            global_1.Global.subscribeObjects = subscribeObjects;
+            global_1.Global.unsubscribeObjects = unsubscribeObjects;
+            hostname = adapter.config.host.toLowerCase();
+            node_coap_client_1.CoapClient.setSecurityParams(hostname, {
+                psk: { "Client_identity": adapter.config.securityCode },
+            });
+            requestBase = "coaps://" + hostname + ":5684/";
+            // TODO: load known devices from ioBroker into <devices> & <objects>
+            observeDevices();
+            observeGroups();
+            return [2 /*return*/];
         });
     }); },
     message: function (obj) { return __awaiter(_this, void 0, void 0, function () {
@@ -177,11 +167,11 @@ var adapter = utils_1.default.adapter({
                         respond({ error: "unsupported request method \"" + params.method + "\"" });
                         return [2 /*return*/];
                     }
-                    global_1.Global.log("custom coap request: " + params.method.toUpperCase() + " \"" + requestBase + params.path + "\"", { level: global_1.Global.loglevels.on });
+                    global_1.Global.log("custom coap request: " + params.method.toUpperCase() + " \"" + requestBase + params.path + "\"");
                     payload = void 0;
                     if (params.payload) {
                         payload = JSON.stringify(params.payload);
-                        global_1.Global.log("sending custom payload: " + payload, { level: global_1.Global.loglevels.on });
+                        global_1.Global.log("sending custom payload: " + payload);
                         payload = Buffer.from(payload);
                     }
                     return [4 /*yield*/, node_coap_client_1.CoapClient.request("" + requestBase + params.path, params.method, payload)];
@@ -202,7 +192,7 @@ var adapter = utils_1.default.adapter({
         });
     }); },
     objectChange: function (id, obj) {
-        global_1.Global.log("{{blue}} object with id " + id + " " + (obj ? "updated" : "deleted"), { level: global_1.Global.loglevels.ridiculous });
+        global_1.Global.log("{{blue}} object with id " + id + " " + (obj ? "updated" : "deleted"), "debug");
         if (id.startsWith(adapter.namespace)) {
             // this is our own object.
             if (obj) {
@@ -256,10 +246,10 @@ var adapter = utils_1.default.adapter({
             switch (_b.label) {
                 case 0:
                     if (state) {
-                        global_1.Global.log("{{blue}} state with id " + id + " updated: ack=" + state.ack + "; val=" + state.val, { level: global_1.Global.loglevels.ridiculous });
+                        global_1.Global.log("{{blue}} state with id " + id + " updated: ack=" + state.ack + "; val=" + state.val, "debug");
                     }
                     else {
-                        global_1.Global.log("{{blue}} state with id " + id + " deleted", { level: global_1.Global.loglevels.ridiculous });
+                        global_1.Global.log("{{blue}} state with id " + id + " deleted", "debug");
                     }
                     if (!(state && !state.ack && id.startsWith(adapter.namespace))) return [3 /*break*/, 4];
                     stateObj = objects[id];
@@ -325,14 +315,14 @@ var adapter = utils_1.default.adapter({
                             break;
                     }
                     if (!(!serializedObj || Object.keys(serializedObj).length === 0)) return [3 /*break*/, 2];
-                    global_1.Global.log("stateChange > empty object, not sending any payload", { level: global_1.Global.loglevels.ridiculous });
+                    global_1.Global.log("stateChange > empty object, not sending any payload", "debug");
                     return [4 /*yield*/, adapter.$setState(id, state.val, true)];
                 case 1:
                     _b.sent();
                     return [2 /*return*/];
                 case 2:
                     payload = JSON.stringify(serializedObj);
-                    global_1.Global.log("stateChange > sending payload: " + payload, { level: global_1.Global.loglevels.ridiculous });
+                    global_1.Global.log("stateChange > sending payload: " + payload, "debug");
                     payload = Buffer.from(payload);
                     node_coap_client_1.CoapClient.request(url, "put", payload);
                     _b.label = 3;
@@ -369,6 +359,8 @@ var adapter = utils_1.default.adapter({
                 var url = observers_1[_i];
                 node_coap_client_1.CoapClient.stopObserving(url);
             }
+            // close all sockets
+            node_coap_client_1.CoapClient.reset();
             callback();
         }
         catch (e) {
@@ -422,26 +414,18 @@ function stopObservingResource(path) {
 }
 /** Sets up an observer for all devices */
 function observeDevices() {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, observeResource(endpoints_1.default.devices, coapCb_getAllDevices)];
-                case 1:
-                    _a.sent();
-                    return [2 /*return*/];
-            }
-        });
-    });
+    observeResource(endpoints_1.default.devices, coapCb_getAllDevices);
 }
 // gets called whenever "get /15001" updates
 function coapCb_getAllDevices(response) {
     return __awaiter(this, void 0, void 0, function () {
+        var _this = this;
         var newDevices, oldKeys, newKeys, addedKeys, addDevices, removedKeys;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     if (response.code.toString() !== "2.05") {
-                        global_1.Global.log("unexpected response (" + response.code.toString() + ") to getAllDevices.", { severity: global_1.Global.severity.error });
+                        global_1.Global.log("unexpected response (" + response.code.toString() + ") to getAllDevices.", "error");
                         return [2 /*return*/];
                     }
                     newDevices = parsePayload(response);
@@ -449,7 +433,7 @@ function coapCb_getAllDevices(response) {
                     oldKeys = Object.keys(devices).map(function (k) { return +k; }).sort();
                     newKeys = newDevices.sort();
                     addedKeys = array_extensions_1.except(newKeys, oldKeys);
-                    global_1.Global.log("adding devices with keys " + JSON.stringify(addedKeys), { level: global_1.Global.loglevels.ridiculous });
+                    global_1.Global.log("adding devices with keys " + JSON.stringify(addedKeys), "debug");
                     addDevices = addedKeys.map(function (id) {
                         return observeResource(endpoints_1.default.devices + "/" + id, function (resp) { return coap_getDevice_cb(id, resp); });
                     });
@@ -457,15 +441,27 @@ function coapCb_getAllDevices(response) {
                 case 1:
                     _a.sent();
                     removedKeys = array_extensions_1.except(oldKeys, newKeys);
-                    global_1.Global.log("removing devices with keys " + JSON.stringify(removedKeys), { level: global_1.Global.loglevels.ridiculous });
-                    removedKeys.forEach(function (id) {
-                        // remove device from dictionary
-                        if (devices.hasOwnProperty(id))
-                            delete devices[id];
-                        // remove observer
-                        stopObservingResource(endpoints_1.default.devices + "/" + id);
-                        // TODO: delete ioBroker device
-                    });
+                    global_1.Global.log("removing devices with keys " + JSON.stringify(removedKeys), "debug");
+                    removedKeys.forEach(function (id) { return __awaiter(_this, void 0, void 0, function () {
+                        var deviceName;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    if (!(id in devices)) return [3 /*break*/, 2];
+                                    deviceName = calcObjName(devices[id]);
+                                    return [4 /*yield*/, adapter.$deleteDevice(deviceName)];
+                                case 1:
+                                    _a.sent();
+                                    // remove device from dictionary
+                                    delete groups[id];
+                                    _a.label = 2;
+                                case 2:
+                                    // remove observer
+                                    stopObservingResource(endpoints_1.default.devices + "/" + id);
+                                    return [2 /*return*/];
+                            }
+                        });
+                    }); });
                     return [2 /*return*/];
             }
         });
@@ -474,7 +470,7 @@ function coapCb_getAllDevices(response) {
 // gets called whenever "get /15001/<instanceId>" updates
 function coap_getDevice_cb(instanceId, response) {
     if (response.code.toString() !== "2.05") {
-        global_1.Global.log("unexpected response (" + response.code.toString() + ") to getDevice(" + instanceId + ").", { severity: global_1.Global.severity.error });
+        global_1.Global.log("unexpected response (" + response.code.toString() + ") to getDevice(" + instanceId + ").", "error");
         return;
     }
     var result = parsePayload(response);
@@ -488,34 +484,26 @@ function coap_getDevice_cb(instanceId, response) {
 }
 /** Sets up an observer for all groups */
 function observeGroups() {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, observeResource(endpoints_1.default.groups, coapCb_getAllGroups)];
-                case 1:
-                    _a.sent();
-                    return [2 /*return*/];
-            }
-        });
-    });
+    observeResource(endpoints_1.default.groups, coapCb_getAllGroups);
 }
 // gets called whenever "get /15004" updates
 function coapCb_getAllGroups(response) {
     return __awaiter(this, void 0, void 0, function () {
+        var _this = this;
         var newGroups, oldKeys, newKeys, addedKeys, addGroups, removedKeys;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     if (response.code.toString() !== "2.05") {
-                        global_1.Global.log("unexpected response (" + response.code.toString() + ") to getAllGroups.", { severity: global_1.Global.severity.error });
+                        global_1.Global.log("unexpected response (" + response.code.toString() + ") to getAllGroups.", "error");
                         return [2 /*return*/];
                     }
                     newGroups = parsePayload(response);
                     global_1.Global.log("got all groups: " + JSON.stringify(newGroups));
-                    oldKeys = Object.keys(devices).map(function (k) { return +k; }).sort();
+                    oldKeys = Object.keys(groups).map(function (k) { return +k; }).sort();
                     newKeys = newGroups.sort();
                     addedKeys = array_extensions_1.except(newKeys, oldKeys);
-                    global_1.Global.log("adding groups with keys " + JSON.stringify(addedKeys), { level: global_1.Global.loglevels.ridiculous });
+                    global_1.Global.log("adding groups with keys " + JSON.stringify(addedKeys), "debug");
                     addGroups = addedKeys.map(function (id) {
                         return observeResource(endpoints_1.default.groups + "/" + id, function (resp) { return coap_getGroup_cb(id, resp); });
                     });
@@ -523,15 +511,27 @@ function coapCb_getAllGroups(response) {
                 case 1:
                     _a.sent();
                     removedKeys = array_extensions_1.except(oldKeys, newKeys);
-                    global_1.Global.log("removing groups with keys " + JSON.stringify(removedKeys), { level: global_1.Global.loglevels.ridiculous });
-                    removedKeys.forEach(function (id) {
-                        // remove device from dictionary
-                        if (devices.hasOwnProperty(id))
-                            delete devices[id];
-                        // remove observer
-                        stopObservingResource(endpoints_1.default.groups + "/" + id);
-                        // TODO: delete ioBroker device
-                    });
+                    global_1.Global.log("removing groups with keys " + JSON.stringify(removedKeys), "debug");
+                    removedKeys.forEach(function (id) { return __awaiter(_this, void 0, void 0, function () {
+                        var groupName;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    if (!(id in groups)) return [3 /*break*/, 2];
+                                    groupName = calcGroupName(groups[id].group);
+                                    return [4 /*yield*/, adapter.$deleteChannel(groupName)];
+                                case 1:
+                                    _a.sent();
+                                    // remove group from dictionary
+                                    delete groups[id];
+                                    _a.label = 2;
+                                case 2:
+                                    // remove observer
+                                    stopObservingResource(endpoints_1.default.groups + "/" + id);
+                                    return [2 /*return*/];
+                            }
+                        });
+                    }); });
                     return [2 /*return*/];
             }
         });
@@ -540,17 +540,23 @@ function coapCb_getAllGroups(response) {
 // gets called whenever "get /15004/<instanceId>" updates
 function coap_getGroup_cb(instanceId, response) {
     if (response.code.toString() !== "2.05") {
-        global_1.Global.log("unexpected response (" + response.code.toString() + ") to getGroup(" + instanceId + ").", { severity: global_1.Global.severity.error });
+        global_1.Global.log("unexpected response (" + response.code.toString() + ") to getGroup(" + instanceId + ").", "error");
         return;
     }
     var result = parsePayload(response);
     // parse group info
     var group = (new group_1.Group()).parse(result);
     // remember the group object, so we can later use it as a reference for updates
-    groups[instanceId] = {
-        group: group,
-        scenes: {},
-    };
+    var groupInfo;
+    if (!(instanceId in groups)) {
+        // if there's none, create one
+        groups[instanceId] = {
+            group: null,
+            scenes: {},
+        };
+    }
+    groupInfo = groups[instanceId];
+    groupInfo.group = group;
     // create ioBroker states
     extendGroup(group);
     // and load scene information
@@ -564,7 +570,7 @@ function coap_getAllScenes_cb(groupId, response) {
             switch (_a.label) {
                 case 0:
                     if (response.code.toString() !== "2.05") {
-                        global_1.Global.log("unexpected response (" + response.code.toString() + ") to getAllScenes(" + groupId + ").", { severity: global_1.Global.severity.error });
+                        global_1.Global.log("unexpected response (" + response.code.toString() + ") to getAllScenes(" + groupId + ").", "error");
                         return [2 /*return*/];
                     }
                     groupInfo = groups[groupId];
@@ -573,7 +579,7 @@ function coap_getAllScenes_cb(groupId, response) {
                     oldKeys = Object.keys(groupInfo.scenes).map(function (k) { return +k; }).sort();
                     newKeys = newScenes.sort();
                     addedKeys = array_extensions_1.except(newKeys, oldKeys);
-                    global_1.Global.log("adding scenes with keys " + JSON.stringify(addedKeys) + " to group " + groupId, { level: global_1.Global.loglevels.ridiculous });
+                    global_1.Global.log("adding scenes with keys " + JSON.stringify(addedKeys) + " to group " + groupId, "debug");
                     addScenes = addedKeys.map(function (id) {
                         return observeResource(endpoints_1.default.scenes + "/" + groupId + "/" + id, function (resp) { return coap_getScene_cb(groupId, id, resp); });
                     });
@@ -581,15 +587,16 @@ function coap_getAllScenes_cb(groupId, response) {
                 case 1:
                     _a.sent();
                     removedKeys = array_extensions_1.except(oldKeys, newKeys);
-                    global_1.Global.log("removing scenes with keys " + JSON.stringify(removedKeys) + " from group " + groupId, { level: global_1.Global.loglevels.ridiculous });
+                    global_1.Global.log("removing scenes with keys " + JSON.stringify(removedKeys) + " from group " + groupId, "debug");
                     removedKeys.forEach(function (id) {
-                        // remove device from dictionary
+                        // remove scene from dictionary
                         if (groupInfo.scenes.hasOwnProperty(id))
                             delete groupInfo.scenes[id];
                         // remove observer
                         stopObservingResource(endpoints_1.default.scenes + "/" + groupId + "/" + id);
-                        // TODO: delete ioBroker device
                     });
+                    // Update the scene dropdown for the group
+                    updatePossibleScenes(groupInfo);
                     return [2 /*return*/];
             }
         });
@@ -598,7 +605,7 @@ function coap_getAllScenes_cb(groupId, response) {
 // gets called whenever "get /15005/<groupId>/<instanceId>" updates
 function coap_getScene_cb(groupId, instanceId, response) {
     if (response.code.toString() !== "2.05") {
-        global_1.Global.log("unexpected response (" + response.code.toString() + ") to getScene(" + groupId + ", " + instanceId + ").", { severity: global_1.Global.severity.error });
+        global_1.Global.log("unexpected response (" + response.code.toString() + ") to getScene(" + groupId + ", " + instanceId + ").", "error");
         return;
     }
     var result = parsePayload(response);
@@ -607,7 +614,7 @@ function coap_getScene_cb(groupId, instanceId, response) {
     // remember the scene object, so we can later use it as a reference for updates
     groups[groupId].scenes[instanceId] = scene;
     // Update the scene dropdown for the group
-    updatePossibleScenes(groups[groupId].group);
+    updatePossibleScenes(groups[groupId]);
 }
 /**
  * Returns the ioBroker id of the root object for the given state
@@ -630,6 +637,13 @@ function getInstanceId(id) {
  * Determines the object ID under which the given accessory should be stored
  */
 function calcObjId(accessory) {
+    return adapter.namespace + "." + calcObjName(accessory);
+}
+/**
+ * Determines the object name under which the given group accessory be stored,
+ * excluding the adapter namespace
+ */
+function calcObjName(accessory) {
     var prefix = (function () {
         switch (accessory.type) {
             case accessory_1.AccessoryTypes.remote:
@@ -641,24 +655,38 @@ function calcObjId(accessory) {
                 return "XYZ";
         }
     })();
-    return adapter.namespace + "." + prefix + "-" + accessory.instanceId;
+    return prefix + "-" + accessory.instanceId;
 }
 /**
  * Determines the object ID under which the given group should be stored
  */
 function calcGroupId(group) {
-    return adapter.namespace + ".G-" + group.instanceId;
+    return adapter.namespace + "." + calcGroupName(group);
+}
+/**
+ * Determines the object name under which the given group should be stored,
+ * excluding the adapter namespace
+ */
+function calcGroupName(group) {
+    return "G-" + group.instanceId;
 }
 /**
  * Determines the object ID under which the given scene should be stored
  */
 function calcSceneId(scene) {
-    return adapter.namespace + ".S-" + scene.instanceId;
+    return adapter.namespace + "." + calcSceneName(scene);
+}
+/**
+ * Determines the object name under which the given scene should be stored,
+ * excluding the adapter namespace
+ */
+function calcSceneName(scene) {
+    return "S-" + scene.instanceId;
 }
 /**
  * finds the property value for @link{accessory} as defined in @link{propPath}
- * @param The accessory to be searched for the property
- * @param The property path under which the property is accessible
+ * @param source The accessory to be searched for the property
+ * @param propPath The property path under which the property is accessible
  */
 function readPropertyValue(source, propPath) {
     // if path starts with "__convert:", use a custom conversion function
@@ -969,26 +997,32 @@ function extendGroup(group) {
         Promise.all(createObjects);
     }
 }
-function updatePossibleScenes(group) {
+function updatePossibleScenes(groupInfo) {
     return __awaiter(this, void 0, void 0, function () {
-        var objId, scenesId, activeSceneObj, scenes_1, states;
+        var group, objId, scenesId, activeSceneObj, scenes_1, states, obj;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
+                    group = groupInfo.group;
                     // if this group is not in the dictionary, don't do anything
                     if (!(group.instanceId in groups))
                         return [2 /*return*/];
                     objId = calcGroupId(group);
                     scenesId = objId + ".activeScene";
-                    if (!global_1.Global.isdef(objects[scenesId])) return [3 /*break*/, 2];
+                    if (!global_1.Global.isdef(objects[scenesId])) return [3 /*break*/, 3];
+                    global_1.Global.log("updating possible scenes for group " + group.instanceId + ": " + JSON.stringify(Object.keys(groupInfo.scenes)));
                     activeSceneObj = objects[scenesId];
-                    scenes_1 = groups[group.instanceId].scenes;
+                    scenes_1 = groupInfo.scenes;
                     states = object_polyfill_1.composeObject(Object.keys(scenes_1).map(function (id) { return [id, scenes_1[id].name]; }));
-                    return [4 /*yield*/, adapter.extendObject(scenesId, { common: { states: states } } /* This is a partial of a partial, not correctly defined in ioBroker.d.ts */)];
+                    return [4 /*yield*/, adapter.$getObject(scenesId)];
                 case 1:
+                    obj = _a.sent();
+                    obj.common.states = states;
+                    return [4 /*yield*/, adapter.$setObject(scenesId, obj)];
+                case 2:
                     _a.sent();
-                    _a.label = 2;
-                case 2: return [2 /*return*/];
+                    _a.label = 3;
+                case 3: return [2 /*return*/];
             }
         });
     });
@@ -1006,12 +1040,12 @@ function renameDevice(accessory, newName) {
     var serializedObj = newAccessory.serialize(accessory);
     // If the serialized object contains no properties, we don't need to send anything
     if (!serializedObj || Object.keys(serializedObj).length === 0) {
-        global_1.Global.log("renameDevice > empty object, not sending any payload", { level: global_1.Global.loglevels.ridiculous });
+        global_1.Global.log("renameDevice > empty object, not sending any payload", "debug");
         return;
     }
     // get the payload
     var payload = JSON.stringify(serializedObj);
-    global_1.Global.log("renameDevice > sending payload: " + payload, { level: global_1.Global.loglevels.ridiculous });
+    global_1.Global.log("renameDevice > sending payload: " + payload, "debug");
     payload = Buffer.from(payload);
     node_coap_client_1.CoapClient.request("" + requestBase + endpoints_1.default.devices + "/" + accessory.instanceId, "put", payload);
 }
@@ -1028,12 +1062,12 @@ function renameGroup(group, newName) {
     var serializedObj = newGroup.serialize(group);
     // If the serialized object contains no properties, we don't need to send anything
     if (!serializedObj || Object.keys(serializedObj).length === 0) {
-        global_1.Global.log("renameGroup > empty object, not sending any payload", { level: global_1.Global.loglevels.ridiculous });
+        global_1.Global.log("renameGroup > empty object, not sending any payload", "debug");
         return;
     }
     // get the payload
     var payload = JSON.stringify(serializedObj);
-    global_1.Global.log("renameDevice > sending payload: " + payload, { level: global_1.Global.loglevels.ridiculous });
+    global_1.Global.log("renameDevice > sending payload: " + payload, "debug");
     payload = Buffer.from(payload);
     node_coap_client_1.CoapClient.request("" + requestBase + endpoints_1.default.groups + "/" + group.instanceId, "put", payload);
 }
@@ -1118,7 +1152,7 @@ function parsePayload(response) {
             return JSON.parse(json);
         default:
             // dunno how to parse this
-            global_1.Global.log("unknown CoAP response format " + response.format, { severity: global_1.Global.severity.warn });
+            global_1.Global.log("unknown CoAP response format " + response.format, "warn");
             return response.payload;
     }
 }

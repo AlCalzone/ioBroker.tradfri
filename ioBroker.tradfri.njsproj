@@ -15,6 +15,7 @@
     <EnableTypeScript>true</EnableTypeScript>
     <TypeScriptSourceMap>true</TypeScriptSourceMap>
     <TypeScriptModuleKind>CommonJS</TypeScriptModuleKind>
+    <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
@@ -64,6 +65,10 @@
     <Content Include="docs\de\img\picture.png" />
     <Content Include="docs\en\img\picture.png" />
     <Content Include="docs\ru\img\picture.png" />
+    <Content Include="deploy_password.json">
+      <SubType>Code</SubType>
+      <Publish>False</Publish>
+    </Content>
     <Content Include="src\flow\add_device.txt" />
     <Content Include="src\flow\app_setup.txt" />
     <Content Include="src\flow\renamegroup.txt" />
@@ -74,6 +79,9 @@
     <Content Include="travis\setup.sh" />
     <Content Include="tsconfig.json" />
     <Content Include="tslint.json" />
+    <TypeScriptCompile Include="src\deploy_local.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="admin" />

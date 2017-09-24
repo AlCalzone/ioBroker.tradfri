@@ -1,5 +1,5 @@
-// TODO: check if we still need this.
 "use strict";
+// TODO: check if we still need this.
 Object.defineProperty(exports, "__esModule", { value: true });
 /* usage:
 const result (<Promise>) = mutex.synchronize( <promise returning function> );

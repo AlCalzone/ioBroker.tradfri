@@ -1,7 +1,7 @@
+"use strict";
 ///
 /// Stellt einen Promise-Wrapper für asynchrone Node-Funktionen zur Verfügung
 ///
-"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function promisify(fn, context) {
     return function () {
