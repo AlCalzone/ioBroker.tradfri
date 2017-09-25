@@ -260,22 +260,14 @@ let adapter: ExtendedAdapter = utils.adapter({
 						// create a copy to modify
 						const newGroup = group.clone();
 
-						// TODO: check if we can change the transition duration here
-						if (id.endsWith("state")) {
-							// just turn on or off
+						if (id.endsWith(".state")) {
 							newGroup.onOff = val;
 						} else if (id.endsWith(".brightness")) {
-							newGroup.merge({ // TODO: check if this even works
+							newGroup.merge({
 								dimmer: val,
 								transitionTime: await getTransitionDuration(group),
 							});
-						} else if (id.endsWith(".color")) {
-							newGroup.merge({
-								colorX: val,
-								colorY: 27000,
-								transitionTime: await getTransitionDuration(group),
-							});
-						} else if (id.endsWith("activeScene")) {
+						} else if (id.endsWith(".activeScene")) {
 							// turn on and activate a scene
 							newGroup.merge({
 								onOff: true,
@@ -297,10 +289,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 							const light = newAccessory.lightList[0];
 
 							if (id.endsWith(".state")) {
-								light.merge({
-									onOff: val,
-									transitionTime: await getTransitionDuration(accessory),
-								});
+								light.onOff = val;
 							} else if (id.endsWith(".brightness")) {
 								light.merge({
 									dimmer: val,
@@ -1023,36 +1012,37 @@ function extendGroup(group: Group) {
 					path: "onOff",
 				},
 			},
-			color: { // TODO: test if this even works
-				_id: `${objId}.color`,
+			transitionDuration: {
+				_id: `${objId}.transitionDuration`,
 				type: "state",
 				common: {
-					name: "color temperature of the group's lightbulbs",
-					read: true, // TODO: check
-					write: true, // TODO: check
-					min: 0,
-					max: 100,
-					unit: "%",
+					name: "Transition duration",
+					read: false,
+					write: true,
 					type: "number",
-					role: "level.color.temperature",
-					desc: "range: 0% = cold, 100% = warm",
+					min: 0,
+					max: 100, // TODO: check
+					def: 0,
+					role: "light.dimmer", // TODO: better role?
+					desc: "Duration for brightness changes of this group's lightbulbs",
+					unit: "s",
 				},
 				native: {
-					path: "colorX",
+					path: "transitionTime",
 				},
 			},
 			brightness: {
 				_id: `${objId}.brightness`,
 				type: "state",
 				common: {
-					name: "brightness of the group's lightbulbs",
-					read: true, // TODO: check
+					name: "Brightness",
+					read: false, // TODO: check
 					write: true, // TODO: check
 					min: 0,
 					max: 254,
 					type: "number",
 					role: "light.dimmer",
-					desc: "brightness of the lightbulb",
+					desc: "Brightness of this group's lightbulbs",
 				},
 				native: {
 					path: "dimmer",

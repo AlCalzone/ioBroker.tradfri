@@ -239,7 +239,7 @@ var adapter = utils_1.default.adapter({
         }
     },
     stateChange: function (id, state) { return __awaiter(_this, void 0, void 0, function () {
-        var stateObj, rootId, rootObj, val, serializedObj, url, _a, group, newGroup, accessory, newAccessory, light, _b, _c, _d, _e, _f, _g, _h, _j, _k, payload, _i, _l, sub;
+        var stateObj, rootId, rootObj, val, serializedObj, url, _a, group, newGroup, _b, _c, _d, accessory, newAccessory, light, _e, _f, _g, _h, _j, _k, payload, _i, _l, sub;
         return __generator(this, function (_m) {
             switch (_m.label) {
                 case 0:
@@ -249,12 +249,12 @@ var adapter = utils_1.default.adapter({
                     else {
                         global_1.Global.log("{{blue}} state with id " + id + " deleted", "debug");
                     }
-                    if (!(state && !state.ack && id.startsWith(adapter.namespace))) return [3 /*break*/, 15];
+                    if (!(state && !state.ack && id.startsWith(adapter.namespace))) return [3 /*break*/, 18];
                     stateObj = objects[id];
                     if (!(stateObj && stateObj.type === "state" && stateObj.native && stateObj.native.path))
                         return [2 /*return*/];
                     rootId = getRootId(id);
-                    if (!rootId) return [3 /*break*/, 14];
+                    if (!rootId) return [3 /*break*/, 17];
                     rootObj = objects[rootId];
                     val = state.val;
                     // make sure we have whole numbers
@@ -271,97 +271,102 @@ var adapter = utils_1.default.adapter({
                     switch (_a) {
                         case "group": return [3 /*break*/, 1];
                     }
-                    return [3 /*break*/, 2];
+                    return [3 /*break*/, 6];
                 case 1:
                     group = groups[rootObj.native.instanceId].group;
                     newGroup = group.clone();
-                    // TODO: check if we can change the transition duration here
-                    if (id.endsWith("state")) {
-                        // just turn on or off
-                        newGroup.onOff = val;
-                    }
-                    else if (id.endsWith("activeScene")) {
+                    if (!id.endsWith(".state")) return [3 /*break*/, 2];
+                    newGroup.onOff = val;
+                    return [3 /*break*/, 5];
+                case 2:
+                    if (!id.endsWith(".brightness")) return [3 /*break*/, 4];
+                    _c = (_b = newGroup).merge;
+                    _d = {
+                        dimmer: val
+                    };
+                    return [4 /*yield*/, getTransitionDuration(group)];
+                case 3:
+                    _c.apply(_b, [(_d.transitionTime = _m.sent(),
+                            _d)]);
+                    return [3 /*break*/, 5];
+                case 4:
+                    if (id.endsWith(".activeScene")) {
                         // turn on and activate a scene
                         newGroup.merge({
                             onOff: true,
                             sceneId: val,
                         });
                     }
+                    _m.label = 5;
+                case 5:
                     serializedObj = newGroup.serialize(group); // serialize with the old object as a reference
                     url = "" + requestBase + endpoints_1.default.groups + "/" + rootObj.native.instanceId;
-                    return [3 /*break*/, 11];
-                case 2:
+                    return [3 /*break*/, 14];
+                case 6:
                     accessory = devices[rootObj.native.instanceId];
                     newAccessory = accessory.clone();
-                    if (!(id.indexOf(".lightbulb.") > -1)) return [3 /*break*/, 10];
+                    if (!(id.indexOf(".lightbulb.") > -1)) return [3 /*break*/, 13];
                     light = newAccessory.lightList[0];
-                    if (!id.endsWith(".state")) return [3 /*break*/, 4];
-                    _c = (_b = light).merge;
-                    _d = {
-                        onOff: val
-                    };
-                    return [4 /*yield*/, getTransitionDuration(accessory)];
-                case 3:
-                    _c.apply(_b, [(_d.transitionTime = _m.sent(),
-                            _d)]);
-                    return [3 /*break*/, 10];
-                case 4:
-                    if (!id.endsWith(".brightness")) return [3 /*break*/, 6];
+                    if (!id.endsWith(".state")) return [3 /*break*/, 7];
+                    light.onOff = val;
+                    return [3 /*break*/, 13];
+                case 7:
+                    if (!id.endsWith(".brightness")) return [3 /*break*/, 9];
                     _f = (_e = light).merge;
                     _g = {
                         dimmer: val
                     };
                     return [4 /*yield*/, getTransitionDuration(accessory)];
-                case 5:
+                case 8:
                     _f.apply(_e, [(_g.transitionTime = _m.sent(),
                             _g)]);
-                    return [3 /*break*/, 10];
-                case 6:
-                    if (!id.endsWith(".color")) return [3 /*break*/, 8];
+                    return [3 /*break*/, 13];
+                case 9:
+                    if (!id.endsWith(".color")) return [3 /*break*/, 11];
                     _j = (_h = light).merge;
                     _k = {
                         colorX: val,
                         colorY: 27000
                     };
                     return [4 /*yield*/, getTransitionDuration(accessory)];
-                case 7:
+                case 10:
                     _j.apply(_h, [(_k.transitionTime = _m.sent(),
                             _k)]);
-                    return [3 /*break*/, 10];
-                case 8:
-                    if (!id.endsWith(".transitionDuration")) return [3 /*break*/, 10];
+                    return [3 /*break*/, 13];
+                case 11:
+                    if (!id.endsWith(".transitionDuration")) return [3 /*break*/, 13];
                     // TODO: check if we need to buffer this somehow
                     // for now just ack the change
                     return [4 /*yield*/, adapter.$setState(id, state, true)];
-                case 9:
+                case 12:
                     // TODO: check if we need to buffer this somehow
                     // for now just ack the change
                     _m.sent();
                     return [2 /*return*/];
-                case 10:
+                case 13:
                     serializedObj = newAccessory.serialize(accessory); // serialize with the old object as a reference
                     url = "" + requestBase + endpoints_1.default.devices + "/" + rootObj.native.instanceId;
-                    return [3 /*break*/, 11];
-                case 11:
-                    if (!(!serializedObj || Object.keys(serializedObj).length === 0)) return [3 /*break*/, 13];
+                    return [3 /*break*/, 14];
+                case 14:
+                    if (!(!serializedObj || Object.keys(serializedObj).length === 0)) return [3 /*break*/, 16];
                     global_1.Global.log("stateChange > empty object, not sending any payload", "debug");
                     return [4 /*yield*/, adapter.$setState(id, state.val, true)];
-                case 12:
+                case 15:
                     _m.sent();
                     return [2 /*return*/];
-                case 13:
+                case 16:
                     payload = JSON.stringify(serializedObj);
                     global_1.Global.log("stateChange > sending payload: " + payload, "debug");
                     payload = Buffer.from(payload);
                     node_coap_client_1.CoapClient.request(url, "put", payload);
-                    _m.label = 14;
-                case 14: return [3 /*break*/, 16];
-                case 15:
+                    _m.label = 17;
+                case 17: return [3 /*break*/, 19];
+                case 18:
                     if (!state) {
                         // TODO: find out what to do when states are deleted
                     }
-                    _m.label = 16;
-                case 16:
+                    _m.label = 19;
+                case 19:
                     // Custom subscriptions durchgehen, um die passenden Callbacks aufzurufen
                     try {
                         for (_i = 0, _l = object_polyfill_1.values(customStateSubscriptions.subscriptions); _i < _l.length; _i++) {
@@ -1030,6 +1035,42 @@ function extendGroup(group) {
                 },
                 native: {
                     path: "onOff",
+                },
+            },
+            transitionDuration: {
+                _id: objId + ".transitionDuration",
+                type: "state",
+                common: {
+                    name: "Transition duration",
+                    read: false,
+                    write: true,
+                    type: "number",
+                    min: 0,
+                    max: 100,
+                    def: 0,
+                    role: "light.dimmer",
+                    desc: "Duration for brightness changes of this group's lightbulbs",
+                    unit: "s",
+                },
+                native: {
+                    path: "transitionTime",
+                },
+            },
+            brightness: {
+                _id: objId + ".brightness",
+                type: "state",
+                common: {
+                    name: "Brightness",
+                    read: false,
+                    write: true,
+                    min: 0,
+                    max: 254,
+                    type: "number",
+                    role: "light.dimmer",
+                    desc: "Brightness of this group's lightbulbs",
+                },
+                native: {
+                    path: "dimmer",
                 },
             },
         };
