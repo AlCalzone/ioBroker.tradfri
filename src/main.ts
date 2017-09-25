@@ -22,9 +22,6 @@ import { Scene } from "./ipso/scene";
 // Adapter-Utils laden
 import utils from "./lib/utils";
 
-// Konvertierungsfunktionen
-import conversions from "./lib/conversions";
-
 const customStateSubscriptions: {
 	subscriptions: { [id: string]: { pattern: RegExp, callback: (id: string, state: ioBroker.State) => void } },
 	counter: number,
@@ -299,9 +296,8 @@ let adapter: ExtendedAdapter = utils.adapter({
 									transitionTime: await getTransitionDuration(accessory),
 								});
 							} else if (id.endsWith(".color")) {
-								const colorX = conversions.color("out", state.val);
 								light.merge({
-									colorX: colorX,
+									colorX: val,
 									colorY: 27000,
 									transitionTime: await getTransitionDuration(accessory),
 								});
@@ -700,54 +696,9 @@ async function getTransitionDuration(accessoryOrGroup: Accessory | Group): Promi
 	} else if (accessoryOrGroup instanceof Group) {
 		stateId = calcGroupId(accessoryOrGroup) + ".transitionDuration";
 	}
-	const ret = await readStateValue(stateId);
-	if (ret != null) return ret;
-	return 5;
-}
-
-/**
- * finds the property value for @link{accessory} as defined in @link{propPath}
- * @param source The accessory to be searched for the property
- * @param propPath The property path under which the property is accessible
- */
-function readPropertyValue(source: DictionaryLike<any>, propPath: string) {
-	// if path starts with "__convert:", use a custom conversion function
-	if (propPath.startsWith("__convert:")) {
-		const pathParts = propPath.substr("__convert:".length).split(",");
-		try {
-			const fnName = pathParts[0];
-			const path = pathParts[1];
-			// find initial value on the object
-			const value = dig(source, path);
-			// and convert it
-			return conversions[fnName]("in", value);
-		} catch (e) {
-			_.log(`invalid path definition ${propPath}`, "warn");
-		}
-	} else {
-		return dig(source, propPath);
-	}
-}
-
-/**
- * Reads the value of a state with possible defined conversions
- */
-async function readStateValue(stateId: string): Promise<any> {
-	const obj = await adapter.$getObject(stateId);
-	if (obj != null && obj.native.path != null && obj.native.path.startsWith("__convert")) {
-		const propPath = obj.native.path;
-		const pathParts = propPath.substr("__convert:".length).split(",");
-		try {
-			const fnName = pathParts[0];
-			// find the state value
-			const state = await adapter.$getState(stateId);
-			// and convert it
-			return conversions[fnName]("out", state.val);
-		} catch (e) {
-			_.log(`invalid path definition ${propPath}`, "warn");
-		}
-		return null;
-	}
+	const ret = await adapter.$getState(stateId);
+	if (ret != null) return ret.val;
+	return 0.5; // default
 }
 
 /**
@@ -809,7 +760,7 @@ function extendDevice(accessory: Accessory) {
 		for (const [id, obj] of entries(stateObjs)) {
 			try {
 				// Object could have a default value, find it
-				const newValue = readPropertyValue(accessory, obj.native.path);
+				const newValue = dig<any>(accessory, obj.native.path);
 				adapter.setState(id, newValue, true);
 			} catch (e) {/* skip this value */}
 		}
@@ -886,7 +837,7 @@ function extendDevice(accessory: Accessory) {
 					desc: "range: 0% = cold, 100% = warm",
 				},
 				native: {
-					path: "__convert:color,lightList.[0].colorX",
+					path: "lightList.[0].colorX",
 				},
 			};
 			stateObjs["lightbulb.brightness"] = {
@@ -925,18 +876,18 @@ function extendDevice(accessory: Accessory) {
 				type: "state",
 				common: {
 					name: "Transition duration",
-					read: true, 
+					read: true,
 					write: true,
 					type: "number",
 					min: 0,
 					max: 100, // TODO: check
-					def: 5,
+					def: 0.5,
 					role: "light.dimmer", // TODO: better role?
 					desc: "Duration of a state change",
 					unit: "s",
 				},
 				native: {
-					path: "__convert:transitionTime,lightList.[0].transitionTime",
+					path: "lightList.[0].transitionTime",
 				},
 			};
 		}
@@ -948,7 +899,7 @@ function extendDevice(accessory: Accessory) {
 				let initialValue = null;
 				if (_.isdef(obj.native.path)) {
 					// Object could have a default value, find it
-					initialValue = readPropertyValue(accessory, obj.native.path);
+					initialValue = dig<any>(accessory, obj.native.path);
 				}
 				// create object and return the promise, so we can wait
 				return adapter.$createOwnStateEx(stateId, obj, initialValue);
@@ -1015,7 +966,7 @@ function extendGroup(group: Group) {
 		for (const [id, obj] of entries(stateObjs)) {
 			try {
 				// Object could have a default value, find it
-				const newValue = readPropertyValue(group, obj.native.path);
+				const newValue = dig<any>(group, obj.native.path);
 				adapter.setState(id, newValue, true);
 			} catch (e) {/* skip this value */ }
 		}
@@ -1070,7 +1021,7 @@ function extendGroup(group: Group) {
 				let initialValue = null;
 				if (_.isdef(obj.native.path)) {
 					// Object could have a default value, find it
-					initialValue = readPropertyValue(group, obj.native.path);
+					initialValue = dig<any>(group, obj.native.path);
 				}
 				// create object and return the promise, so we can wait
 				return adapter.$createOwnStateEx(stateId, obj, initialValue);
