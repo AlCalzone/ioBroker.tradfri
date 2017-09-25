@@ -1,4 +1,7 @@
-import { DictionaryLike } from "./object-polyfill";
-export declare type Conversion = (direction: "in" | "out", value: any) => any;
-declare const _default: DictionaryLike<Conversion>;
-export default _default;
+import { PropertyTransform } from "../ipso/ipsoObject";
+export declare const serializers: {
+    color: PropertyTransform;
+};
+export declare const deserializers: {
+    color: PropertyTransform;
+};
