@@ -46,6 +46,12 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### 0.3.0 (2017-09-25)
+* (AlCalzone) official release of the previous changes
+* (AlCalzone) added transition duration and brightness change for groups
+* (AlCalzone) monitor connection state and update info.connection
+* (AlCalzone) fix connection attempts to unavailable endpoints
+
 #### 0.2.9 (2017-09-25)
 * (AlCalzone) Support changing the transition duration
 
