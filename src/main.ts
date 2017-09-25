@@ -1275,21 +1275,33 @@ function parsePayload(response: CoapResponse): any {
 // Connection check
 let pingTimer: NodeJS.Timer;
 let connectionAlive: boolean = false;
+let pingFails: number = 0;
 async function pingThread() {
 	const oldValue = connectionAlive;
 	connectionAlive = await coap.ping(requestBase);
+	_.log(`ping ${connectionAlive ? "" : "un"}successful...`, "debug");
 	await adapter.$setStateChanged("info.connection", connectionAlive, true);
 
 	// see if the connection state has changed
-	if (connectionAlive !== oldValue) {
-		if (connectionAlive) {
+	if (connectionAlive) {
+		pingFails = 0;
+		if (!oldValue) {
 			// connection is now alive again
 			_.log("Connection to gateway reestablished", "info");
 			// TODO: send buffered messages
-		} else {
+		}
+	} else {
+		if (oldValue) {
 			// connection is now dead
 			_.log("Lost connection to gateway", "warn");
 			// TODO: buffer messages
+		}
+
+		// Try to fix stuff by resetting the connection after a few failed pings
+		pingFails++;
+		if (pingFails >= 3) {
+			_.log("3 consecutive pings failed, resetting connection...", "warn");
+			coap.reset();
 		}
 	}
 }
