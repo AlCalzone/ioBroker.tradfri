@@ -53,8 +53,6 @@ var group_1 = require("./ipso/group");
 var scene_1 = require("./ipso/scene");
 // Adapter-Utils laden
 var utils_1 = require("./lib/utils");
-// Konvertierungsfunktionen
-var conversions_1 = require("./lib/conversions");
 var customStateSubscriptions = {
     subscriptions: {},
     counter: 0,
@@ -241,7 +239,7 @@ var adapter = utils_1.default.adapter({
         }
     },
     stateChange: function (id, state) { return __awaiter(_this, void 0, void 0, function () {
-        var stateObj, rootId, rootObj, val, serializedObj, url, _a, group, newGroup, accessory, newAccessory, light, _b, _c, _d, _e, _f, _g, colorX, _h, _j, _k, payload, _i, _l, sub;
+        var stateObj, rootId, rootObj, val, serializedObj, url, _a, group, newGroup, accessory, newAccessory, light, _b, _c, _d, _e, _f, _g, _h, _j, _k, payload, _i, _l, sub;
         return __generator(this, function (_m) {
             switch (_m.label) {
                 case 0:
@@ -320,10 +318,9 @@ var adapter = utils_1.default.adapter({
                     return [3 /*break*/, 10];
                 case 6:
                     if (!id.endsWith(".color")) return [3 /*break*/, 8];
-                    colorX = conversions_1.default.color("out", state.val);
                     _j = (_h = light).merge;
                     _k = {
-                        colorX: colorX,
+                        colorX: val,
                         colorY: 27000
                     };
                     return [4 /*yield*/, getTransitionDuration(accessory)];
@@ -733,70 +730,12 @@ function getTransitionDuration(accessoryOrGroup) {
                     else if (accessoryOrGroup instanceof group_1.Group) {
                         stateId = calcGroupId(accessoryOrGroup) + ".transitionDuration";
                     }
-                    return [4 /*yield*/, readStateValue(stateId)];
+                    return [4 /*yield*/, adapter.$getState(stateId)];
                 case 1:
                     ret = _a.sent();
                     if (ret != null)
-                        return [2 /*return*/, ret];
-                    return [2 /*return*/, 5];
-            }
-        });
-    });
-}
-/**
- * finds the property value for @link{accessory} as defined in @link{propPath}
- * @param source The accessory to be searched for the property
- * @param propPath The property path under which the property is accessible
- */
-function readPropertyValue(source, propPath) {
-    // if path starts with "__convert:", use a custom conversion function
-    if (propPath.startsWith("__convert:")) {
-        var pathParts = propPath.substr("__convert:".length).split(",");
-        try {
-            var fnName = pathParts[0];
-            var path = pathParts[1];
-            // find initial value on the object
-            var value = object_polyfill_1.dig(source, path);
-            // and convert it
-            return conversions_1.default[fnName]("in", value);
-        }
-        catch (e) {
-            global_1.Global.log("invalid path definition " + propPath, "warn");
-        }
-    }
-    else {
-        return object_polyfill_1.dig(source, propPath);
-    }
-}
-/**
- * Reads the value of a state with possible defined conversions
- */
-function readStateValue(stateId) {
-    return __awaiter(this, void 0, void 0, function () {
-        var obj, propPath, pathParts, fnName, state, e_1;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, adapter.$getObject(stateId)];
-                case 1:
-                    obj = _a.sent();
-                    if (!(obj != null && obj.native.path != null && obj.native.path.startsWith("__convert"))) return [3 /*break*/, 6];
-                    propPath = obj.native.path;
-                    pathParts = propPath.substr("__convert:".length).split(",");
-                    _a.label = 2;
-                case 2:
-                    _a.trys.push([2, 4, , 5]);
-                    fnName = pathParts[0];
-                    return [4 /*yield*/, adapter.$getState(stateId)];
-                case 3:
-                    state = _a.sent();
-                    // and convert it
-                    return [2 /*return*/, conversions_1.default[fnName]("out", state.val)];
-                case 4:
-                    e_1 = _a.sent();
-                    global_1.Global.log("invalid path definition " + propPath, "warn");
-                    return [3 /*break*/, 5];
-                case 5: return [2 /*return*/, null];
-                case 6: return [2 /*return*/];
+                        return [2 /*return*/, ret.val];
+                    return [2 /*return*/, 0.5]; // default
             }
         });
     });
@@ -854,7 +793,7 @@ function extendDevice(accessory) {
             var _b = _a[_i], id = _b[0], obj = _b[1];
             try {
                 // Object could have a default value, find it
-                var newValue = readPropertyValue(accessory, obj.native.path);
+                var newValue = object_polyfill_1.dig(accessory, obj.native.path);
                 adapter.setState(id, newValue, true);
             }
             catch (e) { }
@@ -928,7 +867,7 @@ function extendDevice(accessory) {
                     desc: "range: 0% = cold, 100% = warm",
                 },
                 native: {
-                    path: "__convert:color,lightList.[0].colorX",
+                    path: "lightList.[0].colorX",
                 },
             };
             stateObjs_1["lightbulb.brightness"] = {
@@ -972,13 +911,13 @@ function extendDevice(accessory) {
                     type: "number",
                     min: 0,
                     max: 100,
-                    def: 5,
+                    def: 0.5,
                     role: "light.dimmer",
                     desc: "Duration of a state change",
                     unit: "s",
                 },
                 native: {
-                    path: "__convert:transitionTime,lightList.[0].transitionTime",
+                    path: "lightList.[0].transitionTime",
                 },
             };
         }
@@ -989,7 +928,7 @@ function extendDevice(accessory) {
             var initialValue = null;
             if (global_1.Global.isdef(obj.native.path)) {
                 // Object could have a default value, find it
-                initialValue = readPropertyValue(accessory, obj.native.path);
+                initialValue = object_polyfill_1.dig(accessory, obj.native.path);
             }
             // create object and return the promise, so we can wait
             return adapter.$createOwnStateEx(stateId, obj, initialValue);
@@ -1047,7 +986,7 @@ function extendGroup(group) {
             var _b = _a[_i], id = _b[0], obj = _b[1];
             try {
                 // Object could have a default value, find it
-                var newValue = readPropertyValue(group, obj.native.path);
+                var newValue = object_polyfill_1.dig(group, obj.native.path);
                 adapter.setState(id, newValue, true);
             }
             catch (e) { }
@@ -1101,7 +1040,7 @@ function extendGroup(group) {
             var initialValue = null;
             if (global_1.Global.isdef(obj.native.path)) {
                 // Object could have a default value, find it
-                initialValue = readPropertyValue(group, obj.native.path);
+                initialValue = object_polyfill_1.dig(group, obj.native.path);
             }
             // create object and return the promise, so we can wait
             return adapter.$createOwnStateEx(stateId, obj, initialValue);
