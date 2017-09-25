@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var fs = require("fs");
+var path = require("path");
 var object_polyfill_1 = require("./object-polyfill");
 var promises_1 = require("./promises");
 // ==================================
@@ -224,8 +225,8 @@ var Global = (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        ioPack = JSON.parse(fs.readFileSync(__dirname + "/io-package.json", "utf8"));
-                        if (ioPack.instanceObjects == null && ioPack.instanceObjects.length === 0)
+                        ioPack = JSON.parse(fs.readFileSync(path.join(__dirname, "../../io-package.json"), "utf8"));
+                        if (ioPack.instanceObjects == null || ioPack.instanceObjects.length === 0)
                             return [2 /*return*/];
                         setObjects = ioPack.instanceObjects.map(function (obj) { return Global._adapter.$setObjectNotExists(obj._id, obj); });
                         return [4 /*yield*/, Promise.all(setObjects)];

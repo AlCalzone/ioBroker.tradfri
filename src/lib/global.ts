@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import * as path from "path";
 import { DictionaryLike, entries, filter as objFilter } from "./object-polyfill";
 import { promisify, promisifyNoError } from "./promises";
 
@@ -225,10 +226,10 @@ export class Global {
 	public static async ensureInstanceObjects(): Promise<void> {
 		// read io-package.json
 		const ioPack = JSON.parse(
-			fs.readFileSync(__dirname + "/io-package.json", "utf8"),
+			fs.readFileSync(path.join(__dirname, "../../io-package.json"), "utf8"),
 		);
 
-		if (ioPack.instanceObjects == null && ioPack.instanceObjects.length === 0) return;
+		if (ioPack.instanceObjects == null || ioPack.instanceObjects.length === 0) return;
 
 		// wait for all instance objects to be created
 		const setObjects = ioPack.instanceObjects.map(
