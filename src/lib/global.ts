@@ -1,3 +1,4 @@
+import * as fs from "fs";
 import { DictionaryLike, entries, filter as objFilter } from "./object-polyfill";
 import { promisify, promisifyNoError } from "./promises";
 
@@ -40,12 +41,16 @@ export interface ExtendedAdapter extends ioBroker.Adapter {
 	$getAdapterObjects(): Promise<DictionaryLike<ioBroker.Object>>;
 	/** Creates or overwrites an object in the object db */
 	$setObject(id: string, obj: ioBroker.Object, options?: any): Promise<{ id: string }>;
+	/** Creates an object in the object db if it doesn't exist yet */
+	$setObjectNotExists(id: string, obj: ioBroker.Object, options?: any): Promise<{ id: string }>;
 	/** Extends an object in the object db */
 	$extendObject(id: string, obj: ioBroker.PartialObject, options?: any): Promise<{ id: string }>;
 	/** Reads an object (which might not belong to this adapter) from the object db */
 	$getForeignObject(id: string, options?: any): Promise<ioBroker.Object>;
 	/** Creates or overwrites an object (which might not belong to this adapter) in the object db */
 	$setForeignObject(id: string, obj: ioBroker.Object, options?: any): Promise<{ id: string }>;
+	/** Creates an object (which might not belong to this adapter) in the object db if it doesn't exist yet */
+	$setForeignObjectNotExists(id: string, obj: ioBroker.Object, options?: any): Promise<{ id: string }>;
 	/** Extends an object in the object (which might not belong to this adapter) db */
 	$extendForeignObject(id: string, obj: ioBroker.PartialObject, options?: any): Promise<{ id: string }>;
 	/** Get foreign objects by pattern, by specific type and resolve their enums. */
@@ -110,15 +115,17 @@ export class Global {
 
 		let ret = adapter as ExtendedAdapter;
 		if (!ret.__isExtended) {
-			//ret.objects.$getObjectList = promisify(adapter.objects.getObjectList, adapter.objects);
+			// ret.objects.$getObjectList = promisify(adapter.objects.getObjectList, adapter.objects);
 			ret = Object.assign(ret, {
 				$getObject: promisify<ioBroker.Object>(adapter.getObject, adapter),
 				$setObject: promisify<{ id: string }>(adapter.setObject, adapter),
+				$setObjectNotExists: promisify<{ id: string }>(adapter.setObjectNotExists, adapter),
 				$extendObject: promisify<{ id: string }>(adapter.extendObject, adapter),
 				$getAdapterObjects: promisify<{ [id: string]: ioBroker.Object }>(adapter.getAdapterObjects, adapter),
 
 				$getForeignObject: promisify<ioBroker.Object>(adapter.getForeignObject, adapter),
 				$setForeignObject: promisify<{ id: string }>(adapter.setForeignObject, adapter),
+				$setForeignObjectNotExists: promisify<{ id: string }>(adapter.setForeignObjectNotExists, adapter),
 				$extendForeignObject: promisify<{ id: string }>(adapter.extendForeignObject, adapter),
 				$getForeignObjects: promisify<{ [id: string]: ioBroker.Object }>(adapter.getForeignObjects, adapter),
 
@@ -213,4 +220,20 @@ export class Global {
 	public static unsubscribeStates: (id: string) => void;
 	public static subscribeObjects: (pattern: string | RegExp, callback: (id: string, object: ioBroker.Object) => void) => string;
 	public static unsubscribeObjects: (id: string) => void;
+
+	// Workaround für unvollständige Adapter-Upgrades
+	public static async ensureInstanceObjects(): Promise<void> {
+		// read io-package.json
+		const ioPack = JSON.parse(
+			fs.readFileSync(__dirname + "/io-package.json", "utf8"),
+		);
+
+		if (ioPack.instanceObjects == null && ioPack.instanceObjects.length === 0) return;
+
+		// wait for all instance objects to be created
+		const setObjects = ioPack.instanceObjects.map(
+			obj => Global._adapter.$setObjectNotExists(obj._id, obj),
+		);
+		await Promise.all(setObjects);
+	}
 }

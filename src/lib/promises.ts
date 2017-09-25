@@ -40,3 +40,10 @@ export function waterfall(...fn: PromiseCallback[]): Promise<any> {
 		Promise.resolve(),
 	);
 }
+
+/** Creates a promise that waits for the specified time and then resolves */
+export function wait(ms: number): Promise<void> {
+	return new Promise((resolve, reject) => {
+		setTimeout(resolve, ms);
+	});
+}

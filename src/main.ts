@@ -10,6 +10,7 @@ import coapEndpoints from "./ipso/endpoints";
 import { except } from "./lib/array-extensions";
 import { ExtendedAdapter, Global as _ } from "./lib/global";
 import { composeObject, DictionaryLike, dig, entries, filter, values } from "./lib/object-polyfill";
+import { wait } from "./lib/promises";
 import { str2regex } from "./lib/str2regex";
 
 // Datentypen laden
@@ -74,6 +75,8 @@ let adapter: ExtendedAdapter = utils.adapter({
 		// Adapter-Instanz global machen
 		adapter = _.extend(adapter);
 		_.adapter = adapter;
+		// Sicherstellen, dass alle Instance-Objects vorhanden sind
+		await _.ensureInstanceObjects();
 
 		// redirect console output
 		// console.log = (msg) => adapter.log.debug("STDOUT > " + msg);
@@ -96,6 +99,26 @@ let adapter: ExtendedAdapter = utils.adapter({
 			psk: { "Client_identity": adapter.config.securityCode },
 		});
 		requestBase = `coaps://${hostname}:5684/`;
+
+		// Try a few times to setup a working connection
+		const maxTries = 3;
+		for (let i = 1; i <= maxTries; i++) {
+			if (await coap.tryToConnect(requestBase)) {
+				break; // it worked
+			} else if (i < maxTries) {
+				_.log(`Could not connect to gateway, try #${i}`, "warn");
+				await wait(1000);
+			} else if (i === maxTries) {
+				// no working connection
+				_.log(`Could not connect to the gateway ${requestBase}`, "error");
+				 // TODO: check if this is what we want or if we need process.exit
+				adapter.stop();
+				return;
+			}
+		}
+		await adapter.$setState("info.connection", true, true);
+		connectionAlive = true;
+		pingTimer = setInterval(pingThread, 10000);
 
 		// TODO: load known devices from ioBroker into <devices> & <objects>
 		observeDevices();
@@ -349,6 +372,9 @@ let adapter: ExtendedAdapter = utils.adapter({
 	unload: (callback) => {
 		// is called when adapter shuts down - callback has to be called under any circumstances!
 		try {
+			// stop pinging
+			if (pingTimer != null) clearInterval(pingTimer);
+
 			// stop all observers
 			for (const url of observers) {
 				coap.stopObserving(url);
@@ -1246,12 +1272,35 @@ function parsePayload(response: CoapResponse): any {
 	}
 }
 
+// Connection check
+let pingTimer: NodeJS.Timer;
+let connectionAlive: boolean = false;
+async function pingThread() {
+	const oldValue = connectionAlive;
+	connectionAlive = await coap.ping(requestBase);
+	await adapter.$setStateChanged("info.connection", connectionAlive, true);
+
+	// see if the connection state has changed
+	if (connectionAlive !== oldValue) {
+		if (connectionAlive) {
+			// connection is now alive again
+			_.log("Connection to gateway reestablished", "info");
+			// TODO: send buffered messages
+		} else {
+			// connection is now dead
+			_.log("Lost connection to gateway", "warn");
+			// TODO: buffer messages
+		}
+	}
+}
+
 // Unbehandelte Fehler tracen
-process.on("unhandledRejection", (r: Error) => {
-	adapter.log.error("unhandled promise rejection: " + r);
+process.on("unhandledRejection", (err: Error) => {
+	adapter.log.error("unhandled promise rejection: " + err.message);
+	if (err.stack != null) adapter.log.error("> stack: " + err.stack);
 });
 process.on("uncaughtException", (err: Error) => {
 	adapter.log.error("unhandled exception:" + err.message);
-	adapter.log.error("> stack: " + err.stack);
+	if (err.stack != null) adapter.log.error("> stack: " + err.stack);
 	process.exit(1);
 });
