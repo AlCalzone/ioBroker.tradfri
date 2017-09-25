@@ -134,7 +134,7 @@ var adapter = utils_1.default.adapter({
                 case 6:
                     if (i === maxTries) {
                         // no working connection
-                        global_1.Global.log("Could not connect to the gateway " + requestBase, "error");
+                        global_1.Global.log("Could not connect to the gateway " + requestBase + " after " + maxTries + " tries, shutting down.", "error");
                         process.exit(1);
                         return [2 /*return*/];
                     }
