@@ -25,8 +25,8 @@ export class Light extends IPSODevice {
 
 	@ipsoKey("5712")
 	@required
-	@serializeWith(val => val * 10) // the sent value is in 10ths of seconds
-	@deserializeWith(val => val / 10) // we're working with seconds
+	@serializeWith(serializers.transitionTime)
+	@deserializeWith(deserializers.transitionTime)
 	public transitionTime: number = 0.5; // <float>
 
 	@ipsoKey("5805")

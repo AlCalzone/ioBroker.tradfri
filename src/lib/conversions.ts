@@ -8,6 +8,9 @@ export const serializers = {
 		// extrapolate 0-100% to [min..max]
 		return roundTo(min + value / 100 * (max - min), 0);
 	}) as PropertyTransform,
+
+	// the sent value is in 10ths of seconds, we're working with seconds
+	transitionTime: (val => val * 10) as PropertyTransform,
 };
 
 export const deserializers = {
@@ -18,4 +21,7 @@ export const deserializers = {
 		value = clamp(value, 0, 1);
 		return roundTo(value * 100, 0);
 	}) as PropertyTransform,
+
+	// the sent value is in 10ths of seconds, we're working with seconds
+	transitionTime: (val => val / 10) as PropertyTransform, 
 };

@@ -260,11 +260,14 @@ let adapter: ExtendedAdapter = utils.adapter({
 						// create a copy to modify
 						const newGroup = group.clone();
 
-						// TODO: check if we can change the transition duration here
-						if (id.endsWith("state")) {
-							// just turn on or off
+						if (id.endsWith(".state")) {
 							newGroup.onOff = val;
-						} else if (id.endsWith("activeScene")) {
+						} else if (id.endsWith(".brightness")) {
+							newGroup.merge({
+								dimmer: val,
+								transitionTime: await getTransitionDuration(group),
+							});
+						} else if (id.endsWith(".activeScene")) {
 							// turn on and activate a scene
 							newGroup.merge({
 								onOff: true,
@@ -286,10 +289,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 							const light = newAccessory.lightList[0];
 
 							if (id.endsWith(".state")) {
-								light.merge({
-									onOff: val,
-									transitionTime: await getTransitionDuration(accessory),
-								});
+								light.onOff = val;
 							} else if (id.endsWith(".brightness")) {
 								light.merge({
 									dimmer: val,
@@ -1010,6 +1010,42 @@ function extendGroup(group: Group) {
 				},
 				native: {
 					path: "onOff",
+				},
+			},
+			transitionDuration: {
+				_id: `${objId}.transitionDuration`,
+				type: "state",
+				common: {
+					name: "Transition duration",
+					read: false,
+					write: true,
+					type: "number",
+					min: 0,
+					max: 100, // TODO: check
+					def: 0,
+					role: "light.dimmer", // TODO: better role?
+					desc: "Duration for brightness changes of this group's lightbulbs",
+					unit: "s",
+				},
+				native: {
+					path: "transitionTime",
+				},
+			},
+			brightness: {
+				_id: `${objId}.brightness`,
+				type: "state",
+				common: {
+					name: "Brightness",
+					read: false, // TODO: check
+					write: true, // TODO: check
+					min: 0,
+					max: 254,
+					type: "number",
+					role: "light.dimmer",
+					desc: "Brightness of this group's lightbulbs",
+				},
+				native: {
+					path: "dimmer",
 				},
 			},
 		};

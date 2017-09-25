@@ -4,4 +4,5 @@ export declare class Group extends IPSODevice {
     dimmer: number;
     sceneId: number | number[];
     deviceIDs: number[];
+    transitionTime: number;
 }

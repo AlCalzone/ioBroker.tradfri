@@ -72,10 +72,8 @@ __decorate([
 __decorate([
     ipsoObject_1.ipsoKey("5712"),
     ipsoObject_1.required,
-    ipsoObject_1.serializeWith(function (val) { return val * 10; }) // the sent value is in 10ths of seconds
-    ,
-    ipsoObject_1.deserializeWith(function (val) { return val / 10; }) // we're working with seconds
-    ,
+    ipsoObject_1.serializeWith(conversions_1.serializers.transitionTime),
+    ipsoObject_1.deserializeWith(conversions_1.deserializers.transitionTime),
     __metadata("design:type", Number)
 ], Light.prototype, "transitionTime", void 0);
 __decorate([

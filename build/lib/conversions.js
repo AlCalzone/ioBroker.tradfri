@@ -7,6 +7,8 @@ exports.serializers = {
         // extrapolate 0-100% to [min..max]
         return math_1.roundTo(min + value / 100 * (max - min), 0);
     }),
+    // the sent value is in 10ths of seconds, we're working with seconds
+    transitionTime: (function (val) { return val * 10; }),
 };
 exports.deserializers = {
     color: (function (value) {
@@ -16,5 +18,7 @@ exports.deserializers = {
         value = math_1.clamp(value, 0, 1);
         return math_1.roundTo(value * 100, 0);
     }),
+    // the sent value is in 10ths of seconds, we're working with seconds
+    transitionTime: (function (val) { return val / 10; }),
 };
 //# sourceMappingURL=conversions.js.map
