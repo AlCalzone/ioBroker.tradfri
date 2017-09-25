@@ -35,6 +35,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var fs = require("fs");
 var object_polyfill_1 = require("./object-polyfill");
 var promises_1 = require("./promises");
 // ==================================
@@ -78,14 +79,16 @@ var Global = (function () {
         var _this = this;
         var ret = adapter;
         if (!ret.__isExtended) {
-            //ret.objects.$getObjectList = promisify(adapter.objects.getObjectList, adapter.objects);
+            // ret.objects.$getObjectList = promisify(adapter.objects.getObjectList, adapter.objects);
             ret = Object.assign(ret, {
                 $getObject: promises_1.promisify(adapter.getObject, adapter),
                 $setObject: promises_1.promisify(adapter.setObject, adapter),
+                $setObjectNotExists: promises_1.promisify(adapter.setObjectNotExists, adapter),
                 $extendObject: promises_1.promisify(adapter.extendObject, adapter),
                 $getAdapterObjects: promises_1.promisify(adapter.getAdapterObjects, adapter),
                 $getForeignObject: promises_1.promisify(adapter.getForeignObject, adapter),
                 $setForeignObject: promises_1.promisify(adapter.setForeignObject, adapter),
+                $setForeignObjectNotExists: promises_1.promisify(adapter.setForeignObjectNotExists, adapter),
                 $extendForeignObject: promises_1.promisify(adapter.extendForeignObject, adapter),
                 $getForeignObjects: promises_1.promisify(adapter.getForeignObjects, adapter),
                 $createDevice: promises_1.promisify(adapter.createDevice, adapter),
@@ -214,6 +217,25 @@ var Global = (function () {
     };
     // Prüfen auf (un)defined
     Global.isdef = function (value) { return value != undefined; };
+    // Workaround für unvollständige Adapter-Upgrades
+    Global.ensureInstanceObjects = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var ioPack, setObjects;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        ioPack = JSON.parse(fs.readFileSync(__dirname + "/io-package.json", "utf8"));
+                        if (ioPack.instanceObjects == null && ioPack.instanceObjects.length === 0)
+                            return [2 /*return*/];
+                        setObjects = ioPack.instanceObjects.map(function (obj) { return Global._adapter.$setObjectNotExists(obj._id, obj); });
+                        return [4 /*yield*/, Promise.all(setObjects)];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
     return Global;
 }());
 exports.Global = Global;

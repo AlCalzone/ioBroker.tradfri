@@ -46,6 +46,7 @@ var endpoints_1 = require("./ipso/endpoints");
 var array_extensions_1 = require("./lib/array-extensions");
 var global_1 = require("./lib/global");
 var object_polyfill_1 = require("./lib/object-polyfill");
+var promises_1 = require("./lib/promises");
 var str2regex_1 = require("./lib/str2regex");
 // Datentypen laden
 var accessory_1 = require("./ipso/accessory");
@@ -75,42 +76,83 @@ var adapter = utils_1.default.adapter({
     name: "tradfri",
     // Wird aufgerufen, wenn Adapter initialisiert wird
     ready: function () { return __awaiter(_this, void 0, void 0, function () {
-        var hostname;
+        var hostname, maxTries, i;
         return __generator(this, function (_a) {
-            // Sicherstellen, dass die Optionen vollständig ausgefüllt sind.
-            if (adapter.config
-                && adapter.config.host != null && adapter.config.host !== ""
-                && adapter.config.securityCode != null && adapter.config.securityCode !== "") {
-                // alles gut
+            switch (_a.label) {
+                case 0:
+                    // Sicherstellen, dass die Optionen vollständig ausgefüllt sind.
+                    if (adapter.config
+                        && adapter.config.host != null && adapter.config.host !== ""
+                        && adapter.config.securityCode != null && adapter.config.securityCode !== "") {
+                        // alles gut
+                    }
+                    else {
+                        adapter.log.error("Please set the connection params in the adapter options before starting the adapter!");
+                        return [2 /*return*/];
+                    }
+                    // Adapter-Instanz global machen
+                    adapter = global_1.Global.extend(adapter);
+                    global_1.Global.adapter = adapter;
+                    // Sicherstellen, dass alle Instance-Objects vorhanden sind
+                    return [4 /*yield*/, global_1.Global.ensureInstanceObjects()];
+                case 1:
+                    // Sicherstellen, dass alle Instance-Objects vorhanden sind
+                    _a.sent();
+                    // redirect console output
+                    // console.log = (msg) => adapter.log.debug("STDOUT > " + msg);
+                    // console.error = (msg) => adapter.log.error("STDERR > " + msg);
+                    global_1.Global.log("startfile = " + process.argv[1]);
+                    // Eigene Objekte/States beobachten
+                    adapter.subscribeStates("*");
+                    adapter.subscribeObjects("*");
+                    // Custom subscriptions erlauben
+                    global_1.Global.subscribeStates = subscribeStates;
+                    global_1.Global.unsubscribeStates = unsubscribeStates;
+                    global_1.Global.subscribeObjects = subscribeObjects;
+                    global_1.Global.unsubscribeObjects = unsubscribeObjects;
+                    hostname = adapter.config.host.toLowerCase();
+                    node_coap_client_1.CoapClient.setSecurityParams(hostname, {
+                        psk: { "Client_identity": adapter.config.securityCode },
+                    });
+                    requestBase = "coaps://" + hostname + ":5684/";
+                    maxTries = 3;
+                    i = 1;
+                    _a.label = 2;
+                case 2:
+                    if (!(i <= maxTries)) return [3 /*break*/, 8];
+                    return [4 /*yield*/, node_coap_client_1.CoapClient.tryToConnect(requestBase)];
+                case 3:
+                    if (!_a.sent()) return [3 /*break*/, 4];
+                    return [3 /*break*/, 8]; // it worked
+                case 4:
+                    if (!(i < maxTries)) return [3 /*break*/, 6];
+                    global_1.Global.log("Could not connect to gateway, try #" + i, "warn");
+                    return [4 /*yield*/, promises_1.wait(1000)];
+                case 5:
+                    _a.sent();
+                    return [3 /*break*/, 7];
+                case 6:
+                    if (i === maxTries) {
+                        // no working connection
+                        global_1.Global.log("Could not connect to the gateway " + requestBase, "error");
+                        // TODO: check if this is what we want or if we need process.exit
+                        adapter.stop();
+                        return [2 /*return*/];
+                    }
+                    _a.label = 7;
+                case 7:
+                    i++;
+                    return [3 /*break*/, 2];
+                case 8: return [4 /*yield*/, adapter.$setState("info.connection", true, true)];
+                case 9:
+                    _a.sent();
+                    connectionAlive = true;
+                    pingTimer = setInterval(pingThread, 10000);
+                    // TODO: load known devices from ioBroker into <devices> & <objects>
+                    observeDevices();
+                    observeGroups();
+                    return [2 /*return*/];
             }
-            else {
-                adapter.log.error("Please set the connection params in the adapter options before starting the adapter!");
-                return [2 /*return*/];
-            }
-            // Adapter-Instanz global machen
-            adapter = global_1.Global.extend(adapter);
-            global_1.Global.adapter = adapter;
-            // redirect console output
-            // console.log = (msg) => adapter.log.debug("STDOUT > " + msg);
-            // console.error = (msg) => adapter.log.error("STDERR > " + msg);
-            global_1.Global.log("startfile = " + process.argv[1]);
-            // Eigene Objekte/States beobachten
-            adapter.subscribeStates("*");
-            adapter.subscribeObjects("*");
-            // Custom subscriptions erlauben
-            global_1.Global.subscribeStates = subscribeStates;
-            global_1.Global.unsubscribeStates = unsubscribeStates;
-            global_1.Global.subscribeObjects = subscribeObjects;
-            global_1.Global.unsubscribeObjects = unsubscribeObjects;
-            hostname = adapter.config.host.toLowerCase();
-            node_coap_client_1.CoapClient.setSecurityParams(hostname, {
-                psk: { "Client_identity": adapter.config.securityCode },
-            });
-            requestBase = "coaps://" + hostname + ":5684/";
-            // TODO: load known devices from ioBroker into <devices> & <objects>
-            observeDevices();
-            observeGroups();
-            return [2 /*return*/];
         });
     }); },
     message: function (obj) { return __awaiter(_this, void 0, void 0, function () {
@@ -388,6 +430,9 @@ var adapter = utils_1.default.adapter({
     unload: function (callback) {
         // is called when adapter shuts down - callback has to be called under any circumstances!
         try {
+            // stop pinging
+            if (pingTimer != null)
+                clearInterval(pingTimer);
             // stop all observers
             for (var _i = 0, observers_1 = observers; _i < observers_1.length; _i++) {
                 var url = observers_1[_i];
@@ -1248,13 +1293,61 @@ function parsePayload(response) {
             return response.payload;
     }
 }
+// Connection check
+var pingTimer;
+var connectionAlive = false;
+var pingFails = 0;
+function pingThread() {
+    return __awaiter(this, void 0, void 0, function () {
+        var oldValue;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    oldValue = connectionAlive;
+                    return [4 /*yield*/, node_coap_client_1.CoapClient.ping(requestBase)];
+                case 1:
+                    connectionAlive = _a.sent();
+                    global_1.Global.log("ping " + (connectionAlive ? "" : "un") + "successful...", "debug");
+                    return [4 /*yield*/, adapter.$setStateChanged("info.connection", connectionAlive, true)];
+                case 2:
+                    _a.sent();
+                    // see if the connection state has changed
+                    if (connectionAlive) {
+                        pingFails = 0;
+                        if (!oldValue) {
+                            // connection is now alive again
+                            global_1.Global.log("Connection to gateway reestablished", "info");
+                            // TODO: send buffered messages
+                        }
+                    }
+                    else {
+                        if (oldValue) {
+                            // connection is now dead
+                            global_1.Global.log("Lost connection to gateway", "warn");
+                            // TODO: buffer messages
+                        }
+                        // Try to fix stuff by resetting the connection after a few failed pings
+                        pingFails++;
+                        if (pingFails >= 3) {
+                            global_1.Global.log("3 consecutive pings failed, resetting connection...", "warn");
+                            node_coap_client_1.CoapClient.reset();
+                        }
+                    }
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
 // Unbehandelte Fehler tracen
-process.on("unhandledRejection", function (r) {
-    adapter.log.error("unhandled promise rejection: " + r);
+process.on("unhandledRejection", function (err) {
+    adapter.log.error("unhandled promise rejection: " + err.message);
+    if (err.stack != null)
+        adapter.log.error("> stack: " + err.stack);
 });
 process.on("uncaughtException", function (err) {
     adapter.log.error("unhandled exception:" + err.message);
-    adapter.log.error("> stack: " + err.stack);
+    if (err.stack != null)
+        adapter.log.error("> stack: " + err.stack);
     process.exit(1);
 });
 //# sourceMappingURL=main.js.map
