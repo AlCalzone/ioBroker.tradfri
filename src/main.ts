@@ -264,6 +264,17 @@ let adapter: ExtendedAdapter = utils.adapter({
 						if (id.endsWith("state")) {
 							// just turn on or off
 							newGroup.onOff = val;
+						} else if (id.endsWith(".brightness")) {
+							newGroup.merge({ // TODO: check if this even works
+								dimmer: val,
+								transitionTime: await getTransitionDuration(group),
+							});
+						} else if (id.endsWith(".color")) {
+							newGroup.merge({
+								colorX: val,
+								colorY: 27000,
+								transitionTime: await getTransitionDuration(group),
+							});
 						} else if (id.endsWith("activeScene")) {
 							// turn on and activate a scene
 							newGroup.merge({
@@ -1010,6 +1021,41 @@ function extendGroup(group: Group) {
 				},
 				native: {
 					path: "onOff",
+				},
+			},
+			color: { // TODO: test if this even works
+				_id: `${objId}.color`,
+				type: "state",
+				common: {
+					name: "color temperature of the group's lightbulbs",
+					read: true, // TODO: check
+					write: true, // TODO: check
+					min: 0,
+					max: 100,
+					unit: "%",
+					type: "number",
+					role: "level.color.temperature",
+					desc: "range: 0% = cold, 100% = warm",
+				},
+				native: {
+					path: "colorX",
+				},
+			},
+			brightness: {
+				_id: `${objId}.brightness`,
+				type: "state",
+				common: {
+					name: "brightness of the group's lightbulbs",
+					read: true, // TODO: check
+					write: true, // TODO: check
+					min: 0,
+					max: 254,
+					type: "number",
+					role: "light.dimmer",
+					desc: "brightness of the lightbulb",
+				},
+				native: {
+					path: "dimmer",
 				},
 			},
 		};
