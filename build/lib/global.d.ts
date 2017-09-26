@@ -9,6 +9,10 @@ export interface ExtendedAdapter extends ioBroker.Adapter {
     $setObject(id: string, obj: ioBroker.Object, options?: any): Promise<{
         id: string;
     }>;
+    /** Creates an object in the object db if it doesn't exist yet */
+    $setObjectNotExists(id: string, obj: ioBroker.Object, options?: any): Promise<{
+        id: string;
+    }>;
     /** Extends an object in the object db */
     $extendObject(id: string, obj: ioBroker.PartialObject, options?: any): Promise<{
         id: string;
@@ -17,6 +21,10 @@ export interface ExtendedAdapter extends ioBroker.Adapter {
     $getForeignObject(id: string, options?: any): Promise<ioBroker.Object>;
     /** Creates or overwrites an object (which might not belong to this adapter) in the object db */
     $setForeignObject(id: string, obj: ioBroker.Object, options?: any): Promise<{
+        id: string;
+    }>;
+    /** Creates an object (which might not belong to this adapter) in the object db if it doesn't exist yet */
+    $setForeignObjectNotExists(id: string, obj: ioBroker.Object, options?: any): Promise<{
         id: string;
     }>;
     /** Extends an object in the object (which might not belong to this adapter) db */
@@ -91,4 +99,5 @@ export declare class Global {
     static unsubscribeStates: (id: string) => void;
     static subscribeObjects: (pattern: string | RegExp, callback: (id: string, object: ioBroker.Object) => void) => string;
     static unsubscribeObjects: (id: string) => void;
+    static ensureInstanceObjects(): Promise<void>;
 }

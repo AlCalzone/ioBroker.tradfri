@@ -10,6 +10,7 @@ import coapEndpoints from "./ipso/endpoints";
 import { except } from "./lib/array-extensions";
 import { ExtendedAdapter, Global as _ } from "./lib/global";
 import { composeObject, DictionaryLike, dig, entries, filter, values } from "./lib/object-polyfill";
+import { wait } from "./lib/promises";
 import { str2regex } from "./lib/str2regex";
 
 // Datentypen laden
@@ -21,9 +22,6 @@ import { Scene } from "./ipso/scene";
 
 // Adapter-Utils laden
 import utils from "./lib/utils";
-
-// Konvertierungsfunktionen
-import conversions from "./lib/conversions";
 
 const customStateSubscriptions: {
 	subscriptions: { [id: string]: { pattern: RegExp, callback: (id: string, state: ioBroker.State) => void } },
@@ -77,6 +75,8 @@ let adapter: ExtendedAdapter = utils.adapter({
 		// Adapter-Instanz global machen
 		adapter = _.extend(adapter);
 		_.adapter = adapter;
+		// Sicherstellen, dass alle Instance-Objects vorhanden sind
+		await _.ensureInstanceObjects();
 
 		// redirect console output
 		// console.log = (msg) => adapter.log.debug("STDOUT > " + msg);
@@ -99,6 +99,26 @@ let adapter: ExtendedAdapter = utils.adapter({
 			psk: { "Client_identity": adapter.config.securityCode },
 		});
 		requestBase = `coaps://${hostname}:5684/`;
+
+		// Try a few times to setup a working connection
+		const maxTries = 3;
+		for (let i = 1; i <= maxTries; i++) {
+			if (await coap.tryToConnect(requestBase)) {
+				break; // it worked
+			} else if (i < maxTries) {
+				_.log(`Could not connect to gateway, try #${i}`, "warn");
+				await wait(1000);
+			} else if (i === maxTries) {
+				// no working connection
+				_.log(`Could not connect to the gateway ${requestBase} after ${maxTries} tries, shutting down.`, "error");
+
+				process.exit(1);
+				return;
+			}
+		}
+		await adapter.$setState("info.connection", true, true);
+		connectionAlive = true;
+		pingTimer = setInterval(pingThread, 10000);
 
 		// TODO: load known devices from ioBroker into <devices> & <objects>
 		observeDevices();
@@ -263,11 +283,14 @@ let adapter: ExtendedAdapter = utils.adapter({
 						// create a copy to modify
 						const newGroup = group.clone();
 
-						// TODO: check if we can change the transition duration here
-						if (id.endsWith("state")) {
-							// just turn on or off
+						if (id.endsWith(".state")) {
 							newGroup.onOff = val;
-						} else if (id.endsWith("activeScene")) {
+						} else if (id.endsWith(".brightness")) {
+							newGroup.merge({
+								dimmer: val,
+								transitionTime: await getTransitionDuration(group),
+							});
+						} else if (id.endsWith(".activeScene")) {
 							// turn on and activate a scene
 							newGroup.merge({
 								onOff: true,
@@ -289,19 +312,15 @@ let adapter: ExtendedAdapter = utils.adapter({
 							const light = newAccessory.lightList[0];
 
 							if (id.endsWith(".state")) {
-								light.merge({
-									onOff: val,
-									transitionTime: await getTransitionDuration(accessory),
-								});
+								light.onOff = val;
 							} else if (id.endsWith(".brightness")) {
 								light.merge({
 									dimmer: val,
 									transitionTime: await getTransitionDuration(accessory),
 								});
 							} else if (id.endsWith(".color")) {
-								const colorX = conversions.color("out", state.val);
 								light.merge({
-									colorX: colorX,
+									colorX: val,
 									colorY: 27000,
 									transitionTime: await getTransitionDuration(accessory),
 								});
@@ -353,6 +372,9 @@ let adapter: ExtendedAdapter = utils.adapter({
 	unload: (callback) => {
 		// is called when adapter shuts down - callback has to be called under any circumstances!
 		try {
+			// stop pinging
+			if (pingTimer != null) clearInterval(pingTimer);
+
 			// stop all observers
 			for (const url of observers) {
 				coap.stopObserving(url);
@@ -700,54 +722,9 @@ async function getTransitionDuration(accessoryOrGroup: Accessory | Group): Promi
 	} else if (accessoryOrGroup instanceof Group) {
 		stateId = calcGroupId(accessoryOrGroup) + ".transitionDuration";
 	}
-	const ret = await readStateValue(stateId);
-	if (ret != null) return ret;
-	return 5;
-}
-
-/**
- * finds the property value for @link{accessory} as defined in @link{propPath}
- * @param source The accessory to be searched for the property
- * @param propPath The property path under which the property is accessible
- */
-function readPropertyValue(source: DictionaryLike<any>, propPath: string) {
-	// if path starts with "__convert:", use a custom conversion function
-	if (propPath.startsWith("__convert:")) {
-		const pathParts = propPath.substr("__convert:".length).split(",");
-		try {
-			const fnName = pathParts[0];
-			const path = pathParts[1];
-			// find initial value on the object
-			const value = dig(source, path);
-			// and convert it
-			return conversions[fnName]("in", value);
-		} catch (e) {
-			_.log(`invalid path definition ${propPath}`, "warn");
-		}
-	} else {
-		return dig(source, propPath);
-	}
-}
-
-/**
- * Reads the value of a state with possible defined conversions
- */
-async function readStateValue(stateId: string): Promise<any> {
-	const obj = await adapter.$getObject(stateId);
-	if (obj != null && obj.native.path != null && obj.native.path.startsWith("__convert")) {
-		const propPath = obj.native.path;
-		const pathParts = propPath.substr("__convert:".length).split(",");
-		try {
-			const fnName = pathParts[0];
-			// find the state value
-			const state = await adapter.$getState(stateId);
-			// and convert it
-			return conversions[fnName]("out", state.val);
-		} catch (e) {
-			_.log(`invalid path definition ${propPath}`, "warn");
-		}
-		return null;
-	}
+	const ret = await adapter.$getState(stateId);
+	if (ret != null) return ret.val;
+	return 0.5; // default
 }
 
 /**
@@ -809,7 +786,7 @@ function extendDevice(accessory: Accessory) {
 		for (const [id, obj] of entries(stateObjs)) {
 			try {
 				// Object could have a default value, find it
-				const newValue = readPropertyValue(accessory, obj.native.path);
+				const newValue = dig<any>(accessory, obj.native.path);
 				adapter.setState(id, newValue, true);
 			} catch (e) {/* skip this value */}
 		}
@@ -886,7 +863,7 @@ function extendDevice(accessory: Accessory) {
 					desc: "range: 0% = cold, 100% = warm",
 				},
 				native: {
-					path: "__convert:color,lightList.[0].colorX",
+					path: "lightList.[0].colorX",
 				},
 			};
 			stateObjs["lightbulb.brightness"] = {
@@ -925,18 +902,18 @@ function extendDevice(accessory: Accessory) {
 				type: "state",
 				common: {
 					name: "Transition duration",
-					read: true, 
+					read: true,
 					write: true,
 					type: "number",
 					min: 0,
 					max: 100, // TODO: check
-					def: 5,
+					def: 0.5,
 					role: "light.dimmer", // TODO: better role?
 					desc: "Duration of a state change",
 					unit: "s",
 				},
 				native: {
-					path: "__convert:transitionTime,lightList.[0].transitionTime",
+					path: "lightList.[0].transitionTime",
 				},
 			};
 		}
@@ -948,7 +925,7 @@ function extendDevice(accessory: Accessory) {
 				let initialValue = null;
 				if (_.isdef(obj.native.path)) {
 					// Object could have a default value, find it
-					initialValue = readPropertyValue(accessory, obj.native.path);
+					initialValue = dig<any>(accessory, obj.native.path);
 				}
 				// create object and return the promise, so we can wait
 				return adapter.$createOwnStateEx(stateId, obj, initialValue);
@@ -1015,7 +992,7 @@ function extendGroup(group: Group) {
 		for (const [id, obj] of entries(stateObjs)) {
 			try {
 				// Object could have a default value, find it
-				const newValue = readPropertyValue(group, obj.native.path);
+				const newValue = dig<any>(group, obj.native.path);
 				adapter.setState(id, newValue, true);
 			} catch (e) {/* skip this value */ }
 		}
@@ -1061,6 +1038,42 @@ function extendGroup(group: Group) {
 					path: "onOff",
 				},
 			},
+			transitionDuration: {
+				_id: `${objId}.transitionDuration`,
+				type: "state",
+				common: {
+					name: "Transition duration",
+					read: false,
+					write: true,
+					type: "number",
+					min: 0,
+					max: 100, // TODO: check
+					def: 0,
+					role: "light.dimmer", // TODO: better role?
+					desc: "Duration for brightness changes of this group's lightbulbs",
+					unit: "s",
+				},
+				native: {
+					path: "transitionTime",
+				},
+			},
+			brightness: {
+				_id: `${objId}.brightness`,
+				type: "state",
+				common: {
+					name: "Brightness",
+					read: false, // TODO: check
+					write: true, // TODO: check
+					min: 0,
+					max: 254,
+					type: "number",
+					role: "light.dimmer",
+					desc: "Brightness of this group's lightbulbs",
+				},
+				native: {
+					path: "dimmer",
+				},
+			},
 		};
 
 		const createObjects = Object.keys(stateObjs)
@@ -1070,7 +1083,7 @@ function extendGroup(group: Group) {
 				let initialValue = null;
 				if (_.isdef(obj.native.path)) {
 					// Object could have a default value, find it
-					initialValue = readPropertyValue(group, obj.native.path);
+					initialValue = dig<any>(group, obj.native.path);
 				}
 				// create object and return the promise, so we can wait
 				return adapter.$createOwnStateEx(stateId, obj, initialValue);
@@ -1259,12 +1272,47 @@ function parsePayload(response: CoapResponse): any {
 	}
 }
 
+// Connection check
+let pingTimer: NodeJS.Timer;
+let connectionAlive: boolean = false;
+let pingFails: number = 0;
+async function pingThread() {
+	const oldValue = connectionAlive;
+	connectionAlive = await coap.ping(requestBase);
+	_.log(`ping ${connectionAlive ? "" : "un"}successful...`, "debug");
+	await adapter.$setStateChanged("info.connection", connectionAlive, true);
+
+	// see if the connection state has changed
+	if (connectionAlive) {
+		pingFails = 0;
+		if (!oldValue) {
+			// connection is now alive again
+			_.log("Connection to gateway reestablished", "info");
+			// TODO: send buffered messages
+		}
+	} else {
+		if (oldValue) {
+			// connection is now dead
+			_.log("Lost connection to gateway", "warn");
+			// TODO: buffer messages
+		}
+
+		// Try to fix stuff by resetting the connection after a few failed pings
+		pingFails++;
+		if (pingFails >= 3) {
+			_.log("3 consecutive pings failed, resetting connection...", "warn");
+			coap.reset();
+		}
+	}
+}
+
 // Unbehandelte Fehler tracen
-process.on("unhandledRejection", (r: Error) => {
-	adapter.log.error("unhandled promise rejection: " + r);
+process.on("unhandledRejection", (err: Error) => {
+	adapter.log.error("unhandled promise rejection: " + err.message);
+	if (err.stack != null) adapter.log.error("> stack: " + err.stack);
 });
 process.on("uncaughtException", (err: Error) => {
 	adapter.log.error("unhandled exception:" + err.message);
-	adapter.log.error("> stack: " + err.stack);
+	if (err.stack != null) adapter.log.error("> stack: " + err.stack);
 	process.exit(1);
 });

@@ -1,3 +1,4 @@
+import { deserializers, serializers } from "../lib/conversions";
 import { IPSODevice } from "./ipsoDevice";
 import { deserializeWith, ipsoKey, IPSOObject, PropertyTransform, required, serializeWith } from "./ipsoObject";
 
@@ -16,6 +17,13 @@ export class Group extends IPSODevice {
 	@deserializeWith(obj => parseAccessoryLink(obj))
 	@serializeWith(ids => toAccessoryLink(ids))
 	public deviceIDs: number[];
+
+	// The transition time is not reported by the gateway
+	// but it accepts it for a state change
+	@ipsoKey("5712")
+	@serializeWith(serializers.transitionTime)
+	@deserializeWith(deserializers.transitionTime)
+	public transitionTime: number = 0; // <float>
 
 }
 

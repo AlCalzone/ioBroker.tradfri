@@ -59,12 +59,6 @@
     <Compile Include="main.js" />
     <Compile Include="test\testAdapter.js" />
     <Compile Include="test\testPackageFiles.js" />
-    <Content Include="docs\de\template.md" />
-    <Content Include="docs\en\template.md" />
-    <Content Include="docs\ru\template.md" />
-    <Content Include="docs\de\img\picture.png" />
-    <Content Include="docs\en\img\picture.png" />
-    <Content Include="docs\ru\img\picture.png" />
     <Content Include="deploy_password.json">
       <SubType>Code</SubType>
       <Publish>False</Publish>
@@ -85,13 +79,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="admin" />
-    <Folder Include="docs" />
-    <Folder Include="docs\de" />
-    <Folder Include="docs\de\img" />
-    <Folder Include="docs\en" />
-    <Folder Include="docs\en\img" />
-    <Folder Include="docs\ru" />
-    <Folder Include="docs\ru\img" />
     <Folder Include="src" />
     <Folder Include="src\flow" />
     <Folder Include="src\ipso\" />

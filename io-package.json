@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "0.2.9",
+        "version": "0.3.0",
         "news": {
             "0.1.0": {
                 "en": "initial release. Functionality limited to controlling lightbulbs.",
@@ -46,6 +46,10 @@
             "0.2.5": {
                 "en": "Selection of scenes from the admin UI is now possible.",
                 "de": "Auswahl von Szenen in der Admin UI ist jetzt möglich."
+            },
+            "0.3.0": {
+                "en": "Official release of previous changes. Improved connection handling.",
+                "de": "Offizielles Release der letzten Änderungen. Verbesserte Verbindungsverwaltung."
             }
         },
         "title": "IKEA Trådfri",
@@ -70,5 +74,28 @@
     },
     "objects": [
 
+    ],
+    "instanceObjects": [
+        {
+            "_id": "info",
+            "type": "channel",
+            "common": {
+                "name": "Adapter-Information"
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.connection",
+            "type": "state",
+            "common": {
+                "role": "indicator.connected",
+                "name": "Whether the adapter is connected to the gateway",
+                "type": "boolean",
+                "read": true,
+                "write": false,
+                "def": false
+            },
+            "native": {}
+        }
     ]
 }

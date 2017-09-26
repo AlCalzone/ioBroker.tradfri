@@ -46,6 +46,7 @@ var endpoints_1 = require("./ipso/endpoints");
 var array_extensions_1 = require("./lib/array-extensions");
 var global_1 = require("./lib/global");
 var object_polyfill_1 = require("./lib/object-polyfill");
+var promises_1 = require("./lib/promises");
 var str2regex_1 = require("./lib/str2regex");
 // Datentypen laden
 var accessory_1 = require("./ipso/accessory");
@@ -53,8 +54,6 @@ var group_1 = require("./ipso/group");
 var scene_1 = require("./ipso/scene");
 // Adapter-Utils laden
 var utils_1 = require("./lib/utils");
-// Konvertierungsfunktionen
-var conversions_1 = require("./lib/conversions");
 var customStateSubscriptions = {
     subscriptions: {},
     counter: 0,
@@ -77,42 +76,82 @@ var adapter = utils_1.default.adapter({
     name: "tradfri",
     // Wird aufgerufen, wenn Adapter initialisiert wird
     ready: function () { return __awaiter(_this, void 0, void 0, function () {
-        var hostname;
+        var hostname, maxTries, i;
         return __generator(this, function (_a) {
-            // Sicherstellen, dass die Optionen vollständig ausgefüllt sind.
-            if (adapter.config
-                && adapter.config.host != null && adapter.config.host !== ""
-                && adapter.config.securityCode != null && adapter.config.securityCode !== "") {
-                // alles gut
+            switch (_a.label) {
+                case 0:
+                    // Sicherstellen, dass die Optionen vollständig ausgefüllt sind.
+                    if (adapter.config
+                        && adapter.config.host != null && adapter.config.host !== ""
+                        && adapter.config.securityCode != null && adapter.config.securityCode !== "") {
+                        // alles gut
+                    }
+                    else {
+                        adapter.log.error("Please set the connection params in the adapter options before starting the adapter!");
+                        return [2 /*return*/];
+                    }
+                    // Adapter-Instanz global machen
+                    adapter = global_1.Global.extend(adapter);
+                    global_1.Global.adapter = adapter;
+                    // Sicherstellen, dass alle Instance-Objects vorhanden sind
+                    return [4 /*yield*/, global_1.Global.ensureInstanceObjects()];
+                case 1:
+                    // Sicherstellen, dass alle Instance-Objects vorhanden sind
+                    _a.sent();
+                    // redirect console output
+                    // console.log = (msg) => adapter.log.debug("STDOUT > " + msg);
+                    // console.error = (msg) => adapter.log.error("STDERR > " + msg);
+                    global_1.Global.log("startfile = " + process.argv[1]);
+                    // Eigene Objekte/States beobachten
+                    adapter.subscribeStates("*");
+                    adapter.subscribeObjects("*");
+                    // Custom subscriptions erlauben
+                    global_1.Global.subscribeStates = subscribeStates;
+                    global_1.Global.unsubscribeStates = unsubscribeStates;
+                    global_1.Global.subscribeObjects = subscribeObjects;
+                    global_1.Global.unsubscribeObjects = unsubscribeObjects;
+                    hostname = adapter.config.host.toLowerCase();
+                    node_coap_client_1.CoapClient.setSecurityParams(hostname, {
+                        psk: { "Client_identity": adapter.config.securityCode },
+                    });
+                    requestBase = "coaps://" + hostname + ":5684/";
+                    maxTries = 3;
+                    i = 1;
+                    _a.label = 2;
+                case 2:
+                    if (!(i <= maxTries)) return [3 /*break*/, 8];
+                    return [4 /*yield*/, node_coap_client_1.CoapClient.tryToConnect(requestBase)];
+                case 3:
+                    if (!_a.sent()) return [3 /*break*/, 4];
+                    return [3 /*break*/, 8]; // it worked
+                case 4:
+                    if (!(i < maxTries)) return [3 /*break*/, 6];
+                    global_1.Global.log("Could not connect to gateway, try #" + i, "warn");
+                    return [4 /*yield*/, promises_1.wait(1000)];
+                case 5:
+                    _a.sent();
+                    return [3 /*break*/, 7];
+                case 6:
+                    if (i === maxTries) {
+                        // no working connection
+                        global_1.Global.log("Could not connect to the gateway " + requestBase + " after " + maxTries + " tries, shutting down.", "error");
+                        process.exit(1);
+                        return [2 /*return*/];
+                    }
+                    _a.label = 7;
+                case 7:
+                    i++;
+                    return [3 /*break*/, 2];
+                case 8: return [4 /*yield*/, adapter.$setState("info.connection", true, true)];
+                case 9:
+                    _a.sent();
+                    connectionAlive = true;
+                    pingTimer = setInterval(pingThread, 10000);
+                    // TODO: load known devices from ioBroker into <devices> & <objects>
+                    observeDevices();
+                    observeGroups();
+                    return [2 /*return*/];
             }
-            else {
-                adapter.log.error("Please set the connection params in the adapter options before starting the adapter!");
-                return [2 /*return*/];
-            }
-            // Adapter-Instanz global machen
-            adapter = global_1.Global.extend(adapter);
-            global_1.Global.adapter = adapter;
-            // redirect console output
-            // console.log = (msg) => adapter.log.debug("STDOUT > " + msg);
-            // console.error = (msg) => adapter.log.error("STDERR > " + msg);
-            global_1.Global.log("startfile = " + process.argv[1]);
-            // Eigene Objekte/States beobachten
-            adapter.subscribeStates("*");
-            adapter.subscribeObjects("*");
-            // Custom subscriptions erlauben
-            global_1.Global.subscribeStates = subscribeStates;
-            global_1.Global.unsubscribeStates = unsubscribeStates;
-            global_1.Global.subscribeObjects = subscribeObjects;
-            global_1.Global.unsubscribeObjects = unsubscribeObjects;
-            hostname = adapter.config.host.toLowerCase();
-            node_coap_client_1.CoapClient.setSecurityParams(hostname, {
-                psk: { "Client_identity": adapter.config.securityCode },
-            });
-            requestBase = "coaps://" + hostname + ":5684/";
-            // TODO: load known devices from ioBroker into <devices> & <objects>
-            observeDevices();
-            observeGroups();
-            return [2 /*return*/];
         });
     }); },
     message: function (obj) { return __awaiter(_this, void 0, void 0, function () {
@@ -241,7 +280,7 @@ var adapter = utils_1.default.adapter({
         }
     },
     stateChange: function (id, state) { return __awaiter(_this, void 0, void 0, function () {
-        var stateObj, rootId, rootObj, val, serializedObj, url, _a, group, newGroup, accessory, newAccessory, light, _b, _c, _d, _e, _f, _g, colorX, _h, _j, _k, payload, _i, _l, sub;
+        var stateObj, rootId, rootObj, val, serializedObj, url, _a, group, newGroup, _b, _c, _d, accessory, newAccessory, light, _e, _f, _g, _h, _j, _k, payload, _i, _l, sub;
         return __generator(this, function (_m) {
             switch (_m.label) {
                 case 0:
@@ -251,12 +290,12 @@ var adapter = utils_1.default.adapter({
                     else {
                         global_1.Global.log("{{blue}} state with id " + id + " deleted", "debug");
                     }
-                    if (!(state && !state.ack && id.startsWith(adapter.namespace))) return [3 /*break*/, 15];
+                    if (!(state && !state.ack && id.startsWith(adapter.namespace))) return [3 /*break*/, 18];
                     stateObj = objects[id];
                     if (!(stateObj && stateObj.type === "state" && stateObj.native && stateObj.native.path))
                         return [2 /*return*/];
                     rootId = getRootId(id);
-                    if (!rootId) return [3 /*break*/, 14];
+                    if (!rootId) return [3 /*break*/, 17];
                     rootObj = objects[rootId];
                     val = state.val;
                     // make sure we have whole numbers
@@ -273,98 +312,102 @@ var adapter = utils_1.default.adapter({
                     switch (_a) {
                         case "group": return [3 /*break*/, 1];
                     }
-                    return [3 /*break*/, 2];
+                    return [3 /*break*/, 6];
                 case 1:
                     group = groups[rootObj.native.instanceId].group;
                     newGroup = group.clone();
-                    // TODO: check if we can change the transition duration here
-                    if (id.endsWith("state")) {
-                        // just turn on or off
-                        newGroup.onOff = val;
-                    }
-                    else if (id.endsWith("activeScene")) {
+                    if (!id.endsWith(".state")) return [3 /*break*/, 2];
+                    newGroup.onOff = val;
+                    return [3 /*break*/, 5];
+                case 2:
+                    if (!id.endsWith(".brightness")) return [3 /*break*/, 4];
+                    _c = (_b = newGroup).merge;
+                    _d = {
+                        dimmer: val
+                    };
+                    return [4 /*yield*/, getTransitionDuration(group)];
+                case 3:
+                    _c.apply(_b, [(_d.transitionTime = _m.sent(),
+                            _d)]);
+                    return [3 /*break*/, 5];
+                case 4:
+                    if (id.endsWith(".activeScene")) {
                         // turn on and activate a scene
                         newGroup.merge({
                             onOff: true,
                             sceneId: val,
                         });
                     }
+                    _m.label = 5;
+                case 5:
                     serializedObj = newGroup.serialize(group); // serialize with the old object as a reference
                     url = "" + requestBase + endpoints_1.default.groups + "/" + rootObj.native.instanceId;
-                    return [3 /*break*/, 11];
-                case 2:
+                    return [3 /*break*/, 14];
+                case 6:
                     accessory = devices[rootObj.native.instanceId];
                     newAccessory = accessory.clone();
-                    if (!(id.indexOf(".lightbulb.") > -1)) return [3 /*break*/, 10];
+                    if (!(id.indexOf(".lightbulb.") > -1)) return [3 /*break*/, 13];
                     light = newAccessory.lightList[0];
-                    if (!id.endsWith(".state")) return [3 /*break*/, 4];
-                    _c = (_b = light).merge;
-                    _d = {
-                        onOff: val
-                    };
-                    return [4 /*yield*/, getTransitionDuration(accessory)];
-                case 3:
-                    _c.apply(_b, [(_d.transitionTime = _m.sent(),
-                            _d)]);
-                    return [3 /*break*/, 10];
-                case 4:
-                    if (!id.endsWith(".brightness")) return [3 /*break*/, 6];
+                    if (!id.endsWith(".state")) return [3 /*break*/, 7];
+                    light.onOff = val;
+                    return [3 /*break*/, 13];
+                case 7:
+                    if (!id.endsWith(".brightness")) return [3 /*break*/, 9];
                     _f = (_e = light).merge;
                     _g = {
                         dimmer: val
                     };
                     return [4 /*yield*/, getTransitionDuration(accessory)];
-                case 5:
+                case 8:
                     _f.apply(_e, [(_g.transitionTime = _m.sent(),
                             _g)]);
-                    return [3 /*break*/, 10];
-                case 6:
-                    if (!id.endsWith(".color")) return [3 /*break*/, 8];
-                    colorX = conversions_1.default.color("out", state.val);
+                    return [3 /*break*/, 13];
+                case 9:
+                    if (!id.endsWith(".color")) return [3 /*break*/, 11];
                     _j = (_h = light).merge;
                     _k = {
-                        colorX: colorX,
+                        colorX: val,
                         colorY: 27000
                     };
                     return [4 /*yield*/, getTransitionDuration(accessory)];
-                case 7:
+                case 10:
                     _j.apply(_h, [(_k.transitionTime = _m.sent(),
                             _k)]);
-                    return [3 /*break*/, 10];
-                case 8:
-                    if (!id.endsWith(".transitionDuration")) return [3 /*break*/, 10];
+                    return [3 /*break*/, 13];
+                case 11:
+                    if (!id.endsWith(".transitionDuration")) return [3 /*break*/, 13];
                     // TODO: check if we need to buffer this somehow
                     // for now just ack the change
                     return [4 /*yield*/, adapter.$setState(id, state, true)];
-                case 9:
+                case 12:
                     // TODO: check if we need to buffer this somehow
                     // for now just ack the change
                     _m.sent();
                     return [2 /*return*/];
-                case 10:
+                case 13:
                     serializedObj = newAccessory.serialize(accessory); // serialize with the old object as a reference
                     url = "" + requestBase + endpoints_1.default.devices + "/" + rootObj.native.instanceId;
-                    return [3 /*break*/, 11];
-                case 11:
-                    if (!(!serializedObj || Object.keys(serializedObj).length === 0)) return [3 /*break*/, 13];
+                    return [3 /*break*/, 14];
+                case 14:
+                    if (!(!serializedObj || Object.keys(serializedObj).length === 0)) return [3 /*break*/, 16];
                     global_1.Global.log("stateChange > empty object, not sending any payload", "debug");
                     return [4 /*yield*/, adapter.$setState(id, state.val, true)];
-                case 12:
+                case 15:
                     _m.sent();
                     return [2 /*return*/];
-                case 13:
+                case 16:
                     payload = JSON.stringify(serializedObj);
                     global_1.Global.log("stateChange > sending payload: " + payload, "debug");
                     payload = Buffer.from(payload);
                     node_coap_client_1.CoapClient.request(url, "put", payload);
-                    _m.label = 14;
-                case 14: return [3 /*break*/, 16];
-                case 15:
+                    _m.label = 17;
+                case 17: return [3 /*break*/, 19];
+                case 18:
                     if (!state) {
                         // TODO: find out what to do when states are deleted
                     }
-                    _m.label = 16;
-                case 16:
+                    _m.label = 19;
+                case 19:
                     // Custom subscriptions durchgehen, um die passenden Callbacks aufzurufen
                     try {
                         for (_i = 0, _l = object_polyfill_1.values(customStateSubscriptions.subscriptions); _i < _l.length; _i++) {
@@ -386,6 +429,9 @@ var adapter = utils_1.default.adapter({
     unload: function (callback) {
         // is called when adapter shuts down - callback has to be called under any circumstances!
         try {
+            // stop pinging
+            if (pingTimer != null)
+                clearInterval(pingTimer);
             // stop all observers
             for (var _i = 0, observers_1 = observers; _i < observers_1.length; _i++) {
                 var url = observers_1[_i];
@@ -733,70 +779,12 @@ function getTransitionDuration(accessoryOrGroup) {
                     else if (accessoryOrGroup instanceof group_1.Group) {
                         stateId = calcGroupId(accessoryOrGroup) + ".transitionDuration";
                     }
-                    return [4 /*yield*/, readStateValue(stateId)];
+                    return [4 /*yield*/, adapter.$getState(stateId)];
                 case 1:
                     ret = _a.sent();
                     if (ret != null)
-                        return [2 /*return*/, ret];
-                    return [2 /*return*/, 5];
-            }
-        });
-    });
-}
-/**
- * finds the property value for @link{accessory} as defined in @link{propPath}
- * @param source The accessory to be searched for the property
- * @param propPath The property path under which the property is accessible
- */
-function readPropertyValue(source, propPath) {
-    // if path starts with "__convert:", use a custom conversion function
-    if (propPath.startsWith("__convert:")) {
-        var pathParts = propPath.substr("__convert:".length).split(",");
-        try {
-            var fnName = pathParts[0];
-            var path = pathParts[1];
-            // find initial value on the object
-            var value = object_polyfill_1.dig(source, path);
-            // and convert it
-            return conversions_1.default[fnName]("in", value);
-        }
-        catch (e) {
-            global_1.Global.log("invalid path definition " + propPath, "warn");
-        }
-    }
-    else {
-        return object_polyfill_1.dig(source, propPath);
-    }
-}
-/**
- * Reads the value of a state with possible defined conversions
- */
-function readStateValue(stateId) {
-    return __awaiter(this, void 0, void 0, function () {
-        var obj, propPath, pathParts, fnName, state, e_1;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, adapter.$getObject(stateId)];
-                case 1:
-                    obj = _a.sent();
-                    if (!(obj != null && obj.native.path != null && obj.native.path.startsWith("__convert"))) return [3 /*break*/, 6];
-                    propPath = obj.native.path;
-                    pathParts = propPath.substr("__convert:".length).split(",");
-                    _a.label = 2;
-                case 2:
-                    _a.trys.push([2, 4, , 5]);
-                    fnName = pathParts[0];
-                    return [4 /*yield*/, adapter.$getState(stateId)];
-                case 3:
-                    state = _a.sent();
-                    // and convert it
-                    return [2 /*return*/, conversions_1.default[fnName]("out", state.val)];
-                case 4:
-                    e_1 = _a.sent();
-                    global_1.Global.log("invalid path definition " + propPath, "warn");
-                    return [3 /*break*/, 5];
-                case 5: return [2 /*return*/, null];
-                case 6: return [2 /*return*/];
+                        return [2 /*return*/, ret.val];
+                    return [2 /*return*/, 0.5]; // default
             }
         });
     });
@@ -854,7 +842,7 @@ function extendDevice(accessory) {
             var _b = _a[_i], id = _b[0], obj = _b[1];
             try {
                 // Object could have a default value, find it
-                var newValue = readPropertyValue(accessory, obj.native.path);
+                var newValue = object_polyfill_1.dig(accessory, obj.native.path);
                 adapter.setState(id, newValue, true);
             }
             catch (e) { }
@@ -928,7 +916,7 @@ function extendDevice(accessory) {
                     desc: "range: 0% = cold, 100% = warm",
                 },
                 native: {
-                    path: "__convert:color,lightList.[0].colorX",
+                    path: "lightList.[0].colorX",
                 },
             };
             stateObjs_1["lightbulb.brightness"] = {
@@ -972,13 +960,13 @@ function extendDevice(accessory) {
                     type: "number",
                     min: 0,
                     max: 100,
-                    def: 5,
+                    def: 0.5,
                     role: "light.dimmer",
                     desc: "Duration of a state change",
                     unit: "s",
                 },
                 native: {
-                    path: "__convert:transitionTime,lightList.[0].transitionTime",
+                    path: "lightList.[0].transitionTime",
                 },
             };
         }
@@ -989,7 +977,7 @@ function extendDevice(accessory) {
             var initialValue = null;
             if (global_1.Global.isdef(obj.native.path)) {
                 // Object could have a default value, find it
-                initialValue = readPropertyValue(accessory, obj.native.path);
+                initialValue = object_polyfill_1.dig(accessory, obj.native.path);
             }
             // create object and return the promise, so we can wait
             return adapter.$createOwnStateEx(stateId, obj, initialValue);
@@ -1047,7 +1035,7 @@ function extendGroup(group) {
             var _b = _a[_i], id = _b[0], obj = _b[1];
             try {
                 // Object could have a default value, find it
-                var newValue = readPropertyValue(group, obj.native.path);
+                var newValue = object_polyfill_1.dig(group, obj.native.path);
                 adapter.setState(id, newValue, true);
             }
             catch (e) { }
@@ -1093,6 +1081,42 @@ function extendGroup(group) {
                     path: "onOff",
                 },
             },
+            transitionDuration: {
+                _id: objId + ".transitionDuration",
+                type: "state",
+                common: {
+                    name: "Transition duration",
+                    read: false,
+                    write: true,
+                    type: "number",
+                    min: 0,
+                    max: 100,
+                    def: 0,
+                    role: "light.dimmer",
+                    desc: "Duration for brightness changes of this group's lightbulbs",
+                    unit: "s",
+                },
+                native: {
+                    path: "transitionTime",
+                },
+            },
+            brightness: {
+                _id: objId + ".brightness",
+                type: "state",
+                common: {
+                    name: "Brightness",
+                    read: false,
+                    write: true,
+                    min: 0,
+                    max: 254,
+                    type: "number",
+                    role: "light.dimmer",
+                    desc: "Brightness of this group's lightbulbs",
+                },
+                native: {
+                    path: "dimmer",
+                },
+            },
         };
         var createObjects = Object.keys(stateObjs_2)
             .map(function (key) {
@@ -1101,7 +1125,7 @@ function extendGroup(group) {
             var initialValue = null;
             if (global_1.Global.isdef(obj.native.path)) {
                 // Object could have a default value, find it
-                initialValue = readPropertyValue(group, obj.native.path);
+                initialValue = object_polyfill_1.dig(group, obj.native.path);
             }
             // create object and return the promise, so we can wait
             return adapter.$createOwnStateEx(stateId, obj, initialValue);
@@ -1268,13 +1292,61 @@ function parsePayload(response) {
             return response.payload;
     }
 }
+// Connection check
+var pingTimer;
+var connectionAlive = false;
+var pingFails = 0;
+function pingThread() {
+    return __awaiter(this, void 0, void 0, function () {
+        var oldValue;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    oldValue = connectionAlive;
+                    return [4 /*yield*/, node_coap_client_1.CoapClient.ping(requestBase)];
+                case 1:
+                    connectionAlive = _a.sent();
+                    global_1.Global.log("ping " + (connectionAlive ? "" : "un") + "successful...", "debug");
+                    return [4 /*yield*/, adapter.$setStateChanged("info.connection", connectionAlive, true)];
+                case 2:
+                    _a.sent();
+                    // see if the connection state has changed
+                    if (connectionAlive) {
+                        pingFails = 0;
+                        if (!oldValue) {
+                            // connection is now alive again
+                            global_1.Global.log("Connection to gateway reestablished", "info");
+                            // TODO: send buffered messages
+                        }
+                    }
+                    else {
+                        if (oldValue) {
+                            // connection is now dead
+                            global_1.Global.log("Lost connection to gateway", "warn");
+                            // TODO: buffer messages
+                        }
+                        // Try to fix stuff by resetting the connection after a few failed pings
+                        pingFails++;
+                        if (pingFails >= 3) {
+                            global_1.Global.log("3 consecutive pings failed, resetting connection...", "warn");
+                            node_coap_client_1.CoapClient.reset();
+                        }
+                    }
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
 // Unbehandelte Fehler tracen
-process.on("unhandledRejection", function (r) {
-    adapter.log.error("unhandled promise rejection: " + r);
+process.on("unhandledRejection", function (err) {
+    adapter.log.error("unhandled promise rejection: " + err.message);
+    if (err.stack != null)
+        adapter.log.error("> stack: " + err.stack);
 });
 process.on("uncaughtException", function (err) {
     adapter.log.error("unhandled exception:" + err.message);
-    adapter.log.error("> stack: " + err.stack);
+    if (err.stack != null)
+        adapter.log.error("> stack: " + err.stack);
     process.exit(1);
 });
 //# sourceMappingURL=main.js.map

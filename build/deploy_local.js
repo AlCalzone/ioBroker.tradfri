@@ -1,4 +1,5 @@
 "use strict";
+// tslint:disable:no-var-requires
 /*
     Allows easier local debugging over SSH.
     Running `npm run deploy_local` updates remote adapter files
@@ -40,32 +41,36 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var path = require("path");
-var nodeSSH = require("node-ssh");
-var ssh = new nodeSSH();
 /*
     CONFIGURATION:
-        - enter adapter name behind ADAPTER_NAME
         - provide a deploy_password.json file in the project root with contents
             {
                 "host": "<HOSTNAME>",
                 "username": "<USERNAME>",
                 "password": "<PASSWORD>"
             }
+        - specify which dirs and files should be uploaded
+        - specify where the root dir is relative to this script
 */
-var ADAPTER_NAME = "tradfri";
-var sshConfig = require("../deploy_password.json");
-var localRoot = path.resolve(__dirname, "../");
+var uploadDirs = ["admin", "build"];
+var uploadFiles = ["package.json", "io-package.json", "main.js"];
+var rootDir = "../";
+var nodeSSH = require("node-ssh");
+var path = require("path");
+var localRoot = path.resolve(__dirname, rootDir);
+var ioPack = require(path.join(rootDir, "io-package.json"));
+var ADAPTER_NAME = ioPack.common.name;
+var ssh = new nodeSSH();
+var sshConfig = require(path.join(rootDir, "deploy_password.json"));
 var remoteRoot = "/opt/iobroker/node_modules/iobroker." + ADAPTER_NAME;
 (function main() {
     return __awaiter(this, void 0, void 0, function () {
-        var uploadDirs, _i, uploadDirs_1, dir, uploadFiles, _a, uploadFiles_1, file, execResult;
+        var _i, uploadDirs_1, dir, _a, uploadFiles_1, file, execResult;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0: return [4 /*yield*/, ssh.connect(sshConfig)];
                 case 1:
                     _b.sent();
-                    uploadDirs = ["admin", "build"];
                     _i = 0, uploadDirs_1 = uploadDirs;
                     _b.label = 2;
                 case 2:
@@ -78,7 +83,7 @@ var remoteRoot = "/opt/iobroker/node_modules/iobroker." + ADAPTER_NAME;
                             validate: function (pathname) {
                                 var basename = path.basename(pathname);
                                 return !basename.startsWith("deploy_");
-                            }
+                            },
                         })];
                 case 3:
                     _b.sent();
@@ -87,7 +92,6 @@ var remoteRoot = "/opt/iobroker/node_modules/iobroker." + ADAPTER_NAME;
                     _i++;
                     return [3 /*break*/, 2];
                 case 5:
-                    uploadFiles = ["package.json", "io-package.json", "main.js"];
                     _a = 0, uploadFiles_1 = uploadFiles;
                     _b.label = 6;
                 case 6:

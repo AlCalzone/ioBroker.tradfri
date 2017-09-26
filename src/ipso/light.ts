@@ -1,3 +1,4 @@
+import { deserializers, serializers } from "../lib/conversions";
 import { IPSODevice } from "./ipsoDevice";
 import { deserializeWith, ipsoKey, IPSOObject, PropertyTransform, required, serializeWith } from "./ipsoObject";
 
@@ -12,6 +13,8 @@ export class Light extends IPSODevice {
 	public UNKNOWN2: number = 0; // ???
 
 	@ipsoKey("5709")
+	@serializeWith(serializers.color)
+	@deserializeWith(deserializers.color)
 	public colorX: number = 0; // int
 
 	@ipsoKey("5710")
@@ -22,7 +25,9 @@ export class Light extends IPSODevice {
 
 	@ipsoKey("5712")
 	@required
-	public transitionTime: number = 5; // <int>
+	@serializeWith(serializers.transitionTime)
+	@deserializeWith(deserializers.transitionTime)
+	public transitionTime: number = 0.5; // <float>
 
 	@ipsoKey("5805")
 	public cumulativeActivePower: number = 0.0; // <float>
