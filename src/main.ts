@@ -19,6 +19,7 @@ import { Group } from "./ipso/group";
 import { IPSOObject } from "./ipso/ipsoObject";
 import { Light } from "./ipso/light";
 import { Scene } from "./ipso/scene";
+import { VirtualGroup } from "./lib/virtual-group";
 
 // Adapter-Utils laden
 import utils from "./lib/utils";
@@ -56,6 +57,7 @@ interface GroupInfo {
 	scenes: DictionaryLike<Scene>;
 }
 const groups: DictionaryLike<GroupInfo> = {};
+const virtualGroups: DictionaryLike<VirtualGroup> = {};
 // dictionary of ioBroker objects
 const objects: DictionaryLike<ioBroker.Object> = {};
 
@@ -308,6 +310,29 @@ let adapter: ExtendedAdapter = utils.adapter({
 
 						serializedObj = newGroup.serialize(group); // serialize with the old object as a reference
 						url = `${requestBase}${coapEndpoints.groups}/${rootObj.native.instanceId}`;
+						break;
+
+					case "virtual group":
+						// find the virtual group instance
+						const vGroup = virtualGroups[rootObj.native.instanceId];
+
+						if (id.endsWith(".state")) {
+							vGroup.onOff = val;
+						} else if (id.endsWith(".brightness")) {
+							vGroup.dimmer = val;
+							vGroup.transitionTime = await getTransitionDuration(group);
+						} else if (id.endsWith(".color")) {
+							vGroup.colorX = val;
+							vGroup.transitionTime = await getTransitionDuration(group);
+						} else if (id.endsWith(".transitionDuration")) {
+							// TODO: check if we need to buffer this somehow
+							// for now just ack the change
+							await adapter.$setState(id, state, true);
+							return;
+						}
+
+						serializedObj = vGroup.serialize(devices);
+						url = `${requestBase}${coapEndpoints.groups}`;
 						break;
 
 					default: // accessory
