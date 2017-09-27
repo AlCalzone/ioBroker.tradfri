@@ -322,10 +322,10 @@ let adapter: ExtendedAdapter = utils.adapter({
 							vGroup.onOff = val;
 						} else if (id.endsWith(".brightness")) {
 							vGroup.dimmer = val;
-							vGroup.transitionTime = await getTransitionDuration(group);
+							vGroup.transitionTime = await getTransitionDuration(vGroup);
 						} else if (id.endsWith(".color")) {
 							vGroup.colorX = val;
-							vGroup.transitionTime = await getTransitionDuration(group);
+							vGroup.transitionTime = await getTransitionDuration(vGroup);
 						} else if (id.endsWith(".transitionDuration")) {
 							// TODO: check if we need to buffer this somehow
 							// for now just ack the change
@@ -775,14 +775,14 @@ function calcSceneName(scene: Scene): string {
 /**
  * Returns the configured transition duration for an accessory or a group
  */
-async function getTransitionDuration(accessoryOrGroup: Accessory | Group): Promise<number> {
+async function getTransitionDuration(accessoryOrGroup: Accessory | Group | VirtualGroup): Promise<number> {
 	let stateId: string;
 	if (accessoryOrGroup instanceof Accessory) {
 		switch (accessoryOrGroup.type) {
 			case AccessoryTypes.lightbulb:
 				stateId = calcObjId(accessoryOrGroup) + ".lightbulb.transitionDuration";
 		}
-	} else if (accessoryOrGroup instanceof Group) {
+	} else if (accessoryOrGroup instanceof Group || accessoryOrGroup instanceof VirtualGroup) {
 		stateId = calcGroupId(accessoryOrGroup) + ".transitionDuration";
 	}
 	const ret = await adapter.$getState(stateId);
