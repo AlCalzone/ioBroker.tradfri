@@ -554,10 +554,19 @@ async function coapCb_getAllGroups(response: CoapResponse) {
 // gets called whenever "get /15004/<instanceId>" updates
 function coap_getGroup_cb(instanceId: number, response: CoapResponse) {
 
-	if (response.code.toString() !== "2.05") {
-		_.log(`unexpected response (${response.code.toString()}) to getGroup(${instanceId}).`, "error");
-		return;
+	// check response code
+	switch (response.code.toString()) {
+		case "2.05": break; // all good
+		case "4.04": // not found
+			// We know this group existed or we wouldn't have requested it
+			// This means it has been deleted
+			// TODO: Should we delete it here or where its being handled right now?
+			return;
+		default:
+			_.log(`unexpected response (${response.code.toString()}) to getGroup(${instanceId}).`, "error");
+			return;
 	}
+
 	const result = parsePayload(response);
 	// parse group info
 	const group = (new Group()).parse(result);
@@ -584,6 +593,7 @@ function coap_getGroup_cb(instanceId: number, response: CoapResponse) {
 
 // gets called whenever "get /15005/<groupId>" updates
 async function coap_getAllScenes_cb(groupId: number, response: CoapResponse) {
+
 	if (response.code.toString() !== "2.05") {
 		_.log(`unexpected response (${response.code.toString()}) to getAllScenes(${groupId}).`, "error");
 		return;
@@ -627,10 +637,19 @@ async function coap_getAllScenes_cb(groupId: number, response: CoapResponse) {
 // gets called whenever "get /15005/<groupId>/<instanceId>" updates
 function coap_getScene_cb(groupId: number, instanceId: number, response: CoapResponse) {
 
-	if (response.code.toString() !== "2.05") {
-		_.log(`unexpected response (${response.code.toString()}) to getScene(${groupId}, ${instanceId}).`, "error");
-		return;
+	// check response code
+	switch (response.code.toString()) {
+		case "2.05": break; // all good
+		case "4.04": // not found
+			// We know this scene existed or we wouldn't have requested it
+			// This means it has been deleted
+			// TODO: Should we delete it here or where its being handled right now?
+			return;
+		default:
+			_.log(`unexpected response (${response.code.toString()}) to getScene(${groupId}, ${instanceId}).`, "error");
+			return;
 	}
+
 	const result = parsePayload(response);
 	// parse scene info
 	const scene = (new Scene()).parse(result);
