@@ -1281,9 +1281,9 @@ function unsubscribeObjects(id) {
 function parsePayload(response) {
     switch (response.format) {
         case 0: // text/plain
-        case null:
+        case null:// assume text/plain
             return response.payload.toString("utf-8");
-        case 50:
+        case 50:// application/json
             var json = response.payload.toString("utf-8");
             return JSON.parse(json);
         default:
@@ -1338,13 +1338,25 @@ function pingThread() {
     });
 }
 // Unbehandelte Fehler tracen
+function getMessage(err) {
+    // Irgendwo gibt es wohl einen Fehler ohne Message
+    if (err == null)
+        return "undefined";
+    if (typeof err === "string")
+        return err;
+    if (err.message != null)
+        return err.message;
+    if (err.name != null)
+        return err.name;
+    return err.toString();
+}
 process.on("unhandledRejection", function (err) {
-    adapter.log.error("unhandled promise rejection: " + err.message);
+    adapter.log.error("unhandled promise rejection: " + getMessage(err));
     if (err.stack != null)
         adapter.log.error("> stack: " + err.stack);
 });
 process.on("uncaughtException", function (err) {
-    adapter.log.error("unhandled exception:" + err.message);
+    adapter.log.error("unhandled exception:" + getMessage(err));
     if (err.stack != null)
         adapter.log.error("> stack: " + err.stack);
     process.exit(1);
