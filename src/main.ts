@@ -12,6 +12,7 @@ import { ExtendedAdapter, Global as _ } from "./lib/global";
 import { composeObject, DictionaryLike, dig, entries, filter, values } from "./lib/object-polyfill";
 import { wait } from "./lib/promises";
 import { str2regex } from "./lib/str2regex";
+import { padStart } from "./lib/strings";
 
 // Datentypen laden
 import { Accessory, AccessoryTypes } from "./ipso/accessory";
@@ -720,32 +721,41 @@ function calcObjId(accessory: Accessory): string {
  * excluding the adapter namespace
  */
 function calcObjName(accessory: Accessory): string {
-	const prefix = (() => {
-		switch (accessory.type) {
-			case AccessoryTypes.remote:
-				return "RC";
-			case AccessoryTypes.lightbulb:
-				return "L";
-			default:
-				_.log("unknown accessory type " + accessory.type);
-				return "XYZ";
-		}
-	})();
+	let prefix: string;
+	switch (accessory.type) {
+		case AccessoryTypes.remote:
+			prefix = "RC";
+			break;
+		case AccessoryTypes.lightbulb:
+			prefix = "L";
+			break;
+		default:
+			_.log("unknown accessory type " + accessory.type);
+			prefix = "XYZ";
+			break;
+	}
 	return `${prefix}-${accessory.instanceId}`;
 }
 
 /**
  * Determines the object ID under which the given group should be stored
  */
-function calcGroupId(group: Group): string {
+function calcGroupId(group: Group | VirtualGroup): string {
 	return `${adapter.namespace}.${calcGroupName(group)}`;
 }
 /**
  * Determines the object name under which the given group should be stored,
  * excluding the adapter namespace
  */
-function calcGroupName(group: Group): string {
-	return `G-${group.instanceId}`;
+function calcGroupName(group: Group | VirtualGroup): string {
+	let prefix: string;
+	if (group instanceof Group) {
+		prefix = "G";
+	} else if (group instanceof VirtualGroup) {
+		prefix = "VG";
+	}
+	const postfix: string = group.instanceId.toString();
+	return `${prefix}-${padStart(postfix, 5, "0")}`;
 }
 
 /**
@@ -841,7 +851,7 @@ function extendDevice(accessory: Accessory) {
 				// Object could have a default value, find it
 				const newValue = dig<any>(accessory, obj.native.path);
 				adapter.setState(id, newValue, true);
-			} catch (e) {/* skip this value */}
+			} catch (e) { /* skip this value */ }
 		}
 
 	} else {

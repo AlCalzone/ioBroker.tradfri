@@ -1,6 +1,6 @@
 // tslint:disable:variable-name
 
-// Endpunkte, die abgefragt werden können
+// Endpunkte, die abgefragt werden kÃ¶nnen
 export const Endpoints = {
 	DEVICES: "15001",
 	HS_LINK: "15002", // HSAccessoryLink
