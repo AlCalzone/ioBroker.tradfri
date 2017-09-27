@@ -279,8 +279,8 @@ let adapter: ExtendedAdapter = utils.adapter({
 				// make sure we have whole numbers
 				if (stateObj.common.type === "number") {
 					val = Math.round(val); // TODO: check if there are situations where decimal numbers are allowed
-					if (_.isdef(stateObj.common.min)) val = Math.max(stateObj.common.min, val);
-					if (_.isdef(stateObj.common.max)) val = Math.min(stateObj.common.max, val);
+					if (stateObj.common.min != null) val = Math.max(stateObj.common.min, val);
+					if (stateObj.common.max != null) val = Math.min(stateObj.common.max, val);
 				}
 
 				// this will contain the serialized payload
@@ -817,7 +817,7 @@ function accessoryToNative(accessory: Accessory): DictionaryLike<any> {
 function extendDevice(accessory: Accessory) {
 	const objId = calcObjId(accessory);
 
-	if (_.isdef(objects[objId])) {
+	if (objId in objects) {
 		// check if we need to edit the existing object
 		const devObj = objects[objId];
 		let changed = false;
@@ -983,15 +983,14 @@ function extendDevice(accessory: Accessory) {
 
 		const createObjects = Object.keys(stateObjs)
 			.map((key) => {
-				const stateId = `${objId}.${key}`;
 				const obj = stateObjs[key];
 				let initialValue = null;
-				if (_.isdef(obj.native.path)) {
+				if (obj.native.path != null) {
 					// Object could have a default value, find it
 					initialValue = dig<any>(accessory, obj.native.path);
 				}
 				// create object and return the promise, so we can wait
-				return adapter.$createOwnStateEx(stateId, obj, initialValue);
+				return adapter.$createOwnStateEx(obj._id, obj, initialValue);
 			})
 			;
 		Promise.all(createObjects);
@@ -1002,20 +1001,26 @@ function extendDevice(accessory: Accessory) {
 /**
  * Returns the common part of the ioBroker object representing the given group
  */
-function groupToCommon(group: Group): ioBroker.ObjectCommon {
-	return {
-		name: group.name,
-	};
+function groupToCommon(group: Group | VirtualGroup): ioBroker.ObjectCommon {
+	if (group instanceof Group) {
+		return {
+			name: group.name,
+		};
+	} else {
+		return {
+			name: `virtual group ${group.instanceId}`,
+		};
+	}
 }
 
 /**
  * Returns the native part of the ioBroker object representing the given group
  */
-function groupToNative(group: Group): DictionaryLike<any> {
+function groupToNative(group: Group | VirtualGroup): DictionaryLike<any> {
 	return {
 		instanceId: group.instanceId,
 		deviceIDs: group.deviceIDs,
-		type: "group",
+		type: (group instanceof VirtualGroup ? "virtual " : "") + "group",
 	};
 }
 
@@ -1023,7 +1028,7 @@ function groupToNative(group: Group): DictionaryLike<any> {
 function extendGroup(group: Group) {
 	const objId = calcGroupId(group);
 
-	if (_.isdef(objects[objId])) {
+	if (objId in objects) {
 		// check if we need to edit the existing object
 		const grpObj = objects[objId];
 		let changed = false;
@@ -1141,15 +1146,14 @@ function extendGroup(group: Group) {
 
 		const createObjects = Object.keys(stateObjs)
 			.map((key) => {
-				const stateId = `${objId}.${key}`;
 				const obj = stateObjs[key];
 				let initialValue = null;
-				if (_.isdef(obj.native.path)) {
+				if (obj.native.path != null) {
 					// Object could have a default value, find it
 					initialValue = dig<any>(group, obj.native.path);
 				}
 				// create object and return the promise, so we can wait
-				return adapter.$createOwnStateEx(stateId, obj, initialValue);
+				return adapter.$createOwnStateEx(obj._id, obj, initialValue);
 			})
 			;
 		Promise.all(createObjects);
@@ -1167,7 +1171,7 @@ async function updatePossibleScenes(groupInfo: GroupInfo): Promise<void> {
 	const scenesId = `${objId}.activeScene`;
 
 	// only extend that object if it exists already
-	if (_.isdef(objects[scenesId])) {
+	if (scenesId in objects) {
 		_.log(`updating possible scenes for group ${group.instanceId}: ${JSON.stringify(Object.keys(groupInfo.scenes))}`);
 
 		const activeSceneObj = objects[scenesId];
@@ -1179,6 +1183,131 @@ async function updatePossibleScenes(groupInfo: GroupInfo): Promise<void> {
 		const obj = await adapter.$getObject(scenesId) as ioBroker.StateObject;
 		obj.common.states = states;
 		await adapter.$setObject(scenesId, obj);
+	}
+}
+
+/* creates or edits an existing <group>-object for a virtual group */
+function extendVirtualGroup(group: VirtualGroup) {
+	const objId = calcGroupId(group);
+
+	if (objId in objects) {
+		// check if we need to edit the existing object
+		const grpObj = objects[objId];
+		let changed = false;
+		// update common part if neccessary
+		const newCommon = groupToCommon(group);
+		if (JSON.stringify(grpObj.common) !== JSON.stringify(newCommon)) {
+			// merge the common objects
+			Object.assign(grpObj.common, newCommon);
+			changed = true;
+		}
+		const newNative = groupToNative(group);
+		// update native part if neccessary
+		if (JSON.stringify(grpObj.native) !== JSON.stringify(newNative)) {
+			// merge the native objects
+			Object.assign(grpObj.native, newNative);
+			changed = true;
+		}
+		if (changed) adapter.extendObject(objId, grpObj);
+
+		// TODO: Update group states where applicable. See extendGroup for the code
+
+	} else {
+		// create new object
+		const devObj: ioBroker.Object = {
+			_id: objId,
+			type: "channel",
+			common: groupToCommon(group),
+			native: groupToNative(group),
+		};
+		adapter.setObject(objId, devObj);
+
+		// also create state objects, depending on the accessory type
+		const stateObjs: DictionaryLike<ioBroker.Object> = {
+			state: {
+				_id: `${objId}.state`,
+				type: "state",
+				common: {
+					name: "on/off",
+					read: true, // TODO: check
+					write: true, // TODO: check
+					type: "boolean",
+					role: "switch",
+				},
+				native: {
+					path: "onOff",
+				},
+			},
+			transitionDuration: {
+				_id: `${objId}.transitionDuration`,
+				type: "state",
+				common: {
+					name: "Transition duration",
+					read: false,
+					write: true,
+					type: "number",
+					min: 0,
+					max: 100, // TODO: check
+					def: 0,
+					role: "light.dimmer", // TODO: better role?
+					desc: "Duration for brightness changes of this group's lightbulbs",
+					unit: "s",
+				},
+				native: {
+					path: "transitionTime",
+				},
+			},
+			brightness: {
+				_id: `${objId}.brightness`,
+				type: "state",
+				common: {
+					name: "Brightness",
+					read: false, // TODO: check
+					write: true, // TODO: check
+					min: 0,
+					max: 254,
+					type: "number",
+					role: "light.dimmer",
+					desc: "Brightness of this group's lightbulbs",
+				},
+				native: {
+					path: "dimmer",
+				},
+			},
+			color: {
+				_id: `${objId}.color`,
+				type: "state",
+				common: {
+					name: "Color temperature",
+					read: true, // TODO: check
+					write: true, // TODO: check
+					min: 0,
+					max: 100,
+					unit: "%",
+					type: "number",
+					role: "level.color.temperature",
+					desc: "Color temperature of this group's lightbulbs. Range: 0% = cold, 100% = warm",
+				},
+				native: {
+					path: "colorX",
+				},
+			},
+		};
+
+		const createObjects = Object.keys(stateObjs)
+			.map((key) => {
+				const obj = stateObjs[key];
+				let initialValue = null;
+				if (obj.native.path != null) {
+					// Object could have a default value, find it
+					initialValue = dig<any>(group, obj.native.path);
+				}
+				// create object and return the promise, so we can wait
+				return adapter.$createOwnStateEx(obj._id, obj, initialValue);
+			})
+			;
+		Promise.all(createObjects);
+
 	}
 }
 
@@ -1352,7 +1481,7 @@ async function loadVirtualGroups(): Promise<void> {
 			const id: number = g.native.instanceId;
 			const instanceIDs: number[] = g.native.instanceIDs;
 			const ret = new VirtualGroup(id);
-			ret.instanceIDs = instanceIDs;
+			ret.deviceIDs = instanceIDs;
 			return [`${id}`, ret] as [string, VirtualGroup];
 		}),
 	));

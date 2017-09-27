@@ -213,9 +213,6 @@ export class Global {
 		}
 	}
 
-	// Prüfen auf (un)defined
-	public static isdef(value: any): boolean { return value != undefined; }
-
 	// custom subscriptions
 	public static subscribeStates: (pattern: string | RegExp, callback: (id: string, state: ioBroker.State) => void) => string;
 	public static unsubscribeStates: (id: string) => void;

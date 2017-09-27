@@ -79,7 +79,7 @@ export class IPSOObject {
 				if (value.isSerializedObjectEmpty(_ret)) return null;
 			} else {
 				// if the value is not the default one, then remember it
-				if (_.isdef(refValue)) {
+				if (refValue != null) {
 					if (!_required && refValue === value) return null;
 				} else {
 					// there is no default value, just remember the actual value
@@ -98,7 +98,7 @@ export class IPSOObject {
 				// find value and reference (default) value
 				let value = this[propName];
 				let refValue = null;
-				if (_.isdef(reference) && reference.hasOwnProperty(propName)) {
+				if (reference != null && reference.hasOwnProperty(propName)) {
 					refValue = reference[propName];
 				}
 
@@ -107,7 +107,7 @@ export class IPSOObject {
 
 				if (value instanceof Array) {
 					// serialize each item
-					if (_.isdef(refValue)) {
+					if (refValue != null) {
 						// reference value exists, make sure we have the same amount of items
 						if (!(refValue instanceof Array && refValue.length === value.length)) {
 							throw new Error("cannot serialize arrays when the reference values don't match");
@@ -119,7 +119,7 @@ export class IPSOObject {
 						value = value.map(v => serializeValue(key, propName, v, null, serializer));
 					}
 					// now remove null items
-					value = value.filter(v => _.isdef(v));
+					value = value.filter(v => v != null);
 					if (value.length === 0) value = null;
 				} else {
 					// directly serialize the value

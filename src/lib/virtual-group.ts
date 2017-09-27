@@ -15,11 +15,11 @@ export class VirtualGroup {
 	/**
 	 * The instance ids of all devices combined in this group
 	 */
-	public instanceIDs: number[];
+	public deviceIDs: number[];
 
 	public serialize(references: DictionaryLike<Accessory>): DictionaryLike<any> {
 		const ret = {};
-		for (const id of this.instanceIDs) {
+		for (const id of this.deviceIDs) {
 			if (!(id in references)) {
 				_.log(`VirtualGroup > cannot serialize command for accessory with id ${id}`, "warn");
 				continue;
