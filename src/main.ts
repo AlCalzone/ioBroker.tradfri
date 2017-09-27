@@ -130,6 +130,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 		connectionAlive = true;
 		pingTimer = setInterval(pingThread, 10000);
 
+		loadVirtualGroups();
 		// TODO: load known devices from ioBroker into <devices> & <objects>
 		observeDevices();
 		observeGroups();
@@ -1322,6 +1323,29 @@ function parsePayload(response: CoapResponse): any {
 			_.log(`unknown CoAP response format ${response.format}`, "warn");
 			return response.payload;
 	}
+}
+
+/**
+ * Loads defined virtual groups from the ioBroker objects DB
+ */
+async function loadVirtualGroups(): Promise<void> {
+	// find all defined virtual groups
+	let groupObjects = values(await _.$$("VG-*", "channel"));
+	groupObjects = groupObjects.filter(g => {
+		return g.native &&
+			g.native.instanceId != null &&
+			g.native.type === "virtual group";
+	});
+	// load them into the virtualGroups dict
+	Object.assign(virtualGroups, composeObject<VirtualGroup>(
+		groupObjects.map(g => {
+			const id: number = g.native.instanceId;
+			const instanceIDs: number[] = g.native.instanceIDs;
+			const ret = new VirtualGroup(id);
+			ret.instanceIDs = instanceIDs;
+			return [`${id}`, ret] as [string, VirtualGroup];
+		}),
+	));
 }
 
 // Connection check
