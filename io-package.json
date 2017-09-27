@@ -3,53 +3,17 @@
         "name": "tradfri",
         "version": "0.3.0",
         "news": {
-            "0.1.0": {
-                "en": "initial release. Functionality limited to controlling lightbulbs.",
-                "de": "Initiale Version. Funktionalität ist beschränkt auf das Steuern von Lampen."
+            "0.3.0": {
+                "en": "Support of groups and scenes, improved connection handling, internal improvements.",
+                "de": "Unterstützung von Gruppen und Szenen, verbesserte Verbindungsverwaltung, interne Verbesserungen."
             },
-            "0.1.1": {
-                "en": "Added support for NodeJS 4.X and building the dependencies on Windows systems.",
-                "de": "Support für NodeJS 4.X hinzugefügt und Buildprobleme auf Windows-Systemen behoben."
-            },
-            "0.1.2": {
-                "en": "Color temperature of lightbulbs is now expressed in terms of 0-100%.",
-                "de": "Farbtemperatur von Lichtern wird nun als 0-100% ausgedrückt."
-            },
-            "0.1.3": {
-                "en": "Reboot of the adapter without 3rd party libraries",
-                "de": "Neuauflage des Adapters ohne Dritt-Software"
-            },
-            "0.1.5": {
-                "en": "Ensure only whole numbers are sent. Fix connection by hostname.",
-                "de": "Sichergehen, dass nur Ganzzahlen gesendet werden. Verbindung mit Hostname gefixt."
-            },
-            "0.2.0": {
+            "0.2.1": {
                 "en": "Removed git dependency, published to npm.",
                 "de": "Git-Abhängigkeit entfernt, auf npm veröffentlicht."
             },
-            "0.2.1": {
-                "en": "Sync io-package and package version",
-                "de": "io-package und package-Version synchronisiert"
-            },
-            "0.2.2": {
-                "en": "Changed internal handling of objects to prepare the next updates",
-                "de": "Interne Behandlung von Objekte verändert, um die nächsten Updates vorzubereiten"
-            },
-            "0.2.3": {
-                "en": "Send custom CoAP packets by using sendTo",
-                "de": "Unterstützung eigener CoAP-Pakete mittels sendTo"
-            },
-            "0.2.4": {
-                "en": "Add support for groups and scenes (partial)",
-                "de": "Unterstützung für Gruppen und Szenen (partiell) hinzugefügt."
-            },
-            "0.2.5": {
-                "en": "Selection of scenes from the admin UI is now possible.",
-                "de": "Auswahl von Szenen in der Admin UI ist jetzt möglich."
-            },
-            "0.3.0": {
-                "en": "Official release of previous changes. Improved connection handling.",
-                "de": "Offizielles Release der letzten Änderungen. Verbesserte Verbindungsverwaltung."
+            "0.1.3": {
+                "en": "Initial release without broken 3rd party libraries",
+                "de": "Initiale Version des Adapters ohne fehlerhafte Dritt-Software"
             }
         },
         "title": "IKEA Trådfri",
