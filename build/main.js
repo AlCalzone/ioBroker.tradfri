@@ -76,7 +76,7 @@ var adapter = utils_1.default.adapter({
     name: "tradfri",
     // Wird aufgerufen, wenn Adapter initialisiert wird
     ready: function () { return __awaiter(_this, void 0, void 0, function () {
-        var hostname, maxTries, i;
+        var debugPackage, hostname, maxTries, i;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -98,9 +98,13 @@ var adapter = utils_1.default.adapter({
                 case 1:
                     // Sicherstellen, dass alle Instance-Objects vorhanden sind
                     _a.sent();
-                    // redirect console output
-                    // console.log = (msg) => adapter.log.debug("STDOUT > " + msg);
-                    // console.error = (msg) => adapter.log.error("STDERR > " + msg);
+                    // Bei Debug-Loglevel die Debugausgaben der Module umleiten
+                    if (adapter.log.level === "debug") {
+                        global_1.Global.log("== debug mode active ==");
+                        process.env.DEBUG = "*";
+                        debugPackage = require("debug");
+                        debugPackage.log = adapter.log.debug.bind(adapter);
+                    }
                     global_1.Global.log("startfile = " + process.argv[1]);
                     // Eigene Objekte/States beobachten
                     adapter.subscribeStates("*");
@@ -617,9 +621,17 @@ function coapCb_getAllGroups(response) {
 }
 // gets called whenever "get /15004/<instanceId>" updates
 function coap_getGroup_cb(instanceId, response) {
-    if (response.code.toString() !== "2.05") {
-        global_1.Global.log("unexpected response (" + response.code.toString() + ") to getGroup(" + instanceId + ").", "error");
-        return;
+    // check response code
+    switch (response.code.toString()) {
+        case "2.05": break; // all good
+        case "4.04":
+            // We know this group existed or we wouldn't have requested it
+            // This means it has been deleted
+            // TODO: Should we delete it here or where its being handled right now?
+            return;
+        default:
+            global_1.Global.log("unexpected response (" + response.code.toString() + ") to getGroup(" + instanceId + ").", "error");
+            return;
     }
     var result = parsePayload(response);
     // parse group info
@@ -682,9 +694,17 @@ function coap_getAllScenes_cb(groupId, response) {
 }
 // gets called whenever "get /15005/<groupId>/<instanceId>" updates
 function coap_getScene_cb(groupId, instanceId, response) {
-    if (response.code.toString() !== "2.05") {
-        global_1.Global.log("unexpected response (" + response.code.toString() + ") to getScene(" + groupId + ", " + instanceId + ").", "error");
-        return;
+    // check response code
+    switch (response.code.toString()) {
+        case "2.05": break; // all good
+        case "4.04":
+            // We know this scene existed or we wouldn't have requested it
+            // This means it has been deleted
+            // TODO: Should we delete it here or where its being handled right now?
+            return;
+        default:
+            global_1.Global.log("unexpected response (" + response.code.toString() + ") to getScene(" + groupId + ", " + instanceId + ").", "error");
+            return;
     }
     var result = parsePayload(response);
     // parse scene info
@@ -1281,9 +1301,9 @@ function unsubscribeObjects(id) {
 function parsePayload(response) {
     switch (response.format) {
         case 0: // text/plain
-        case null:// assume text/plain
+        case null:
             return response.payload.toString("utf-8");
-        case 50:// application/json
+        case 50:
             var json = response.payload.toString("utf-8");
             return JSON.parse(json);
         default:

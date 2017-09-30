@@ -78,9 +78,13 @@ let adapter: ExtendedAdapter = utils.adapter({
 		// Sicherstellen, dass alle Instance-Objects vorhanden sind
 		await _.ensureInstanceObjects();
 
-		// redirect console output
-		// console.log = (msg) => adapter.log.debug("STDOUT > " + msg);
-		// console.error = (msg) => adapter.log.error("STDERR > " + msg);
+		// Bei Debug-Loglevel die Debugausgaben der Module umleiten
+		if (adapter.log.level === "debug") {
+			_.log("== debug mode active ==");
+			process.env.DEBUG = "*";
+			const debugPackage = require("debug");
+			debugPackage.log = adapter.log.debug.bind(adapter);
+		}
 		_.log(`startfile = ${process.argv[1]}`);
 
 		// Eigene Objekte/States beobachten
