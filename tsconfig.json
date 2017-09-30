@@ -4,7 +4,7 @@
         "declaration": true,        // emit d.ts files
         "module": "commonjs",
         "moduleResolution": "node",
-        "noEmitOnError": false,     // dont compile faulty code
+        "noEmitOnError": true,     // dont compile faulty code
         "noImplicitAny": false,     // set to true for stricter type checking
         "outDir": "build/",
         "removeComments": false,

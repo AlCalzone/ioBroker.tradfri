@@ -19,6 +19,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var conversions_1 = require("../lib/conversions");
 var ipsoDevice_1 = require("./ipsoDevice");
 var ipsoObject_1 = require("./ipsoObject");
 var Light = (function (_super) {
@@ -31,7 +32,7 @@ var Light = (function (_super) {
         _this.colorX = 0; // int
         _this.colorY = 0; // int
         _this.UNKNOWN3 = 0; // ???
-        _this.transitionTime = 5; // <int>
+        _this.transitionTime = 0.5; // <float>
         _this.cumulativeActivePower = 0.0; // <float>
         _this.dimmer = 0; // <int> [0..254]
         _this.onOff = false;
@@ -56,6 +57,8 @@ __decorate([
 ], Light.prototype, "UNKNOWN2", void 0);
 __decorate([
     ipsoObject_1.ipsoKey("5709"),
+    ipsoObject_1.serializeWith(conversions_1.serializers.color),
+    ipsoObject_1.deserializeWith(conversions_1.deserializers.color),
     __metadata("design:type", Number)
 ], Light.prototype, "colorX", void 0);
 __decorate([
@@ -69,6 +72,8 @@ __decorate([
 __decorate([
     ipsoObject_1.ipsoKey("5712"),
     ipsoObject_1.required,
+    ipsoObject_1.serializeWith(conversions_1.serializers.transitionTime),
+    ipsoObject_1.deserializeWith(conversions_1.deserializers.transitionTime),
     __metadata("design:type", Number)
 ], Light.prototype, "transitionTime", void 0);
 __decorate([

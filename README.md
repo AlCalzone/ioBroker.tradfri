@@ -46,6 +46,22 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### 0.3.0 (2017-09-25)
+* (AlCalzone) official release of the previous changes
+* (AlCalzone) added transition duration and brightness change for groups
+* (AlCalzone) monitor connection state and update info.connection
+* (AlCalzone) fix connection attempts to unavailable endpoints
+
+#### 0.2.9 (2017-09-25)
+* (AlCalzone) Support changing the transition duration
+
+#### 0.2.8 (2017-09-24)
+* (AlCalzone) Fixed group and scene deletion
+
+#### 0.2.7 (2017-09-23)
+* (AlCalzone) Update CoAP and DTLS library for the next features
+* (AlCalzone) Offloaded concurrency handling to CoAP lib
+
 #### 0.2.5 (2017-09-12)
 * (AlCalzone) Selection of scenes from the admin UI is now possible
 

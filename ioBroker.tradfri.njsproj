@@ -15,7 +15,6 @@
     <EnableTypeScript>true</EnableTypeScript>
     <TypeScriptSourceMap>true</TypeScriptSourceMap>
     <TypeScriptModuleKind>CommonJS</TypeScriptModuleKind>
-    <ToolsVersionPromptShown>0.0</ToolsVersionPromptShown>
     <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
@@ -60,12 +59,10 @@
     <Compile Include="main.js" />
     <Compile Include="test\testAdapter.js" />
     <Compile Include="test\testPackageFiles.js" />
-    <Content Include="docs\de\template.md" />
-    <Content Include="docs\en\template.md" />
-    <Content Include="docs\ru\template.md" />
-    <Content Include="docs\de\img\picture.png" />
-    <Content Include="docs\en\img\picture.png" />
-    <Content Include="docs\ru\img\picture.png" />
+    <Content Include="deploy_password.json">
+      <SubType>Code</SubType>
+      <Publish>False</Publish>
+    </Content>
     <Content Include="src\flow\add_device.txt" />
     <Content Include="src\flow\app_setup.txt" />
     <Content Include="src\flow\renamegroup.txt" />
@@ -76,16 +73,12 @@
     <Content Include="travis\setup.sh" />
     <Content Include="tsconfig.json" />
     <Content Include="tslint.json" />
+    <TypeScriptCompile Include="src\deploy_local.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="admin" />
-    <Folder Include="docs" />
-    <Folder Include="docs\de" />
-    <Folder Include="docs\de\img" />
-    <Folder Include="docs\en" />
-    <Folder Include="docs\en\img" />
-    <Folder Include="docs\ru" />
-    <Folder Include="docs\ru\img" />
     <Folder Include="src" />
     <Folder Include="src\flow" />
     <Folder Include="src\ipso\" />

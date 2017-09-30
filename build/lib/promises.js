@@ -1,7 +1,7 @@
+"use strict";
 ///
 /// Stellt einen Promise-Wrapper für asynchrone Node-Funktionen zur Verfügung
 ///
-"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function promisify(fn, context) {
     return function () {
@@ -48,4 +48,11 @@ function waterfall() {
     return fn.reduce(function (prev, cur) { return prev.then(cur); }, Promise.resolve());
 }
 exports.waterfall = waterfall;
+/** Creates a promise that waits for the specified time and then resolves */
+function wait(ms) {
+    return new Promise(function (resolve, reject) {
+        setTimeout(resolve, ms);
+    });
+}
+exports.wait = wait;
 //# sourceMappingURL=promises.js.map
