@@ -274,3 +274,5 @@ iobroker.*.tgz
 
 # Local debugging password
 *_password.json
+
+Thumbs.db

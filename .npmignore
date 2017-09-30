@@ -21,3 +21,5 @@ build/**/*.map
 
 # Local debugging password
 *_password.json
+
+Thumbs.db
