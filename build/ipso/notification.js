@@ -1,14 +1,4 @@
 "use strict";
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -19,26 +9,23 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var ipsoDevice_1 = require("./ipsoDevice");
-var ipsoObject_1 = require("./ipsoObject");
-var Notification = (function (_super) {
-    __extends(Notification, _super);
-    function Notification() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.event = 0;
-        _this.details = {};
-        _this.state = 0; // => ?
-        return _this;
+const ipsoDevice_1 = require("./ipsoDevice");
+const ipsoObject_1 = require("./ipsoObject");
+class Notification extends ipsoDevice_1.IPSODevice {
+    constructor() {
+        super(...arguments);
+        this.event = 0;
+        this.details = {};
+        this.state = 0; // => ?
     }
-    return Notification;
-}(ipsoDevice_1.IPSODevice));
+}
 __decorate([
     ipsoObject_1.ipsoKey("9015"),
     __metadata("design:type", Number)
 ], Notification.prototype, "event", void 0);
 __decorate([
     ipsoObject_1.ipsoKey("9017"),
-    ipsoObject_1.deserializeWith(function (arr) { return parseNotificationDetails(arr); }),
+    ipsoObject_1.deserializeWith(arr => parseNotificationDetails(arr)),
     __metadata("design:type", Object)
 ], Notification.prototype, "details", void 0);
 __decorate([
@@ -58,10 +45,9 @@ var NotificationTypes;
  * Turns a key=value-Array into a Dictionary object
  */
 function parseNotificationDetails(kvpList) {
-    var ret = {};
-    for (var _i = 0, kvpList_1 = kvpList; _i < kvpList_1.length; _i++) {
-        var kvp = kvpList_1[_i];
-        var parts = kvp.split("=");
+    const ret = {};
+    for (const kvp of kvpList) {
+        const parts = kvp.split("=");
         ret[parts[0]] = parts[1];
     }
     return ret;

@@ -1,14 +1,4 @@
 "use strict";
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -19,22 +9,19 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var conversions_1 = require("../lib/conversions");
-var ipsoDevice_1 = require("./ipsoDevice");
-var ipsoObject_1 = require("./ipsoObject");
-var Group = (function (_super) {
-    __extends(Group, _super);
-    function Group() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.onOff = false; // <bool>
-        _this.dimmer = 0; // <int> [0..254]
+const conversions_1 = require("../lib/conversions");
+const ipsoDevice_1 = require("./ipsoDevice");
+const ipsoObject_1 = require("./ipsoObject");
+class Group extends ipsoDevice_1.IPSODevice {
+    constructor() {
+        super(...arguments);
+        this.onOff = false; // <bool>
+        this.dimmer = 0; // <int> [0..254]
         // The transition time is not reported by the gateway
         // but it accepts it for a state change
-        _this.transitionTime = 0; // <float>
-        return _this;
+        this.transitionTime = 0; // <float>
     }
-    return Group;
-}(ipsoDevice_1.IPSODevice));
+}
 __decorate([
     ipsoObject_1.ipsoKey("5850"),
     __metadata("design:type", Boolean)
@@ -49,8 +36,8 @@ __decorate([
 ], Group.prototype, "sceneId", void 0);
 __decorate([
     ipsoObject_1.ipsoKey("9018"),
-    ipsoObject_1.deserializeWith(function (obj) { return parseAccessoryLink(obj); }),
-    ipsoObject_1.serializeWith(function (ids) { return toAccessoryLink(ids); }),
+    ipsoObject_1.deserializeWith(obj => parseAccessoryLink(obj)),
+    ipsoObject_1.serializeWith(ids => toAccessoryLink(ids)),
     __metadata("design:type", Array)
 ], Group.prototype, "deviceIDs", void 0);
 __decorate([
@@ -62,8 +49,8 @@ __decorate([
 exports.Group = Group;
 // TODO: Type annotation
 function parseAccessoryLink(link) {
-    var hsLink = link["15002"];
-    var deviceIDs = hsLink["9003"];
+    const hsLink = link["15002"];
+    const deviceIDs = hsLink["9003"];
     return deviceIDs;
 }
 function toAccessoryLink(ids) {

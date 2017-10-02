@@ -2,18 +2,17 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 function entries(obj) {
     return Object.keys(obj)
-        .map(function (key) { return [key, obj[key]]; });
+        .map(key => [key, obj[key]]);
 }
 exports.entries = entries;
 function values(obj) {
     return Object.keys(obj)
-        .map(function (key) { return obj[key]; });
+        .map(key => obj[key]);
 }
 exports.values = values;
 function filter(obj, predicate) {
-    var ret = {};
-    for (var _i = 0, _a = entries(obj); _i < _a.length; _i++) {
-        var _b = _a[_i], key = _b[0], val = _b[1];
+    const ret = {};
+    for (const [key, val] of entries(obj)) {
         if (predicate(val))
             ret[key] = val;
     }
@@ -21,8 +20,7 @@ function filter(obj, predicate) {
 }
 exports.filter = filter;
 function composeObject(properties) {
-    return properties.reduce(function (acc, _a) {
-        var key = _a[0], value = _a[1];
+    return properties.reduce((acc, [key, value]) => {
         acc[key] = value;
         return acc;
     }, {});
@@ -34,7 +32,7 @@ function dig(object, path) {
         if (!pathArr.length)
             return obj;
         // go deeper
-        var propName = pathArr.shift();
+        let propName = pathArr.shift();
         if (/\[\d+\]/.test(propName)) {
             // this is an array index
             propName = +propName.slice(1, -1);
@@ -52,7 +50,7 @@ function bury(object, path, value) {
             return;
         }
         // go deeper
-        var propName = pathArr.shift();
+        let propName = pathArr.shift();
         if (/\[\d+\]/.test(propName)) {
             // this is an array index
             propName = +propName.slice(1, -1);
@@ -65,8 +63,7 @@ exports.bury = bury;
 // Kopiert Eigenschaften rekursiv von einem Objekt auf ein anderes
 function extend(target, source) {
     target = target || {};
-    for (var _i = 0, _a = entries(source); _i < _a.length; _i++) {
-        var _b = _a[_i], prop = _b[0], val = _b[1];
+    for (const [prop, val] of entries(source)) {
         if (val instanceof Object) {
             target[prop] = extend(target[prop], val);
         }

@@ -2,12 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 // tslint:disable:unified-signatures
 // tslint:disable:no-var-requires
-var fs = require("fs");
+const fs = require("fs");
 // Get js-controller directory to load libs
 function getControllerDir(isInstall) {
     // Find the js-controller location
     // tslint:disable-next-line:no-shadowed-variable
-    var controllerDir = __dirname.replace(/\\/g, "/");
+    let controllerDir = __dirname.replace(/\\/g, "/");
     controllerDir = controllerDir.split("/");
     if (controllerDir[controllerDir.length - 4] === "adapter") {
         controllerDir.splice(controllerDir.length - 4, 4);
@@ -44,11 +44,11 @@ function getControllerDir(isInstall) {
     return controllerDir;
 }
 // Read controller configuration file
-var controllerDir = getControllerDir(typeof process !== "undefined" && process.argv && process.argv.indexOf("--install") !== -1);
+const controllerDir = getControllerDir(typeof process !== "undefined" && process.argv && process.argv.indexOf("--install") !== -1);
 function getConfig() {
     return JSON.parse(fs.readFileSync(controllerDir + "/conf/iobroker.json", "utf8"));
 }
-var adapter = require(controllerDir + "/lib/adapter.js");
+const adapter = require(controllerDir + "/lib/adapter.js");
 exports.default = {
     controllerDir: controllerDir,
     getConfig: getConfig,

@@ -1,14 +1,4 @@
 "use strict";
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -19,42 +9,39 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var ipsoDevice_1 = require("./ipsoDevice");
-var ipsoObject_1 = require("./ipsoObject");
+const ipsoDevice_1 = require("./ipsoDevice");
+const ipsoObject_1 = require("./ipsoObject");
 /** contains information about the gateway */
-var GatewayDetails = (function (_super) {
-    __extends(GatewayDetails, _super);
-    function GatewayDetails() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.ntpServerUrl = "";
-        _this.version = "";
-        _this.updateState = 0; // => which enum?
-        _this.updateProgress = 100; // <int>
-        _this.updateDetailsURL = ""; // <string> => what is this?
-        _this.currentTimestamp = 0; // <long>
-        _this.UNKNOWN1 = ""; // <string> => something to do with commissioning? XML-Date
-        _this.commissioningMode = 0; // <int> => which enum?
-        _this.UNKNOWN2 = 0; // <int> => something more with commissioning?
-        _this.updatePriority = updatePriority.normal;
-        _this.updateAcceptedTimestamp = 0; // <int>
-        _this.timeSource = -1; // <int>
-        _this.UNKNOWN3 = 0; // <int/bool> => what is this?
-        _this.UNKNOWN4 = 0; // <int/bool> => what is this?
-        _this.UNKNOWN5 = 0; // <int/bool> => what is this?
-        _this.UNKNOWN6 = 0; // <int/bool> => what is this?
-        _this.UNKNOWN7 = 0; // <int/bool> => what is this?
-        _this.UNKNOWN8 = 0; // <int/bool> => what is this?
-        _this.UNKNOWN9 = 0; // <int/bool> => what is this?
-        _this.UNKNOWN10 = 0; // <int/bool> => what is this?
-        _this.UNKNOWN11 = 0; // <int/bool> => what is this?
-        _this.UNKNOWN12 = ""; // some kind of hex code
+class GatewayDetails extends ipsoDevice_1.IPSODevice {
+    constructor() {
+        super(...arguments);
+        this.ntpServerUrl = "";
+        this.version = "";
+        this.updateState = 0; // => which enum?
+        this.updateProgress = 100; // <int>
+        this.updateDetailsURL = ""; // <string> => what is this?
+        this.currentTimestamp = 0; // <long>
+        this.UNKNOWN1 = ""; // <string> => something to do with commissioning? XML-Date
+        this.commissioningMode = 0; // <int> => which enum?
+        this.UNKNOWN2 = 0; // <int> => something more with commissioning?
+        this.updatePriority = updatePriority.normal;
+        this.updateAcceptedTimestamp = 0; // <int>
+        this.timeSource = -1; // <int>
+        this.UNKNOWN3 = 0; // <int/bool> => what is this?
+        this.UNKNOWN4 = 0; // <int/bool> => what is this?
+        this.UNKNOWN5 = 0; // <int/bool> => what is this?
+        this.UNKNOWN6 = 0; // <int/bool> => what is this?
+        this.UNKNOWN7 = 0; // <int/bool> => what is this?
+        this.UNKNOWN8 = 0; // <int/bool> => what is this?
+        this.UNKNOWN9 = 0; // <int/bool> => what is this?
+        this.UNKNOWN10 = 0; // <int/bool> => what is this?
+        this.UNKNOWN11 = 0; // <int/bool> => what is this?
+        this.UNKNOWN12 = ""; // some kind of hex code
         // are those used?
-        _this.FORCE_CHECK_OTA_UPDATE = "";
-        _this.name = "";
-        return _this;
+        this.FORCE_CHECK_OTA_UPDATE = "";
+        this.name = "";
     }
-    return GatewayDetails;
-}(ipsoDevice_1.IPSODevice));
+}
 __decorate([
     ipsoObject_1.ipsoKey("9023"),
     __metadata("design:type", String)

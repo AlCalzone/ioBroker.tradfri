@@ -1,14 +1,4 @@
 "use strict";
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -19,22 +9,19 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var ipsoObject_1 = require("./ipsoObject");
+const ipsoObject_1 = require("./ipsoObject");
 // contains information about a specific device
-var DeviceInfo = (function (_super) {
-    __extends(DeviceInfo, _super);
-    function DeviceInfo() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.battery = 0;
-        _this.firmwareVersion = "";
-        _this.manufacturer = "";
-        _this.modelNumber = "";
-        _this.power = 0;
-        _this.serialNumber = "";
-        return _this;
+class DeviceInfo extends ipsoObject_1.IPSOObject {
+    constructor() {
+        super(...arguments);
+        this.battery = 0;
+        this.firmwareVersion = "";
+        this.manufacturer = "";
+        this.modelNumber = "";
+        this.power = 0;
+        this.serialNumber = "";
     }
-    return DeviceInfo;
-}(ipsoObject_1.IPSOObject));
+}
 __decorate([
     ipsoObject_1.ipsoKey("9"),
     __metadata("design:type", Number)

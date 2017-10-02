@@ -4,53 +4,41 @@
 ///
 Object.defineProperty(exports, "__esModule", { value: true });
 function promisify(fn, context) {
-    return function () {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
+    return function (...args) {
         context = context || this;
-        return new Promise(function (resolve, reject) {
-            fn.apply(context, args.concat([function (error, result) {
+        return new Promise((resolve, reject) => {
+            fn.apply(context, [...args, (error, result) => {
                     if (error) {
                         return reject(error);
                     }
                     else {
                         return resolve(result);
                     }
-                }]));
+                }]);
         });
     };
 }
 exports.promisify = promisify;
 function promisifyNoError(fn, context) {
-    return function () {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
+    return function (...args) {
         context = context || this;
-        return new Promise(function (resolve, reject) {
-            fn.apply(context, args.concat([function (result) {
+        return new Promise((resolve, reject) => {
+            fn.apply(context, [...args, (result) => {
                     return resolve(result);
-                }]));
+                }]);
         });
     };
 }
 exports.promisifyNoError = promisifyNoError;
-function waterfall() {
-    var fn = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        fn[_i] = arguments[_i];
-    }
+function waterfall(...fn) {
     // Führt eine Reihe von Promises sequentiell aus
     // TODO: Rückgabewerte prüfen (ob da was zu viel ist)
-    return fn.reduce(function (prev, cur) { return prev.then(cur); }, Promise.resolve());
+    return fn.reduce((prev, cur) => prev.then(cur), Promise.resolve());
 }
 exports.waterfall = waterfall;
 /** Creates a promise that waits for the specified time and then resolves */
 function wait(ms) {
-    return new Promise(function (resolve, reject) {
+    return new Promise((resolve, reject) => {
         setTimeout(resolve, ms);
     });
 }

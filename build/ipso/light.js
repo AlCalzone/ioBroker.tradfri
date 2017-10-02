@@ -1,14 +1,4 @@
 "use strict";
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -19,30 +9,27 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var conversions_1 = require("../lib/conversions");
-var ipsoDevice_1 = require("./ipsoDevice");
-var ipsoObject_1 = require("./ipsoObject");
-var Light = (function (_super) {
-    __extends(Light, _super);
-    function Light() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.color = "f1e0b5"; // hex string
-        _this.UNKNOWN1 = 0; // ???
-        _this.UNKNOWN2 = 0; // ???
-        _this.colorX = 0; // int
-        _this.colorY = 0; // int
-        _this.UNKNOWN3 = 0; // ???
-        _this.transitionTime = 0.5; // <float>
-        _this.cumulativeActivePower = 0.0; // <float>
-        _this.dimmer = 0; // <int> [0..254]
-        _this.onOff = false;
-        _this.onTime = 0; // <int>
-        _this.powerFactor = 0.0; // <float>
-        _this.unit = "";
-        return _this;
+const conversions_1 = require("../lib/conversions");
+const ipsoDevice_1 = require("./ipsoDevice");
+const ipsoObject_1 = require("./ipsoObject");
+class Light extends ipsoDevice_1.IPSODevice {
+    constructor() {
+        super(...arguments);
+        this.color = "f1e0b5"; // hex string
+        this.UNKNOWN1 = 0; // ???
+        this.UNKNOWN2 = 0; // ???
+        this.colorX = 0; // int
+        this.colorY = 0; // int
+        this.UNKNOWN3 = 0; // ???
+        this.transitionTime = 0.5; // <float>
+        this.cumulativeActivePower = 0.0; // <float>
+        this.dimmer = 0; // <int> [0..254]
+        this.onOff = false;
+        this.onTime = 0; // <int>
+        this.powerFactor = 0.0; // <float>
+        this.unit = "";
     }
-    return Light;
-}(ipsoDevice_1.IPSODevice));
+}
 __decorate([
     ipsoObject_1.ipsoKey("5706"),
     __metadata("design:type", String)

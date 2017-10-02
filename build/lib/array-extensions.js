@@ -11,9 +11,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
  * @param b
  */
 function intersect(a, b) {
-    var ai = 0;
-    var bi = 0;
-    var ret = [];
+    let ai = 0;
+    let bi = 0;
+    const ret = [];
     while ((ai < a.length) && (bi < b.length)) {
         if (a[ai] < b[bi])
             ai++;
@@ -30,23 +30,21 @@ function intersect(a, b) {
 exports.intersect = intersect;
 /// gibt die Elemente zurück, die in a, aber nicht in b sind.
 function except(a, b) {
-    return a.filter(function (el) { return b.indexOf(el) === -1; });
+    return a.filter((el) => b.indexOf(el) === -1);
 }
 exports.except = except;
 /// Erzeugt ein Range-Array
 function range(min, max) {
     // Potentiell Reihenfolge tauschen
     if (min > max)
-        _a = [min, max], max = _a[0], min = _a[1];
-    var N = max - min + 1;
-    return Array.from(new Array(N), function (_, index) { return index + min; });
-    var _a;
+        [max, min] = [min, max];
+    const N = max - min + 1;
+    return Array.from(new Array(N), (_, index) => index + min);
 }
 exports.range = range;
 // Gibt das erste Element eines Array zurück, das mit dem angegebenen Filter übereinstimmt
 function firstOrDefault(arr, filter) {
-    for (var _i = 0, arr_1 = arr; _i < arr_1.length; _i++) {
-        var item = arr_1[_i];
+    for (const item of arr) {
         if (filter(item))
             return item;
     }

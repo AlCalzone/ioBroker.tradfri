@@ -4,38 +4,35 @@ Object.defineProperty(exports, "__esModule", { value: true });
 /* usage:
 const result (<Promise>) = mutex.synchronize( <promise returning function> );
 */
-var Mutex = (function () {
-    function Mutex() {
+class Mutex {
+    constructor() {
         this.busy = false;
         this.queue = [];
     }
-    Mutex.prototype.synchronize = function (task) {
+    synchronize(task) {
         // Task must be a promise returning function
-        var _this = this;
-        return new Promise(function (resolve, reject) {
-            _this.queue.push([task, resolve, reject]);
-            if (!_this.busy)
-                _this.dequeue();
+        return new Promise((resolve, reject) => {
+            this.queue.push([task, resolve, reject]);
+            if (!this.busy)
+                this.dequeue();
         });
-    };
-    Mutex.prototype.dequeue = function () {
+    }
+    dequeue() {
         this.busy = true;
-        var next = this.queue.shift();
+        const next = this.queue.shift();
         if (next) {
             this.execute(next);
         }
         else {
             this.busy = false;
         }
-    };
-    Mutex.prototype.execute = function (job) {
-        var _this = this;
-        var task = job[0], resolve = job[1], reject = job[2];
+    }
+    execute(job) {
+        const [task, resolve, reject] = job;
         task()
             .then(resolve, reject)
-            .then(function () { return _this.dequeue(); });
-    };
-    return Mutex;
-}());
+            .then(() => this.dequeue());
+    }
+}
 exports.Mutex = Mutex;
 //# sourceMappingURL=mutex.js.map
