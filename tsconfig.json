@@ -23,7 +23,7 @@
         "sourceMap": true,
         "inlineSourceMap": false,
         "sourceRoot": "src/",
-        "target": "es2015"    // Compile to "old" JavaScript, you can choose target "es6" for NodeJS 6+
+        "target": "es2015"
         //"watch": true
     }
 }
