@@ -46,6 +46,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### 0.3.1 (2017-10-02)
+* (AlCalzone) Update CoAP library to fix a bug
+
 #### 0.3.0 (2017-09-25)
 * (AlCalzone) official release of the previous changes
 * (AlCalzone) added transition duration and brightness change for groups

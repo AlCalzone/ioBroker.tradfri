@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "0.3.0",
+        "version": "0.3.1",
         "news": {
             "0.3.0": {
                 "en": "Support of groups and scenes, improved connection handling, internal improvements.",
