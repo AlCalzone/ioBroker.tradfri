@@ -1295,6 +1295,7 @@ function parsePayload(response: CoapResponse): any {
 let pingTimer: NodeJS.Timer;
 let connectionAlive: boolean = false;
 let pingFails: number = 0;
+let resetAttempts: number = 0;
 async function pingThread() {
 	const oldValue = connectionAlive;
 	connectionAlive = await coap.ping(requestBase);
@@ -1319,8 +1320,18 @@ async function pingThread() {
 		// Try to fix stuff by resetting the connection after a few failed pings
 		pingFails++;
 		if (pingFails >= 3) {
-			_.log("3 consecutive pings failed, resetting connection...", "warn");
-			coap.reset();
+			if (resetAttempts < 3) {
+				resetAttempts++;
+				_.log(`3 consecutive pings failed, resetting connection (attempt #${resetAttempts})...`, "warn");
+				pingFails = 0;
+				coap.reset();
+			} else {
+				// not sure what to do here, try restarting the adapter
+				_.log(`3 consecutive reset attempts failed, restarting the adapter`, "warn");
+				setTimeout(() => {
+					process.exit(1);
+				}, 1000);
+			}
 		}
 	}
 }

@@ -1168,6 +1168,7 @@ function parsePayload(response) {
 let pingTimer;
 let connectionAlive = false;
 let pingFails = 0;
+let resetAttempts = 0;
 function pingThread() {
     return __awaiter(this, void 0, void 0, function* () {
         const oldValue = connectionAlive;
@@ -1192,8 +1193,19 @@ function pingThread() {
             // Try to fix stuff by resetting the connection after a few failed pings
             pingFails++;
             if (pingFails >= 3) {
-                global_1.Global.log("3 consecutive pings failed, resetting connection...", "warn");
-                node_coap_client_1.CoapClient.reset();
+                if (resetAttempts < 3) {
+                    resetAttempts++;
+                    global_1.Global.log(`3 consecutive pings failed, resetting connection (attempt #${resetAttempts})...`, "warn");
+                    pingFails = 0;
+                    node_coap_client_1.CoapClient.reset();
+                }
+                else {
+                    // not sure what to do here, try restarting the adapter
+                    global_1.Global.log(`3 consecutive reset attempts failed, restarting the adapter`, "warn");
+                    setTimeout(() => {
+                        process.exit(1);
+                    }, 1000);
+                }
             }
         }
     });
