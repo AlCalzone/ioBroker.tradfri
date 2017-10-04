@@ -42,17 +42,25 @@
     <TypeScriptCompile Include="src\ipso\lightSetting.ts" />
     <TypeScriptCompile Include="src\ipso\notification.ts" />
     <TypeScriptCompile Include="src\ipso\scene.ts" />
+    <TypeScriptCompile Include="src\lib\array-extensions.test.ts" />
     <TypeScriptCompile Include="src\lib\array-extensions.ts" />
     <TypeScriptCompile Include="src\lib\constants.ts" />
+    <TypeScriptCompile Include="src\lib\conversions.test.ts">
+      <SubType>Code</SubType>
+      <TestFramework>Mocha</TestFramework>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\lib\conversions.ts" />
     <TypeScriptCompile Include="src\lib\defer-promise.ts" />
     <TypeScriptCompile Include="src\lib\enums.ts" />
     <TypeScriptCompile Include="src\lib\global.ts" />
     <TypeScriptCompile Include="src\lib\ioBroker.d.ts" />
+    <TypeScriptCompile Include="src\lib\math.test.ts" />
     <TypeScriptCompile Include="src\lib\math.ts" />
     <TypeScriptCompile Include="src\lib\mutex.ts" />
     <TypeScriptCompile Include="src\lib\object-polyfill.ts" />
+    <TypeScriptCompile Include="src\lib\promises.test.ts" />
     <TypeScriptCompile Include="src\lib\promises.ts" />
+    <TypeScriptCompile Include="src\lib\str2regex.test.ts" />
     <TypeScriptCompile Include="src\lib\str2regex.ts" />
     <TypeScriptCompile Include="src\lib\utils.ts" />
     <TypeScriptCompile Include="src\main.ts" />

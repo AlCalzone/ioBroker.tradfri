@@ -6,6 +6,7 @@ export const serializers = {
 	color: ((value) => {
 		const [min, max] = [24930, 33135];
 		// extrapolate 0-100% to [min..max]
+		value = clamp(value, 0, 100);
 		return roundTo(min + value / 100 * (max - min), 0);
 	}) as PropertyTransform,
 
