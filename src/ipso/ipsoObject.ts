@@ -139,12 +139,17 @@ export class IPSOObject {
 	 */
 	public clone(): this {
 		// create a new instance of the same object as this
-		const constructor = (this as object).constructor;
-		function F(): void {
-			return constructor.apply(this);
+		interface Constructable<T> {
+			new(): T;
 		}
-		F.prototype = constructor.prototype;
-		const ret = new F();
+		const constructor = this.constructor as Constructable<this>;
+		// If the easy way doesn't work, use this:
+		// const F = new Proxy(this.constructor, {
+		// 	apply(target: Constructable<any>, thisArg, argumentsList) {
+		// 		return new target(...argumentsList);
+		// 	},
+		// });
+		const ret = new constructor(); // F();
 		// serialize the old values
 		const serialized = this.serialize();
 		// and parse them back
