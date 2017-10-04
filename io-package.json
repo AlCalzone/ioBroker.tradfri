@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "0.3.1",
+        "version": "0.3.2",
         "news": {
+            "0.3.2": {
+                "en": "Bugfixes",
+                "de": "Bugfixes"
+            },
             "0.3.0": {
                 "en": "Support of groups and scenes, improved connection handling, internal improvements.",
                 "de": "Unterstützung von Gruppen und Szenen, verbesserte Verbindungsverwaltung, interne Verbesserungen."
