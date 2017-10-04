@@ -46,7 +46,11 @@ const remoteRoot = `/opt/iobroker/node_modules/iobroker.${ADAPTER_NAME}`;
                 concurrency: 10,
                 validate: (pathname) => {
                     const basename = path.basename(pathname);
-                    return !basename.startsWith("deploy_");
+                    if (basename.startsWith("deploy_"))
+                        return false;
+                    if (basename.endsWith("Thumbs.db"))
+                        return false;
+                    return true;
                 },
             });
         }
