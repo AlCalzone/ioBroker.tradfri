@@ -23,18 +23,26 @@ import { Scene } from "./ipso/scene";
 // Adapter-Utils laden
 import utils from "./lib/utils";
 
+interface CustomStateSubscription {
+	pattern: RegExp;
+	callback: (id: string, state: ioBroker.State) => void;
+}
+interface CustomObjectSubscription {
+	pattern: RegExp;
+	callback: (id: string, obj: ioBroker.Object) => void;
+}
 const customStateSubscriptions: {
-	subscriptions: { [id: string]: { pattern: RegExp, callback: (id: string, state: ioBroker.State) => void } },
+	subscriptions: Map<string, CustomStateSubscription>,
 	counter: number,
 } = {
-		subscriptions: {},
+		subscriptions: new Map(),
 		counter: 0,
 	};
 const customObjectSubscriptions: {
-	subscriptions: { [id: string]: { pattern: RegExp, callback: (id: string, obj: ioBroker.Object) => void } },
+	subscriptions: Map<string, CustomObjectSubscription>,
 	counter: number,
 } = {
-		subscriptions: {},
+		subscriptions: new Map(),
 		counter: 0,
 	};
 
@@ -230,7 +238,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 
 		// Custom subscriptions durchgehen, um die passenden Callbacks aufzurufen
 		try {
-			for (const sub of values(customObjectSubscriptions.subscriptions)) {
+			for (const sub of customObjectSubscriptions.subscriptions.values()) {
 				if (sub && sub.pattern && sub.callback) {
 					// Wenn die ID zum aktuellen Pattern passt, dann Callback aufrufen
 					if (sub.pattern.test(id)) sub.callback(id, obj);
@@ -357,7 +365,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 
 		// Custom subscriptions durchgehen, um die passenden Callbacks aufzurufen
 		try {
-			for (const sub of values(customStateSubscriptions.subscriptions)) {
+			for (const sub of customStateSubscriptions.subscriptions.values()) {
 				if (sub && sub.pattern && sub.callback) {
 					// Wenn die ID zum aktuellen Pattern passt, dann Callback aufrufen
 					if (sub.pattern.test(id)) sub.callback(id, state);
@@ -1232,7 +1240,7 @@ function subscribeStates(pattern: string | RegExp, callback: (id: string, state:
 	const newCounter = (++customStateSubscriptions.counter);
 	const id = "" + newCounter;
 
-	customStateSubscriptions.subscriptions[id] = { pattern, callback };
+	customStateSubscriptions.subscriptions.set(id, { pattern, callback });
 
 	return id;
 }
@@ -1242,8 +1250,8 @@ function subscribeStates(pattern: string | RegExp, callback: (id: string, state:
  * @param id The subscription ID returned by @link{subscribeStates}
  */
 function unsubscribeStates(id: string) {
-	if (customStateSubscriptions.subscriptions[id]) {
-		delete customStateSubscriptions.subscriptions[id];
+	if (customStateSubscriptions.subscriptions.has(id)) {
+		customStateSubscriptions.subscriptions.delete(id);
 	}
 }
 
@@ -1261,7 +1269,7 @@ function subscribeObjects(pattern: string | RegExp, callback: (id: string, objec
 	const newCounter = (++customObjectSubscriptions.counter);
 	const id = "" + newCounter;
 
-	customObjectSubscriptions.subscriptions[id] = { pattern, callback };
+	customObjectSubscriptions.subscriptions.set(id, { pattern, callback });
 
 	return id;
 }
@@ -1271,8 +1279,8 @@ function subscribeObjects(pattern: string | RegExp, callback: (id: string, objec
  * @param id The subscription ID returned by @link{subscribeObjects}
  */
 function unsubscribeObjects(id: string) {
-	if (customObjectSubscriptions.subscriptions[id]) {
-		delete customObjectSubscriptions.subscriptions[id];
+	if (customObjectSubscriptions.subscriptions.has(id)) {
+		customObjectSubscriptions.subscriptions.delete(id);
 	}
 }
 

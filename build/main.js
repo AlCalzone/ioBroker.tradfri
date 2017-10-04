@@ -27,11 +27,11 @@ const scene_1 = require("./ipso/scene");
 // Adapter-Utils laden
 const utils_1 = require("./lib/utils");
 const customStateSubscriptions = {
-    subscriptions: {},
+    subscriptions: new Map(),
     counter: 0,
 };
 const customObjectSubscriptions = {
-    subscriptions: {},
+    subscriptions: new Map(),
     counter: 0,
 };
 // dictionary of COAP observers
@@ -206,7 +206,7 @@ let adapter = utils_1.default.adapter({
         }
         // Custom subscriptions durchgehen, um die passenden Callbacks aufzurufen
         try {
-            for (const sub of object_polyfill_1.values(customObjectSubscriptions.subscriptions)) {
+            for (const sub of customObjectSubscriptions.subscriptions.values()) {
                 if (sub && sub.pattern && sub.callback) {
                     // Wenn die ID zum aktuellen Pattern passt, dann Callback aufrufen
                     if (sub.pattern.test(id))
@@ -327,7 +327,7 @@ let adapter = utils_1.default.adapter({
         }
         // Custom subscriptions durchgehen, um die passenden Callbacks aufzurufen
         try {
-            for (const sub of object_polyfill_1.values(customStateSubscriptions.subscriptions)) {
+            for (const sub of customStateSubscriptions.subscriptions.values()) {
                 if (sub && sub.pattern && sub.callback) {
                     // Wenn die ID zum aktuellen Pattern passt, dann Callback aufrufen
                     if (sub.pattern.test(id))
@@ -1114,7 +1114,7 @@ function subscribeStates(pattern, callback) {
         return;
     const newCounter = (++customStateSubscriptions.counter);
     const id = "" + newCounter;
-    customStateSubscriptions.subscriptions[id] = { pattern, callback };
+    customStateSubscriptions.subscriptions.set(id, { pattern, callback });
     return id;
 }
 /**
@@ -1122,8 +1122,8 @@ function subscribeStates(pattern, callback) {
  * @param id The subscription ID returned by @link{subscribeStates}
  */
 function unsubscribeStates(id) {
-    if (customStateSubscriptions.subscriptions[id]) {
-        delete customStateSubscriptions.subscriptions[id];
+    if (customStateSubscriptions.subscriptions.has(id)) {
+        customStateSubscriptions.subscriptions.delete(id);
     }
 }
 /**
@@ -1138,7 +1138,7 @@ function subscribeObjects(pattern, callback) {
         return;
     const newCounter = (++customObjectSubscriptions.counter);
     const id = "" + newCounter;
-    customObjectSubscriptions.subscriptions[id] = { pattern, callback };
+    customObjectSubscriptions.subscriptions.set(id, { pattern, callback });
     return id;
 }
 /**
@@ -1146,8 +1146,8 @@ function subscribeObjects(pattern, callback) {
  * @param id The subscription ID returned by @link{subscribeObjects}
  */
 function unsubscribeObjects(id) {
-    if (customObjectSubscriptions.subscriptions[id]) {
-        delete customObjectSubscriptions.subscriptions[id];
+    if (customObjectSubscriptions.subscriptions.has(id)) {
+        customObjectSubscriptions.subscriptions.delete(id);
     }
 }
 function parsePayload(response) {
