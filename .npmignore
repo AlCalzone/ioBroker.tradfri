@@ -37,7 +37,8 @@ UpgradeLog*.htm
 coverage
 .nyc*
 
-# Compiled test files
+# test files
+src/**/*.test.ts
 build/**/*.test.js
 build/**/*.test.d.ts
 build/**/*.test.map
