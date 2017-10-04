@@ -143,13 +143,7 @@ export class IPSOObject {
 			new(): T;
 		}
 		const constructor = this.constructor as Constructable<this>;
-		// If the easy way doesn't work, use this:
-		// const F = new Proxy(this.constructor, {
-		// 	apply(target: Constructable<any>, thisArg, argumentsList) {
-		// 		return new target(...argumentsList);
-		// 	},
-		// });
-		const ret = new constructor(); // F();
+		const ret = new constructor();
 		// serialize the old values
 		const serialized = this.serialize();
 		// and parse them back

@@ -142,13 +142,8 @@ class IPSOObject {
      * Deeply clones an IPSO Object
      */
     clone() {
-        // create a new instance of the same object as this
         const constructor = this.constructor;
-        function F() {
-            return constructor.apply(this);
-        }
-        F.prototype = constructor.prototype;
-        const ret = new F();
+        const ret = new constructor();
         // serialize the old values
         const serialized = this.serialize();
         // and parse them back
