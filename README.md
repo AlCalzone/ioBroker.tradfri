@@ -46,6 +46,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### 0.3.2 (2017-10-04)
+* (AlCalzone) Fixed an error resulting from the upgrade to ES2015 output
+
 #### 0.3.1 (2017-10-02)
 * (AlCalzone) Update CoAP library to fix a bug
 
