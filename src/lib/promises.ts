@@ -4,8 +4,8 @@
 
 export type PromiseCallback = (value: any) => {} | PromiseLike<any>;
 
-export function promisify<T>(fn, context): (...args: any[]) => Promise<T>;
-export function promisify(fn, context) {
+export function promisify<T>(fn, context?: any): (...args: any[]) => Promise<T>;
+export function promisify(fn, context?: any) {
 	return function(...args) {
 		context = context || this;
 		return new Promise((resolve, reject) => {
@@ -20,8 +20,8 @@ export function promisify(fn, context) {
 	};
 }
 
-export function promisifyNoError<T>(fn, context): (...args: any[]) => Promise<T>;
-export function promisifyNoError(fn, context) {
+export function promisifyNoError<T>(fn, context?: any): (...args: any[]) => Promise<T>;
+export function promisifyNoError(fn, context?: any) {
 	return function(...args) {
 		context = context || this;
 		return new Promise((resolve, reject) => {
