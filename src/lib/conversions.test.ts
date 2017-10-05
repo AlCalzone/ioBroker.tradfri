@@ -2,7 +2,7 @@
 import { deserializers, serializers } from "./conversions";
 // tslint:disable:no-unused-expression
 
-describe.only("lib/conversions => color() =>", () => {
+describe("lib/conversions => color() =>", () => {
 
 	const serialize = serializers.color;
 	const deserialize = deserializers.color;
@@ -23,7 +23,7 @@ describe.only("lib/conversions => color() =>", () => {
 
 });
 
-describe.only("lib/conversions => transitionTime() =>", () => {
+describe("lib/conversions => transitionTime() =>", () => {
 
 	const serialize = serializers.transitionTime;
 	const deserialize = deserializers.transitionTime;
