@@ -2,6 +2,7 @@ import { DeviceInfo } from "./deviceInfo";
 import { IPSODevice } from "./ipsoDevice";
 import { deserializeWith, ipsoKey, IPSOObject, PropertyTransform, required, serializeWith } from "./ipsoObject";
 import { Light } from "./light";
+import { Plug } from "./plug";
 
 // list of known endpoints defined on the gateway
 export enum AccessoryTypes {
@@ -30,8 +31,8 @@ export class Accessory extends IPSODevice {
 	public lightList: Light[];
 
 	@ipsoKey("3312")
-	@deserializeWith(obj => new IPSODevice().parse(obj))
-	public plugList: IPSODevice[]; // <[Plug]> // seems unsupported atm.
+	@deserializeWith(obj => new Plug().parse(obj))
+	public plugList: Plug[];
 
 	@ipsoKey("3300")
 	@deserializeWith(obj => new IPSODevice().parse(obj))
