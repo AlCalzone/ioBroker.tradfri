@@ -53,7 +53,7 @@ describe("lib/promises => promisifyNoError()", () => {
 describe("lib/promises => wait()", () => {
 	let start;
 	const timeout = 100;
-	const delta = 5;
+	const delta = 20;
 
 	it(`wait(${timeout}) should wait (${timeout}±${delta}) ms`, async function() {
 		// this is not super accurate, so retry a few times until it works
