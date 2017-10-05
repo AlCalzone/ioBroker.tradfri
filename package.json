@@ -21,10 +21,12 @@
   },
   "devDependencies": {
     "@types/chai": "^4.0.4",
+    "@types/chai-as-promised": "^7.1.0",
     "@types/mocha": "^2.2.43",
     "@types/node": "^6.0.88",
     "@types/reflect-metadata": "0.0.5",
     "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
     "mocha": "^4.0.0",
     "nyc": "^11.2.1",
     "source-map-support": "^0.5.0",
@@ -75,5 +77,5 @@
     ],
     "sourceMap": true,
     "instrument": true
-  }  
+  }
 }
