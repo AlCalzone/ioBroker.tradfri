@@ -16,8 +16,8 @@ export class Light extends IPSODevice {
 	public saturation: number = 0; // TODO: range unknown!
 
 	@ipsoKey("5709")
-	@serializeWith(serializers.color)
-	@deserializeWith(deserializers.color)
+	@serializeWith(serializers.whiteTemperature)
+	@deserializeWith(deserializers.whiteTemperature)
 	public colorX: number = 0; // int
 
 	@ipsoKey("5710")
@@ -49,5 +49,26 @@ export class Light extends IPSODevice {
 
 	@ipsoKey("5701")
 	public unit: string = "";
+
+	/**
+	 * Returns true if the current lightbulb is dimmable
+	 */
+	public isDimmable(): boolean {
+		return true; // we know no lightbulbs that aren't dimmable
+	}
+
+	/**
+	 * Returns true if the current lightbulb is switchable
+	 */
+	public isSwitchable(): boolean {
+		return true; // we know no lightbulbs that aren't switchable
+	}
+
+	/**
+	 * Returns the supported color spectrum of the lightbulb
+	 */
+	public getSpectrum(): "none" | "white" | "rgb" {
+		return "white"; // TODO: determine which lights support which spectrum
+	}
 
 }

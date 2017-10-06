@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const math_1 = require("../lib/math");
 exports.serializers = {
-    color: ((value) => {
+    whiteTemperature: ((value) => {
         const [min, max] = [24930, 33135];
         // extrapolate 0-100% to [min..max]
         value = math_1.clamp(value, 0, 100);
@@ -12,7 +12,7 @@ exports.serializers = {
     transitionTime: (val => val * 10),
 };
 exports.deserializers = {
-    color: ((value) => {
+    whiteTemperature: ((value) => {
         const [min, max] = [24930, 33135];
         // interpolate "color percentage" from the colorX range of a lightbulb
         value = (value - min) / (max - min);

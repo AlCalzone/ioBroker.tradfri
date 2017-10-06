@@ -4,8 +4,8 @@ import { deserializers, serializers } from "./conversions";
 
 describe("lib/conversions => color() =>", () => {
 
-	const serialize = serializers.color;
-	const deserialize = deserializers.color;
+	const serialize = serializers.whiteTemperature;
+	const deserialize = deserializers.whiteTemperature;
 
 	const inputs = [0, 50, 100];
 	const outputs = [24930, Math.round((24930 + 33135) / 2), 33135];

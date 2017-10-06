@@ -46,8 +46,8 @@ __decorate([
 ], Light.prototype, "saturation", void 0);
 __decorate([
     ipsoObject_1.ipsoKey("5709"),
-    ipsoObject_1.serializeWith(conversions_1.serializers.color),
-    ipsoObject_1.deserializeWith(conversions_1.deserializers.color),
+    ipsoObject_1.serializeWith(conversions_1.serializers.whiteTemperature),
+    ipsoObject_1.deserializeWith(conversions_1.deserializers.whiteTemperature),
     __metadata("design:type", Number)
 ], Light.prototype, "colorX", void 0);
 __decorate([

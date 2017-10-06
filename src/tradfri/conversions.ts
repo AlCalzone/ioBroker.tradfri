@@ -3,7 +3,7 @@ import { clamp, roundTo } from "../lib/math";
 import { DictionaryLike } from "../lib/object-polyfill";
 
 export const serializers = {
-	color: ((value) => {
+	whiteTemperature: ((value) => {
 		const [min, max] = [24930, 33135];
 		// extrapolate 0-100% to [min..max]
 		value = clamp(value, 0, 100);
@@ -15,7 +15,7 @@ export const serializers = {
 };
 
 export const deserializers = {
-	color: ((value) => {
+	whiteTemperature: ((value) => {
 		const [min, max] = [24930, 33135];
 		// interpolate "color percentage" from the colorX range of a lightbulb
 		value = (value - min) / (max - min);
