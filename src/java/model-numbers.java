@@ -128,27 +128,51 @@ public final class C1617c {
 
     public static boolean m5934b(HSAccessory hSAccessory) {
         String a = C1617c.m5933a(hSAccessory);
-        return a.equalsIgnoreCase("1") || a.equalsIgnoreCase("2") || a.equalsIgnoreCase("0") || a.equalsIgnoreCase("5") || a.equalsIgnoreCase("3") || a.equalsIgnoreCase("4") || a.equalsIgnoreCase("9") || a.equalsIgnoreCase("14") || a.equalsIgnoreCase("15") || a.equalsIgnoreCase("13");
+        return a.equalsIgnoreCase("1") || 
+        a.equalsIgnoreCase("2") || 
+        a.equalsIgnoreCase("0") ||
+         a.equalsIgnoreCase("5") || 
+         a.equalsIgnoreCase("3") || 
+         a.equalsIgnoreCase("4") || 
+         a.equalsIgnoreCase("9") || 
+         a.equalsIgnoreCase("14") || 
+         a.equalsIgnoreCase("15") || 
+         a.equalsIgnoreCase("13");
     }
 
     public static boolean m5935c(HSAccessory hSAccessory) {
         String a = C1617c.m5933a(hSAccessory);
-        return a.equals("6") || a.equals("8") || a.equals("7") || a.equalsIgnoreCase("16") || a.equalsIgnoreCase("17");
+        return a.equals("6") || 
+        a.equals("8") || 
+        a.equals("7") || 
+        a.equalsIgnoreCase("16") || 
+        a.equalsIgnoreCase("17");
     }
 
     public static boolean m5936d(HSAccessory hSAccessory) {
         String a = C1617c.m5933a(hSAccessory);
-        return a.equalsIgnoreCase("1") || a.equalsIgnoreCase("2") || a.equalsIgnoreCase("0") || a.equalsIgnoreCase("5") || a.equalsIgnoreCase("3") || a.equalsIgnoreCase("4") || a.equalsIgnoreCase("9") || a.equalsIgnoreCase("13") || a.equals("14");
+        return a.equalsIgnoreCase("1") || 
+        a.equalsIgnoreCase("2") || 
+        a.equalsIgnoreCase("0") || 
+        a.equalsIgnoreCase("5") || 
+        a.equalsIgnoreCase("3") || 
+        a.equalsIgnoreCase("4") || 
+        a.equalsIgnoreCase("9") || 
+        a.equalsIgnoreCase("13") || 
+        a.equals("14");
     }
 
     public static boolean m5937e(HSAccessory hSAccessory) {
         String a = C1617c.m5933a(hSAccessory);
-        return a.equalsIgnoreCase("15") || a.equalsIgnoreCase("2") || a.equalsIgnoreCase("13");
+        return a.equalsIgnoreCase("15") || 
+        a.equalsIgnoreCase("2") || 
+        a.equalsIgnoreCase("13");
     }
 
     public static boolean m5938f(HSAccessory hSAccessory) {
         String a = C1617c.m5933a(hSAccessory);
-        return a.equals("6") || a.equals("16");
+        return a.equals("6") || 
+        a.equals("16");
     }
 
     public static boolean m5939g(HSAccessory hSAccessory) {
@@ -157,58 +181,72 @@ public final class C1617c {
 
     public static boolean m5940h(HSAccessory hSAccessory) {
         String a = C1617c.m5933a(hSAccessory);
-        return a.equals("7") || a.equals("17");
+        return a.equals("7") || 
+        a.equals("17");
     }
 
     public static boolean m5941i(HSAccessory hSAccessory) {
         String a = C1617c.m5933a(hSAccessory);
-        return a.equalsIgnoreCase("1") || a.equalsIgnoreCase("3") || a.equalsIgnoreCase("5") || a.equalsIgnoreCase("9");
+        return a.equalsIgnoreCase("1") ||
+ 
+        a.equalsIgnoreCase("3") ||
+        a.equalsIgnoreCase("5") ||
+        a.equalsIgnoreCase("9");
     }
 
     public static boolean m5942j(HSAccessory hSAccessory) {
         String a = C1617c.m5933a(hSAccessory);
-        return a.equalsIgnoreCase("0") || a.equalsIgnoreCase("4") || a.equalsIgnoreCase("14");
+        return a.equalsIgnoreCase("0") ||
+        a.equalsIgnoreCase("4") ||
+        a.equalsIgnoreCase("14");
     }
 
+    // a group of some sort
     private static String m5943k(HSAccessory hSAccessory) {
         if (hSAccessory.getLightList() == null || hSAccessory.getLightList().size() == 0) {
-            return (hSAccessory.getSwitchList() == null || hSAccessory.getSwitchList().size() == 0) ? 
-            ((hSAccessory.getSensorList() == null || hSAccessory.getSensorList().size() == 0) ? "12" : "17")
-             : "16";
+            // no lights
+            if ((hSAccessory.getSwitchList() == null || hSAccessory.getSwitchList().size() == 0) ) {
+                // no switches
+                if (hSAccessory.getSensorList() == null || hSAccessory.getSensorList().size() == 0) {
+                    // no sensors => empty accessory
+                    return "12"
+                } else {
+                    // sensor (motion?)
+                    return  "17"
+                }
+            }
+            // switches of some sort
+            return "16"
         } else {
-            Iterator it = hSAccessory.getLightList().iterator();
-            return it.hasNext() ? TextUtils.isEmpty(((Light) it.next()).getOriginalColor()) ? "15" : "14" : "12";
+            // empty? => 12
+            // has getOriginalColor() => 15 // ??
+            // else: => 14
         }
     }
 }
 
 
-C1624h.m5971c(this.f4445o, "accessory type :" + a);
-String str2 = "";
 if (a.equalsIgnoreCase("6")) {
-    // remote control black
+    // remote_control)});
 } else if (a.equalsIgnoreCase("7")) {
-    // motion sensor black
+    // motion_sensor)});
 } else if (a.equalsIgnoreCase("8")) {
-    // wireless_dimmer_black;
-} else if (a.equalsIgnoreCase("0") || a.equalsIgnoreCase("1") || a.equalsIgnoreCase("2")) {
-    a = String.format(Locale.getDefault(), getResources().getString(R.string.found), new Object[]{getResources().getString(R.string.bulb)});
-    str2 = String.format(Locale.getDefault(), getResources().getString(R.string.perfect_is_now_connected_to_tr), new Object[]{C1362d.m4864a(getApplicationContext(), d)});
-    i = R.drawable.ic_popup_bulb_black;
-} else if (a.equalsIgnoreCase("9") || a.equalsIgnoreCase("13")) {
-    a = String.format(Locale.getDefault(), getResources().getString(R.string.found), new Object[]{getResources().getString(R.string.bulb)});
-    str2 = String.format(Locale.getDefault(), getResources().getString(R.string.perfect_is_now_connected_to_tr), new Object[]{C1362d.m4864a(getApplicationContext(), d)});
-    i = R.drawable.ic_popup_gu10_light_bulb_black;
-} else if (a.equalsIgnoreCase("3") || a.equalsIgnoreCase("4")) {
-    a = String.format(Locale.getDefault(), getResources().getString(R.string.found), new Object[]{getResources().getString(R.string.panel)});
-    str2 = String.format(Locale.getDefault(), getResources().getString(R.string.perfect_is_now_connected_to_tr), new Object[]{C1362d.m4864a(getApplicationContext(), d)});
+    // wireless_dimmer)});
+} else if (a.equalsIgnoreCase("0") || 
+    a.equalsIgnoreCase("1") || 
+    a.equalsIgnoreCase("2")) {
+    // bulb
+} else if (a.equalsIgnoreCase("9") || 
+    a.equalsIgnoreCase("13")) {
+    // bulb gu10
+} else if (a.equalsIgnoreCase("3") || 
+    a.equalsIgnoreCase("4")) {
+    // panel
 } else if (a.equalsIgnoreCase("5")) {
-    a = String.format(Locale.getDefault(), getResources().getString(R.string.found), new Object[]{getResources().getString(R.string.door)});
-    str2 = String.format(Locale.getDefault(), getResources().getString(R.string.perfect_is_now_connected_to_tr), new Object[]{C1362d.m4864a(getApplicationContext(), d)});
+    // door
 } else if (d.getDevice() == null || TextUtils.isEmpty(d.getDevice().getModelNumber())) {
-    a = String.format(Locale.getDefault(), getResources().getString(R.string.found), new Object[]{getResources().getString(R.string.unknown_device)});
-    i = 0;
+    // unknown_device
 } else {
-    a = String.format(Locale.getDefault(), getResources().getString(R.string.found), new Object[]{d.getDevice().getModelNumber()});
+    a = String.format(/*...*/, new Object[]{d.getDevice().getModelNumber()});
     i = 0;
 }
