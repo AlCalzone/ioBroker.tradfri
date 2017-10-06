@@ -1,6 +1,8 @@
 import { DeviceInfo } from "./deviceInfo";
 import { IPSODevice } from "./ipsoDevice";
 import { Light } from "./light";
+import { Plug } from "./plug";
+import { Sensor } from "./sensor";
 export declare enum AccessoryTypes {
     remote = 0,
     lightbulb = 2,
@@ -11,8 +13,8 @@ export declare class Accessory extends IPSODevice {
     alive: boolean;
     lastSeen: number;
     lightList: Light[];
-    plugList: IPSODevice[];
-    sensorList: IPSODevice[];
+    plugList: Plug[];
+    sensorList: Sensor[];
     switchList: IPSODevice[];
     otaUpdateState: number;
 }

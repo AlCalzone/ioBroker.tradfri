@@ -273,7 +273,7 @@ let adapter = utils_1.default.adapter({
                             });
                         }
                         serializedObj = newGroup.serialize(group); // serialize with the old object as a reference
-                        url = `${requestBase}${endpoints_1.default.groups}/${rootObj.native.instanceId}`;
+                        url = `${requestBase}${endpoints_1.endpoints.groups}/${rootObj.native.instanceId}`;
                         break;
                     default:
                         // read the instanceId and get a reference value
@@ -307,7 +307,7 @@ let adapter = utils_1.default.adapter({
                             }
                         }
                         serializedObj = newAccessory.serialize(accessory); // serialize with the old object as a reference
-                        url = `${requestBase}${endpoints_1.default.devices}/${rootObj.native.instanceId}`;
+                        url = `${requestBase}${endpoints_1.endpoints.devices}/${rootObj.native.instanceId}`;
                         break;
                 }
                 // If the serialized object contains no properties, we don't need to send anything
@@ -402,7 +402,7 @@ function stopObservingResource(path) {
 }
 /** Sets up an observer for all devices */
 function observeDevices() {
-    observeResource(endpoints_1.default.devices, coapCb_getAllDevices);
+    observeResource(endpoints_1.endpoints.devices, coapCb_getAllDevices);
 }
 // gets called whenever "get /15001" updates
 function coapCb_getAllDevices(response) {
@@ -421,7 +421,7 @@ function coapCb_getAllDevices(response) {
         const addedKeys = array_extensions_1.except(newKeys, oldKeys);
         global_1.Global.log(`adding devices with keys ${JSON.stringify(addedKeys)}`, "debug");
         const addDevices = addedKeys.map(id => {
-            return observeResource(`${endpoints_1.default.devices}/${id}`, (resp) => coap_getDevice_cb(id, resp));
+            return observeResource(`${endpoints_1.endpoints.devices}/${id}`, (resp) => coap_getDevice_cb(id, resp));
         });
         yield Promise.all(addDevices);
         const removedKeys = array_extensions_1.except(oldKeys, newKeys);
@@ -435,7 +435,7 @@ function coapCb_getAllDevices(response) {
                 delete groups[id];
             }
             // remove observer
-            stopObservingResource(`${endpoints_1.default.devices}/${id}`);
+            stopObservingResource(`${endpoints_1.endpoints.devices}/${id}`);
         }));
     });
 }
@@ -456,7 +456,7 @@ function coap_getDevice_cb(instanceId, response) {
 }
 /** Sets up an observer for all groups */
 function observeGroups() {
-    observeResource(endpoints_1.default.groups, coapCb_getAllGroups);
+    observeResource(endpoints_1.endpoints.groups, coapCb_getAllGroups);
 }
 // gets called whenever "get /15004" updates
 function coapCb_getAllGroups(response) {
@@ -475,7 +475,7 @@ function coapCb_getAllGroups(response) {
         const addedKeys = array_extensions_1.except(newKeys, oldKeys);
         global_1.Global.log(`adding groups with keys ${JSON.stringify(addedKeys)}`, "debug");
         const addGroups = addedKeys.map(id => {
-            return observeResource(`${endpoints_1.default.groups}/${id}`, (resp) => coap_getGroup_cb(id, resp));
+            return observeResource(`${endpoints_1.endpoints.groups}/${id}`, (resp) => coap_getGroup_cb(id, resp));
         });
         yield Promise.all(addGroups);
         const removedKeys = array_extensions_1.except(oldKeys, newKeys);
@@ -489,7 +489,7 @@ function coapCb_getAllGroups(response) {
                 delete groups[id];
             }
             // remove observer
-            stopObservingResource(`${endpoints_1.default.groups}/${id}`);
+            stopObservingResource(`${endpoints_1.endpoints.groups}/${id}`);
         }));
     });
 }
@@ -524,7 +524,7 @@ function coap_getGroup_cb(instanceId, response) {
     // create ioBroker states
     extendGroup(group);
     // and load scene information
-    observeResource(`${endpoints_1.default.scenes}/${instanceId}`, (resp) => coap_getAllScenes_cb(instanceId, resp));
+    observeResource(`${endpoints_1.endpoints.scenes}/${instanceId}`, (resp) => coap_getAllScenes_cb(instanceId, resp));
 }
 // gets called whenever "get /15005/<groupId>" updates
 function coap_getAllScenes_cb(groupId, response) {
@@ -544,7 +544,7 @@ function coap_getAllScenes_cb(groupId, response) {
         const addedKeys = array_extensions_1.except(newKeys, oldKeys);
         global_1.Global.log(`adding scenes with keys ${JSON.stringify(addedKeys)} to group ${groupId}`, "debug");
         const addScenes = addedKeys.map(id => {
-            return observeResource(`${endpoints_1.default.scenes}/${groupId}/${id}`, (resp) => coap_getScene_cb(groupId, id, resp));
+            return observeResource(`${endpoints_1.endpoints.scenes}/${groupId}/${id}`, (resp) => coap_getScene_cb(groupId, id, resp));
         });
         yield Promise.all(addScenes);
         const removedKeys = array_extensions_1.except(oldKeys, newKeys);
@@ -554,7 +554,7 @@ function coap_getAllScenes_cb(groupId, response) {
             if (groupInfo.scenes.hasOwnProperty(id))
                 delete groupInfo.scenes[id];
             // remove observer
-            stopObservingResource(`${endpoints_1.default.scenes}/${groupId}/${id}`);
+            stopObservingResource(`${endpoints_1.endpoints.scenes}/${groupId}/${id}`);
         });
         // Update the scene dropdown for the group
         updatePossibleScenes(groupInfo);
@@ -1055,7 +1055,7 @@ function renameDevice(accessory, newName) {
     let payload = JSON.stringify(serializedObj);
     global_1.Global.log("renameDevice > sending payload: " + payload, "debug");
     payload = Buffer.from(payload);
-    node_coap_client_1.CoapClient.request(`${requestBase}${endpoints_1.default.devices}/${accessory.instanceId}`, "put", payload);
+    node_coap_client_1.CoapClient.request(`${requestBase}${endpoints_1.endpoints.devices}/${accessory.instanceId}`, "put", payload);
 }
 /**
  * Renames a group
@@ -1077,7 +1077,7 @@ function renameGroup(group, newName) {
     let payload = JSON.stringify(serializedObj);
     global_1.Global.log("renameDevice > sending payload: " + payload, "debug");
     payload = Buffer.from(payload);
-    node_coap_client_1.CoapClient.request(`${requestBase}${endpoints_1.default.groups}/${group.instanceId}`, "put", payload);
+    node_coap_client_1.CoapClient.request(`${requestBase}${endpoints_1.endpoints.groups}/${group.instanceId}`, "put", payload);
 }
 // ==================================
 // Custom subscriptions

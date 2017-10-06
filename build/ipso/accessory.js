@@ -13,6 +13,8 @@ const deviceInfo_1 = require("./deviceInfo");
 const ipsoDevice_1 = require("./ipsoDevice");
 const ipsoObject_1 = require("./ipsoObject");
 const light_1 = require("./light");
+const plug_1 = require("./plug");
+const sensor_1 = require("./sensor");
 // list of known endpoints defined on the gateway
 var AccessoryTypes;
 (function (AccessoryTypes) {
@@ -54,12 +56,12 @@ __decorate([
 ], Accessory.prototype, "lightList", void 0);
 __decorate([
     ipsoObject_1.ipsoKey("3312"),
-    ipsoObject_1.deserializeWith(obj => new ipsoDevice_1.IPSODevice().parse(obj)),
+    ipsoObject_1.deserializeWith(obj => new plug_1.Plug().parse(obj)),
     __metadata("design:type", Array)
 ], Accessory.prototype, "plugList", void 0);
 __decorate([
     ipsoObject_1.ipsoKey("3300"),
-    ipsoObject_1.deserializeWith(obj => new ipsoDevice_1.IPSODevice().parse(obj)),
+    ipsoObject_1.deserializeWith(obj => new sensor_1.Sensor().parse(obj)),
     __metadata("design:type", Array)
 ], Accessory.prototype, "sensorList", void 0);
 __decorate([

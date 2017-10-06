@@ -9,18 +9,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const conversions_1 = require("../lib/conversions");
+const conversions_1 = require("../tradfri/conversions");
 const ipsoDevice_1 = require("./ipsoDevice");
 const ipsoObject_1 = require("./ipsoObject");
+// see https://github.com/hreichert/smarthome/blob/master/extensions/binding/org.eclipse.smarthome.binding.tradfri/src/main/java/org/eclipse/smarthome/binding/tradfri/internal/TradfriColor.java
+// for some color conversion
 class Light extends ipsoDevice_1.IPSODevice {
     constructor() {
         super(...arguments);
         this.color = "f1e0b5"; // hex string
-        this.UNKNOWN1 = 0; // ???
-        this.UNKNOWN2 = 0; // ???
+        this.hue = 0; // 0-360
+        this.saturation = 0; // TODO: range unknown!
         this.colorX = 0; // int
         this.colorY = 0; // int
-        this.UNKNOWN3 = 0; // ???
+        this.colorTemperature = 0; // TODO: range unknown!
         this.transitionTime = 0.5; // <float>
         this.cumulativeActivePower = 0.0; // <float>
         this.dimmer = 0; // <int> [0..254]
@@ -37,11 +39,11 @@ __decorate([
 __decorate([
     ipsoObject_1.ipsoKey("5707"),
     __metadata("design:type", Number)
-], Light.prototype, "UNKNOWN1", void 0);
+], Light.prototype, "hue", void 0);
 __decorate([
     ipsoObject_1.ipsoKey("5708"),
     __metadata("design:type", Number)
-], Light.prototype, "UNKNOWN2", void 0);
+], Light.prototype, "saturation", void 0);
 __decorate([
     ipsoObject_1.ipsoKey("5709"),
     ipsoObject_1.serializeWith(conversions_1.serializers.color),
@@ -55,7 +57,7 @@ __decorate([
 __decorate([
     ipsoObject_1.ipsoKey("5711"),
     __metadata("design:type", Number)
-], Light.prototype, "UNKNOWN3", void 0);
+], Light.prototype, "colorTemperature", void 0);
 __decorate([
     ipsoObject_1.ipsoKey("5712"),
     ipsoObject_1.required,

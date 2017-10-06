@@ -1,11 +1,11 @@
 import { IPSODevice } from "./ipsoDevice";
 export declare class Light extends IPSODevice {
     color: string;
-    UNKNOWN1: number;
-    UNKNOWN2: number;
+    hue: number;
+    saturation: number;
     colorX: number;
     colorY: number;
-    UNKNOWN3: number;
+    colorTemperature: number;
     transitionTime: number;
     cumulativeActivePower: number;
     dimmer: number;

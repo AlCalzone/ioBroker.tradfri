@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{53e51c2f-73aa-4803-9a77-5431efc98998}</ProjectGuid>
     <ProjectHome />
-    <ProjectView>ProjectFiles</ProjectView>
+    <ProjectView>ShowAllFiles</ProjectView>
     <StartupFile />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -41,15 +41,17 @@
     <TypeScriptCompile Include="src\ipso\light.ts" />
     <TypeScriptCompile Include="src\ipso\lightSetting.ts" />
     <TypeScriptCompile Include="src\ipso\notification.ts" />
+    <TypeScriptCompile Include="src\ipso\plug.ts" />
     <TypeScriptCompile Include="src\ipso\scene.ts" />
+    <TypeScriptCompile Include="src\ipso\sensor.ts" />
     <TypeScriptCompile Include="src\lib\array-extensions.test.ts" />
     <TypeScriptCompile Include="src\lib\array-extensions.ts" />
     <TypeScriptCompile Include="src\lib\constants.ts" />
-    <TypeScriptCompile Include="src\lib\conversions.test.ts">
+    <TypeScriptCompile Include="src\tradfri\conversions.test.ts">
       <SubType>Code</SubType>
       <TestFramework>Mocha</TestFramework>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\lib\conversions.ts" />
+    <TypeScriptCompile Include="src\tradfri\conversions.ts" />
     <TypeScriptCompile Include="src\lib\defer-promise.test.ts" />
     <TypeScriptCompile Include="src\lib\defer-promise.ts" />
     <TypeScriptCompile Include="src\lib\enums.test.ts" />
@@ -80,19 +82,23 @@
     <Content Include="src\flow\startup.txt" />
     <Content Include="src\flow\timetable.txt" />
     <Compile Include="test\lib\setup.js" />
+    <Content Include="src\java\model-numbers.java" />
     <Content Include="travis\setup.sh" />
     <Content Include="tsconfig.json" />
     <Content Include="tslint.json" />
     <TypeScriptCompile Include="src\deploy_local.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\tradfri\predefined-colors.ts" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="admin" />
     <Folder Include="src" />
     <Folder Include="src\flow" />
     <Folder Include="src\ipso\" />
+    <Folder Include="src\java\" />
     <Folder Include="src\lib\" />
+    <Folder Include="src\tradfri\" />
     <Folder Include="test" />
     <Folder Include="test\lib" />
     <Folder Include="travis\" />
