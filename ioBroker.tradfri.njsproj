@@ -82,7 +82,6 @@
     <Content Include="src\flow\startup.txt" />
     <Content Include="src\flow\timetable.txt" />
     <Compile Include="test\lib\setup.js" />
-    <Content Include="src\java\model-numbers.java" />
     <Content Include="travis\setup.sh" />
     <Content Include="tsconfig.json" />
     <Content Include="tslint.json" />
@@ -96,7 +95,6 @@
     <Folder Include="src" />
     <Folder Include="src\flow" />
     <Folder Include="src\ipso\" />
-    <Folder Include="src\java\" />
     <Folder Include="src\lib\" />
     <Folder Include="src\tradfri\" />
     <Folder Include="test" />

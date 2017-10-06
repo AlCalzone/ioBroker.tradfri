@@ -1,11 +1,16 @@
 import { deserializers, serializers } from "../tradfri/conversions";
 import { IPSODevice } from "./ipsoDevice";
 import { deserializeWith, ipsoKey, IPSOObject, PropertyTransform, required, serializeWith } from "./ipsoObject";
+import { Accessory } from "./accessory";
 
 // see https://github.com/hreichert/smarthome/blob/master/extensions/binding/org.eclipse.smarthome.binding.tradfri/src/main/java/org/eclipse/smarthome/binding/tradfri/internal/TradfriColor.java
 // for some color conversion
 
 export class Light extends IPSODevice {
+
+	constructor(private _accessory?: Accessory) {
+		super();
+	}
 
 	@ipsoKey("5706")
 	public color: string = "f1e0b5"; // hex string
@@ -64,11 +69,38 @@ export class Light extends IPSODevice {
 		return true; // we know no lightbulbs that aren't switchable
 	}
 
+	public clone(): this {
+		const ret = super.clone() as this;
+		ret._accessory = this._accessory;
+		return ret;
+	}
+
 	/**
 	 * Returns the supported color spectrum of the lightbulb
 	 */
-	public getSpectrum(): "none" | "white" | "rgb" {
-		return "white"; // TODO: determine which lights support which spectrum
+	private _spectrum: Spectrum = null;
+	public getSpectrum(): Spectrum{
+		if (this._spectrum == null) {
+			// determine the spectrum
+			this._spectrum = "none";
+			if (this._accessory != null &&
+				this._accessory.deviceInfo != null &&
+				this._accessory.deviceInfo.modelNumber != null &&
+				this._accessory.deviceInfo.modelNumber.length > 0
+			) {
+				const modelName = this._accessory.deviceInfo.modelNumber;
+				if (modelName.indexOf(" WS ") > -1) {
+					// WS = white spectrum
+					this._spectrum = "white";
+				} else if (modelName.indexOf(" C/WS ") > -1 || modelName.indexOf(" CWS ") > -1) {
+					// CWS = color + white spectrum
+					this._spectrum = "rgb";
+				}
+			}
+		}
+		return this._spectrum;
 	}
 
 }
+
+export type Spectrum = "none" | "white" | "rgb";

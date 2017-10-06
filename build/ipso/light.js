@@ -15,8 +15,9 @@ const ipsoObject_1 = require("./ipsoObject");
 // see https://github.com/hreichert/smarthome/blob/master/extensions/binding/org.eclipse.smarthome.binding.tradfri/src/main/java/org/eclipse/smarthome/binding/tradfri/internal/TradfriColor.java
 // for some color conversion
 class Light extends ipsoDevice_1.IPSODevice {
-    constructor() {
-        super(...arguments);
+    constructor(_accessory) {
+        super();
+        this._accessory = _accessory;
         this.color = "f1e0b5"; // hex string
         this.hue = 0; // 0-360
         this.saturation = 0; // TODO: range unknown!
@@ -30,6 +31,48 @@ class Light extends ipsoDevice_1.IPSODevice {
         this.onTime = 0; // <int>
         this.powerFactor = 0.0; // <float>
         this.unit = "";
+        /**
+         * Returns the supported color spectrum of the lightbulb
+         */
+        this._spectrum = null;
+    }
+    /**
+     * Returns true if the current lightbulb is dimmable
+     */
+    isDimmable() {
+        return true; // we know no lightbulbs that aren't dimmable
+    }
+    /**
+     * Returns true if the current lightbulb is switchable
+     */
+    isSwitchable() {
+        return true; // we know no lightbulbs that aren't switchable
+    }
+    clone() {
+        const ret = super.clone();
+        ret._accessory = this._accessory;
+        return ret;
+    }
+    getSpectrum() {
+        if (this._spectrum == null) {
+            // determine the spectrum
+            this._spectrum = "none";
+            if (this._accessory != null &&
+                this._accessory.deviceInfo != null &&
+                this._accessory.deviceInfo.modelNumber != null &&
+                this._accessory.deviceInfo.modelNumber.length > 0) {
+                const modelName = this._accessory.deviceInfo.modelNumber;
+                if (modelName.indexOf(" WS ") > -1) {
+                    // WS = white spectrum
+                    this._spectrum = "white";
+                }
+                else if (modelName.indexOf(" C/WS ") > -1 || modelName.indexOf(" CWS ") > -1) {
+                    // CWS = color + white spectrum
+                    this._spectrum = "rgb";
+                }
+            }
+        }
+        return this._spectrum;
     }
 }
 __decorate([
