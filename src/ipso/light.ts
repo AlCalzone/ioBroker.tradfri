@@ -2,6 +2,9 @@ import { deserializers, serializers } from "../lib/conversions";
 import { IPSODevice } from "./ipsoDevice";
 import { deserializeWith, ipsoKey, IPSOObject, PropertyTransform, required, serializeWith } from "./ipsoObject";
 
+// see https://github.com/hreichert/smarthome/blob/master/extensions/binding/org.eclipse.smarthome.binding.tradfri/src/main/java/org/eclipse/smarthome/binding/tradfri/internal/TradfriColor.java
+// for some color conversion
+
 export class Light extends IPSODevice {
 
 	@ipsoKey("5706")
