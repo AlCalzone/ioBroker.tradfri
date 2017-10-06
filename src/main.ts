@@ -6,7 +6,7 @@ require("reflect-metadata");
 
 // Eigene Module laden
 import { CoapClient as coap, CoapResponse } from "node-coap-client";
-import coapEndpoints from "./ipso/endpoints";
+import { endpoints as coapEndpoints} from "./ipso/endpoints";
 import { except } from "./lib/array-extensions";
 import { ExtendedAdapter, Global as _ } from "./lib/global";
 import { composeObject, DictionaryLike, dig, entries, filter, values } from "./lib/object-polyfill";

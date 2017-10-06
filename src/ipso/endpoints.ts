@@ -1,5 +1,5 @@
 // list of known endpoints defined on the gateway
-export default {
+export const endpoints = {
 	devices: "15001",
 	hsAccessoryLink: "15002",
 	groups: "15004",
@@ -8,4 +8,9 @@ export default {
 	smartTasks: "15010",
 	gateway: "15011",
 	gatewayDetails: "15012",
+};
+
+export const gatewayEndpoints = {
+	alexaCertificate: "9094", // DELETE or POST (raw string)
+	alexa: "9095", // DELETE or POST (something with cognitoId)
 };
