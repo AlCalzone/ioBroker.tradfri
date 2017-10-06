@@ -5,7 +5,7 @@ export default {
 	groups: "15004",
 	scenes: "15005",
 	notifications: "15006",
-	UNKNOWN1: "15010",
+	smartTasks: "15010",
 	gateway: "15011",
 	gatewayDetails: "15012",
 };
