@@ -1,11 +1,11 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "0.3.2",
+        "version": "0.3.3",
         "news": {
-            "0.3.2": {
-                "en": "Bugfixes",
-                "de": "Bugfixes"
+            "0.3.3": {
+                "en": "Eliminated potential sources of infinite loops",
+                "de": "Potentielle Auslöser von Endlosschleifen eliminiert"
             },
             "0.3.0": {
                 "en": "Support of groups and scenes, improved connection handling, internal improvements.",

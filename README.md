@@ -46,6 +46,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### 0.3.3 (2017-10-07)
+* (AlCalzone) Eliminated potential sources of infinite loops
+
 #### 0.3.2 (2017-10-04)
 * (AlCalzone) Fixed an error resulting from the upgrade to ES2015 output
 
