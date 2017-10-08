@@ -332,6 +332,16 @@ let adapter: ExtendedAdapter = utils.adapter({
 									colorY: 27000,
 									transitionTime: await getTransitionDuration(accessory),
 								});
+							} else if (id.endsWith(".hue")) {
+								light.merge({
+									hue: val,
+									transitionTime: await getTransitionDuration(accessory),
+								});
+							} else if (id.endsWith(".saturation")) {
+								light.merge({
+									saturation: val,
+									transitionTime: await getTransitionDuration(accessory),
+								});
 							} else if (id.endsWith(".transitionDuration")) {
 								// TODO: check if we need to buffer this somehow
 								// for now just ack the change
@@ -884,27 +894,64 @@ function extendDevice(accessory: Accessory) {
 					role: "light",
 				},
 				native: {
-					/* Nothing here */
+					spectrum: spectrum, // remember the spectrum, so we can update different properties later
 				},
 			};
-			stateObjs["lightbulb.color"] = {
-				_id: `${objId}.lightbulb.color`,
-				type: "state",
-				common: {
-					name: "color temperature of the lightbulb",
-					read: true,
-					write: true,
-					min: 0,
-					max: 100,
-					unit: "%",
-					type: "number",
-					role: "level.color.temperature",
-					desc: "range: 0% = cold, 100% = warm",
-				},
-				native: {
-					path: "lightList.[0].colorX",
-				},
-			};
+			if (spectrum === "white") {
+				stateObjs["lightbulb.color"] = {
+					_id: `${objId}.lightbulb.color`,
+					type: "state",
+					common: {
+						name: "Color temperature",
+						read: true,
+						write: true,
+						min: 0,
+						max: 100,
+						unit: "%",
+						type: "number",
+						role: "level.color.temperature",
+						desc: "range: 0% = cold, 100% = warm",
+					},
+					native: {
+						path: "lightList.[0].colorX",
+					},
+				};
+			} else if (spectrum === "rgb") {
+				stateObjs["lightbulb.hue"] = {
+					_id: `${objId}.lightbulb.hue`,
+					type: "state",
+					common: {
+						name: "Color hue",
+						read: true,
+						write: true,
+						min: 0,
+						max: 360,
+						unit: "°",
+						type: "number",
+						role: "level.color.hue",
+					},
+					native: {
+						path: "lightList.[0].hue",
+					},
+				};
+				stateObjs["lightbulb.saturation"] = {
+					_id: `${objId}.lightbulb.saturation`,
+					type: "state",
+					common: {
+						name: "Color saturation",
+						read: true,
+						write: true,
+						min: 0,
+						max: 100,
+						unit: "%",
+						type: "number",
+						role: "level.color.saturation",
+					},
+					native: {
+						path: "lightList.[0].saturation",
+					},
+				};
+			}
 			stateObjs["lightbulb.brightness"] = {
 				_id: `${objId}.lightbulb.brightness`,
 				type: "state",
