@@ -771,12 +771,26 @@ function extendDevice(accessory) {
             },
         };
         if (accessory.type === accessory_1.AccessoryTypes.lightbulb) {
+            let channelName;
+            let spectrum = "none";
+            if (accessory.lightList != null && accessory.lightList.length > 0) {
+                spectrum = accessory.lightList[0].spectrum;
+            }
+            if (spectrum === "none") {
+                channelName = "Lightbulb";
+            }
+            else if (spectrum === "white") {
+                channelName = "Lightbulb (white spectrum)";
+            }
+            else if (spectrum === "rgb") {
+                channelName = "RGB Lightbulb";
+            }
             // obj.lightbulb should be a channel
             stateObjs.lightbulb = {
                 _id: `${objId}.lightbulb`,
                 type: "channel",
                 common: {
-                    name: "Lightbulb",
+                    name: channelName,
                     role: "light",
                 },
                 native: {},

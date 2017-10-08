@@ -17,7 +17,7 @@ import { str2regex } from "./lib/str2regex";
 import { Accessory, AccessoryTypes } from "./ipso/accessory";
 import { Group } from "./ipso/group";
 import { IPSOObject } from "./ipso/ipsoObject";
-import { Light } from "./ipso/light";
+import { Light, Spectrum } from "./ipso/light";
 import { Scene } from "./ipso/scene";
 
 // Adapter-Utils laden
@@ -863,12 +863,24 @@ function extendDevice(accessory: Accessory) {
 		};
 
 		if (accessory.type === AccessoryTypes.lightbulb) {
+			let channelName;
+			let spectrum: Spectrum = "none";
+			if (accessory.lightList != null && accessory.lightList.length > 0) {
+				spectrum = accessory.lightList[0].spectrum;
+			}
+			if (spectrum === "none") {
+				channelName = "Lightbulb";
+			} else if (spectrum === "white") {
+				channelName = "Lightbulb (white spectrum)";
+			} else if (spectrum === "rgb") {
+				channelName = "RGB Lightbulb";
+			}
 			// obj.lightbulb should be a channel
 			stateObjs.lightbulb = {
 				_id: `${objId}.lightbulb`,
 				type: "channel",
 				common: {
-					name: "Lightbulb",
+					name: channelName,
 					role: "light",
 				},
 				native: {
@@ -880,8 +892,8 @@ function extendDevice(accessory: Accessory) {
 				type: "state",
 				common: {
 					name: "color temperature of the lightbulb",
-					read: true, // TODO: check
-					write: true, // TODO: check
+					read: true,
+					write: true,
 					min: 0,
 					max: 100,
 					unit: "%",
@@ -898,8 +910,8 @@ function extendDevice(accessory: Accessory) {
 				type: "state",
 				common: {
 					name: "brightness",
-					read: true, // TODO: check
-					write: true, // TODO: check
+					read: true,
+					write: true,
 					min: 0,
 					max: 254,
 					type: "number",
@@ -915,8 +927,8 @@ function extendDevice(accessory: Accessory) {
 				type: "state",
 				common: {
 					name: "on/off",
-					read: true, // TODO: check
-					write: true, // TODO: check
+					read: true,
+					write: true,
 					type: "boolean",
 					role: "switch",
 				},
