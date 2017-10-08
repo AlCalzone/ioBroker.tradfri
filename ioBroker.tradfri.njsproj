@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{53e51c2f-73aa-4803-9a77-5431efc98998}</ProjectGuid>
     <ProjectHome />
-    <ProjectView>ShowAllFiles</ProjectView>
+    <ProjectView>ProjectFiles</ProjectView>
     <StartupFile />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -38,6 +38,7 @@
     <TypeScriptCompile Include="src\ipso\group.ts" />
     <TypeScriptCompile Include="src\ipso\ipsoDevice.ts" />
     <TypeScriptCompile Include="src\ipso\ipsoObject.ts" />
+    <TypeScriptCompile Include="src\ipso\light.test.ts" />
     <TypeScriptCompile Include="src\ipso\light.ts" />
     <TypeScriptCompile Include="src\ipso\lightSetting.ts" />
     <TypeScriptCompile Include="src\ipso\notification.ts" />

@@ -41,7 +41,7 @@ class IPSOObject {
         else if (typeof value === "object") {
             // Object: try to parse this, objects should be parsed in any case
             if (deserializer) {
-                return deserializer(value);
+                return deserializer(value, this);
             }
             else {
                 global_1.Global.log(`{{yellow}}could not find deserializer for key ${propKey}`);
@@ -49,7 +49,7 @@ class IPSOObject {
         }
         else if (deserializer) {
             // if this property needs a parser, parse the value
-            return deserializer(value);
+            return deserializer(value, this);
         }
         else {
             // otherwise just return the value
@@ -91,7 +91,7 @@ class IPSOObject {
                 }
             }
             if (transform)
-                _ret = transform(_ret);
+                _ret = transform(_ret, this);
             return _ret;
         };
         // const refObj = reference || getDefaultValues(this); //this.defaultValues;

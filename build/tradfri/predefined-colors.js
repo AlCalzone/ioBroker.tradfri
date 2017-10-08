@@ -1,12 +1,23 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * The maximum value of color related numbers in Tradfri
+ */
+exports.MAX_COLOR = 65279;
+/**
+ * All predefined RGB colors in the app
+ */
 exports.predefinedColors = new Map();
+/**
+ * The hex colors for the white spectrum, sorted from cold to warm
+ */
+exports.whiteSpectrumHex = ["f5faf6", "f1e0b5", "efd275"];
 function defineColor(rgbHex, x, y, hue, saturation, temperature) {
     const definition = {
         colorX: x,
         colorY: y,
-        hue: hue * 360 / 65279,
-        saturation: saturation / 65279,
+        hue: hue * 360 / exports.MAX_COLOR,
+        saturation: saturation / exports.MAX_COLOR,
         rgbHex,
     };
     if (temperature != null)
@@ -34,4 +45,9 @@ defineColor("4a418a", 0.17, 0.05, 47822, 65279);
 defineColor("6c83ba", 0.2, 0.1, 47324, 51774);
 defineColor("a9d62b", 0.41, 0.51, 11383, 65279);
 defineColor("d6e44b", 0.45, 0.47, 8572, 55985);
+// The white spectrum expressed in colorX values, as defined in the app
+exports.whiteSpectrumRange = [
+    Math.round(exports.predefinedColors.get(exports.whiteSpectrumHex[0]).colorX * exports.MAX_COLOR),
+    Math.round(exports.predefinedColors.get(exports.whiteSpectrumHex[exports.whiteSpectrumHex.length - 1]).colorX * exports.MAX_COLOR),
+];
 //# sourceMappingURL=predefined-colors.js.map

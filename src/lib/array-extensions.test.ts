@@ -80,7 +80,6 @@ describe("lib/array-extensions => intersect() =>", () => {
 
 });
 
-
 describe("lib/array-extensions => range() =>", () => {
 
 	it("should work", () => {
@@ -100,11 +99,10 @@ describe("lib/array-extensions => range() =>", () => {
 
 });
 
-
 describe("lib/array-extensions => firstOrDefault() =>", () => {
 
 	const source = [1, 2, 3, 4, 5];
-	
+
 	it("should return the first value found", () => {
 		expect(firstOrDefault(source, (i => i > 3))).to.equal(4);
 	});

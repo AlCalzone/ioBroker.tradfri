@@ -17,7 +17,7 @@ export declare class IPSOObject {
     clone(): this;
     private isSerializedObjectEmpty(obj);
 }
-export declare type PropertyTransform = (value: any) => any;
+export declare type PropertyTransform = (value: any, parent?: IPSOObject) => any;
 /**
  * Defines the ipso key neccessary to serialize a property to a CoAP object
  */

@@ -1,7 +1,7 @@
 import { deserializers, serializers } from "../tradfri/conversions";
+import { Accessory } from "./accessory";
 import { IPSODevice } from "./ipsoDevice";
 import { deserializeWith, ipsoKey, IPSOObject, PropertyTransform, required, serializeWith } from "./ipsoObject";
-import { Accessory } from "./accessory";
 
 // see https://github.com/hreichert/smarthome/blob/master/extensions/binding/org.eclipse.smarthome.binding.tradfri/src/main/java/org/eclipse/smarthome/binding/tradfri/internal/TradfriColor.java
 // for some color conversion
@@ -21,8 +21,8 @@ export class Light extends IPSODevice {
 	public saturation: number = 0; // TODO: range unknown!
 
 	@ipsoKey("5709")
-	@serializeWith(serializers.whiteTemperature)
-	@deserializeWith(deserializers.whiteTemperature)
+	@serializeWith(serializers.whiteSpectrumToColorX)
+	@deserializeWith(deserializers.whiteSpectrumFromColorX)
 	public colorX: number = 0; // int
 
 	@ipsoKey("5710")
@@ -79,7 +79,7 @@ export class Light extends IPSODevice {
 	 * Returns the supported color spectrum of the lightbulb
 	 */
 	private _spectrum: Spectrum = null;
-	public getSpectrum(): Spectrum{
+	public getSpectrum(): Spectrum {
 		if (this._spectrum == null) {
 			// determine the spectrum
 			this._spectrum = "none";

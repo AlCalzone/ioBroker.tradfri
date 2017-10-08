@@ -10,4 +10,16 @@ export interface ColorDefinition {
     /** RGB hex color */
     rgbHex: string;
 }
+/**
+ * The maximum value of color related numbers in Tradfri
+ */
+export declare const MAX_COLOR: number;
+/**
+ * All predefined RGB colors in the app
+ */
 export declare const predefinedColors: Map<string, ColorDefinition>;
+/**
+ * The hex colors for the white spectrum, sorted from cold to warm
+ */
+export declare const whiteSpectrumHex: string[];
+export declare const whiteSpectrumRange: number[];

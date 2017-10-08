@@ -1,21 +1,25 @@
-﻿import { expect } from "chai";
+import { expect } from "chai";
 import { deserializers, serializers } from "./conversions";
+import { MAX_COLOR, predefinedColors, whiteSpectrumRange } from "./predefined-colors";
 // tslint:disable:no-unused-expression
 
-describe("lib/conversions => color() =>", () => {
+describe("tradfri/conversions => whiteSpectrum <=> colorX =>", () => {
 
-	const serialize = serializers.whiteTemperature;
-	const deserialize = deserializers.whiteTemperature;
+	const serialize = serializers.whiteSpectrumToColorX;
+	const deserialize = deserializers.whiteSpectrumFromColorX;
+
+	// The white spectrum expressed in colorX values, as defined in the app
+	const [min, max] = whiteSpectrumRange;
 
 	const inputs = [0, 50, 100];
-	const outputs = [24930, Math.round((24930 + 33135) / 2), 33135];
+	const outputs = [min, Math.round((min + max) / 2), max];
 
-	it("serialize: 0..100% should map to 24930..33135", () => {
+	it(`serialize: 0..100% should map to ${min}..${max}`, () => {
 		for (let i = 0; i < inputs.length; i++) {
 			expect(serialize(inputs[i])).to.equal(outputs[i]);
 		}
 	});
-	it("deserialize: 24930..33135 should map to 0..100%", () => {
+	it(`deserialize: ${min}..${max} should map to 0..100%`, () => {
 		for (let i = 0; i < outputs.length; i++) {
 			expect(deserialize(outputs[i])).to.equal(inputs[i]);
 		}
@@ -23,7 +27,7 @@ describe("lib/conversions => color() =>", () => {
 
 });
 
-describe("lib/conversions => transitionTime() =>", () => {
+describe("tradfri/conversions => transitionTime() =>", () => {
 
 	const serialize = serializers.transitionTime;
 	const deserialize = deserializers.transitionTime;

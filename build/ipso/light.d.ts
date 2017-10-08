@@ -1,5 +1,5 @@
-import { IPSODevice } from "./ipsoDevice";
 import { Accessory } from "./accessory";
+import { IPSODevice } from "./ipsoDevice";
 export declare class Light extends IPSODevice {
     private _accessory;
     constructor(_accessory?: Accessory);

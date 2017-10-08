@@ -40,13 +40,13 @@ export class IPSOObject {
 		} else if (typeof value === "object") {
 			// Object: try to parse this, objects should be parsed in any case
 			if (deserializer) {
-				return deserializer(value);
+				return deserializer(value, this);
 			} else {
 				_.log(`{{yellow}}could not find deserializer for key ${propKey}`);
 			}
 		} else if (deserializer) {
 			// if this property needs a parser, parse the value
-			return deserializer(value);
+			return deserializer(value, this);
 		} else {
 			// otherwise just return the value
 			return value;
@@ -85,7 +85,7 @@ export class IPSOObject {
 					// there is no default value, just remember the actual value
 				}
 			}
-			if (transform) _ret = transform(_ret);
+			if (transform) _ret = transform(_ret, this);
 			return _ret;
 		};
 
@@ -172,7 +172,7 @@ const METADATA_serializeWith = Symbol("serializeWith");
 const METADATA_deserializeWith = Symbol("deserializeWith");
 // tslint:enable:variable-name
 
-export type PropertyTransform = (value: any) => any;
+export type PropertyTransform = (value: any, parent?: IPSOObject) => any;
 
 /**
  * Defines the ipso key neccessary to serialize a property to a CoAP object

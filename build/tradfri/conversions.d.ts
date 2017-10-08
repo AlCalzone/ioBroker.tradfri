@@ -1,9 +1,9 @@
 import { PropertyTransform } from "../ipso/ipsoObject";
 export declare const serializers: {
-    whiteTemperature: PropertyTransform;
+    whiteSpectrumToColorX: PropertyTransform;
     transitionTime: PropertyTransform;
 };
 export declare const deserializers: {
-    whiteTemperature: PropertyTransform;
+    whiteSpectrumFromColorX: PropertyTransform;
     transitionTime: PropertyTransform;
 };
