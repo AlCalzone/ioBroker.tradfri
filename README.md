@@ -46,6 +46,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### 0.4.0 (2017-10-08)
+* (AlCalzone) Experimental support for RGB and lightbulbs with fixed color
+
 #### 0.3.3 (2017-10-07)
 * (AlCalzone) Eliminated potential sources of infinite loops
 

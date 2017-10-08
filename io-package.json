@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "0.3.3",
+        "version": "0.4.0",
         "news": {
+            "0.4.0": {
+                "en": "Experimental support for RGB and lightbulbs with fixed color.",
+                "de": "Experimentelle Unterstützung für RGB und Lampen mit fester Farbtemperatur."
+            },
             "0.3.3": {
                 "en": "Eliminated potential sources of infinite loops",
                 "de": "Potentielle Auslöser von Endlosschleifen eliminiert"
