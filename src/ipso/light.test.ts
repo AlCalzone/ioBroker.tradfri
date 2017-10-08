@@ -85,7 +85,7 @@ describe("ipso/light => feature tests =>", () => {
 
 			expect(light.isSwitchable()).to.equal(device.isSwitchable, `${device.name} should ${device.isSwitchable ? "" : "not "}be switchable`);
 			expect(light.isDimmable()).to.equal(device.isDimmable, `${device.name} should ${device.isDimmable ? "" : "not "}be dimmable`);
-			expect(light.getSpectrum()).to.equal(device.spectrum, `${device.name} should have spectrum ${device.spectrum}`);
+			expect(light.spectrum).to.equal(device.spectrum, `${device.name} should have spectrum ${device.spectrum}`);
 		}
 	});
 

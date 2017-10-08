@@ -22,4 +22,8 @@ export declare const predefinedColors: Map<string, ColorDefinition>;
  * The hex colors for the white spectrum, sorted from cold to warm
  */
 export declare const whiteSpectrumHex: string[];
+/**
+ * The color temp in Mired for the white spectrum, sorted from cold to warm
+ */
+export declare const whiteSpectrumTemp: number[];
 export declare const whiteSpectrumRange: number[];

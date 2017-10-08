@@ -1,8 +1,8 @@
 import { Accessory } from "./accessory";
 import { IPSODevice } from "./ipsoDevice";
 export declare class Light extends IPSODevice {
-    private _accessory;
-    constructor(_accessory?: Accessory);
+    constructor(accessory?: Accessory);
+    private _modelName;
     color: string;
     hue: number;
     saturation: number;
@@ -29,6 +29,6 @@ export declare class Light extends IPSODevice {
      * Returns the supported color spectrum of the lightbulb
      */
     private _spectrum;
-    getSpectrum(): Spectrum;
+    readonly spectrum: Spectrum;
 }
 export declare type Spectrum = "none" | "white" | "rgb";

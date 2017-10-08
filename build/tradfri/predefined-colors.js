@@ -12,6 +12,10 @@ exports.predefinedColors = new Map();
  * The hex colors for the white spectrum, sorted from cold to warm
  */
 exports.whiteSpectrumHex = ["f5faf6", "f1e0b5", "efd275"];
+/**
+ * The color temp in Mired for the white spectrum, sorted from cold to warm
+ */
+exports.whiteSpectrumTemp = [250, 370, 454];
 function defineColor(rgbHex, x, y, hue, saturation, temperature) {
     const definition = {
         colorX: x,
@@ -46,8 +50,9 @@ defineColor("6c83ba", 0.2, 0.1, 47324, 51774);
 defineColor("a9d62b", 0.41, 0.51, 11383, 65279);
 defineColor("d6e44b", 0.45, 0.47, 8572, 55985);
 // The white spectrum expressed in colorX values, as defined in the app
-exports.whiteSpectrumRange = [
-    Math.round(exports.predefinedColors.get(exports.whiteSpectrumHex[0]).colorX * exports.MAX_COLOR),
-    Math.round(exports.predefinedColors.get(exports.whiteSpectrumHex[exports.whiteSpectrumHex.length - 1]).colorX * exports.MAX_COLOR),
-];
+exports.whiteSpectrumRange = [24930, 33135];
+// TODO: it could be expressed like in RGB bulbs but the iOS app does it differently
+//	Math.round(predefinedColors.get(whiteSpectrumHex[0]).colorX * MAX_COLOR),
+//	Math.round(predefinedColors.get(whiteSpectrumHex[whiteSpectrumHex.length - 1]).colorX * MAX_COLOR),
+//];
 //# sourceMappingURL=predefined-colors.js.map

@@ -1,5 +1,6 @@
 import { deserializers, serializers } from "../tradfri/conversions";
 import { Accessory } from "./accessory";
+import { DeviceInfo } from "./deviceInfo";
 import { IPSODevice } from "./ipsoDevice";
 import { deserializeWith, ipsoKey, IPSOObject, PropertyTransform, required, serializeWith } from "./ipsoObject";
 
@@ -8,18 +9,35 @@ import { deserializeWith, ipsoKey, IPSOObject, PropertyTransform, required, seri
 
 export class Light extends IPSODevice {
 
-	constructor(private _accessory?: Accessory) {
+	constructor(accessory?: Accessory) {
 		super();
+
+		// get the model number to detect features
+		if (accessory != null &&
+			accessory.deviceInfo != null &&
+			accessory.deviceInfo.modelNumber != null &&
+			accessory.deviceInfo.modelNumber.length > 0
+		) {
+			this._modelName = accessory.deviceInfo.modelNumber;
+		}
 	}
+
+	private _modelName: string;
 
 	@ipsoKey("5706")
 	public color: string = "f1e0b5"; // hex string
 
 	@ipsoKey("5707")
+	@serializeWith(serializers.hue)
+	@deserializeWith(deserializers.hue)
 	public hue: number = 0; // 0-360
 	@ipsoKey("5708")
-	public saturation: number = 0; // TODO: range unknown!
+	@serializeWith(serializers.saturation)
+	@deserializeWith(deserializers.saturation)
+	public saturation: number = 0; // 0-100%
 
+	// TODO: I'm not happy with this solution, I'd rather map this to colorTemp for
+	// white spectrum lamps
 	@ipsoKey("5709")
 	@serializeWith(serializers.whiteSpectrumToColorX)
 	@deserializeWith(deserializers.whiteSpectrumFromColorX)
@@ -28,6 +46,8 @@ export class Light extends IPSODevice {
 	@ipsoKey("5710")
 	public colorY: number = 0; // int
 
+	// currently not used, since the gateway only accepts 3 distinct values
+	// we have to set colorX to set more than those 3 color temps
 	@ipsoKey("5711")
 	public colorTemperature: number = 0; // TODO: range unknown!
 
@@ -71,7 +91,7 @@ export class Light extends IPSODevice {
 
 	public clone(): this {
 		const ret = super.clone() as this;
-		ret._accessory = this._accessory;
+		ret._modelName = this._modelName;
 		return ret;
 	}
 
@@ -79,20 +99,15 @@ export class Light extends IPSODevice {
 	 * Returns the supported color spectrum of the lightbulb
 	 */
 	private _spectrum: Spectrum = null;
-	public getSpectrum(): Spectrum {
+	public get spectrum(): Spectrum {
 		if (this._spectrum == null) {
 			// determine the spectrum
 			this._spectrum = "none";
-			if (this._accessory != null &&
-				this._accessory.deviceInfo != null &&
-				this._accessory.deviceInfo.modelNumber != null &&
-				this._accessory.deviceInfo.modelNumber.length > 0
-			) {
-				const modelName = this._accessory.deviceInfo.modelNumber;
-				if (modelName.indexOf(" WS ") > -1) {
+			if (this._modelName != null) {
+				if (this._modelName.indexOf(" WS ") > -1) {
 					// WS = white spectrum
 					this._spectrum = "white";
-				} else if (modelName.indexOf(" C/WS ") > -1 || modelName.indexOf(" CWS ") > -1) {
+				} else if (this._modelName.indexOf(" C/WS ") > -1 || this._modelName.indexOf(" CWS ") > -1) {
 					// CWS = color + white spectrum
 					this._spectrum = "rgb";
 				}

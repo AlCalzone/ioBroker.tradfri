@@ -15,14 +15,17 @@ const ipsoObject_1 = require("./ipsoObject");
 // see https://github.com/hreichert/smarthome/blob/master/extensions/binding/org.eclipse.smarthome.binding.tradfri/src/main/java/org/eclipse/smarthome/binding/tradfri/internal/TradfriColor.java
 // for some color conversion
 class Light extends ipsoDevice_1.IPSODevice {
-    constructor(_accessory) {
+    constructor(accessory) {
         super();
-        this._accessory = _accessory;
         this.color = "f1e0b5"; // hex string
         this.hue = 0; // 0-360
-        this.saturation = 0; // TODO: range unknown!
+        this.saturation = 0; // 0-100%
+        // TODO: I'm not happy with this solution, I'd rather map this to colorTemp for
+        // white spectrum lamps
         this.colorX = 0; // int
         this.colorY = 0; // int
+        // currently not used, since the gateway only accepts 3 distinct values
+        // we have to set colorX to set more than those 3 color temps
         this.colorTemperature = 0; // TODO: range unknown!
         this.transitionTime = 0.5; // <float>
         this.cumulativeActivePower = 0.0; // <float>
@@ -35,6 +38,13 @@ class Light extends ipsoDevice_1.IPSODevice {
          * Returns the supported color spectrum of the lightbulb
          */
         this._spectrum = null;
+        // get the model number to detect features
+        if (accessory != null &&
+            accessory.deviceInfo != null &&
+            accessory.deviceInfo.modelNumber != null &&
+            accessory.deviceInfo.modelNumber.length > 0) {
+            this._modelName = accessory.deviceInfo.modelNumber;
+        }
     }
     /**
      * Returns true if the current lightbulb is dimmable
@@ -50,23 +60,19 @@ class Light extends ipsoDevice_1.IPSODevice {
     }
     clone() {
         const ret = super.clone();
-        ret._accessory = this._accessory;
+        ret._modelName = this._modelName;
         return ret;
     }
-    getSpectrum() {
+    get spectrum() {
         if (this._spectrum == null) {
             // determine the spectrum
             this._spectrum = "none";
-            if (this._accessory != null &&
-                this._accessory.deviceInfo != null &&
-                this._accessory.deviceInfo.modelNumber != null &&
-                this._accessory.deviceInfo.modelNumber.length > 0) {
-                const modelName = this._accessory.deviceInfo.modelNumber;
-                if (modelName.indexOf(" WS ") > -1) {
+            if (this._modelName != null) {
+                if (this._modelName.indexOf(" WS ") > -1) {
                     // WS = white spectrum
                     this._spectrum = "white";
                 }
-                else if (modelName.indexOf(" C/WS ") > -1 || modelName.indexOf(" CWS ") > -1) {
+                else if (this._modelName.indexOf(" C/WS ") > -1 || this._modelName.indexOf(" CWS ") > -1) {
                     // CWS = color + white spectrum
                     this._spectrum = "rgb";
                 }
@@ -81,10 +87,14 @@ __decorate([
 ], Light.prototype, "color", void 0);
 __decorate([
     ipsoObject_1.ipsoKey("5707"),
+    ipsoObject_1.serializeWith(conversions_1.serializers.hue),
+    ipsoObject_1.deserializeWith(conversions_1.deserializers.hue),
     __metadata("design:type", Number)
 ], Light.prototype, "hue", void 0);
 __decorate([
     ipsoObject_1.ipsoKey("5708"),
+    ipsoObject_1.serializeWith(conversions_1.serializers.saturation),
+    ipsoObject_1.deserializeWith(conversions_1.deserializers.saturation),
     __metadata("design:type", Number)
 ], Light.prototype, "saturation", void 0);
 __decorate([
