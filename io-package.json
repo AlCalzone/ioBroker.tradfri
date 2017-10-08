@@ -1,11 +1,11 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "0.3.3",
+        "version": "0.5.0",
         "news": {
-            "0.3.3": {
-                "en": "Eliminated potential sources of infinite loops",
-                "de": "Potentielle Auslöser von Endlosschleifen eliminiert"
+            "0.5.0": {
+                "en": "Support of virtual groups",
+                "de": "Unterstützung virtueller Gruppen"
             },
             "0.3.0": {
                 "en": "Support of groups and scenes, improved connection handling, internal improvements.",

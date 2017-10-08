@@ -46,6 +46,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### 0.5.0 (2017-10-XX)
+* (AlCalzone) Support virtual groups
+
 #### 0.3.3 (2017-10-07)
 * (AlCalzone) Eliminated potential sources of infinite loops
 
