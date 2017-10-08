@@ -10,46 +10,47 @@ class IPSOObject {
     parse(obj) {
         for (const [key, value] of object_polyfill_1.entries(obj)) {
             // key might be ipso key or property name
-            let deserializer = getDeserializer(this, key);
+            let deserializers = getDeserializers(this, key);
             let propName;
-            if (deserializer == null) {
+            if (deserializers == null) {
                 // deserializers are defined by property name, so key is actually the key
                 propName = lookupKeyOrProperty(this, key);
                 if (!propName) {
-                    global_1.Global.log(`{{yellow}}found unknown property with key ${key}`);
+                    global_1.Global.log(`found unknown property with key ${key}`, "warn");
+                    global_1.Global.log(`object was: ${JSON.stringify(obj)}`, "warn");
                     continue;
                 }
-                deserializer = getDeserializer(this, propName);
+                deserializers = getDeserializers(this, propName);
             }
             else {
                 // the deserializer was found, so key is actually the property name
                 propName = key;
             }
             // parse the value
-            const parsedValue = this.parseValue(key, value, deserializer);
+            const parsedValue = this.parseValue(key, value, deserializers);
             // and remember it
             this[propName] = parsedValue;
         }
         return this;
     }
     // parses a value, depending on the value type and defined parsers
-    parseValue(propKey, value, deserializer) {
+    parseValue(propKey, value, deserializers) {
         if (value instanceof Array) {
             // Array: parse every element
-            return value.map(v => this.parseValue(propKey, v, deserializer));
+            return value.map(v => this.parseValue(propKey, v, deserializers));
         }
         else if (typeof value === "object") {
             // Object: try to parse this, objects should be parsed in any case
-            if (deserializer) {
-                return deserializer(value, this);
+            if (deserializers) {
+                return applyDeserializers(deserializers, value, this);
             }
             else {
-                global_1.Global.log(`{{yellow}}could not find deserializer for key ${propKey}`);
+                global_1.Global.log(`could not find deserializer for key ${propKey}`, "warn");
             }
         }
-        else if (deserializer) {
+        else if (deserializers) {
             // if this property needs a parser, parse the value
-            return deserializer(value, this);
+            return applyDeserializers(deserializers, value, this);
         }
         else {
             // otherwise just return the value
@@ -94,10 +95,10 @@ class IPSOObject {
                 _ret = transform(_ret, this);
             return _ret;
         };
-        // const refObj = reference || getDefaultValues(this); //this.defaultValues;
         // check all set properties
         for (const propName of Object.keys(this)) {
-            if (this.hasOwnProperty(propName)) {
+            if (!propName.startsWith("_") && this.hasOwnProperty(propName)) {
+                // only serialize own properties not starting with "_", because they are private
                 // find IPSO key
                 const key = lookupKeyOrProperty(this, propName);
                 // find value and reference (default) value
@@ -264,7 +265,7 @@ function getSerializer(target, property) {
 /**
  * Defines the required transformations to deserialize a property from a CoAP object
  */
-exports.deserializeWith = (transform) => {
+exports.deserializeWith = (...transform) => {
     return (target, property) => {
         // get the class constructor
         const constr = target.constructor;
@@ -283,7 +284,7 @@ exports.defaultDeserializers = {
 /**
  * Retrieves the deserializer for a given property
  */
-function getDeserializer(target, property) {
+function getDeserializers(target, property) {
     // get the class constructor
     const constr = target.constructor;
     // retrieve the current metadata
@@ -294,8 +295,19 @@ function getDeserializer(target, property) {
     // If there's no custom deserializer, try to find a default one
     const type = getPropertyType(target, property);
     if (type && type.name in exports.defaultDeserializers) {
-        return exports.defaultDeserializers[type.name];
+        return [exports.defaultDeserializers[type.name]];
     }
+}
+/**
+ * Apply a series of deserializers in the defined order. The first one returning a value != null wins
+ */
+function applyDeserializers(deserializers, target, parent) {
+    for (const d of deserializers) {
+        const ret = d(target, parent);
+        if (ret != null)
+            return ret;
+    }
+    return null;
 }
 /**
  * Finds the design type for a given property

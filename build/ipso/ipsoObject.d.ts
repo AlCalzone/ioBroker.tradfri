@@ -4,7 +4,7 @@ export declare class IPSOObject {
      * Reads this instance's properties from the given object
      */
     parse(obj: DictionaryLike<any>): this;
-    private parseValue(propKey, value, deserializer?);
+    private parseValue(propKey, value, deserializers?);
     /**
      * Overrides this object's properties with those from another partial one
      */
@@ -34,5 +34,5 @@ export declare const defaultSerializers: DictionaryLike<PropertyTransform>;
 /**
  * Defines the required transformations to deserialize a property from a CoAP object
  */
-export declare const deserializeWith: (transform: PropertyTransform) => PropertyDecorator;
+export declare const deserializeWith: (...transform: PropertyTransform[]) => PropertyDecorator;
 export declare const defaultDeserializers: DictionaryLike<PropertyTransform>;

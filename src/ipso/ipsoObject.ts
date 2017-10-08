@@ -10,22 +10,23 @@ export class IPSOObject {
 	public parse(obj: DictionaryLike<any>): this {
 		for (const [key, value] of entries(obj)) {
 			// key might be ipso key or property name
-			let deserializer: PropertyTransform = getDeserializer(this, key);
+			let deserializers: PropertyTransform[] = getDeserializers(this, key);
 			let propName: string | symbol;
-			if (deserializer == null) {
+			if (deserializers == null) {
 				// deserializers are defined by property name, so key is actually the key
 				propName = lookupKeyOrProperty(this, key);
 				if (!propName) {
-					_.log(`{{yellow}}found unknown property with key ${key}`);
+					_.log(`found unknown property with key ${key}`, "warn");
+					_.log(`object was: ${JSON.stringify(obj)}`, "warn");
 					continue;
 				}
-				deserializer = getDeserializer(this, propName);
+				deserializers = getDeserializers(this, propName);
 			} else {
 				// the deserializer was found, so key is actually the property name
 				propName = key;
 			}
 			// parse the value
-			const parsedValue = this.parseValue(key, value, deserializer);
+			const parsedValue = this.parseValue(key, value, deserializers);
 			// and remember it
 			this[propName] = parsedValue;
 		}
@@ -33,20 +34,20 @@ export class IPSOObject {
 	}
 
 	// parses a value, depending on the value type and defined parsers
-	private parseValue(propKey, value, deserializer?: PropertyTransform): any {
+	private parseValue(propKey, value, deserializers?: PropertyTransform[]): any {
 		if (value instanceof Array) {
 			// Array: parse every element
-			return value.map(v => this.parseValue(propKey, v, deserializer));
+			return value.map(v => this.parseValue(propKey, v, deserializers));
 		} else if (typeof value === "object") {
 			// Object: try to parse this, objects should be parsed in any case
-			if (deserializer) {
-				return deserializer(value, this);
+			if (deserializers) {
+				return applyDeserializers(deserializers, value, this);
 			} else {
-				_.log(`{{yellow}}could not find deserializer for key ${propKey}`);
+				_.log(`could not find deserializer for key ${propKey}`, "warn");
 			}
-		} else if (deserializer) {
+		} else if (deserializers) {
 			// if this property needs a parser, parse the value
-			return deserializer(value, this);
+			return applyDeserializers(deserializers, value, this);
 		} else {
 			// otherwise just return the value
 			return value;
@@ -89,10 +90,11 @@ export class IPSOObject {
 			return _ret;
 		};
 
-		// const refObj = reference || getDefaultValues(this); //this.defaultValues;
 		// check all set properties
 		for (const propName of Object.keys(this)) {
-			if (this.hasOwnProperty(propName)) {
+			if (!propName.startsWith("_") && this.hasOwnProperty(propName)) {
+				// only serialize own properties not starting with "_", because they are private
+
 				// find IPSO key
 				const key = lookupKeyOrProperty(this, propName);
 				// find value and reference (default) value
@@ -272,7 +274,7 @@ function getSerializer(target: object, property: string | symbol): PropertyTrans
 /**
  * Defines the required transformations to deserialize a property from a CoAP object
  */
-export const deserializeWith = (transform: PropertyTransform): PropertyDecorator => {
+export const deserializeWith = (...transform: PropertyTransform[]): PropertyDecorator => {
 	return (target: object, property: string | symbol) => {
 		// get the class constructor
 		const constr = target.constructor;
@@ -294,7 +296,7 @@ export const defaultDeserializers: DictionaryLike<PropertyTransform> = {
 /**
  * Retrieves the deserializer for a given property
  */
-function getDeserializer(target: object, property: string | symbol): PropertyTransform {
+function getDeserializers(target: object, property: string | symbol): PropertyTransform[] {
 	// get the class constructor
 	const constr = target.constructor;
 	// retrieve the current metadata
@@ -306,8 +308,19 @@ function getDeserializer(target: object, property: string | symbol): PropertyTra
 	// If there's no custom deserializer, try to find a default one
 	const type = getPropertyType(target, property);
 	if (type && type.name in defaultDeserializers) {
-		return defaultDeserializers[type.name];
+		return [defaultDeserializers[type.name]];
 	}
+}
+
+/**
+ * Apply a series of deserializers in the defined order. The first one returning a value != null wins
+ */
+function applyDeserializers(deserializers: PropertyTransform[], target: any, parent?: IPSOObject): any {
+	for (const d of deserializers) {
+		const ret = d(target, parent);
+		if (ret != null) return ret;
+	}
+	return null;
 }
 
 /**
