@@ -140,8 +140,6 @@ class Global {
             }
         });
     }
-    // Prüfen auf (un)defined
-    static isdef(value) { return value != undefined; }
     // Workaround für unvollständige Adapter-Upgrades
     static ensureInstanceObjects() {
         return __awaiter(this, void 0, void 0, function* () {

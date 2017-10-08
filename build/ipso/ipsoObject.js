@@ -82,7 +82,7 @@ class IPSOObject {
             }
             else {
                 // if the value is not the default one, then remember it
-                if (global_1.Global.isdef(refValue)) {
+                if (refValue != null) {
                     if (!_required && refValue === value)
                         return null;
                 }
@@ -103,14 +103,14 @@ class IPSOObject {
                 // find value and reference (default) value
                 let value = this[propName];
                 let refValue = null;
-                if (global_1.Global.isdef(reference) && reference.hasOwnProperty(propName)) {
+                if (reference != null && reference.hasOwnProperty(propName)) {
                     refValue = reference[propName];
                 }
                 // try to find serializer for this property
                 const serializer = getSerializer(this, propName);
                 if (value instanceof Array) {
                     // serialize each item
-                    if (global_1.Global.isdef(refValue)) {
+                    if (refValue != null) {
                         // reference value exists, make sure we have the same amount of items
                         if (!(refValue instanceof Array && refValue.length === value.length)) {
                             throw new Error("cannot serialize arrays when the reference values don't match");
@@ -123,7 +123,7 @@ class IPSOObject {
                         value = value.map(v => serializeValue(key, propName, v, null, serializer));
                     }
                     // now remove null items
-                    value = value.filter(v => global_1.Global.isdef(v));
+                    value = value.filter(v => v != null);
                     if (value.length === 0)
                         value = null;
                 }

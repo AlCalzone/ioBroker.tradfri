@@ -94,7 +94,6 @@ export declare class Global {
      * @param id
      */
     static $$(pattern: string, type: ioBroker.ObjectType, role?: string): Promise<DictionaryLike<ioBroker.Object>>;
-    static isdef(value: any): boolean;
     static subscribeStates: (pattern: string | RegExp, callback: (id: string, state: ioBroker.State) => void) => string;
     static unsubscribeStates: (id: string) => void;
     static subscribeObjects: (pattern: string | RegExp, callback: (id: string, object: ioBroker.Object) => void) => string;
