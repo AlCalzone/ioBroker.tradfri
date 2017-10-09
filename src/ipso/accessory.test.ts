@@ -40,7 +40,7 @@ const template = {
 
 const acc = new Accessory().parse(template);
 
-describe("ipso/accessory => parse() =>", () => {
+describe("ipso/accessory => ", () => {
 
 	it("should parse correctly", () => {
 		assert(acc.deviceInfo instanceof DeviceInfo);
@@ -49,4 +49,32 @@ describe("ipso/accessory => parse() =>", () => {
 		expect(acc.type).to.equal(template["5750"]);
 	});
 
+	it("should serialize correctly", () => {
+		// note: we manually check for property equality since we're going to
+		// serialize a few more values than the gateway reports
+		const serialized = acc.serialize();
+
+		// check all properties except the light list
+		for (const key in Object.keys(serialized)) {
+			if (key !== "3311") expect(serialized[key]).to.deep.equal(template[key]);
+		}
+
+		// compare all lights
+		expect(serialized["3311"].length).to.equal(template["3311"].length);
+		for (let i = 0; i < serialized["3311"].length; i++) {
+			expect(serialized["3311"][i]).to.deep.include(template["3311"][i]);
+		}
+	});
+
+	it("should serialize correctly when a reference is given", () => {
+		const original = acc.clone();
+		expect(acc.serialize(original)).to.deep.equal({});
+
+		acc.merge({name: "Test"});
+		expect(acc.serialize(original)).to.deep.equal({9001: "Test"});
+
+		acc.lightList[0].merge({name: "Blub"});
+		// note: we use include here, since Light has the required property transitionTime
+		expect(acc.serialize(original)["3311"][0]).to.include({9001: "Blub"});
+	});
 });
