@@ -219,7 +219,7 @@ exports.required = required;
 function isRequired(target, property) {
     // get the class constructor
     const constr = target.constructor;
-    console.log(`${constr.name}: checking if ${property} is required...`);
+    global_1.Global.log(`${constr.name}: checking if ${property} is required...`, "silly");
     // retrieve the current metadata
     const metadata = Reflect.getMetadata(METADATA_required, constr) || {};
     if (metadata.hasOwnProperty(property))

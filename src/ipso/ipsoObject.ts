@@ -224,7 +224,7 @@ export function required(target: object, property: string | symbol): void {
 function isRequired(target: object, property: string | symbol): boolean {
 	// get the class constructor
 	const constr = target.constructor;
-	console.log(`${constr.name}: checking if ${property} is required...`);
+	_.log(`${constr.name}: checking if ${property} is required...`, "silly");
 	// retrieve the current metadata
 	const metadata = Reflect.getMetadata(METADATA_required, constr) || {};
 	if (metadata.hasOwnProperty(property)) return metadata[property];
