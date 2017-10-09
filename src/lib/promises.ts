@@ -24,7 +24,7 @@ export function promisifyNoError<T>(fn, context?: any): (...args: any[]) => Prom
 export function promisifyNoError(fn, context?: any) {
 	return function(...args) {
 		context = context || this;
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve) => {
 			fn.apply(context, [...args, (result) => {
 				return resolve(result);
 			}]);
@@ -43,7 +43,7 @@ export function waterfall(...fn: PromiseCallback[]): Promise<any> {
 
 /** Creates a promise that waits for the specified time and then resolves */
 export function wait(ms: number): Promise<void> {
-	return new Promise<void>((resolve, reject) => {
+	return new Promise<void>((resolve) => {
 		setTimeout(resolve, ms);
 	});
 }

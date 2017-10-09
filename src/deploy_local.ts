@@ -24,7 +24,6 @@ const rootDir = "../";
 // CAN'T TOUCH THIS
 // =========================
 
-import * as fs from "fs";
 import * as nodeSSH from "node-ssh";
 import * as path from "path";
 

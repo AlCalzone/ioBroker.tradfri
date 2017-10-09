@@ -105,11 +105,11 @@ describe("lib/object-polyfill => filter() =>", () => {
 	});
 
 	it("should work correctly with an impossible filter", () => {
-		expect(filter(source, v => false)).to.deep.equal({ });
+		expect(filter(source, () => false)).to.deep.equal({ });
 	});
 
 	it("should work for empty objects", () => {
-		expect(filter({}, v => true)).to.deep.equal({});
+		expect(filter({}, () => true)).to.deep.equal({});
 	});
 
 });

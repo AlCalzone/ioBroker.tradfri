@@ -70,7 +70,7 @@ class IPSOObject {
     /** serializes this object in order to transfer it via COAP */
     serialize(reference = null) {
         const ret = {};
-        const serializeValue = (key, propName, value, refValue, transform) => {
+        const serializeValue = (propName, value, refValue, transform) => {
             const _required = isRequired(this, propName);
             let _ret = value;
             if (value instanceof IPSOObject) {
@@ -116,11 +116,11 @@ class IPSOObject {
                             throw new Error("cannot serialize arrays when the reference values don't match");
                         }
                         // serialize each item with the matching reference value
-                        value = value.map((v, i) => serializeValue(key, propName, v, refValue[i], serializer));
+                        value = value.map((v, i) => serializeValue(propName, v, refValue[i], serializer));
                     }
                     else {
                         // no reference value, makes things easier
-                        value = value.map(v => serializeValue(key, propName, v, null, serializer));
+                        value = value.map(v => serializeValue(propName, v, null, serializer));
                     }
                     // now remove null items
                     value = value.filter(v => v != null);
@@ -129,7 +129,7 @@ class IPSOObject {
                 }
                 else {
                     // directly serialize the value
-                    value = serializeValue(key, propName, value, refValue, serializer);
+                    value = serializeValue(propName, value, refValue, serializer);
                 }
                 // only output the value if it's != null
                 if (value != null)

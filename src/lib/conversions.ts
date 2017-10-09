@@ -1,6 +1,5 @@
 import { PropertyTransform } from "../ipso/ipsoObject";
 import { clamp, roundTo } from "./math";
-import { DictionaryLike } from "./object-polyfill";
 
 export const serializers = {
 	color: ((value) => {
