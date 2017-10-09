@@ -16,9 +16,8 @@ import { padStart } from "./lib/strings";
 
 // Datentypen laden
 import { Accessory, AccessoryTypes } from "./ipso/accessory";
-import { Group } from "./ipso/group";
-import { IPSOObject } from "./ipso/ipsoObject";
-import { Light } from "./ipso/light";
+import { Group, GroupOperation } from "./ipso/group";
+import { LightOperation } from "./ipso/light";
 import { Scene } from "./ipso/scene";
 import { VirtualGroup } from "./lib/virtual-group";
 
@@ -261,6 +260,19 @@ let adapter: ExtendedAdapter = utils.adapter({
 			_.log(`{{blue}} state with id ${id} deleted`, "debug");
 		}
 
+		// Custom subscriptions durchgehen, um die passenden Callbacks aufzurufen
+		try {
+			for (const sub of customStateSubscriptions.subscriptions.values()) {
+				if (sub && sub.pattern && sub.callback) {
+					// Wenn die ID zum aktuellen Pattern passt, dann Callback aufrufen
+					if (sub.pattern.test(id)) sub.callback(id, state);
+				}
+			}
+		} catch (e) {
+			_.log("error handling custom sub: " + e);
+		}
+
+		// Eigene Handling-Logik zum Schluss, damit wir return benutzen können
 		if (state && !state.ack && id.startsWith(adapter.namespace)) {
 			// our own state was changed from within ioBroker, react to it
 
@@ -283,123 +295,118 @@ let adapter: ExtendedAdapter = utils.adapter({
 					if (stateObj.common.max != null) val = Math.min(stateObj.common.max, val);
 				}
 
-				// this will contain the serialized payload
-				let serializedObj: DictionaryLike<any>;
-				// this will contain the url to be requested
-				let url: string;
-
 				switch (rootObj.native.type) {
-					case "group":
+					case "group": {
 						// read the instanceId and get a reference value
 						const group = groups[rootObj.native.instanceId].group;
-						// create a copy to modify
-						const newGroup = group.clone();
+						// if the change was acknowledged, update the state later
+						let wasAcked: boolean;
 
 						if (id.endsWith(".state")) {
-							newGroup.onOff = val;
+							wasAcked = !await operateGroup(group, {
+								onOff: val,
+							});
 						} else if (id.endsWith(".brightness")) {
-							newGroup.merge({
+							wasAcked = !await operateGroup(group, {
 								dimmer: val,
 								transitionTime: await getTransitionDuration(group),
 							});
 						} else if (id.endsWith(".activeScene")) {
 							// turn on and activate a scene
-							newGroup.merge({
+							wasAcked = !await operateGroup(group, {
 								onOff: true,
 								sceneId: val,
 							});
+						} else if (id.endsWith(".color")) {
+							// color change is only supported manually, so we operate
+							// the virtual state of this group
+							await operateVirtualGroup(group, {
+								colorX: val,
+								colorY: 27000,
+								transitionTime: await getTransitionDuration(group),
+							});
+							wasAcked = true;
 						}
 
-						serializedObj = newGroup.serialize(group); // serialize with the old object as a reference
-						url = `${requestBase}${coapEndpoints.groups}/${rootObj.native.instanceId}`;
-						break;
+						// ack the state if neccessary and return
+						if (wasAcked) adapter.$setState(id, state, true);
+						return;
+					}
 
-					case "virtual group":
+					case "virtual group": {
 						// find the virtual group instance
 						const vGroup = virtualGroups[rootObj.native.instanceId];
 
+						let operation: LightOperation;
+
 						if (id.endsWith(".state")) {
-							vGroup.onOff = val;
+							operation = {
+								onOff: val,
+							};
 						} else if (id.endsWith(".brightness")) {
-							vGroup.dimmer = val;
-							vGroup.transitionTime = await getTransitionDuration(vGroup);
+							operation = {
+								dimmer: val,
+								transitionTime: await getTransitionDuration(vGroup),
+							};
 						} else if (id.endsWith(".color")) {
-							vGroup.colorX = val;
-							vGroup.transitionTime = await getTransitionDuration(vGroup);
+							operation = {
+								colorX: val,
+								colorY: 27000,
+								transitionTime: await getTransitionDuration(vGroup),
+							};
 						} else if (id.endsWith(".transitionDuration")) {
-							// TODO: check if we need to buffer this somehow
-							// for now just ack the change
-							await adapter.$setState(id, state, true);
-							return;
+							// No operation here, since this is part of another one
 						}
 
-						serializedObj = vGroup.serialize(devices);
-						url = `${requestBase}${coapEndpoints.groups}`;
-						break;
+						// update all lightbulbs in this group
+						if (operation != null) {
+							operateVirtualGroup(vGroup, operation);
+						}
 
-					default: // accessory
-						// read the instanceId and get a reference value
-						const accessory = devices[rootObj.native.instanceId];
-						// create a copy to modify
-						const newAccessory = accessory.clone();
+						// and ack the state change
+						adapter.$setState(id, state, true);
+						return;
+					}
+
+					default: { // accessory
+
 						if (id.indexOf(".lightbulb.") > -1) {
-							// get the Light instance to modify
-							const light = newAccessory.lightList[0];
+							// read the instanceId and get a reference value
+							const accessory = devices[rootObj.native.instanceId];
+							// if the change was acknowledged, update the state later
+							let wasAcked: boolean;
 
+							// operate the lights depending on the set state
+							// if no request was sent, we can ack the state immediately
 							if (id.endsWith(".state")) {
-								light.onOff = val;
+								wasAcked = !await operateLight(accessory, {
+									onOff: val,
+								});
 							} else if (id.endsWith(".brightness")) {
-								light.merge({
+								wasAcked = !await operateLight(accessory, {
 									dimmer: val,
 									transitionTime: await getTransitionDuration(accessory),
 								});
 							} else if (id.endsWith(".color")) {
-								light.merge({
+								wasAcked = !await operateLight(accessory, {
 									colorX: val,
 									colorY: 27000,
 									transitionTime: await getTransitionDuration(accessory),
 								});
 							} else if (id.endsWith(".transitionDuration")) {
-								// TODO: check if we need to buffer this somehow
-								// for now just ack the change
-								await adapter.$setState(id, state, true);
-								return;
+								// this is part of another operation, just ack the state
+								wasAcked = true;
 							}
+
+							// ack the state if neccessary and return
+							if (wasAcked) adapter.$setState(id, state, true);
+							return;
 						}
-
-						serializedObj = newAccessory.serialize(accessory); // serialize with the old object as a reference
-						url = `${requestBase}${coapEndpoints.devices}/${rootObj.native.instanceId}`;
-						break;
+					}
 				}
-
-				// If the serialized object contains no properties, we don't need to send anything
-				if (!serializedObj || Object.keys(serializedObj).length === 0) {
-					_.log("stateChange > empty object, not sending any payload", "debug");
-					await adapter.$setState(id, state.val, true);
-					return;
-				}
-
-				let payload: string | Buffer = JSON.stringify(serializedObj);
-				_.log("stateChange > sending payload: " + payload, "debug");
-
-				payload = Buffer.from(payload);
-				coap.request(url, "put", payload);
-
 			}
 		} else if (!state) {
 			// TODO: find out what to do when states are deleted
-		}
-
-		// Custom subscriptions durchgehen, um die passenden Callbacks aufzurufen
-		try {
-			for (const sub of customStateSubscriptions.subscriptions.values()) {
-				if (sub && sub.pattern && sub.callback) {
-					// Wenn die ID zum aktuellen Pattern passt, dann Callback aufrufen
-					if (sub.pattern.test(id)) sub.callback(id, state);
-				}
-			}
-		} catch (e) {
-			_.log("error handling custom sub: " + e);
 		}
 
 	},
@@ -422,6 +429,99 @@ let adapter: ExtendedAdapter = utils.adapter({
 		}
 	},
 }) as ExtendedAdapter;
+
+/**
+ * Sets some properties on a lightbulb
+ * @param accessory The parent accessory of the lightbulb
+ * @param operation The properties to be set
+ * @returns true if a request was sent, false otherwise
+ */
+async function operateLight(accessory: Accessory, operation: LightOperation): Promise<boolean> {
+	if (accessory.type !== AccessoryTypes.lightbulb) {
+		throw new Error("The parameter accessory must be a lightbulb!");
+	}
+
+	// the url to be requested
+	const url: string = `${requestBase}${coapEndpoints.devices}/${accessory.instanceId}`;
+
+	// create a copy to modify
+	const newAccessory = accessory.clone();
+	// get the Light instance to modify
+	const light = newAccessory.lightList[0];
+	light.merge(operation);
+
+	const serializedObj = newAccessory.serialize(accessory); // serialize with the old object as a reference
+
+	// If the serialized object contains no properties, we don't need to send anything
+	if (!serializedObj || Object.keys(serializedObj).length === 0) {
+		_.log("stateChange > empty object, not sending any payload", "debug");
+		return false; // signal that no request was made
+	}
+
+	let payload: string | Buffer = JSON.stringify(serializedObj);
+	_.log("stateChange > sending payload: " + payload, "debug");
+
+	payload = Buffer.from(payload);
+	await coap.request(url, "put", payload);
+
+	return true;
+}
+
+/**
+ * Sets some properties on a group
+ * @param group The group to be updated
+ * @param operation The properties to be set
+ * @returns true if a request was sent, false otherwise
+ */
+async function operateGroup(group: Group, operation: GroupOperation): Promise<boolean> {
+
+	// the url to be requested
+	const url: string = `${requestBase}${coapEndpoints.groups}/${group.instanceId}`;
+
+	// create a copy to modify
+	const newGroup = group.clone();
+	newGroup.merge(operation);
+
+	const serializedObj = newGroup.serialize(group); // serialize with the old object as a reference
+
+	// If the serialized object contains no properties, we don't need to send anything
+	if (!serializedObj || Object.keys(serializedObj).length === 0) {
+		_.log("stateChange > empty object, not sending any payload", "debug");
+		return false; // signal that no request was made
+	}
+
+	let payload: string | Buffer = JSON.stringify(serializedObj);
+	_.log("stateChange > sending payload: " + payload, "debug");
+
+	payload = Buffer.from(payload);
+	await coap.request(url, "put", payload);
+
+	return true;
+}
+
+/**
+ * Sets some properties on virtual group or virtual properties on a real group.
+ * Can be used to manually update non-existing endpoints on real groups.
+ * @param group The group to be updated
+ * @param operation The properties to be set
+ * @returns true if a request was sent, false otherwise
+ */
+async function operateVirtualGroup(group: Group | VirtualGroup, operation: LightOperation): Promise<void> {
+
+	// find all lightbulbs belonging to this group
+	const lightbulbAccessories = group.deviceIDs
+		.map(did => devices[did])
+		.filter(dev => dev != null && dev.type === AccessoryTypes.lightbulb)
+		;
+
+	for (const acc of lightbulbAccessories) {
+		await operateLight(acc, operation);
+	}
+	// and update the group
+	if (group instanceof VirtualGroup) {
+		group.merge(operation);
+	}
+}
 
 // ==================================
 // manage devices
@@ -1142,6 +1242,26 @@ function extendGroup(group: Group) {
 					path: "dimmer",
 				},
 			},
+			color: {
+				_id: `${objId}.color`,
+				type: "state",
+				common: {
+					name: "Color temperature",
+					read: true, // TODO: check
+					write: true, // TODO: check
+					min: 0,
+					max: 100,
+					unit: "%",
+					type: "number",
+					role: "level.color.temperature",
+					desc: "Color temperature of this group's lightbulbs. Range: 0% = cold, 100% = warm",
+				},
+				native: {
+					// virtual state, so no real path to an object exists
+					// we still have to give path a value, because other functions check for its existence
+					path: "__virtual__",
+				},
+			},
 		};
 
 		const createObjects = Object.keys(stateObjs)
@@ -1174,7 +1294,6 @@ async function updatePossibleScenes(groupInfo: GroupInfo): Promise<void> {
 	if (scenesId in objects) {
 		_.log(`updating possible scenes for group ${group.instanceId}: ${JSON.stringify(Object.keys(groupInfo.scenes))}`);
 
-		const activeSceneObj = objects[scenesId];
 		const scenes = groupInfo.scenes;
 		// map scene ids and names to the dropdown
 		const states = composeObject(

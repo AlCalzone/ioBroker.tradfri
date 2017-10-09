@@ -229,6 +229,20 @@ let adapter = utils_1.default.adapter({
         else {
             global_1.Global.log(`{{blue}} state with id ${id} deleted`, "debug");
         }
+        // Custom subscriptions durchgehen, um die passenden Callbacks aufzurufen
+        try {
+            for (const sub of customStateSubscriptions.subscriptions.values()) {
+                if (sub && sub.pattern && sub.callback) {
+                    // Wenn die ID zum aktuellen Pattern passt, dann Callback aufrufen
+                    if (sub.pattern.test(id))
+                        sub.callback(id, state);
+                }
+            }
+        }
+        catch (e) {
+            global_1.Global.log("error handling custom sub: " + e);
+        }
+        // Eigene Handling-Logik zum Schluss, damit wir return benutzen können
         if (state && !state.ack && id.startsWith(adapter.namespace)) {
             // our own state was changed from within ioBroker, react to it
             const stateObj = objects[id];
@@ -250,120 +264,119 @@ let adapter = utils_1.default.adapter({
                     if (stateObj.common.max != null)
                         val = Math.min(stateObj.common.max, val);
                 }
-                // this will contain the serialized payload
-                let serializedObj;
-                // this will contain the url to be requested
-                let url;
                 switch (rootObj.native.type) {
-                    case "group":
+                    case "group": {
                         // read the instanceId and get a reference value
                         const group = groups[rootObj.native.instanceId].group;
-                        // create a copy to modify
-                        const newGroup = group.clone();
+                        // if the change was acknowledged, update the state later
+                        let wasAcked;
                         if (id.endsWith(".state")) {
-                            newGroup.onOff = val;
+                            wasAcked = !(yield operateGroup(group, {
+                                onOff: val,
+                            }));
                         }
                         else if (id.endsWith(".brightness")) {
-                            newGroup.merge({
+                            wasAcked = !(yield operateGroup(group, {
                                 dimmer: val,
                                 transitionTime: yield getTransitionDuration(group),
-                            });
+                            }));
                         }
                         else if (id.endsWith(".activeScene")) {
                             // turn on and activate a scene
-                            newGroup.merge({
+                            wasAcked = !(yield operateGroup(group, {
                                 onOff: true,
                                 sceneId: val,
-                            });
-                        }
-                        serializedObj = newGroup.serialize(group); // serialize with the old object as a reference
-                        url = `${requestBase}${endpoints_1.default.groups}/${rootObj.native.instanceId}`;
-                        break;
-                    case "virtual group":
-                        // find the virtual group instance
-                        const vGroup = virtualGroups[rootObj.native.instanceId];
-                        if (id.endsWith(".state")) {
-                            vGroup.onOff = val;
-                        }
-                        else if (id.endsWith(".brightness")) {
-                            vGroup.dimmer = val;
-                            vGroup.transitionTime = yield getTransitionDuration(vGroup);
+                            }));
                         }
                         else if (id.endsWith(".color")) {
-                            vGroup.colorX = val;
-                            vGroup.transitionTime = yield getTransitionDuration(vGroup);
+                            // color change is only supported manually, so we operate
+                            // the virtual state of this group
+                            yield operateVirtualGroup(group, {
+                                colorX: val,
+                                colorY: 27000,
+                                transitionTime: yield getTransitionDuration(group),
+                            });
+                            wasAcked = true;
+                        }
+                        // ack the state if neccessary and return
+                        if (wasAcked)
+                            adapter.$setState(id, state, true);
+                        return;
+                    }
+                    case "virtual group": {
+                        // find the virtual group instance
+                        const vGroup = virtualGroups[rootObj.native.instanceId];
+                        let operation;
+                        if (id.endsWith(".state")) {
+                            operation = {
+                                onOff: val,
+                            };
+                        }
+                        else if (id.endsWith(".brightness")) {
+                            operation = {
+                                dimmer: val,
+                                transitionTime: yield getTransitionDuration(vGroup),
+                            };
+                        }
+                        else if (id.endsWith(".color")) {
+                            operation = {
+                                colorX: val,
+                                colorY: 27000,
+                                transitionTime: yield getTransitionDuration(vGroup),
+                            };
                         }
                         else if (id.endsWith(".transitionDuration")) {
-                            // TODO: check if we need to buffer this somehow
-                            // for now just ack the change
-                            yield adapter.$setState(id, state, true);
-                            return;
+                            // No operation here, since this is part of another one
                         }
-                        serializedObj = vGroup.serialize(devices);
-                        url = `${requestBase}${endpoints_1.default.groups}`;
-                        break;
-                    default:
-                        // read the instanceId and get a reference value
-                        const accessory = devices[rootObj.native.instanceId];
-                        // create a copy to modify
-                        const newAccessory = accessory.clone();
+                        // update all lightbulbs in this group
+                        if (operation != null) {
+                            operateVirtualGroup(vGroup, operation);
+                        }
+                        // and ack the state change
+                        adapter.$setState(id, state, true);
+                        return;
+                    }
+                    default: {
                         if (id.indexOf(".lightbulb.") > -1) {
-                            // get the Light instance to modify
-                            const light = newAccessory.lightList[0];
+                            // read the instanceId and get a reference value
+                            const accessory = devices[rootObj.native.instanceId];
+                            // if the change was acknowledged, update the state later
+                            let wasAcked;
+                            // operate the lights depending on the set state
+                            // if no request was sent, we can ack the state immediately
                             if (id.endsWith(".state")) {
-                                light.onOff = val;
+                                wasAcked = !(yield operateLight(accessory, {
+                                    onOff: val,
+                                }));
                             }
                             else if (id.endsWith(".brightness")) {
-                                light.merge({
+                                wasAcked = !(yield operateLight(accessory, {
                                     dimmer: val,
                                     transitionTime: yield getTransitionDuration(accessory),
-                                });
+                                }));
                             }
                             else if (id.endsWith(".color")) {
-                                light.merge({
+                                wasAcked = !(yield operateLight(accessory, {
                                     colorX: val,
                                     colorY: 27000,
                                     transitionTime: yield getTransitionDuration(accessory),
-                                });
+                                }));
                             }
                             else if (id.endsWith(".transitionDuration")) {
-                                // TODO: check if we need to buffer this somehow
-                                // for now just ack the change
-                                yield adapter.$setState(id, state, true);
-                                return;
+                                // this is part of another operation, just ack the state
+                                wasAcked = true;
                             }
+                            // ack the state if neccessary and return
+                            if (wasAcked)
+                                adapter.$setState(id, state, true);
+                            return;
                         }
-                        serializedObj = newAccessory.serialize(accessory); // serialize with the old object as a reference
-                        url = `${requestBase}${endpoints_1.default.devices}/${rootObj.native.instanceId}`;
-                        break;
+                    }
                 }
-                // If the serialized object contains no properties, we don't need to send anything
-                if (!serializedObj || Object.keys(serializedObj).length === 0) {
-                    global_1.Global.log("stateChange > empty object, not sending any payload", "debug");
-                    yield adapter.$setState(id, state.val, true);
-                    return;
-                }
-                let payload = JSON.stringify(serializedObj);
-                global_1.Global.log("stateChange > sending payload: " + payload, "debug");
-                payload = Buffer.from(payload);
-                node_coap_client_1.CoapClient.request(url, "put", payload);
             }
         }
         else if (!state) {
             // TODO: find out what to do when states are deleted
-        }
-        // Custom subscriptions durchgehen, um die passenden Callbacks aufzurufen
-        try {
-            for (const sub of customStateSubscriptions.subscriptions.values()) {
-                if (sub && sub.pattern && sub.callback) {
-                    // Wenn die ID zum aktuellen Pattern passt, dann Callback aufrufen
-                    if (sub.pattern.test(id))
-                        sub.callback(id, state);
-                }
-            }
-        }
-        catch (e) {
-            global_1.Global.log("error handling custom sub: " + e);
         }
     }),
     unload: (callback) => {
@@ -385,6 +398,85 @@ let adapter = utils_1.default.adapter({
         }
     },
 });
+/**
+ * Sets some properties on a lightbulb
+ * @param accessory The parent accessory of the lightbulb
+ * @param operation The properties to be set
+ * @returns true if a request was sent, false otherwise
+ */
+function operateLight(accessory, operation) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (accessory.type !== accessory_1.AccessoryTypes.lightbulb) {
+            throw new Error("The parameter accessory must be a lightbulb!");
+        }
+        // the url to be requested
+        const url = `${requestBase}${endpoints_1.default.devices}/${accessory.instanceId}`;
+        // create a copy to modify
+        const newAccessory = accessory.clone();
+        // get the Light instance to modify
+        const light = newAccessory.lightList[0];
+        light.merge(operation);
+        const serializedObj = newAccessory.serialize(accessory); // serialize with the old object as a reference
+        // If the serialized object contains no properties, we don't need to send anything
+        if (!serializedObj || Object.keys(serializedObj).length === 0) {
+            global_1.Global.log("stateChange > empty object, not sending any payload", "debug");
+            return false; // signal that no request was made
+        }
+        let payload = JSON.stringify(serializedObj);
+        global_1.Global.log("stateChange > sending payload: " + payload, "debug");
+        payload = Buffer.from(payload);
+        yield node_coap_client_1.CoapClient.request(url, "put", payload);
+        return true;
+    });
+}
+/**
+ * Sets some properties on a group
+ * @param group The group to be updated
+ * @param operation The properties to be set
+ * @returns true if a request was sent, false otherwise
+ */
+function operateGroup(group, operation) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // the url to be requested
+        const url = `${requestBase}${endpoints_1.default.groups}/${group.instanceId}`;
+        // create a copy to modify
+        const newGroup = group.clone();
+        newGroup.merge(operation);
+        const serializedObj = newGroup.serialize(group); // serialize with the old object as a reference
+        // If the serialized object contains no properties, we don't need to send anything
+        if (!serializedObj || Object.keys(serializedObj).length === 0) {
+            global_1.Global.log("stateChange > empty object, not sending any payload", "debug");
+            return false; // signal that no request was made
+        }
+        let payload = JSON.stringify(serializedObj);
+        global_1.Global.log("stateChange > sending payload: " + payload, "debug");
+        payload = Buffer.from(payload);
+        yield node_coap_client_1.CoapClient.request(url, "put", payload);
+        return true;
+    });
+}
+/**
+ * Sets some properties on virtual group or virtual properties on a real group.
+ * Can be used to manually update non-existing endpoints on real groups.
+ * @param group The group to be updated
+ * @param operation The properties to be set
+ * @returns true if a request was sent, false otherwise
+ */
+function operateVirtualGroup(group, operation) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // find all lightbulbs belonging to this group
+        const lightbulbAccessories = group.deviceIDs
+            .map(did => devices[did])
+            .filter(dev => dev != null && dev.type === accessory_1.AccessoryTypes.lightbulb);
+        for (const acc of lightbulbAccessories) {
+            yield operateLight(acc, operation);
+        }
+        // and update the group
+        if (group instanceof virtual_group_1.VirtualGroup) {
+            group.merge(operation);
+        }
+    });
+}
 // ==================================
 // manage devices
 /** Normalizes the path to a resource, so it can be used for storing the observer */
@@ -525,7 +617,7 @@ function coap_getGroup_cb(instanceId, response) {
     // check response code
     switch (response.code.toString()) {
         case "2.05": break; // all good
-        case "4.04":
+        case "4.04":// not found
             // We know this group existed or we wouldn't have requested it
             // This means it has been deleted
             // TODO: Should we delete it here or where its being handled right now?
@@ -592,7 +684,7 @@ function coap_getScene_cb(groupId, instanceId, response) {
     // check response code
     switch (response.code.toString()) {
         case "2.05": break; // all good
-        case "4.04":
+        case "4.04":// not found
             // We know this scene existed or we wouldn't have requested it
             // This means it has been deleted
             // TODO: Should we delete it here or where its being handled right now?
@@ -1039,6 +1131,26 @@ function extendGroup(group) {
                     path: "dimmer",
                 },
             },
+            color: {
+                _id: `${objId}.color`,
+                type: "state",
+                common: {
+                    name: "Color temperature",
+                    read: true,
+                    write: true,
+                    min: 0,
+                    max: 100,
+                    unit: "%",
+                    type: "number",
+                    role: "level.color.temperature",
+                    desc: "Color temperature of this group's lightbulbs. Range: 0% = cold, 100% = warm",
+                },
+                native: {
+                    // virtual state, so no real path to an object exists
+                    // we still have to give path a value, because other functions check for its existence
+                    path: "__virtual__",
+                },
+            },
         };
         const createObjects = Object.keys(stateObjs)
             .map((key) => {
@@ -1067,7 +1179,6 @@ function updatePossibleScenes(groupInfo) {
         // only extend that object if it exists already
         if (scenesId in objects) {
             global_1.Global.log(`updating possible scenes for group ${group.instanceId}: ${JSON.stringify(Object.keys(groupInfo.scenes))}`);
-            const activeSceneObj = objects[scenesId];
             const scenes = groupInfo.scenes;
             // map scene ids and names to the dropdown
             const states = object_polyfill_1.composeObject(Object.keys(scenes).map(id => [id, scenes[id].name]));
@@ -1314,9 +1425,9 @@ function unsubscribeObjects(id) {
 function parsePayload(response) {
     switch (response.format) {
         case 0: // text/plain
-        case null:
+        case null:// assume text/plain
             return response.payload.toString("utf-8");
-        case 50:
+        case 50:// application/json
             const json = response.payload.toString("utf-8");
             return JSON.parse(json);
         default:

@@ -48,3 +48,5 @@ export class Light extends IPSODevice {
 	public unit: string = "";
 
 }
+
+export type LightOperation = Partial<Pick<Light, "onOff" | "dimmer" | "colorX" | "colorY" | "transitionTime">>;

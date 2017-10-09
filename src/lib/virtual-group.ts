@@ -1,6 +1,5 @@
-import { Accessory } from "../ipso/accessory";
-import { Global as _ } from "./global";
-import { DictionaryLike } from "./object-polyfill";
+import { LightOperation } from "../ipso/light";
+import { entries } from "./object-polyfill";
 
 export class VirtualGroup {
 
@@ -17,28 +16,12 @@ export class VirtualGroup {
 	 */
 	public deviceIDs: number[];
 
-	public serialize(references: DictionaryLike<Accessory>): DictionaryLike<any> {
-		const ret = {};
-		for (const id of this.deviceIDs) {
-			if (!(id in references)) {
-				_.log(`VirtualGroup > cannot serialize command for accessory with id ${id}`, "warn");
-				continue;
-			}
-			// get the reference value and a clone to modify
-			const oldAcc = references[id];
-			const newAcc = oldAcc.clone();
-			// get the light to modify
-			const light = newAcc.lightList[0];
-			light.merge({
-				onOff: this.onOff,
-				dimmer: this.dimmer,
-				colorX: this.colorX,
-				colorY: 27000,
-				transitionTime: this.transitionTime,
-			});
-			// and serialize the payload
-			ret[id] = newAcc.serialize(oldAcc);
+	/**
+	 * Updates this virtual group's state with the changes contained in the given operation
+	 */
+	public merge(operation: LightOperation): void {
+		for (const [prop, val] of entries(operation)) {
+			if (this.hasOwnProperty(prop)) this[prop] = val;
 		}
-		return ret;
 	}
 }

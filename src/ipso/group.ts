@@ -27,6 +27,8 @@ export class Group extends IPSODevice {
 
 }
 
+export type GroupOperation = Partial<Pick<Group, "onOff" | "dimmer" | "sceneId" | "transitionTime">>;
+
 // TODO: Type annotation
 function parseAccessoryLink(link): number[] {
 	const hsLink = link["15002"];

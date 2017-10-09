@@ -6,3 +6,4 @@ export declare class Group extends IPSODevice {
     deviceIDs: number[];
     transitionTime: number;
 }
+export declare type GroupOperation = Partial<Pick<Group, "onOff" | "dimmer" | "sceneId" | "transitionTime">>;

@@ -1,5 +1,4 @@
-import { Accessory } from "../ipso/accessory";
-import { DictionaryLike } from "./object-polyfill";
+import { LightOperation } from "../ipso/light";
 export declare class VirtualGroup {
     readonly instanceId: number;
     constructor(instanceId: number);
@@ -11,5 +10,8 @@ export declare class VirtualGroup {
      * The instance ids of all devices combined in this group
      */
     deviceIDs: number[];
-    serialize(references: DictionaryLike<Accessory>): DictionaryLike<any>;
+    /**
+     * Updates this virtual group's state with the changes contained in the given operation
+     */
+    merge(operation: LightOperation): void;
 }

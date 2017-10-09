@@ -14,3 +14,4 @@ export declare class Light extends IPSODevice {
     powerFactor: number;
     unit: string;
 }
+export declare type LightOperation = Partial<Pick<Light, "onOff" | "dimmer" | "colorX" | "colorY" | "transitionTime">>;
