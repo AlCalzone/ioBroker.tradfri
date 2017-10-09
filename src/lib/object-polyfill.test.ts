@@ -1,4 +1,4 @@
-﻿import { expect } from "chai";
+import { expect } from "chai";
 import { bury, composeObject, dig, entries, extend, filter, values } from "./object-polyfill";
 // tslint:disable:no-unused-expression
 

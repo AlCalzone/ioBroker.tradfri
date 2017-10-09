@@ -24,5 +24,5 @@ export const deserializers = {
 	}) as PropertyTransform,
 
 	// the sent value is in 10ths of seconds, we're working with seconds
-	transitionTime: (val => val / 10) as PropertyTransform, 
+	transitionTime: (val => val / 10) as PropertyTransform,
 };
