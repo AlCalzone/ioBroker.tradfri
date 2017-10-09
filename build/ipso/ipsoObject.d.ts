@@ -28,8 +28,10 @@ export declare const ipsoKey: (key: string) => PropertyDecorator;
 export declare function required(target: object, property: string | symbol): void;
 /**
  * Defines the required transformations to serialize a property to a CoAP object
+ * @param transform: The transformation to apply during serialization
+ * @param splitArrays: Whether the serializer expects arrays to be split up in advance
  */
-export declare const serializeWith: (transform: PropertyTransform) => PropertyDecorator;
+export declare const serializeWith: (transform: PropertyTransform, splitArrays?: boolean) => PropertyDecorator;
 export declare const defaultSerializers: DictionaryLike<PropertyTransform>;
 /**
  * Defines the required transformations to deserialize a property from a CoAP object

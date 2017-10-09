@@ -32,12 +32,12 @@ __decorate([
 ], Group.prototype, "dimmer", void 0);
 __decorate([
     ipsoObject_1.ipsoKey("9039"),
-    __metadata("design:type", Object)
+    __metadata("design:type", Number)
 ], Group.prototype, "sceneId", void 0);
 __decorate([
     ipsoObject_1.ipsoKey("9018"),
     ipsoObject_1.deserializeWith(obj => parseAccessoryLink(obj)),
-    ipsoObject_1.serializeWith(ids => toAccessoryLink(ids)),
+    ipsoObject_1.serializeWith(ids => toAccessoryLink(ids), false),
     __metadata("design:type", Array)
 ], Group.prototype, "deviceIDs", void 0);
 __decorate([

@@ -106,8 +106,9 @@ export class IPSOObject {
 
 				// try to find serializer for this property
 				const serializer = getSerializer(this, propName);
+				const requiresArraySplitting: boolean = serializerRequiresArraySplitting(this, propName);
 
-				if (value instanceof Array) {
+				if (value instanceof Array && requiresArraySplitting) {
 					// serialize each item
 					if (_.isdef(refValue)) {
 						// reference value exists, make sure we have the same amount of items
@@ -235,15 +236,17 @@ function isRequired(target: object, property: string | symbol): boolean {
 
 /**
  * Defines the required transformations to serialize a property to a CoAP object
+ * @param transform: The transformation to apply during serialization
+ * @param splitArrays: Whether the serializer expects arrays to be split up in advance
  */
-export const serializeWith = (transform: PropertyTransform): PropertyDecorator => {
+export const serializeWith = (transform: PropertyTransform, splitArrays: boolean = true): PropertyDecorator => {
 	return (target: object, property: string | symbol) => {
 		// get the class constructor
 		const constr = target.constructor;
 		// retrieve the current metadata
 		const metadata = Reflect.getMetadata(METADATA_serializeWith, constr) || {};
 
-		metadata[property] = transform;
+		metadata[property] = {transform, splitArrays};
 		// store back to the object
 		Reflect.defineMetadata(METADATA_serializeWith, metadata, constr);
 	};
@@ -263,12 +266,28 @@ function getSerializer(target: object, property: string | symbol): PropertyTrans
 	const constr = target.constructor;
 	// retrieve the current metadata
 	const metadata = Reflect.getMetadata(METADATA_serializeWith, constr) || {};
-	if (metadata.hasOwnProperty(property)) return metadata[property];
+	if (metadata.hasOwnProperty(property)) return metadata[property].transform;
 	// If there's no custom serializer, try to find a default one
 	const type = getPropertyType(target, property);
 	if (type && type.name in defaultSerializers) {
 		return defaultSerializers[type.name];
 	}
+}
+
+/**
+ * Checks if the deserializer for a given property expects arrays to be split in advance
+ */
+function serializerRequiresArraySplitting(target: object, property: string | symbol): boolean {
+	// get the class constructor
+	const constr = target.constructor;
+	// retrieve the current metadata
+	const metadata = Reflect.getMetadata(METADATA_serializeWith, constr) || {};
+
+	if (metadata.hasOwnProperty(property)) {
+		return metadata[property].splitArrays;
+	}
+	// return default value => true
+	return true;
 }
 
 /**
@@ -315,7 +334,7 @@ function getDeserializer(target: object, property: string | symbol): PropertyTra
 }
 
 /**
- * Retrieves the deserializer for a given property
+ * Checks if the deserializer for a given property expects arrays to be split in advance
  */
 function deserializerRequiresArraySplitting(target: object, property: string | symbol): boolean {
 	// get the class constructor
