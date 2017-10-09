@@ -701,7 +701,7 @@ function calcObjName(accessory: Accessory): string {
 			case AccessoryTypes.lightbulb:
 				return "L";
 			default:
-				_.log("unknown accessory type " + accessory.type);
+				_.log(`Unknown accessory type ${accessory.type}. Please send this info to the developer with a short description of the device!`, "warn");
 				return "XYZ";
 		}
 	})();
