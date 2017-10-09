@@ -275,7 +275,7 @@ let adapter = utils_1.default.adapter({
                         serializedObj = newGroup.serialize(group); // serialize with the old object as a reference
                         url = `${requestBase}${endpoints_1.default.groups}/${rootObj.native.instanceId}`;
                         break;
-                    default:// accessory
+                    default:
                         // read the instanceId and get a reference value
                         const accessory = devices[rootObj.native.instanceId];
                         // create a copy to modify
@@ -498,7 +498,7 @@ function coap_getGroup_cb(instanceId, response) {
     // check response code
     switch (response.code.toString()) {
         case "2.05": break; // all good
-        case "4.04":// not found
+        case "4.04":
             // We know this group existed or we wouldn't have requested it
             // This means it has been deleted
             // TODO: Should we delete it here or where its being handled right now?
@@ -565,7 +565,7 @@ function coap_getScene_cb(groupId, instanceId, response) {
     // check response code
     switch (response.code.toString()) {
         case "2.05": break; // all good
-        case "4.04":// not found
+        case "4.04":
             // We know this scene existed or we wouldn't have requested it
             // This means it has been deleted
             // TODO: Should we delete it here or where its being handled right now?
@@ -1153,9 +1153,9 @@ function unsubscribeObjects(id) {
 function parsePayload(response) {
     switch (response.format) {
         case 0: // text/plain
-        case null:// assume text/plain
+        case null:
             return response.payload.toString("utf-8");
-        case 50:// application/json
+        case 50:
             const json = response.payload.toString("utf-8");
             return JSON.parse(json);
         default:
