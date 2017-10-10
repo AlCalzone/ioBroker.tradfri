@@ -4,7 +4,7 @@ import { deserializeWith, ipsoKey, IPSOObject, PropertyTransform, required, seri
 export class DeviceInfo extends IPSOObject {
 
 	@ipsoKey("9")
-	public battery: number = 0;
+	public battery: number; // no default value, some devices don't have a battery
 
 	@ipsoKey("3")
 	public firmwareVersion: string = "";

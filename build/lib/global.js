@@ -114,6 +114,8 @@ class Global {
                 }
             }
         }
+        if (level === "silly" && !(level in Global._adapter.log))
+            level = "debug";
         Global._adapter.log[level](message);
     }
     /**

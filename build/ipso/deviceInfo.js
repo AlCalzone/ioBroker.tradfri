@@ -14,7 +14,6 @@ const ipsoObject_1 = require("./ipsoObject");
 class DeviceInfo extends ipsoObject_1.IPSOObject {
     constructor() {
         super(...arguments);
-        this.battery = 0;
         this.firmwareVersion = "";
         this.manufacturer = "";
         this.modelNumber = "";

@@ -1,4 +1,4 @@
-﻿import {expect, use } from "chai";
+import {expect, use } from "chai";
 import * as chaiAsPromised from "chai-as-promised";
 
 before(() => {
@@ -22,11 +22,10 @@ describe("lib/defer-promise => createDeferredPromise() =>", () => {
 		return expect(promiseRes).to.be.fulfilled;
 	});
 
-	const promiseRej = createDeferredPromise<boolean>();
-
-	promiseRej.reject();
-
 	it("should be rejected", () => {
+		// the promise has to get rejected inside it() or we'll get an uncaught rejection error
+		const promiseRej = createDeferredPromise<boolean>();
+		promiseRej.reject();
 		return expect(promiseRej).to.be.rejected;
 	});
 

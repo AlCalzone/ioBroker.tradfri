@@ -175,7 +175,7 @@ export class Global {
 		**fett**, ##kursiv##, __unterstrichen__, ~~durchgestrichen~~
 		schwarz{{farbe|bunt}}schwarz, {{farbe}}bunt
 	*/
-	public static log(message: string, level: "info" | "debug" | "warn" | "error" = "info") {
+	public static log(message: string, level: ioBroker.LogLevel = "info") {
 		if (!Global.adapter) return;
 
 		if (message) {
@@ -189,6 +189,7 @@ export class Global {
 			}
 		}
 
+		if (level === "silly" && !(level in Global._adapter.log)) level = "debug";
 		Global._adapter.log[level](message);
 	}
 

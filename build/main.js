@@ -738,7 +738,7 @@ function calcObjName(accessory) {
             prefix = "L";
             break;
         default:
-            global_1.Global.log("unknown accessory type " + accessory.type);
+            global_1.Global.log(`Unknown accessory type ${accessory.type}. Please send this info to the developer with a short description of the device!`, "warn");
             prefix = "XYZ";
             break;
     }

@@ -1,4 +1,4 @@
-﻿import { expect } from "chai";
+import { expect } from "chai";
 import { deserializers, serializers } from "./conversions";
 // tslint:disable:no-unused-expression
 

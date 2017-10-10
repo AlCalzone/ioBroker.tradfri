@@ -1,4 +1,4 @@
-﻿import { expect } from "chai";
+import { expect } from "chai";
 import { Enumeration, getEnumValueAsName } from "./enums";
 // tslint:disable:no-unused-expression
 
