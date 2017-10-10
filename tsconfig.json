@@ -12,16 +12,9 @@
         // enable the new reflection API
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
-
-        // Source maps are for debugging
-        // use *EITHER* sourceMap = true (generates .map file)
-        // or inlineSourceMap = true (includes map files in js files)
-        // *NOT* both.
-        // if you have problems finding the right lines while debugging, 
-        // try switching the source map types
-        // you can also disable them for less output.
-        "sourceMap": true,
-        "inlineSourceMap": false,
+        
+        "sourceMap": false,
+        "inlineSourceMap": true,
         "sourceRoot": "src/",
         "target": "es2015"
         //"watch": true
