@@ -11,7 +11,9 @@ import { Light } from "./light";
 const template = {
 	3: {
 		0: "IKEA of Sweden",
-		1: "Some long-ass model name",
+		// we need to use a RGB bulb here,
+		// so all properties get serialized
+		1: "TRADFRI bulb E27 CWS opal 600",
 		2: "",
 		3: "1.2.217",
 		6: 1,
@@ -43,9 +45,9 @@ const acc = new Accessory().parse(template);
 describe("ipso/accessory => ", () => {
 
 	it("should parse correctly", () => {
-		assert(acc.deviceInfo instanceof DeviceInfo);
+		assert(acc.deviceInfo instanceof DeviceInfo, "the deviceInfo must be of type DeviceInfo");
 		expect(acc.lightList).to.have.length(1);
-		assert(acc.lightList[0] instanceof Light);
+		assert(acc.lightList[0] instanceof Light, "the light array items must be of type Light");
 		expect(acc.type).to.equal(template["5750"]);
 	});
 

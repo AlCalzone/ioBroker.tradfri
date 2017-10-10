@@ -314,7 +314,7 @@ function getDeserializers(target, property) {
     // retrieve the current metadata
     const metadata = Reflect.getMetadata(METADATA_deserializeWith, constr) || {};
     if (metadata.hasOwnProperty(property)) {
-        return metadata[property].transform;
+        return metadata[property].transforms;
     }
     // If there's no custom deserializer, try to find a default one
     const type = getPropertyType(target, property);
