@@ -8,7 +8,7 @@ export class Notification extends IPSODevice {
 	public event: NotificationTypes = 0;
 
 	@ipsoKey("9017")
-	@deserializeWith(arr => parseNotificationDetails(arr))
+	@deserializeWith(arr => parseNotificationDetails(arr), false /* parse whole arrays */)
 	public details: DictionaryLike<string> = {};
 
 	@ipsoKey("9014")

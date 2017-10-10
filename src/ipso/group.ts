@@ -11,11 +11,11 @@ export class Group extends IPSODevice {
 	public dimmer: number = 0; // <int> [0..254]
 
 	@ipsoKey("9039")
-	public sceneId: number | number[];
+	public sceneId: number;
 
 	@ipsoKey("9018")
 	@deserializeWith(obj => parseAccessoryLink(obj))
-	@serializeWith(ids => toAccessoryLink(ids))
+	@serializeWith(ids => toAccessoryLink(ids), false)
 	public deviceIDs: number[];
 
 	// The transition time is not reported by the gateway

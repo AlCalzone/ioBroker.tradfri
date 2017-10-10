@@ -25,7 +25,7 @@ __decorate([
 ], Notification.prototype, "event", void 0);
 __decorate([
     ipsoObject_1.ipsoKey("9017"),
-    ipsoObject_1.deserializeWith(arr => parseNotificationDetails(arr)),
+    ipsoObject_1.deserializeWith(arr => parseNotificationDetails(arr), false /* parse whole arrays */),
     __metadata("design:type", Object)
 ], Notification.prototype, "details", void 0);
 __decorate([

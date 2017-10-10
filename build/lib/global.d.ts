@@ -83,7 +83,7 @@ export declare class Global {
     private static _adapter;
     static adapter: ExtendedAdapter;
     static extend(adapter: ioBroker.Adapter): ExtendedAdapter;
-    static log(message: string, level?: "info" | "debug" | "warn" | "error"): void;
+    static log(message: string, level?: ioBroker.LogLevel): void;
     /**
      * Kurzschreibweise für die Ermittlung eines Objekts
      * @param id
