@@ -116,7 +116,7 @@ let adapter = utils_1.default.adapter({
                 adapter.sendTo(obj.from, obj.command, response, obj.callback);
         }
         // some predefined responses so we only have to define them once
-        const predefinedResponses = {
+        const responses = {
             ACK: { error: null },
             OK: { error: null, result: "ok" },
             ERROR_UNKNOWN_COMMAND: { error: "Unknown command!" },
@@ -124,6 +124,8 @@ let adapter = utils_1.default.adapter({
                 return { error: 'missing parameter "' + paramName + '"!' };
             },
             COMMAND_RUNNING: { error: "command running" },
+            RESULT: (result) => ({ error: null, result }),
+            ERROR: (error) => ({ error }),
         };
         // make required parameters easier
         function requireParams(...params) {
@@ -131,7 +133,7 @@ let adapter = utils_1.default.adapter({
                 return true;
             for (const param of params) {
                 if (!(obj.message && obj.message.hasOwnProperty(param))) {
-                    respond(predefinedResponses.MISSING_PARAMETER(param));
+                    respond(responses.MISSING_PARAMETER(param));
                     return false;
                 }
             }
@@ -161,12 +163,10 @@ let adapter = utils_1.default.adapter({
                     }
                     // wait for the CoAP response and respond to the message
                     const resp = yield node_coap_client_1.CoapClient.request(`${requestBase}${params.path}`, params.method, payload);
-                    respond({
-                        error: null, result: {
-                            code: resp.code.toString(),
-                            payload: parsePayload(resp),
-                        },
-                    });
+                    respond(responses.RESULT({
+                        code: resp.code.toString(),
+                        payload: parsePayload(resp),
+                    }));
                     return;
                 }
                 case "getGroups": {
@@ -197,10 +197,30 @@ let adapter = utils_1.default.adapter({
                             };
                         }
                     }
+                    respond(responses.RESULT(ret));
+                    return;
+                }
+                case "getDevice": {
+                    // require the id to be given
+                    if (!requireParams("id"))
+                        return;
+                    // check the given params
+                    const params = obj.message;
+                    if (!(params.id in devices)) {
+                        respond(responses.ERROR(`device with id ${params.id} not found`));
+                        return;
+                    }
+                    const device = devices[params.id];
+                    // TODO: Do we need more?
+                    const ret = {
+                        name: device.name,
+                        type: accessory_1.AccessoryTypes[device.type],
+                    };
+                    respond(responses.RESULT(ret));
                     return;
                 }
                 default:
-                    respond(predefinedResponses.ERROR_UNKNOWN_COMMAND);
+                    respond(responses.ERROR_UNKNOWN_COMMAND);
                     return;
             }
         }
