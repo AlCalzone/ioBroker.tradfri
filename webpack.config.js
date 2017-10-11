@@ -48,4 +48,9 @@ module.exports = {
             },
         ],
     },
+    externals: {
+        jquery: 'jQuery',
+        socketio: 'socket',
+        sendTo: 'sendTo',
+    }
 }

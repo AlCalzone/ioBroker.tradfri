@@ -1,5 +1,9 @@
 // Dictionary (systemDictionary is global variable from adapter-settings.js)
 systemDictionary = {
+	"loading...": {
+		"de": "Lade Einstellungen...",
+		"en": "loading settings..."
+	},
 	"tradfri adapter settings": {
 		"de": "Einstellungen für Trådfri-Adapter",
 		"en": "Trådfri adapter settings"
@@ -12,8 +16,4 @@ systemDictionary = {
 		"de": "Der Security-Code findet sich auf der Unterseite des Gateways",
 		"en": "The security code can be found on the bottom of the gateway"
 	},
-	"on save adapter restarts with new config immediately": {
-		"de": "Beim Speichern von Einstellungen der Adapter wird sofort neu gestartet.",
-		"ru": "Ñðàçó ïîñëå ñîõðàíåíèÿ íàñòðîåê äðàéâåð ïåðåçàïóñòèòüñÿ ñ íîâûìè çíà÷åíèÿìè"
-	}
 };

@@ -1,0 +1,46 @@
+* {
+	box-sizing: border-box
+}
+#adapter-container {
+	font-size: initial;
+	padding: 0 0.5em;
+}
+#adapter-container > * {
+	width: 100%;
+}
+div.loading:first-child {
+	margin-top: 2em;
+}
+div.loading {
+	text-align: center;
+}
+
+[data-role="adapter-name"] {
+	min-height: 64px;
+	padding-left: 80px;
+	vertical-align: middle;
+	background-image: url(tradfri.png);
+	background-size: 64px auto;
+	background-position: left center;
+	background-repeat: no-repeat;
+}
+[data-role="adapter-name"]::before {
+	content: "";
+	display: inline-block;
+	height: 64px;
+	vertical-align: middle;
+}
+.settings-table > * {
+	display: inline-block;
+}
+.settings-table > label {
+	min-width: 25%;
+	white-space: nowrap;
+}
+.settings-table > .admin-tooltip-icon {
+	margin-right: 0.25em;
+}
+.settings-table > label ~ span {
+	font-size: 80%;
+	padding-left: 1em;
+}	
