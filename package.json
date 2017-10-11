@@ -25,6 +25,8 @@
     "@types/mocha": "^2.2.43",
     "@types/node": "^6.0.88",
     "@types/reflect-metadata": "0.0.5",
+    "@types/react": "^16.0.10",
+    "@types/react-dom": "^16.0.1",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "mocha": "^4.0.0",
@@ -33,7 +35,17 @@
     "ts-node": "^3.3.0",
     "tslint": "^5.7.0",
     "typescript": "^2.5.3",
-    "node-ssh": "^5.0.0"
+    "node-ssh": "^5.0.0",
+    "enzyme": "^3.1.0",
+    "enzyme-adapter-react-16": "^1.0.1",
+    "html-webpack-plugin": "^2.30.1",
+    "react": "^16.0.0",
+    "react-dom": "^16.0.0",
+    "react-test-renderer": "^16.0.0",
+    "sinon": "^4.0.1",
+    "ts-loader": "^2.3.7",
+    "tslint-react": "^3.2.0",
+    "webpack": "^3.6.0"
   },
   "homepage": "https://github.com/AlCalzone/ioBroker.tradfri",
   "keywords": [
@@ -50,25 +62,32 @@
     "url": "https://github.com/AlCalzone/ioBroker.tradfri"
   },
   "scripts": {
-    "test_js": "node node_modules/mocha/bin/mocha test/*.js",
-    "test_ts": "node node_modules/mocha/bin/mocha --require ts-node/register --require source-map-support/register src/**/*.test.ts",
-    "test_package": "node node_modules/mocha/bin/mocha test/testPackageFiles.js",
-    "prepublishOnly": "npm run test_package",
-    "test": "npm run test_ts && npm run test_js",
-    "coverage": "node node_modules/nyc/bin/nyc npm run test_ts",
-    "lint": "npm run tslint \"src/**/*.ts\"",
-    "tslint": "tslint",
+    "build:webpack": "webpack --config webpack.config.js",
+    "build": "npm run build:webpack",
+    "watch": "webpack --config webpack.config.js --watch --progress",
+    "test:js": "node node_modules/mocha/bin/mocha test/*.js",
+    "test:ts": "node node_modules/mocha/bin/mocha --require ts-node/register --require source-map-support/register src/**/*.test.ts",
+    "test:tsx": "node node_modules/mocha/bin/mocha --require ts-node/register --require source-map-support/register **/src/**/*.test.tsx",
+    "test:package": "node node_modules/mocha/bin/mocha test/testPackageFiles.js",
+    "test": "npm run test:ts && npm run test:tsx",
+    "prepublishOnly": "npm run test:package",
+    "coverage": "node node_modules/nyc/bin/nyc npm run test",
+    "lint:ts": "tslint",
+    "lint": "npm run lint:ts \"src/**/*.{ts|tsx}\"",
     "deploy_local": "node build/deploy_local.js"
   },
   "nyc": {
     "include": [
-      "src/**/*.ts"
+      "src/**/*.ts",
+      "admin/src/**/*.ts*"
     ],
     "exclude": [
-      "src/**/*.test.ts"
+      "src/**/*.test.ts*",
+      "admin/src/**/*.test.ts*"
     ],
     "extension": [
-      ".ts"
+      ".ts", 
+      ".tsx"
     ],
     "require": [
       "ts-node/register"
