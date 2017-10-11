@@ -140,7 +140,7 @@ let adapter = utils_1.default.adapter({
         // handle the message
         if (obj) {
             switch (obj.command) {
-                case "request":
+                case "request": {
                     // require the path to be given
                     if (!requireParams("path"))
                         return;
@@ -168,6 +168,37 @@ let adapter = utils_1.default.adapter({
                         },
                     });
                     return;
+                }
+                case "getGroups": {
+                    // check the given params
+                    const params = obj.message;
+                    // group type must be "real", "virtual" or "both"
+                    const groupType = params.type || "real";
+                    if (["real", "virtual", "both"].indexOf(groupType) === -1) {
+                        respond({ error: `group type must be "real", "virtual" or "both"` });
+                        return;
+                    }
+                    const ret = {};
+                    if (groupType === "real" || groupType === "both") {
+                        for (const [id, group] of object_polyfill_1.entries(groups)) {
+                            ret[id] = {
+                                name: group.group.name,
+                                deviceIDs: group.group.deviceIDs,
+                                type: "real",
+                            };
+                        }
+                    }
+                    if (groupType === "virtual" || groupType === "both") {
+                        for (const [id, group] of object_polyfill_1.entries(virtualGroups)) {
+                            ret[id] = {
+                                name: group.name,
+                                deviceIDs: group.deviceIDs,
+                                type: "virtual",
+                            };
+                        }
+                    }
+                    return;
+                }
                 default:
                     respond(predefinedResponses.ERROR_UNKNOWN_COMMAND);
                     return;
@@ -1454,6 +1485,7 @@ function loadVirtualGroups() {
             const instanceIDs = g.native.instanceIDs;
             const ret = new virtual_group_1.VirtualGroup(id);
             ret.deviceIDs = instanceIDs;
+            ret.name = g.common.name;
             return [`${id}`, ret];
         })));
     });

@@ -167,7 +167,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 		// handle the message
 		if (obj) {
 			switch (obj.command) {
-				case "request":
+				case "request": {// custom CoAP request
 					// require the path to be given
 					if (!requireParams("path")) return;
 
@@ -198,6 +198,40 @@ let adapter: ExtendedAdapter = utils.adapter({
 						},
 					});
 					return;
+				}
+
+				case "getGroups": { // get all groups defined on the gateway
+					// check the given params
+					const params = obj.message as any;
+					// group type must be "real", "virtual" or "both"
+					const groupType = params.type || "real";
+					if (["real", "virtual", "both"].indexOf(groupType) === -1) {
+						respond({ error: `group type must be "real", "virtual" or "both"` });
+						return;
+					}
+
+					const ret = {};
+					if (groupType === "real" || groupType === "both") {
+						for (const [id, group] of entries(groups)) {
+							ret[id] = {
+								name: group.group.name,
+								deviceIDs: group.group.deviceIDs,
+								type: "real",
+							};
+						}
+					}
+					if (groupType === "virtual" || groupType === "both") {
+						for (const [id, group] of entries(virtualGroups)) {
+							ret[id] = {
+								name: group.name,
+								deviceIDs: group.deviceIDs,
+								type: "virtual",
+							};
+						}
+					}
+					return;
+				}
+
 				default:
 					respond(predefinedResponses.ERROR_UNKNOWN_COMMAND);
 					return;
@@ -1601,6 +1635,7 @@ async function loadVirtualGroups(): Promise<void> {
 			const instanceIDs: number[] = g.native.instanceIDs;
 			const ret = new VirtualGroup(id);
 			ret.deviceIDs = instanceIDs;
+			ret.name = g.common.name;
 			return [`${id}`, ret] as [string, VirtualGroup];
 		}),
 	));

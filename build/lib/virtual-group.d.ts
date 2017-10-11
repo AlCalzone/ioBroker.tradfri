@@ -2,6 +2,7 @@ import { LightOperation } from "../ipso/light";
 export declare class VirtualGroup {
     readonly instanceId: number;
     constructor(instanceId: number);
+    name: string;
     onOff: boolean;
     dimmer: number;
     colorX: number;
