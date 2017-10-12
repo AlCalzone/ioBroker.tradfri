@@ -6,6 +6,7 @@ import * as ReactDOM from "react-dom";
 // components
 import Fragment from "./fragment";
 import { OnSettingsChangedCallback, Settings } from "./settings";
+import { Tabs } from "./tabs";
 
 const $window = window as any;
 const namespace = `tradfri.${$window.instance}`;
@@ -52,3 +53,8 @@ $window.save = (callback) => {
 	// save the settings
 	callback(curSettings);
 };
+
+ReactDOM.render(
+	<Tabs tabs={{Test: <b>1</b>, Test2: <i>2</i>}} />,
+	document.getElementById("adapter-container"),
+);

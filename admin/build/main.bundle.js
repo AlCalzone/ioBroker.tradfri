@@ -25,6 +25,7 @@ const ReactDOM = __webpack_require__("./node_modules/react-dom/index.js");
 // components
 const fragment_1 = __webpack_require__("./admin/src/fragment.tsx");
 const settings_1 = __webpack_require__("./admin/src/settings.tsx");
+const tabs_1 = __webpack_require__("./admin/src/tabs.tsx");
 const $window = window;
 const namespace = `tradfri.${$window.instance}`;
 // layout components
@@ -54,6 +55,7 @@ $window.save = (callback) => {
     // save the settings
     callback(curSettings);
 };
+ReactDOM.render(React.createElement(tabs_1.Tabs, { tabs: { Test: React.createElement("b", null, "1"), Test2: React.createElement("i", null, "2") } }), document.getElementById("adapter-container"));
 
 
 /***/ }),
@@ -137,6 +139,43 @@ class Settings extends React.Component {
     }
 }
 exports.Settings = Settings;
+
+
+/***/ }),
+
+/***/ "./admin/src/tabs.tsx":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+// Renders some components in jQuery UI tabs
+const React = __webpack_require__("./node_modules/react/index.js");
+// fix missing property errors/warnings
+const $window = window;
+const $ = $window.jQuery;
+const $$ = $;
+class Tabs extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            tabs: props.tabs,
+        };
+        this.containerId = this.props.id || "tabs";
+    }
+    componentDidMount() {
+        if (!$)
+            return; // we're in a test environment without jQuery
+        $$(`#${this.containerId}`).tabs();
+    }
+    render() {
+        return (React.createElement("div", { id: this.containerId },
+            React.createElement("ul", null, Object.keys(this.state.tabs).map((k, i) => React.createElement("li", { key: i },
+                React.createElement("a", { href: `#${this.containerId}-${i}` }, k)))),
+            Object.keys(this.state.tabs).map((k, i) => React.createElement("div", { key: i, id: `#${this.containerId}-${i}` }, this.state.tabs[k]))));
+    }
+}
+exports.Tabs = Tabs;
 
 
 /***/ })
