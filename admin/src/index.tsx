@@ -4,9 +4,10 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 
 // components
-import Fragment from "./fragment";
-import { OnSettingsChangedCallback, Settings } from "./settings";
-import { Tabs } from "./tabs";
+import Fragment from "./components/fragment";
+import { Groups } from "./components/groups";
+import { OnSettingsChangedCallback, Settings } from "./components/settings";
+import { Tabs } from "./components/tabs";
 
 const $window = window as any;
 const namespace = `tradfri.${$window.instance}`;
@@ -22,7 +23,10 @@ function Root(props) {
 	return (
 		<Fragment>
 			<Header />
-			<Settings settings={props.settings} onChange={props.onChange} />
+			<Tabs tabs={{
+				Settings: <Settings settings={props.settings} onChange={props.onSettingsChanged} />,
+				Groups: <Groups />,
+			}} />
 		</Fragment>
 	);
 }
@@ -39,7 +43,7 @@ $window.load = (settings, onChange) => {
 	};
 
 	ReactDOM.render(
-		<Root settings={settings} onChange={settingsChanged} />,
+		<Root settings={settings} onSettingsChanged={settingsChanged} />,
 		document.getElementById("adapter-container"),
 	);
 
@@ -53,8 +57,3 @@ $window.save = (callback) => {
 	// save the settings
 	callback(curSettings);
 };
-
-ReactDOM.render(
-	<Tabs tabs={{Test: <b>1</b>, Test2: <i>2</i>}} />,
-	document.getElementById("adapter-container"),
-);

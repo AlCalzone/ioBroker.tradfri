@@ -1,9 +1,12 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
+import Fragment from "./fragment";
+
 const $window = window as any;
 
-import Fragment from "./fragment";
+/** Translates text */
+const _ = $window._ as (text: string) => string;
 
 export type OnSettingsChangedCallback = (newSettings: DictionaryLike<any>, hasChanges: boolean) => void;
 
@@ -22,7 +25,7 @@ function Label(props) {
 }
 /** Helper component for a tooltip */
 function Tooltip(props) {
-	return <img className="admin-tooltip-icon" src="../../img/info.png" title={props.text} />;
+	return <img className="admin-tooltip-icon" src="../../img/info.png" title={_(props.text)} />;
 }
 
 export class Settings extends React.Component<SettingsProps, DictionaryLike<any>> {

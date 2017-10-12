@@ -14,7 +14,7 @@ import sinon from "sinon";
 // import components
 import { Tabs } from "./tabs";
 
-describe.only("jQuery-UI tabs", () => {
+describe("jQuery-UI tabs", () => {
 
 	const definition = {
 		"Tab 1": "Hallo",

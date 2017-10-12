@@ -30,7 +30,7 @@ export class Tabs extends React.Component<any, any> {
 			<div id={this.containerId}>
 				<ul>
 					{Object.keys(this.state.tabs).map(
-						(k, i) => <li key={i}><a href={`#${this.containerId}-${i}`}>{k}</a></li>,
+						(k, i) => <li key={i}><a href={`#${this.containerId}-${i}`} className="translate">{k}</a></li>,
 					)}
 				</ul>
 				{Object.keys(this.state.tabs).map(
