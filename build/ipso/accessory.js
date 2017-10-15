@@ -20,6 +20,7 @@ var AccessoryTypes;
 (function (AccessoryTypes) {
     AccessoryTypes[AccessoryTypes["remote"] = 0] = "remote";
     AccessoryTypes[AccessoryTypes["lightbulb"] = 2] = "lightbulb";
+    AccessoryTypes[AccessoryTypes["motionSensor"] = 4] = "motionSensor";
     // TODO: find out the other ones
 })(AccessoryTypes = exports.AccessoryTypes || (exports.AccessoryTypes = {}));
 class Accessory extends ipsoDevice_1.IPSODevice {

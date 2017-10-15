@@ -9,6 +9,7 @@ import { Sensor } from "./sensor";
 export enum AccessoryTypes {
 	remote = 0,
 	lightbulb = 2,
+	motionSensor = 4,
 	// TODO: find out the other ones
 }
 
