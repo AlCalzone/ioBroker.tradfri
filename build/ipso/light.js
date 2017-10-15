@@ -10,6 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const conversions_1 = require("../tradfri/conversions");
+const predefined_colors_1 = require("../tradfri/predefined-colors");
 const ipsoDevice_1 = require("./ipsoDevice");
 const ipsoObject_1 = require("./ipsoObject");
 // see https://github.com/hreichert/smarthome/blob/master/extensions/binding/org.eclipse.smarthome.binding.tradfri/src/main/java/org/eclipse/smarthome/binding/tradfri/internal/TradfriColor.java
@@ -80,6 +81,19 @@ class Light extends ipsoDevice_1.IPSODevice {
         }
         return this._spectrum;
     }
+    /**
+     * Creates a proxy which redirects the properties to the correct internal one
+     */
+    createProxy() {
+        switch (this.spectrum) {
+            case "white":
+                return createWhiteSpectrumProxy(this);
+            case "rgb":
+                return createRGBProxy(this);
+            default:
+                return this;
+        }
+    }
 }
 __decorate([
     ipsoObject_1.ipsoKey("5706"),
@@ -98,9 +112,9 @@ __decorate([
     __metadata("design:type", Number)
 ], Light.prototype, "saturation", void 0);
 __decorate([
-    ipsoObject_1.ipsoKey("5709"),
-    ipsoObject_1.serializeWith(conversions_1.serializers.whiteSpectrumToColorX),
-    ipsoObject_1.deserializeWith(conversions_1.deserializers.whiteSpectrumFromColorX),
+    ipsoObject_1.ipsoKey("5709")
+    // TODO: do the transformation [0..1] => [0..COLOR_MAX]
+    ,
     __metadata("design:type", Number)
 ], Light.prototype, "colorX", void 0);
 __decorate([
@@ -143,4 +157,83 @@ __decorate([
     __metadata("design:type", String)
 ], Light.prototype, "unit", void 0);
 exports.Light = Light;
+/**
+ * Creates a proxy for a white spectrum lamp,
+ * which converts color temperature to the correct colorX value
+ */
+function createWhiteSpectrumProxy(target) {
+    return new Proxy(target, {
+        get: (me, key) => {
+            switch (key) {
+                case "colorTemperature": {
+                    return conversions_1.conversions.whiteSpectrumFromColorX(me.colorX);
+                }
+                default: return me[key];
+            }
+        },
+        set: (me, key, value, receiver) => {
+            switch (key) {
+                case "colorTemperature": {
+                    me.colorX = conversions_1.conversions.whiteSpectrumToColorX(value);
+                    break;
+                }
+                default: me[key] = value;
+            }
+            return true;
+        },
+    });
+}
+/**
+ * Creates a proxy for an RGB lamp,
+ * which converts RGB color to CIE xy
+ */
+function createRGBProxy(target) {
+    return new Proxy(target, {
+        get: (me, key) => {
+            switch (key) {
+                case "color": {
+                    if (typeof me.color === "string" && me.color.length === 6) {
+                        // predefined color, return it
+                        return me.color;
+                    }
+                    else {
+                        // calculate it from colorX/Y
+                        const { r, g, b } = conversions_1.conversions.rgbFromCIExy(me.colorX, me.colorY);
+                        return `${r.toString(16)}${g.toString(16)}${b.toString(16)}`;
+                    }
+                }
+                default: return me[key];
+            }
+        },
+        set: (me, key, value, receiver) => {
+            switch (key) {
+                case "color": {
+                    if (predefined_colors_1.predefinedColors.has(value)) {
+                        // its a predefined color, use the predefined values
+                        const definition = predefined_colors_1.predefinedColors.get(value);
+                        me.colorX = definition.colorX;
+                        me.colorY = definition.colorY;
+                    }
+                    else {
+                        // only accept HEX colors
+                        if (/^[0-9A-Fa-f]{6}$/.test(value)) {
+                            // calculate the X/Y values
+                            const rgb = value;
+                            const r = parseInt(rgb.substr(0, 2), 16);
+                            const g = parseInt(rgb.substr(2, 2), 16);
+                            const b = parseInt(rgb.substr(4, 2), 16);
+                            const { x, y } = conversions_1.conversions.rgbToCIExy(r, g, b);
+                            me.colorX = x;
+                            me.colorY = y;
+                        }
+                    }
+                    me.colorX = conversions_1.conversions.whiteSpectrumToColorX(value);
+                    break;
+                }
+                default: me[key] = value;
+            }
+            return true;
+        },
+    });
+}
 //# sourceMappingURL=light.js.map

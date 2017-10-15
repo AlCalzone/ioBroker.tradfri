@@ -1,4 +1,5 @@
-import { deserializers, serializers } from "../tradfri/conversions";
+import { conversions, deserializers, serializers } from "../tradfri/conversions";
+import { predefinedColors } from "../tradfri/predefined-colors";
 import { Accessory } from "./accessory";
 import { DeviceInfo } from "./deviceInfo";
 import { IPSODevice } from "./ipsoDevice";
@@ -39,8 +40,7 @@ export class Light extends IPSODevice {
 	// TODO: I'm not happy with this solution, I'd rather map this to colorTemp for
 	// white spectrum lamps
 	@ipsoKey("5709")
-	@serializeWith(serializers.whiteSpectrumToColorX)
-	@deserializeWith(deserializers.whiteSpectrumFromColorX)
+	// TODO: do the transformation [0..1] => [0..COLOR_MAX]
 	public colorX: number = 0; // int
 
 	@ipsoKey("5710")
@@ -116,6 +116,99 @@ export class Light extends IPSODevice {
 		return this._spectrum;
 	}
 
+	/**
+	 * Creates a proxy which redirects the properties to the correct internal one
+	 */
+	public createProxy(): this {
+		switch (this.spectrum) {
+			case "white":
+				return createWhiteSpectrumProxy(this);
+			case "rgb":
+				return createRGBProxy(this);
+			default:
+				return this;
+		}
+	}
+
 }
 
 export type Spectrum = "none" | "white" | "rgb";
+
+/**
+ * Creates a proxy for a white spectrum lamp,
+ * which converts color temperature to the correct colorX value
+ */
+function createWhiteSpectrumProxy<T extends Light>(target: T): T {
+	return new Proxy(target, {
+		get: (me: T, key: PropertyKey) => {
+			switch (key) {
+				case "colorTemperature": {
+					return conversions.whiteSpectrumFromColorX(me.colorX);
+				}
+				default: return me[key];
+			}
+		},
+		set: (me: T, key: PropertyKey, value, receiver) => {
+			switch (key) {
+				case "colorTemperature": {
+					me.colorX = conversions.whiteSpectrumToColorX(value);
+					break;
+				}
+				default: me[key] = value;
+			}
+			return true;
+		},
+	});
+}
+
+/**
+ * Creates a proxy for an RGB lamp,
+ * which converts RGB color to CIE xy
+ */
+function createRGBProxy<T extends Light>(target: T): T {
+	return new Proxy(target, {
+		get: (me: T, key: PropertyKey) => {
+			switch (key) {
+				case "color": {
+					if (typeof me.color === "string" && me.color.length === 6) {
+						// predefined color, return it
+						return me.color;
+					} else {
+						// calculate it from colorX/Y
+						const {r, g, b} = conversions.rgbFromCIExy(me.colorX, me.colorY);
+						return `${r.toString(16)}${g.toString(16)}${b.toString(16)}`;
+					}
+				}
+				default: return me[key];
+			}
+		},
+		set: (me: T, key: PropertyKey, value, receiver) => {
+			switch (key) {
+				case "color": {
+					if (predefinedColors.has(value)) {
+						// its a predefined color, use the predefined values
+						const definition = predefinedColors.get(value);
+						me.colorX = definition.colorX;
+						me.colorY = definition.colorY;
+					} else {
+						// only accept HEX colors
+						if (/^[0-9A-Fa-f]{6}$/.test(value)) {
+							// calculate the X/Y values
+							const rgb = value as string;
+							const r = parseInt(rgb.substr(0, 2), 16);
+							const g = parseInt(rgb.substr(2, 2), 16);
+							const b = parseInt(rgb.substr(4, 2), 16);
+							const {x, y} = conversions.rgbToCIExy(r, g, b);
+							me.colorX = x;
+							me.colorY = y;
+						}
+					}
+					me.colorX = conversions.whiteSpectrumToColorX(value);
+					break;
+				}
+				default: me[key] = value;
+			}
+			return true;
+		},
+	});
+}

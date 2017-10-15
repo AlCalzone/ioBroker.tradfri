@@ -30,5 +30,9 @@ export declare class Light extends IPSODevice {
      */
     private _spectrum;
     readonly spectrum: Spectrum;
+    /**
+     * Creates a proxy which redirects the properties to the correct internal one
+     */
+    createProxy(): this;
 }
 export declare type Spectrum = "none" | "white" | "rgb";
