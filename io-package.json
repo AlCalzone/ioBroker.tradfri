@@ -25,6 +25,9 @@
             "en": "Communicates with IKEA Trådfri Gateway to control devices",
             "de": "Kommuniziert mit IKEA Trådfri Gateway um Geräte zu steuern"
         },
+        "authors": [
+            "AlCalzone <d.griesel@gmx.net>"
+        ],
         "platform": "Javascript/Node.js",
         "mode": "daemon",
         "icon": "tradfri.png",
