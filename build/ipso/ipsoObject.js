@@ -340,7 +340,6 @@ class IPSOObject {
                 this.hasOwnProperty(propName) &&
                 // the same goes for properties with @doNotSerialize
                 isSerializable(this, propName)) {
-                console.log(propName);
                 // find IPSO key
                 const key = lookupKeyOrProperty(this, propName);
                 // find value and reference (default) value
@@ -425,13 +424,22 @@ class IPSOObject {
                     return true;
                 if (key === "underlyingObject")
                     return me;
+                if (key === "unproxy")
+                    return me.unproxy;
                 // if defined, call the overloaded getter
                 if (get != null)
                     return get(me, key);
                 // else continue with predefined behaviour
                 // simply return functions
-                if (typeof me[key] === "function")
-                    return me[key];
+                if (typeof me[key] === "function") {
+                    if (key === "clone") {
+                        // clones of proxies should also be proxies
+                        return () => me.clone().createProxy();
+                    }
+                    else {
+                        return me[key];
+                    }
+                }
                 // proxy all IPSOObject-Arrays
                 if (me[key] instanceof Array &&
                     me[key].length > 0 &&

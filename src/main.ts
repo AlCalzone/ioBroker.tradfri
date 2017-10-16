@@ -936,7 +936,7 @@ function extendDevice(accessory: Accessory) {
 						read: true,
 						write: true,
 						type: "string",
-						role: "level.color.temperature",
+						role: "level.color",
 						desc: "6-digit RGB hex string",
 					},
 					native: {

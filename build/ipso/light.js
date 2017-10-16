@@ -21,13 +21,11 @@ class Light extends ipsoDevice_1.IPSODevice {
         this.color = "f1e0b5"; // hex string
         this.hue = 0; // 0-360
         this.saturation = 0; // 0-100%
-        // TODO: I'm not happy with this solution, I'd rather map this to colorTemp for
-        // white spectrum lamps
         this.colorX = 0; // int
         this.colorY = 0; // int
-        // currently not used, since the gateway only accepts 3 distinct values
+        // currently not used directly, since the gateway only accepts 3 distinct values
         // we have to set colorX to set more than those 3 color temps
-        this.colorTemperature = 0; // TODO: range unknown!
+        this.colorTemperature = 0; // TODO: CoAP range unknown!
         this.transitionTime = 0.5; // <float>
         this.cumulativeActivePower = 0.0; // <float>
         this.dimmer = 0; // <int> [0..254]
@@ -101,6 +99,8 @@ class Light extends ipsoDevice_1.IPSODevice {
 }
 __decorate([
     ipsoObject_1.ipsoKey("5706"),
+    ipsoObject_1.doNotSerialize // this is done through colorX / colorY
+    ,
     __metadata("design:type", String)
 ], Light.prototype, "color", void 0);
 __decorate([
@@ -116,9 +116,7 @@ __decorate([
     __metadata("design:type", Number)
 ], Light.prototype, "saturation", void 0);
 __decorate([
-    ipsoObject_1.ipsoKey("5709")
-    // TODO: do the transformation [0..1] => [0..COLOR_MAX]
-    ,
+    ipsoObject_1.ipsoKey("5709"),
     __metadata("design:type", Number)
 ], Light.prototype, "colorX", void 0);
 __decorate([
@@ -179,6 +177,7 @@ function createWhiteSpectrumProxy() {
             switch (key) {
                 case "colorTemperature": {
                     me.colorX = conversions_1.conversions.whiteSpectrumToColorX(value);
+                    me.colorY = 27000; // magic number, but it works!
                     break;
                 }
                 default: me[key] = value;
@@ -231,7 +230,6 @@ function createRGBProxy() {
                             me.colorY = y;
                         }
                     }
-                    me.colorX = conversions_1.conversions.whiteSpectrumToColorX(value);
                     break;
                 }
                 default: me[key] = value;

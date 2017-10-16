@@ -458,7 +458,14 @@ export class IPSOObject {
 				// else continue with predefined behaviour
 
 				// simply return functions
-				if (typeof me[key] === "function") return me[key];
+				if (typeof me[key] === "function") {
+					if (key === "clone") {
+						// clones of proxies should also be proxies
+						return () => me.clone().createProxy();
+					} else {
+						return me[key];
+					}
+				}
 				// proxy all IPSOObject-Arrays
 				if (
 					me[key] instanceof Array &&

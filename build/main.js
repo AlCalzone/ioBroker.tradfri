@@ -293,13 +293,27 @@ let adapter = utils_1.default.adapter({
                                 });
                             }
                             else if (id.endsWith(".color")) {
+                                if (light.spectrum === "rgb") {
+                                    light.merge({
+                                        color: val,
+                                        transitionTime: yield getTransitionDuration(accessory),
+                                    });
+                                }
+                                else if (light.spectrum === "white") {
+                                    light.merge({
+                                        colorTemperature: val,
+                                        transitionTime: yield getTransitionDuration(accessory),
+                                    });
+                                }
+                            }
+                            else if (id.endsWith(".colorTemperature")) {
                                 light.merge({
-                                    colorX: val,
-                                    colorY: 27000,
+                                    colorTemperature: val,
                                     transitionTime: yield getTransitionDuration(accessory),
                                 });
                             }
                             else if (id.endsWith(".hue")) {
+                                // TODO: transform HSL to RGB
                                 light.merge({
                                     hue: val,
                                     transitionTime: yield getTransitionDuration(accessory),
@@ -459,8 +473,7 @@ function coap_getDevice_cb(instanceId, response) {
     }
     const result = parsePayload(response);
     // parse device info
-    const accessory = new accessory_1.Accessory();
-    accessory.parse(result);
+    const accessory = new accessory_1.Accessory().parse(result).createProxy();
     // remember the device object, so we can later use it as a reference for updates
     devices[instanceId] = accessory;
     // create ioBroker device
@@ -521,7 +534,7 @@ function coap_getGroup_cb(instanceId, response) {
     }
     const result = parsePayload(response);
     // parse group info
-    const group = (new group_1.Group()).parse(result);
+    const group = (new group_1.Group()).parse(result).createProxy();
     // remember the group object, so we can later use it as a reference for updates
     let groupInfo;
     if (!(instanceId in groups)) {
@@ -588,7 +601,7 @@ function coap_getScene_cb(groupId, instanceId, response) {
     }
     const result = parsePayload(response);
     // parse scene info
-    const scene = (new scene_1.Scene()).parse(result);
+    const scene = (new scene_1.Scene()).parse(result).createProxy();
     // remember the scene object, so we can later use it as a reference for updates
     groups[groupId].scenes[instanceId] = scene;
     // Update the scene dropdown for the group
@@ -825,11 +838,26 @@ function extendDevice(accessory) {
                         desc: "range: 0% = cold, 100% = warm",
                     },
                     native: {
-                        path: "lightList.[0].colorX",
+                        path: "lightList.[0].colorTemperature",
                     },
                 };
             }
             else if (spectrum === "rgb") {
+                stateObjs["lightbulb.color"] = {
+                    _id: `${objId}.lightbulb.color`,
+                    type: "state",
+                    common: {
+                        name: "RGB color",
+                        read: true,
+                        write: true,
+                        type: "string",
+                        role: "level.color",
+                        desc: "6-digit RGB hex string",
+                    },
+                    native: {
+                        path: "lightList.[0].color",
+                    },
+                };
                 stateObjs["lightbulb.hue"] = {
                     _id: `${objId}.lightbulb.hue`,
                     type: "state",
