@@ -14,8 +14,8 @@
         "emitDecoratorMetadata": true,
         
         "sourceMap": false,
-        "inlineSourceMap": true,
-        "sourceRoot": "src/",
+        "inlineSourceMap": false,
+        //"sourceRoot": "src/",
         "target": "es2015"
         //"watch": true
     }
