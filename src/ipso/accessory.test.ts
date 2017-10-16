@@ -41,21 +41,28 @@ const template = {
 };
 
 const acc = new Accessory().parse(template);
-const light = acc.lightList[0];
+const proxyAcc = new Accessory().parse(template).createProxy();
 
 describe("ipso/accessory => ", () => {
 
+	function testParse(obj: Accessory) {
+		assert(obj.deviceInfo instanceof DeviceInfo, "the deviceInfo must be of type DeviceInfo");
+		expect(obj.lightList).to.have.length(1);
+		assert(obj.lightList[0] instanceof Light, "the light array items must be of type Light");
+		expect(obj.type).to.equal(template["5750"]);
+	}
+
 	it("should parse correctly", () => {
-		assert(acc.deviceInfo instanceof DeviceInfo, "the deviceInfo must be of type DeviceInfo");
-		expect(acc.lightList).to.have.length(1);
-		assert(acc.lightList[0] instanceof Light, "the light array items must be of type Light");
-		expect(acc.type).to.equal(template["5750"]);
+		testParse(acc);
+	});
+	it("should parse correctly when proxied", () => {
+		testParse(proxyAcc);
 	});
 
-	it("should serialize correctly", () => {
+	function testSerialize(obj: Accessory) {
 		// note: we manually check for property equality since we're going to
 		// serialize a few more values than the gateway reports
-		const serialized = acc.serialize();
+		const serialized = obj.serialize();
 
 		// check all properties except the light list
 		for (const key in Object.keys(serialized)) {
@@ -76,17 +83,29 @@ describe("ipso/accessory => ", () => {
 				}
 			}
 		}
+	}
+	it("should serialize correctly", () => {
+		testSerialize(acc);
+	});
+	it("should serialize correctly when proxied", () => {
+		testSerialize(proxyAcc);
 	});
 
-	it("should serialize correctly when a reference is given", () => {
-		const original = acc.clone();
-		expect(acc.serialize(original)).to.deep.equal({});
+	function testSerializeReference(obj: Accessory) {
+		const original = obj.clone();
+		expect(obj.serialize(original)).to.deep.equal({});
 
-		acc.merge({name: "Test"});
-		expect(acc.serialize(original)).to.deep.equal({9001: "Test"});
+		obj.merge({name: "Test"});
+		expect(obj.serialize(original)).to.deep.equal({9001: "Test"});
 
-		acc.lightList[0].merge({name: "Blub"});
+		obj.lightList[0].merge({name: "Blub"});
 		// note: we use include here, since Light has the required property transitionTime
-		expect(acc.serialize(original)["3311"][0]).to.include({9001: "Blub"});
+		expect(obj.serialize(original)["3311"][0]).to.include({9001: "Blub"});
+	}
+	it("should serialize correctly when a reference is given", () => {
+		testSerializeReference(acc);
+	});
+	it("should serialize correctly when a reference is given and proxied", () => {
+		testSerializeReference(proxyAcc);
 	});
 });

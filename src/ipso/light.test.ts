@@ -105,6 +105,21 @@ describe("ipso/light => feature tests =>", () => {
 		expect(light.colorX).to.equal(whiteSpectrumRange[1]);
 	});
 
+	it("setting the colorX on a white spectrum bulb should be correctly transformed to colorTemperature", () => {
+		const white = new Accessory()
+			.parse(buildAccessory("TRADFRI bulb E27 WS clear 950lm"))
+			.createProxy()
+			;
+		const light = white.lightList[0];
+
+		light.colorX = whiteSpectrumRange[0];
+		expect(light.colorTemperature).to.equal(0);
+		light.colorX = Math.round((whiteSpectrumRange[0] + whiteSpectrumRange[1]) / 2);
+		expect(light.colorTemperature).to.equal(50);
+		light.colorX = whiteSpectrumRange[1];
+		expect(light.colorTemperature).to.equal(100);
+	});
+
 	it("setting the hex color on an RGB bulb should update colorX and colorY", () => {
 		const rgb = new Accessory()
 			.parse(buildAccessory("TRADFRI bulb E27 C/WS opal 600lm"))

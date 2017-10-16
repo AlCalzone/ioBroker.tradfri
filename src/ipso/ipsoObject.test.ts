@@ -29,6 +29,17 @@ describe("ipso/ipsoObject => proxies", () => {
 		expect(obj.serialize()).to.deep.equal({});
 	});
 
+	it(`serialize() should transparently work for proxied objects`, () => {
+		expect(proxy.serialize()).to.deep.equal({});
+	});
+
+	it(`clone() on a native object should return another native object`, () => {
+		expect(obj.clone().isProxy).to.be.false;
+	});
+	it(`clone() on a proxy should return another proxy`, () => {
+		expect(proxy.clone().isProxy).to.be.true;
+	});
+
 	it(`serialize() should cause the proxy to be queried only once for "serialize"`, () => {
 		const dummyGet = (me, prop) => {
 			return me[prop];
