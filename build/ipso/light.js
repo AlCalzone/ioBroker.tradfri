@@ -86,10 +86,14 @@ class Light extends ipsoDevice_1.IPSODevice {
      */
     createProxy() {
         switch (this.spectrum) {
-            case "white":
-                return createWhiteSpectrumProxy(this);
-            case "rgb":
-                return createRGBProxy(this);
+            case "white": {
+                const proxy = createWhiteSpectrumProxy();
+                return super.createProxy(proxy.get, proxy.set);
+            }
+            case "rgb": {
+                const proxy = createRGBProxy();
+                return super.createProxy(proxy.get, proxy.set);
+            }
             default:
                 return this;
         }
@@ -161,8 +165,8 @@ exports.Light = Light;
  * Creates a proxy for a white spectrum lamp,
  * which converts color temperature to the correct colorX value
  */
-function createWhiteSpectrumProxy(target) {
-    return new Proxy(target, {
+function createWhiteSpectrumProxy() {
+    return {
         get: (me, key) => {
             switch (key) {
                 case "colorTemperature": {
@@ -181,14 +185,14 @@ function createWhiteSpectrumProxy(target) {
             }
             return true;
         },
-    });
+    };
 }
 /**
  * Creates a proxy for an RGB lamp,
  * which converts RGB color to CIE xy
  */
-function createRGBProxy(target) {
-    return new Proxy(target, {
+function createRGBProxy() {
+    return {
         get: (me, key) => {
             switch (key) {
                 case "color": {
@@ -234,6 +238,6 @@ function createRGBProxy(target) {
             }
             return true;
         },
-    });
+    };
 }
 //# sourceMappingURL=light.js.map

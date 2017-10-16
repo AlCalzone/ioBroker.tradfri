@@ -3,6 +3,7 @@
 require("reflect-metadata");
 
 import { expect } from "chai";
+import { whiteSpectrumRange } from "../tradfri/predefined-colors";
 import { Accessory } from "./accessory";
 import { Spectrum } from "./light";
 
@@ -47,9 +48,9 @@ describe("ipso/light => feature tests =>", () => {
 		isSwitchable: boolean;
 		spectrum: Spectrum;
 	}
-	const deviceTable: Device[] = [];
+	const deviceTable = new Map<string, Device>();
 	function add(name: string, switchable: boolean, dimmable: boolean, spectrum: Spectrum) {
-		deviceTable.push({ name, isDimmable: dimmable, isSwitchable: switchable, spectrum });
+		deviceTable.set(name, { name, isDimmable: dimmable, isSwitchable: switchable, spectrum });
 	}
 
 	// white spectrum lamps
@@ -79,7 +80,7 @@ describe("ipso/light => feature tests =>", () => {
 	add("TRADFRI bulb E12 CWS opal 600", true, true, "rgb");
 
 	it("supported features should be detected correctly", () => {
-		for (const device of deviceTable) {
+		for (const device of deviceTable.values()) {
 			const acc = new Accessory().parse(buildAccessory(device.name));
 			const light = acc.lightList[0];
 
@@ -87,6 +88,34 @@ describe("ipso/light => feature tests =>", () => {
 			expect(light.isDimmable()).to.equal(device.isDimmable, `${device.name} should ${device.isDimmable ? "" : "not "}be dimmable`);
 			expect(light.spectrum).to.equal(device.spectrum, `${device.name} should have spectrum ${device.spectrum}`);
 		}
+	});
+
+	it("setting the colorTemp on a white spectrum bulb should correctly set colorX", () => {
+		const white = new Accessory()
+			.parse(buildAccessory("TRADFRI bulb E27 WS clear 950lm"))
+			.createProxy()
+			;
+		const light = white.lightList[0];
+
+		light.colorTemperature = 0;
+		expect(light.colorX).to.equal(whiteSpectrumRange[0]);
+		light.colorTemperature = 50;
+		expect(light.colorX).to.equal(Math.round((whiteSpectrumRange[0] + whiteSpectrumRange[1]) / 2));
+		light.colorTemperature = 100;
+		expect(light.colorX).to.equal(whiteSpectrumRange[1]);
+	});
+
+	it("setting the hex color on an RGB bulb should update colorX and colorY", () => {
+		const rgb = new Accessory()
+			.parse(buildAccessory("TRADFRI bulb E27 C/WS opal 600lm"))
+			.createProxy()
+			;
+		const light = rgb.lightList[0];
+
+		light.merge({colorX: 0, colorY: 0});
+		light.color = "BADA55";
+		expect(light.colorX).to.not.equal(0);
+		expect(light.colorY).to.not.equal(0);
 	});
 
 });

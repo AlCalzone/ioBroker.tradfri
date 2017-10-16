@@ -34,8 +34,8 @@ export const whiteSpectrumTemp = [250, 370, 454];
 
 function defineColor(rgbHex: string, x: number, y: number, hue: number, saturation: number, temperature?: number) {
 	const definition: ColorDefinition = {
-		colorX: x,
-		colorY: y,
+		colorX: x * MAX_COLOR,
+		colorY: y * MAX_COLOR,
 		hue: hue * 360 / MAX_COLOR,
 		saturation: saturation / MAX_COLOR,
 		rgbHex,

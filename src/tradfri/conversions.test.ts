@@ -1,12 +1,12 @@
 import { expect } from "chai";
-import { deserializers, serializers } from "./conversions";
+import { conversions, deserializers, serializers } from "./conversions";
 import { MAX_COLOR, predefinedColors, whiteSpectrumRange } from "./predefined-colors";
 // tslint:disable:no-unused-expression
 
 describe("tradfri/conversions => whiteSpectrum <=> colorX =>", () => {
 
-	const serialize = serializers.whiteSpectrumToColorX;
-	const deserialize = deserializers.whiteSpectrumFromColorX;
+	const serialize = conversions.whiteSpectrumToColorX;
+	const deserialize = conversions.whiteSpectrumFromColorX;
 
 	// The white spectrum expressed in colorX values, as defined in the app
 	const [min, max] = whiteSpectrumRange;

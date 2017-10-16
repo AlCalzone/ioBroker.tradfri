@@ -3,7 +3,7 @@ import { predefinedColors } from "../tradfri/predefined-colors";
 import { Accessory } from "./accessory";
 import { DeviceInfo } from "./deviceInfo";
 import { IPSODevice } from "./ipsoDevice";
-import { deserializeWith, ipsoKey, IPSOObject, PropertyTransform, required, serializeWith } from "./ipsoObject";
+import { deserializeWith, doNotSerialize, ipsoKey, IPSOObject, PropertyTransform, required, serializeWith } from "./ipsoObject";
 
 // see https://github.com/hreichert/smarthome/blob/master/extensions/binding/org.eclipse.smarthome.binding.tradfri/src/main/java/org/eclipse/smarthome/binding/tradfri/internal/TradfriColor.java
 // for some color conversion
@@ -26,6 +26,7 @@ export class Light extends IPSODevice {
 	private _modelName: string;
 
 	@ipsoKey("5706")
+	@doNotSerialize // this is done through colorX / colorY
 	public color: string = "f1e0b5"; // hex string
 
 	@ipsoKey("5707")
@@ -37,19 +38,16 @@ export class Light extends IPSODevice {
 	@deserializeWith(deserializers.saturation)
 	public saturation: number = 0; // 0-100%
 
-	// TODO: I'm not happy with this solution, I'd rather map this to colorTemp for
-	// white spectrum lamps
 	@ipsoKey("5709")
-	// TODO: do the transformation [0..1] => [0..COLOR_MAX]
 	public colorX: number = 0; // int
 
 	@ipsoKey("5710")
 	public colorY: number = 0; // int
 
-	// currently not used, since the gateway only accepts 3 distinct values
+	// currently not used directly, since the gateway only accepts 3 distinct values
 	// we have to set colorX to set more than those 3 color temps
 	@ipsoKey("5711")
-	public colorTemperature: number = 0; // TODO: range unknown!
+	public colorTemperature: number = 0; // TODO: CoAP range unknown!
 
 	@ipsoKey("5712")
 	@required
@@ -121,10 +119,14 @@ export class Light extends IPSODevice {
 	 */
 	public createProxy(): this {
 		switch (this.spectrum) {
-			case "white":
-				return createWhiteSpectrumProxy(this);
-			case "rgb":
-				return createRGBProxy(this);
+			case "white": {
+				const proxy = createWhiteSpectrumProxy();
+				return super.createProxy(proxy.get, proxy.set);
+			}
+			case "rgb": {
+				const proxy = createRGBProxy();
+				return super.createProxy(proxy.get, proxy.set);
+			}
 			default:
 				return this;
 		}
@@ -138,8 +140,8 @@ export type Spectrum = "none" | "white" | "rgb";
  * Creates a proxy for a white spectrum lamp,
  * which converts color temperature to the correct colorX value
  */
-function createWhiteSpectrumProxy<T extends Light>(target: T): T {
-	return new Proxy(target, {
+function createWhiteSpectrumProxy<T extends Light>() {
+	return {
 		get: (me: T, key: PropertyKey) => {
 			switch (key) {
 				case "colorTemperature": {
@@ -152,21 +154,22 @@ function createWhiteSpectrumProxy<T extends Light>(target: T): T {
 			switch (key) {
 				case "colorTemperature": {
 					me.colorX = conversions.whiteSpectrumToColorX(value);
+					me.colorY = 27000; // magic number, but it works!
 					break;
 				}
 				default: me[key] = value;
 			}
 			return true;
 		},
-	});
+	};
 }
 
 /**
  * Creates a proxy for an RGB lamp,
  * which converts RGB color to CIE xy
  */
-function createRGBProxy<T extends Light>(target: T): T {
-	return new Proxy(target, {
+function createRGBProxy<T extends Light>() {
+	return {
 		get: (me: T, key: PropertyKey) => {
 			switch (key) {
 				case "color": {
@@ -203,12 +206,11 @@ function createRGBProxy<T extends Light>(target: T): T {
 							me.colorY = y;
 						}
 					}
-					me.colorX = conversions.whiteSpectrumToColorX(value);
 					break;
 				}
 				default: me[key] = value;
 			}
 			return true;
 		},
-	});
+	};
 }

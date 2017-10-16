@@ -41,6 +41,7 @@ const template = {
 };
 
 const acc = new Accessory().parse(template);
+const light = acc.lightList[0];
 
 describe("ipso/accessory => ", () => {
 
@@ -62,9 +63,18 @@ describe("ipso/accessory => ", () => {
 		}
 
 		// compare all lights
+		const ignoredProperties = [
+			"5706", // we don't send the RGB hex string
+		];
 		expect(serialized["3311"].length).to.equal(template["3311"].length);
 		for (let i = 0; i < serialized["3311"].length; i++) {
-			expect(serialized["3311"][i]).to.deep.include(template["3311"][i]);
+			const entry = serialized["3311"][i];
+			const templateEntry = template["3311"][i];
+			for (const prop of Object.keys(templateEntry)) {
+				if (ignoredProperties.indexOf(prop) === -1) {
+					expect(entry[prop]).to.equal(templateEntry[prop]);
+				}
+			}
 		}
 	});
 

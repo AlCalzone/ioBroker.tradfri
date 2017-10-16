@@ -12,10 +12,4 @@ export class IPSODevice extends IPSOObject {
 	@ipsoKey("9003")
 	public instanceId: number = 0;
 
-	/** Creates a proxy device */
-	public createProxy(): this {
-		// per default return this (equals no proxy)
-		return this;
-	}
-
 }

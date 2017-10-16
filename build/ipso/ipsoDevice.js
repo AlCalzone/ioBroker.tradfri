@@ -18,11 +18,6 @@ class IPSODevice extends ipsoObject_1.IPSOObject {
         this.createdAt = 0;
         this.instanceId = 0;
     }
-    /** Creates a proxy device */
-    createProxy() {
-        // per default return this (equals no proxy)
-        return this;
-    }
 }
 __decorate([
     ipsoObject_1.ipsoKey("9001"),

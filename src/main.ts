@@ -327,12 +327,24 @@ let adapter: ExtendedAdapter = utils.adapter({
 									transitionTime: await getTransitionDuration(accessory),
 								});
 							} else if (id.endsWith(".color")) {
+								if (light.spectrum === "rgb") {
+									light.merge({
+										color: val,
+										transitionTime: await getTransitionDuration(accessory),
+									});
+								} else if (light.spectrum === "white") {
+									light.merge({
+										colorTemperature: val,
+										transitionTime: await getTransitionDuration(accessory),
+									});
+								}
+							} else if (id.endsWith(".colorTemperature")) {
 								light.merge({
-									colorX: val,
-									colorY: 27000,
+									colorTemperature: val,
 									transitionTime: await getTransitionDuration(accessory),
 								});
 							} else if (id.endsWith(".hue")) {
+								// TODO: transform HSL to RGB
 								light.merge({
 									hue: val,
 									transitionTime: await getTransitionDuration(accessory),
@@ -511,8 +523,7 @@ function coap_getDevice_cb(instanceId: number, response: CoapResponse) {
 	}
 	const result = parsePayload(response);
 	// parse device info
-	const accessory = new Accessory();
-	accessory.parse(result);
+	const accessory = new Accessory().parse(result).createProxy();
 	// remember the device object, so we can later use it as a reference for updates
 	devices[instanceId] = accessory;
 	// create ioBroker device
@@ -587,7 +598,7 @@ function coap_getGroup_cb(instanceId: number, response: CoapResponse) {
 
 	const result = parsePayload(response);
 	// parse group info
-	const group = (new Group()).parse(result);
+	const group = (new Group()).parse(result).createProxy();
 	// remember the group object, so we can later use it as a reference for updates
 	let groupInfo: GroupInfo;
 	if (!(instanceId in groups)) {
@@ -670,7 +681,7 @@ function coap_getScene_cb(groupId: number, instanceId: number, response: CoapRes
 
 	const result = parsePayload(response);
 	// parse scene info
-	const scene = (new Scene()).parse(result);
+	const scene = (new Scene()).parse(result).createProxy();
 	// remember the scene object, so we can later use it as a reference for updates
 	groups[groupId].scenes[instanceId] = scene;
 	// Update the scene dropdown for the group
@@ -913,10 +924,25 @@ function extendDevice(accessory: Accessory) {
 						desc: "range: 0% = cold, 100% = warm",
 					},
 					native: {
-						path: "lightList.[0].colorX",
+						path: "lightList.[0].colorTemperature",
 					},
 				};
 			} else if (spectrum === "rgb") {
+				stateObjs["lightbulb.color"] = {
+					_id: `${objId}.lightbulb.color`,
+					type: "state",
+					common: {
+						name: "RGB color",
+						read: true,
+						write: true,
+						type: "string",
+						role: "level.color.temperature",
+						desc: "6-digit RGB hex string",
+					},
+					native: {
+						path: "lightList.[0].color",
+					},
+				};
 				stateObjs["lightbulb.hue"] = {
 					_id: `${objId}.lightbulb.hue`,
 					type: "state",
