@@ -21,4 +21,20 @@ export declare const conversions: {
         x: number;
         y: number;
     };
+    rgbFromHSV: (h: number, s: number, v: number) => {
+        r: number;
+        g: number;
+        b: number;
+    };
+    rgbToHSV: (r: number, g: number, b: number) => {
+        h: number;
+        s: number;
+        v: number;
+    };
+    rgbToString: (r: number, g: number, b: number) => string;
+    rgbFromString: (rgb: string) => {
+        r: number;
+        g: number;
+        b: number;
+    };
 };

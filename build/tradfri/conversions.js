@@ -2,6 +2,7 @@
 // tslint:disable:variable-name
 Object.defineProperty(exports, "__esModule", { value: true });
 const math_1 = require("../lib/math");
+const strings_1 = require("../lib/strings");
 const predefined_colors_1 = require("./predefined-colors");
 // ==========================
 // WHITE SPECTRUM conversions
@@ -65,6 +66,85 @@ function rgbFromCIExy(x, y) {
     [r, g, b] = [r, g, b].map(c => Math.round(math_1.clamp(c, 0, 1) * 255));
     return { r, g, b };
 }
+function rgbToHSV(r, g, b) {
+    // transform [0..255] => [0..1]
+    [r, g, b] = [r, g, b].map(c => c / 255);
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h;
+    let s;
+    const v = math_1.roundTo(max, 2);
+    if (r === g && g === b) {
+        h = 0;
+    }
+    else if (max === r) {
+        h = 60 * (0 + (g - b) / (max - min));
+    }
+    else if (max === g) {
+        h = 60 * (2 + (b - r) / (max - min));
+    }
+    else if (max === b) {
+        h = 60 * (4 + (r - g) / (max - min));
+    }
+    h = Math.round(h);
+    if (h < 0)
+        h += 360;
+    if (max === 0) {
+        s = 0;
+    }
+    else {
+        s = math_1.roundTo((max - min) / max, 2);
+    }
+    return { h, s, v };
+}
+function rgbFromHSV(h, s, v) {
+    let r;
+    let g;
+    let b;
+    if (s === 0) {
+        r = g = b = v;
+    }
+    else {
+        const hi = Math.floor(h / 60);
+        const f = (h / 60 - hi);
+        const p = v * (1 - s);
+        const q = v * (1 - s * f);
+        const t = v * (1 - s * (1 - f));
+        switch (hi) {
+            case 0:
+            case 6:
+                [r, g, b] = [v, t, p];
+                break;
+            case 1:
+                [r, g, b] = [q, v, p];
+                break;
+            case 2:
+                [r, g, b] = [p, v, t];
+                break;
+            case 3:
+                [r, g, b] = [p, q, v];
+                break;
+            case 4:
+                [r, g, b] = [t, p, v];
+                break;
+            case 5:
+                [r, g, b] = [v, p, q];
+                break;
+        }
+    }
+    // transform back to [0..255]
+    [r, g, b] = [r, g, b].map(c => Math.round(math_1.clamp(c, 0, 1) * 255));
+    return { r, g, b };
+}
+function rgbToString(r, g, b) {
+    return [r, g, b].map(c => strings_1.padStart(c.toString(16), 2, "0")).join("");
+}
+function rgbFromString(rgb) {
+    const r = parseInt(rgb.substr(0, 2), 16);
+    const g = parseInt(rgb.substr(2, 2), 16);
+    const b = parseInt(rgb.substr(4, 2), 16);
+    return { r, g, b };
+}
 // ===========================
 // RGB serializers
 // interpolate hue from [0..360] to [0..COLOR_MAX]
@@ -112,4 +192,8 @@ exports.conversions = {
     whiteSpectrumFromColorX,
     rgbFromCIExy,
     rgbToCIExy,
+    rgbFromHSV,
+    rgbToHSV,
+    rgbToString,
+    rgbFromString,
 };

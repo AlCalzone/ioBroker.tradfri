@@ -47,3 +47,23 @@ describe("tradfri/conversions => transitionTime() =>", () => {
 	});
 
 });
+
+describe("tradfri/conversions => rgbToHSV() <=> rgbFromHSV", () => {
+
+	it("should correctly convert RGB <=> HSV", () => {
+		const testSets = [
+			{rgb: {r: 0, g: 0, b: 0}, hsv: {h: 0, s: 0, v: 0}},
+			{rgb: {r: 92, g: 46, b: 23}, hsv: {h: 20, s: 0.75, v: 0.36}},
+			{rgb: {r: 255, g: 255, b: 255}, hsv: {h: 0, s: 0, v: 1}},
+			{rgb: {r: 191, g: 0, b: 255}, hsv: {h: 285, s: 1, v: 1}},
+			// TODO: Extend this to the predefined colors
+		];
+		for (const set of testSets) {
+			const {r, g, b} = set.rgb;
+			const {h, s, v} = set.hsv;
+			expect(conversions.rgbToHSV(r, g, b)).to.deep.equal(set.hsv, "rgbToHSV did not match the expected values");
+			expect(conversions.rgbFromHSV(h, s, v)).to.deep.equal(set.rgb, "rgbFromHSV did not match the expected values");
+		}
+	});
+
+});

@@ -1,4 +1,3 @@
-import { padStart } from "../lib/strings";
 import { conversions, deserializers, serializers } from "../tradfri/conversions";
 import { MAX_COLOR, predefinedColors } from "../tradfri/predefined-colors";
 import { Accessory } from "./accessory";
@@ -165,53 +164,80 @@ function createWhiteSpectrumProxy<T extends Light>() {
 	};
 }
 
+const rgbRegex = /^[0-9A-Fa-f]{6}$/;
+
 /**
  * Creates a proxy for an RGB lamp,
  * which converts RGB color to CIE xy
  */
 function createRGBProxy<T extends Light>() {
-	return {
-		get: (me: T, key: PropertyKey) => {
-			switch (key) {
-				case "color": {
-					if (typeof me.color === "string" && me.color.length === 6) {
-						// predefined color, return it
-						return me.color;
-					} else {
-						// calculate it from colorX/Y
-						const {r, g, b} = conversions.rgbFromCIExy(me.colorX, me.colorY);
-						return [r, g, b].map(c => padStart(c.toString(16), 2, "0")).join("");
+	function get(me: T, key: PropertyKey) {
+		switch (key) {
+			case "color": {
+				if (typeof me.color === "string" && rgbRegex.test(me.color)) {
+					// predefined color, return it
+					return me.color;
+				} else {
+					// calculate it from colorX/Y
+					const {r, g, b} = conversions.rgbFromCIExy(me.colorX, me.colorY);
+					return conversions.rgbToString(r, g, b);
+				}
+			}
+			case "hue": {
+				const {r, g, b} = conversions.rgbFromString(get(me, "color"));
+				const {h, s, v} = conversions.rgbToHSV(r, g, b);
+				return h;
+			}
+			case "saturation": {
+				const {r, g, b} = conversions.rgbFromString(get(me, "color"));
+				const {h, s, v} = conversions.rgbToHSV(r, g, b);
+				return Math.round(s * 100);
+			}
+			default: return me[key];
+		}
+	}
+	function set(me: T, key: PropertyKey, value, receiver) {
+		switch (key) {
+			case "color": {
+				if (predefinedColors.has(value)) {
+					// its a predefined color, use the predefined values
+					const definition = predefinedColors.get(value);
+					me.colorX = definition.colorX;
+					me.colorY = definition.colorY;
+				} else {
+					// only accept HEX colors
+					if (rgbRegex.test(value)) {
+						// calculate the X/Y values
+						const {r, g, b} = conversions.rgbFromString(value);
+						const {x, y} = conversions.rgbToCIExy(r, g, b);
+						me.colorX = Math.round(x * MAX_COLOR);
+						me.colorY = Math.round(y * MAX_COLOR);
 					}
 				}
-				default: return me[key];
+				break;
 			}
-		},
-		set: (me: T, key: PropertyKey, value, receiver) => {
-			switch (key) {
-				case "color": {
-					if (predefinedColors.has(value)) {
-						// its a predefined color, use the predefined values
-						const definition = predefinedColors.get(value);
-						me.colorX = definition.colorX;
-						me.colorY = definition.colorY;
-					} else {
-						// only accept HEX colors
-						if (/^[0-9A-Fa-f]{6}$/.test(value)) {
-							// calculate the X/Y values
-							const rgb = value as string;
-							const r = parseInt(rgb.substr(0, 2), 16);
-							const g = parseInt(rgb.substr(2, 2), 16);
-							const b = parseInt(rgb.substr(4, 2), 16);
-							const {x, y} = conversions.rgbToCIExy(r, g, b);
-							me.colorX = Math.round(x * MAX_COLOR);
-							me.colorY = Math.round(y * MAX_COLOR);
-						}
-					}
-					break;
-				}
-				default: me[key] = value;
+			case "hue": {
+				let {r, g, b} = conversions.rgbFromString(get(me, "color"));
+				// tslint:disable-next-line:prefer-const
+				let {h, s, v} = conversions.rgbToHSV(r, g, b);
+				h = value;
+				({r, g, b} = conversions.rgbFromHSV(h, s, v));
+				set(me, "color", conversions.rgbToString(r, g, b), receiver);
+				break;
 			}
-			return true;
-		},
-	};
+			case "saturation": {
+				let {r, g, b} = conversions.rgbFromString(get(me, "color"));
+				// tslint:disable-next-line:prefer-const
+				let {h, s, v} = conversions.rgbToHSV(r, g, b);
+				s = value / 100;
+				({r, g, b} = conversions.rgbFromHSV(h, s, v));
+				set(me, "color", conversions.rgbToString(r, g, b), receiver);
+				break;
+			}
+			default: me[key] = value;
+		}
+		return true;
+	}
+
+	return {get, set};
 }
