@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{53e51c2f-73aa-4803-9a77-5431efc98998}</ProjectGuid>
     <ProjectHome />
-    <ProjectView>ProjectFiles</ProjectView>
+    <ProjectView>ShowAllFiles</ProjectView>
     <StartupFile />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -26,28 +26,37 @@
     <Content Include="appveyor.yml" />
     <Content Include="io-package.json" />
     <Content Include="LICENSE" />
+    <Content Include="package-lock.json" />
     <Content Include="package.json" />
     <Content Include="README.md" />
     <Content Include="admin\index.html" />
     <Content Include="admin\tradfri.png" />
     <Compile Include="admin\words.js" />
+    <TypeScriptCompile Include="src\ipso\accessory.test.ts" />
     <TypeScriptCompile Include="src\ipso\accessory.ts" />
+    <TypeScriptCompile Include="src\ipso\deviceInfo.test.ts" />
     <TypeScriptCompile Include="src\ipso\deviceInfo.ts" />
     <TypeScriptCompile Include="src\ipso\endpoints.ts" />
     <TypeScriptCompile Include="src\ipso\gatewayDetails.ts" />
+    <TypeScriptCompile Include="src\ipso\group.test.ts" />
     <TypeScriptCompile Include="src\ipso\group.ts" />
     <TypeScriptCompile Include="src\ipso\ipsoDevice.ts" />
+    <TypeScriptCompile Include="src\ipso\ipsoObject.test.ts" />
     <TypeScriptCompile Include="src\ipso\ipsoObject.ts" />
     <TypeScriptCompile Include="src\ipso\light.test.ts" />
     <TypeScriptCompile Include="src\ipso\light.ts" />
     <TypeScriptCompile Include="src\ipso\lightSetting.ts" />
+    <TypeScriptCompile Include="src\ipso\notification.test.ts" />
     <TypeScriptCompile Include="src\ipso\notification.ts" />
     <TypeScriptCompile Include="src\ipso\plug.ts" />
+    <TypeScriptCompile Include="src\ipso\scene.test.ts" />
     <TypeScriptCompile Include="src\ipso\scene.ts" />
     <TypeScriptCompile Include="src\ipso\sensor.ts" />
     <TypeScriptCompile Include="src\lib\array-extensions.test.ts" />
     <TypeScriptCompile Include="src\lib\array-extensions.ts" />
     <TypeScriptCompile Include="src\lib\constants.ts" />
+    <TypeScriptCompile Include="src\lib\strings.test.ts" />
+    <TypeScriptCompile Include="src\lib\strings.ts" />
     <TypeScriptCompile Include="src\tradfri\conversions.test.ts">
       <SubType>Code</SubType>
       <TestFramework>Mocha</TestFramework>
@@ -78,6 +87,7 @@
     </Content>
     <Content Include="src\flow\add_device.txt" />
     <Content Include="src\flow\app_setup.txt" />
+    <Content Include="src\flow\motion_sensor.txt" />
     <Content Include="src\flow\renamegroup.txt" />
     <Content Include="src\flow\scenes.txt" />
     <Content Include="src\flow\startup.txt" />
