@@ -226,8 +226,8 @@ function createRGBProxy() {
                             const g = parseInt(rgb.substr(2, 2), 16);
                             const b = parseInt(rgb.substr(4, 2), 16);
                             const { x, y } = conversions_1.conversions.rgbToCIExy(r, g, b);
-                            me.colorX = x;
-                            me.colorY = y;
+                            me.colorX = Math.round(x * predefined_colors_1.MAX_COLOR);
+                            me.colorY = Math.round(y * predefined_colors_1.MAX_COLOR);
                         }
                     }
                     break;

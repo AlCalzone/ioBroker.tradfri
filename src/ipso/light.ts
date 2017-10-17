@@ -1,5 +1,5 @@
 import { conversions, deserializers, serializers } from "../tradfri/conversions";
-import { predefinedColors } from "../tradfri/predefined-colors";
+import { MAX_COLOR, predefinedColors } from "../tradfri/predefined-colors";
 import { Accessory } from "./accessory";
 import { DeviceInfo } from "./deviceInfo";
 import { IPSODevice } from "./ipsoDevice";
@@ -202,8 +202,8 @@ function createRGBProxy<T extends Light>() {
 							const g = parseInt(rgb.substr(2, 2), 16);
 							const b = parseInt(rgb.substr(4, 2), 16);
 							const {x, y} = conversions.rgbToCIExy(r, g, b);
-							me.colorX = x;
-							me.colorY = y;
+							me.colorX = Math.round(x * MAX_COLOR);
+							me.colorY = Math.round(y * MAX_COLOR);
 						}
 					}
 					break;

@@ -18,8 +18,8 @@ exports.whiteSpectrumHex = ["f5faf6", "f1e0b5", "efd275"];
 exports.whiteSpectrumTemp = [250, 370, 454];
 function defineColor(rgbHex, x, y, hue, saturation, temperature) {
     const definition = {
-        colorX: x * exports.MAX_COLOR,
-        colorY: y * exports.MAX_COLOR,
+        colorX: Math.round(x * exports.MAX_COLOR),
+        colorY: Math.round(y * exports.MAX_COLOR),
         hue: hue * 360 / exports.MAX_COLOR,
         saturation: saturation / exports.MAX_COLOR,
         rgbHex,

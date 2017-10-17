@@ -3,7 +3,7 @@
 require("reflect-metadata");
 
 import { expect } from "chai";
-import { whiteSpectrumRange } from "../tradfri/predefined-colors";
+import { predefinedColors, whiteSpectrumRange } from "../tradfri/predefined-colors";
 import { Accessory } from "./accessory";
 import { Spectrum } from "./light";
 
@@ -131,6 +131,70 @@ describe("ipso/light => feature tests =>", () => {
 		light.color = "BADA55";
 		expect(light.colorX).to.not.equal(0);
 		expect(light.colorY).to.not.equal(0);
+	});
+
+	it("the payload to set RGB color should include colorX/Y and transitionTime", () => {
+		const rgb = new Accessory()
+			.parse(buildAccessory("TRADFRI bulb E27 C/WS opal 600lm"))
+			.createProxy()
+			;
+		const original = rgb.clone();
+		const light = rgb.lightList[0];
+
+		light.color = "BADA55";
+		const serialized = rgb.serialize(original);
+		expect(serialized).to.haveOwnProperty("3311");
+		expect(serialized["3311"]).to.have.length(1);
+		expect(serialized["3311"][0]).to.haveOwnProperty("5709");
+		expect(serialized["3311"][0]).to.haveOwnProperty("5710");
+		expect(serialized["3311"][0]).to.haveOwnProperty("5712");
+	});
+
+	it("updating RGB to a predefined color should send the predefined colorX/Y values", () => {
+		const rgb = new Accessory()
+			.parse(buildAccessory("TRADFRI bulb E27 C/WS opal 600lm"))
+			.createProxy()
+			;
+		const original = rgb.clone();
+		const light = rgb.lightList[0];
+
+		for (const predefined of predefinedColors.values()) {
+			if (predefined.rgbHex === original.lightList[0].color) continue;
+			light.color = predefined.rgbHex;
+			const serialized = rgb.serialize(original);
+			expect(serialized).to.deep.equal({
+				3311: [{
+					5709: predefined.colorX,
+					5710: predefined.colorY,
+					5712: 5,
+				}],
+			});
+		}
+
+	});
+
+	it("parsing an RGB light should result in a valid hex color", () => {
+		const source = buildAccessory("TRADFRI bulb E27 C/WS opal 600lm");
+		delete source["3311"][0]["5706"];
+		source["3311"][0]["5709"] = 24567;
+		source["3311"][0]["5710"] = 30987;
+		const rgb = new Accessory()
+			.parse(source)
+			.createProxy()
+			;
+		expect(/^[a-fA-F0-9]{6}$/.test(rgb.lightList[0].color));
+	});
+
+	it("parsing an RGB light without any color properties should result in a valid hex color", () => {
+		const source = buildAccessory("TRADFRI bulb E27 C/WS opal 600lm");
+		delete source["3311"][0]["5706"];
+		delete source["3311"][0]["5709"];
+		delete source["3311"][0]["5710"];
+		const rgb = new Accessory()
+			.parse(source)
+			.createProxy()
+			;
+		expect(/^[a-fA-F0-9]{6}$/.test(rgb.lightList[0].color));
 	});
 
 });
