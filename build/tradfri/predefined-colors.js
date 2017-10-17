@@ -55,4 +55,3 @@ exports.whiteSpectrumRange = [24930, 33135];
 // 	Math.round(predefinedColors.get(whiteSpectrumHex[0]).colorX * MAX_COLOR),
 // 	Math.round(predefinedColors.get(whiteSpectrumHex[whiteSpectrumHex.length - 1]).colorX * MAX_COLOR),
 // ];
-//# sourceMappingURL=predefined-colors.js.map

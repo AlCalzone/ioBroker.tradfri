@@ -52,4 +52,3 @@ function parseNotificationDetails(kvpList) {
     }
     return ret;
 }
-//# sourceMappingURL=notification.js.map

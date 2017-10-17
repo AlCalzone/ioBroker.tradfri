@@ -46,4 +46,3 @@ __decorate([
     __metadata("design:type", String)
 ], DeviceInfo.prototype, "serialNumber", void 0);
 exports.DeviceInfo = DeviceInfo;
-//# sourceMappingURL=deviceInfo.js.map

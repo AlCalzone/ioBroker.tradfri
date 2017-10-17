@@ -43,4 +43,3 @@ __decorate([
     __metadata("design:type", Boolean)
 ], Scene.prototype, "useCurrentLightSettings", void 0);
 exports.Scene = Scene;
-//# sourceMappingURL=scene.js.map

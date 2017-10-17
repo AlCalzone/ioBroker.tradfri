@@ -45,4 +45,3 @@ __decorate([
     __metadata("design:type", Number)
 ], Plug.prototype, "powerFactor", void 0);
 exports.Plug = Plug;
-//# sourceMappingURL=plug.js.map

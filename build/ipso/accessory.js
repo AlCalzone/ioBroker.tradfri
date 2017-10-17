@@ -75,4 +75,3 @@ __decorate([
     __metadata("design:type", Number)
 ], Accessory.prototype, "otaUpdateState", void 0);
 exports.Accessory = Accessory;
-//# sourceMappingURL=accessory.js.map

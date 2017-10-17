@@ -17,4 +17,3 @@ function roundTo(value, digits) {
     return Math.round(value * exp) / exp;
 }
 exports.roundTo = roundTo;
-//# sourceMappingURL=math.js.map

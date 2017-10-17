@@ -238,4 +238,3 @@ function createRGBProxy() {
         },
     };
 }
-//# sourceMappingURL=light.js.map

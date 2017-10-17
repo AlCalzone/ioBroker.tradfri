@@ -113,4 +113,3 @@ exports.conversions = {
     rgbFromCIExy,
     rgbToCIExy,
 };
-//# sourceMappingURL=conversions.js.map

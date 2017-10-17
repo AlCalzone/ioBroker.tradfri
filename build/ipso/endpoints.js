@@ -15,4 +15,3 @@ exports.gatewayEndpoints = {
     alexaCertificate: "9094",
     alexa: "9095",
 };
-//# sourceMappingURL=endpoints.js.map

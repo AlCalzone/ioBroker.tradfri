@@ -62,4 +62,3 @@ __decorate([
     __metadata("design:type", String)
 ], Sensor.prototype, "unit", void 0);
 exports.Sensor = Sensor;
-//# sourceMappingURL=sensor.js.map

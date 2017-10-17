@@ -1328,4 +1328,3 @@ process.on("uncaughtException", (err) => {
         adapter.log.error("> stack: " + err.stack);
     process.exit(1);
 });
-//# sourceMappingURL=main.js.map

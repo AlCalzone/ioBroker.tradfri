@@ -71,4 +71,3 @@ const remoteRoot = `/opt/iobroker/node_modules/iobroker.${ADAPTER_NAME}`;
         process.exit(0);
     });
 })();
-//# sourceMappingURL=deploy_local.js.map

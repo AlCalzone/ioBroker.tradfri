@@ -469,4 +469,3 @@ __decorate([
     __metadata("design:type", Boolean)
 ], IPSOObject.prototype, "isProxy", void 0);
 exports.IPSOObject = IPSOObject;
-//# sourceMappingURL=ipsoObject.js.map

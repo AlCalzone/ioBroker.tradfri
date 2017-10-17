@@ -60,4 +60,3 @@ function toAccessoryLink(ids) {
         },
     };
 }
-//# sourceMappingURL=group.js.map

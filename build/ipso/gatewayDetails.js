@@ -146,4 +146,3 @@ var updatePriority;
     updatePriority[updatePriority["required"] = 2] = "required";
     updatePriority[updatePriority["forced"] = 5] = "forced";
 })(updatePriority = exports.updatePriority || (exports.updatePriority = {}));
-//# sourceMappingURL=gatewayDetails.js.map

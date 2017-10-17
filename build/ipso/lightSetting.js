@@ -57,4 +57,3 @@ __decorate([
     __metadata("design:type", Boolean)
 ], LightSetting.prototype, "onOff", void 0);
 exports.LightSetting = LightSetting;
-//# sourceMappingURL=lightSetting.js.map
