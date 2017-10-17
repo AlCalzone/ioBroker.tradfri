@@ -62,7 +62,7 @@ function rgbFromCIExy(x, y) {
     // reverse gamma correction
     [r, g, b] = [r, g, b].map(c => c <= 0.0031308 ? 12.92 * c : (1.0 + 0.055) * Math.pow(c, (1.0 / 2.4)) - 0.055);
     // transform back to [0..255]
-    [r, g, b] = [r, g, b].map(c => math_1.clamp(c, 0, 1) * 255);
+    [r, g, b] = [r, g, b].map(c => Math.round(math_1.clamp(c, 0, 1) * 255));
     return { r, g, b };
 }
 // ===========================

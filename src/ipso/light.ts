@@ -1,3 +1,4 @@
+import { padStart } from "../lib/strings";
 import { conversions, deserializers, serializers } from "../tradfri/conversions";
 import { MAX_COLOR, predefinedColors } from "../tradfri/predefined-colors";
 import { Accessory } from "./accessory";
@@ -179,7 +180,7 @@ function createRGBProxy<T extends Light>() {
 					} else {
 						// calculate it from colorX/Y
 						const {r, g, b} = conversions.rgbFromCIExy(me.colorX, me.colorY);
-						return `${r.toString(16)}${g.toString(16)}${b.toString(16)}`;
+						return [r, g, b].map(c => padStart(c.toString(16), 2, "0")).join("");
 					}
 				}
 				default: return me[key];

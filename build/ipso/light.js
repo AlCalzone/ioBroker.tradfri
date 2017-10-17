@@ -9,6 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const strings_1 = require("../lib/strings");
 const conversions_1 = require("../tradfri/conversions");
 const predefined_colors_1 = require("../tradfri/predefined-colors");
 const ipsoDevice_1 = require("./ipsoDevice");
@@ -202,7 +203,7 @@ function createRGBProxy() {
                     else {
                         // calculate it from colorX/Y
                         const { r, g, b } = conversions_1.conversions.rgbFromCIExy(me.colorX, me.colorY);
-                        return `${r.toString(16)}${g.toString(16)}${b.toString(16)}`;
+                        return [r, g, b].map(c => strings_1.padStart(c.toString(16), 2, "0")).join("");
                     }
                 }
                 default: return me[key];
