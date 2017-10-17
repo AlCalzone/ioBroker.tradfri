@@ -46,6 +46,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### 0.3.4 (2017-10-17)
+* (AlCalzone) Disabled automatic restart on connection loss.
+
 #### 0.3.3 (2017-10-07)
 * (AlCalzone) Eliminated potential sources of infinite loops
 

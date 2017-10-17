@@ -225,6 +225,12 @@ let adapter = utils_1.default.adapter({
         else {
             global_1.Global.log(`{{blue}} state with id ${id} deleted`, "debug");
         }
+        if (dead) {
+            global_1.Global.log("The connection to the gateway is dead.", "error");
+            global_1.Global.log("Cannot send changes.", "error");
+            global_1.Global.log("Please restart the adapter!", "error");
+            return;
+        }
         if (state && !state.ack && id.startsWith(adapter.namespace)) {
             // our own state was changed from within ioBroker, react to it
             const stateObj = objects[id];
@@ -1169,6 +1175,7 @@ let pingTimer;
 let connectionAlive = false;
 let pingFails = 0;
 let resetAttempts = 0;
+let dead = false;
 function pingThread() {
     return __awaiter(this, void 0, void 0, function* () {
         const oldValue = connectionAlive;
@@ -1201,10 +1208,10 @@ function pingThread() {
                 }
                 else {
                     // not sure what to do here, try restarting the adapter
-                    global_1.Global.log(`3 consecutive reset attempts failed, restarting the adapter`, "warn");
-                    setTimeout(() => {
-                        process.exit(1);
-                    }, 1000);
+                    global_1.Global.log(`Three consecutive reset attempts failed!`, "error");
+                    global_1.Global.log(`Please restart the adapter manually!`, "error");
+                    clearTimeout(pingTimer);
+                    dead = true;
                 }
             }
         }

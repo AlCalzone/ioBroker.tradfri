@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "0.3.3",
+        "version": "0.3.4",
         "news": {
+            "0.3.4": {
+                "en": "Disabled automatic restart on connection loss.",
+                "de": "Automatischen Neustart bei Verbindungsverlust deaktiviert."
+            },
             "0.3.3": {
                 "en": "Eliminated potential sources of infinite loops",
                 "de": "Potentielle Auslöser von Endlosschleifen eliminiert"

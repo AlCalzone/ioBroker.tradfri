@@ -257,6 +257,13 @@ let adapter: ExtendedAdapter = utils.adapter({
 			_.log(`{{blue}} state with id ${id} deleted`, "debug");
 		}
 
+		if (dead) {
+			_.log("The connection to the gateway is dead.", "error");
+			_.log("Cannot send changes.", "error");
+			_.log("Please restart the adapter!", "error");
+			return;
+		}
+
 		if (state && !state.ack && id.startsWith(adapter.namespace)) {
 			// our own state was changed from within ioBroker, react to it
 
@@ -1304,6 +1311,7 @@ let pingTimer: NodeJS.Timer;
 let connectionAlive: boolean = false;
 let pingFails: number = 0;
 let resetAttempts: number = 0;
+let dead: boolean = false;
 async function pingThread() {
 	const oldValue = connectionAlive;
 	connectionAlive = await coap.ping(requestBase);
@@ -1335,10 +1343,10 @@ async function pingThread() {
 				coap.reset();
 			} else {
 				// not sure what to do here, try restarting the adapter
-				_.log(`3 consecutive reset attempts failed, restarting the adapter`, "warn");
-				setTimeout(() => {
-					process.exit(1);
-				}, 1000);
+				_.log(`Three consecutive reset attempts failed!`, "error");
+				_.log(`Please restart the adapter manually!`, "error");
+				clearTimeout(pingTimer);
+				dead = true;
 			}
 		}
 	}
