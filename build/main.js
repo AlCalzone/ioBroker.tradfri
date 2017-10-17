@@ -279,7 +279,7 @@ let adapter = utils_1.default.adapter({
                             });
                         }
                         serializedObj = newGroup.serialize(group); // serialize with the old object as a reference
-                        url = `${requestBase}${endpoints_1.default.groups}/${rootObj.native.instanceId}`;
+                        url = `${requestBase}${endpoints_1.endpoints.groups}/${rootObj.native.instanceId}`;
                         break;
                     default:// accessory
                         // read the instanceId and get a reference value
@@ -299,9 +299,35 @@ let adapter = utils_1.default.adapter({
                                 });
                             }
                             else if (id.endsWith(".color")) {
+                                if (light.spectrum === "rgb") {
+                                    light.merge({
+                                        color: val,
+                                        transitionTime: yield getTransitionDuration(accessory),
+                                    });
+                                }
+                                else if (light.spectrum === "white") {
+                                    light.merge({
+                                        colorTemperature: val,
+                                        transitionTime: yield getTransitionDuration(accessory),
+                                    });
+                                }
+                            }
+                            else if (id.endsWith(".colorTemperature")) {
                                 light.merge({
-                                    colorX: val,
-                                    colorY: 27000,
+                                    colorTemperature: val,
+                                    transitionTime: yield getTransitionDuration(accessory),
+                                });
+                            }
+                            else if (id.endsWith(".hue")) {
+                                // TODO: transform HSL to RGB
+                                light.merge({
+                                    hue: val,
+                                    transitionTime: yield getTransitionDuration(accessory),
+                                });
+                            }
+                            else if (id.endsWith(".saturation")) {
+                                light.merge({
+                                    saturation: val,
                                     transitionTime: yield getTransitionDuration(accessory),
                                 });
                             }
@@ -313,7 +339,7 @@ let adapter = utils_1.default.adapter({
                             }
                         }
                         serializedObj = newAccessory.serialize(accessory); // serialize with the old object as a reference
-                        url = `${requestBase}${endpoints_1.default.devices}/${rootObj.native.instanceId}`;
+                        url = `${requestBase}${endpoints_1.endpoints.devices}/${rootObj.native.instanceId}`;
                         break;
                 }
                 // If the serialized object contains no properties, we don't need to send anything
@@ -408,7 +434,7 @@ function stopObservingResource(path) {
 }
 /** Sets up an observer for all devices */
 function observeDevices() {
-    observeResource(endpoints_1.default.devices, coapCb_getAllDevices);
+    observeResource(endpoints_1.endpoints.devices, coapCb_getAllDevices);
 }
 // gets called whenever "get /15001" updates
 function coapCb_getAllDevices(response) {
@@ -427,7 +453,7 @@ function coapCb_getAllDevices(response) {
         const addedKeys = array_extensions_1.except(newKeys, oldKeys);
         global_1.Global.log(`adding devices with keys ${JSON.stringify(addedKeys)}`, "debug");
         const addDevices = addedKeys.map(id => {
-            return observeResource(`${endpoints_1.default.devices}/${id}`, (resp) => coap_getDevice_cb(id, resp));
+            return observeResource(`${endpoints_1.endpoints.devices}/${id}`, (resp) => coap_getDevice_cb(id, resp));
         });
         yield Promise.all(addDevices);
         const removedKeys = array_extensions_1.except(oldKeys, newKeys);
@@ -441,7 +467,7 @@ function coapCb_getAllDevices(response) {
                 delete groups[id];
             }
             // remove observer
-            stopObservingResource(`${endpoints_1.default.devices}/${id}`);
+            stopObservingResource(`${endpoints_1.endpoints.devices}/${id}`);
         }));
     });
 }
@@ -453,8 +479,7 @@ function coap_getDevice_cb(instanceId, response) {
     }
     const result = parsePayload(response);
     // parse device info
-    const accessory = new accessory_1.Accessory();
-    accessory.parse(result);
+    const accessory = new accessory_1.Accessory().parse(result).createProxy();
     // remember the device object, so we can later use it as a reference for updates
     devices[instanceId] = accessory;
     // create ioBroker device
@@ -462,7 +487,7 @@ function coap_getDevice_cb(instanceId, response) {
 }
 /** Sets up an observer for all groups */
 function observeGroups() {
-    observeResource(endpoints_1.default.groups, coapCb_getAllGroups);
+    observeResource(endpoints_1.endpoints.groups, coapCb_getAllGroups);
 }
 // gets called whenever "get /15004" updates
 function coapCb_getAllGroups(response) {
@@ -481,7 +506,7 @@ function coapCb_getAllGroups(response) {
         const addedKeys = array_extensions_1.except(newKeys, oldKeys);
         global_1.Global.log(`adding groups with keys ${JSON.stringify(addedKeys)}`, "debug");
         const addGroups = addedKeys.map(id => {
-            return observeResource(`${endpoints_1.default.groups}/${id}`, (resp) => coap_getGroup_cb(id, resp));
+            return observeResource(`${endpoints_1.endpoints.groups}/${id}`, (resp) => coap_getGroup_cb(id, resp));
         });
         yield Promise.all(addGroups);
         const removedKeys = array_extensions_1.except(oldKeys, newKeys);
@@ -495,7 +520,7 @@ function coapCb_getAllGroups(response) {
                 delete groups[id];
             }
             // remove observer
-            stopObservingResource(`${endpoints_1.default.groups}/${id}`);
+            stopObservingResource(`${endpoints_1.endpoints.groups}/${id}`);
         }));
     });
 }
@@ -515,7 +540,7 @@ function coap_getGroup_cb(instanceId, response) {
     }
     const result = parsePayload(response);
     // parse group info
-    const group = (new group_1.Group()).parse(result);
+    const group = (new group_1.Group()).parse(result).createProxy();
     // remember the group object, so we can later use it as a reference for updates
     let groupInfo;
     if (!(instanceId in groups)) {
@@ -530,7 +555,7 @@ function coap_getGroup_cb(instanceId, response) {
     // create ioBroker states
     extendGroup(group);
     // and load scene information
-    observeResource(`${endpoints_1.default.scenes}/${instanceId}`, (resp) => coap_getAllScenes_cb(instanceId, resp));
+    observeResource(`${endpoints_1.endpoints.scenes}/${instanceId}`, (resp) => coap_getAllScenes_cb(instanceId, resp));
 }
 // gets called whenever "get /15005/<groupId>" updates
 function coap_getAllScenes_cb(groupId, response) {
@@ -550,7 +575,7 @@ function coap_getAllScenes_cb(groupId, response) {
         const addedKeys = array_extensions_1.except(newKeys, oldKeys);
         global_1.Global.log(`adding scenes with keys ${JSON.stringify(addedKeys)} to group ${groupId}`, "debug");
         const addScenes = addedKeys.map(id => {
-            return observeResource(`${endpoints_1.default.scenes}/${groupId}/${id}`, (resp) => coap_getScene_cb(groupId, id, resp));
+            return observeResource(`${endpoints_1.endpoints.scenes}/${groupId}/${id}`, (resp) => coap_getScene_cb(groupId, id, resp));
         });
         yield Promise.all(addScenes);
         const removedKeys = array_extensions_1.except(oldKeys, newKeys);
@@ -560,7 +585,7 @@ function coap_getAllScenes_cb(groupId, response) {
             if (groupInfo.scenes.hasOwnProperty(id))
                 delete groupInfo.scenes[id];
             // remove observer
-            stopObservingResource(`${endpoints_1.default.scenes}/${groupId}/${id}`);
+            stopObservingResource(`${endpoints_1.endpoints.scenes}/${groupId}/${id}`);
         });
         // Update the scene dropdown for the group
         updatePossibleScenes(groupInfo);
@@ -582,7 +607,7 @@ function coap_getScene_cb(groupId, instanceId, response) {
     }
     const result = parsePayload(response);
     // parse scene info
-    const scene = (new scene_1.Scene()).parse(result);
+    const scene = (new scene_1.Scene()).parse(result).createProxy();
     // remember the scene object, so we can later use it as a reference for updates
     groups[groupId].scenes[instanceId] = scene;
     // Update the scene dropdown for the group
@@ -777,34 +802,103 @@ function extendDevice(accessory) {
             },
         };
         if (accessory.type === accessory_1.AccessoryTypes.lightbulb) {
+            let channelName;
+            let spectrum = "none";
+            if (accessory.lightList != null && accessory.lightList.length > 0) {
+                spectrum = accessory.lightList[0].spectrum;
+            }
+            if (spectrum === "none") {
+                channelName = "Lightbulb";
+            }
+            else if (spectrum === "white") {
+                channelName = "Lightbulb (white spectrum)";
+            }
+            else if (spectrum === "rgb") {
+                channelName = "RGB Lightbulb";
+            }
             // obj.lightbulb should be a channel
             stateObjs.lightbulb = {
                 _id: `${objId}.lightbulb`,
                 type: "channel",
                 common: {
-                    name: "Lightbulb",
+                    name: channelName,
                     role: "light",
                 },
-                native: {},
-            };
-            stateObjs["lightbulb.color"] = {
-                _id: `${objId}.lightbulb.color`,
-                type: "state",
-                common: {
-                    name: "color temperature of the lightbulb",
-                    read: true,
-                    write: true,
-                    min: 0,
-                    max: 100,
-                    unit: "%",
-                    type: "number",
-                    role: "level.color.temperature",
-                    desc: "range: 0% = cold, 100% = warm",
-                },
                 native: {
-                    path: "lightList.[0].colorX",
+                    spectrum: spectrum,
                 },
             };
+            if (spectrum === "white") {
+                stateObjs["lightbulb.color"] = {
+                    _id: `${objId}.lightbulb.color`,
+                    type: "state",
+                    common: {
+                        name: "Color temperature",
+                        read: true,
+                        write: true,
+                        min: 0,
+                        max: 100,
+                        unit: "%",
+                        type: "number",
+                        role: "level.color.temperature",
+                        desc: "range: 0% = cold, 100% = warm",
+                    },
+                    native: {
+                        path: "lightList.[0].colorTemperature",
+                    },
+                };
+            }
+            else if (spectrum === "rgb") {
+                stateObjs["lightbulb.color"] = {
+                    _id: `${objId}.lightbulb.color`,
+                    type: "state",
+                    common: {
+                        name: "RGB color",
+                        read: true,
+                        write: true,
+                        type: "string",
+                        role: "level.color",
+                        desc: "6-digit RGB hex string",
+                    },
+                    native: {
+                        path: "lightList.[0].color",
+                    },
+                };
+                stateObjs["lightbulb.hue"] = {
+                    _id: `${objId}.lightbulb.hue`,
+                    type: "state",
+                    common: {
+                        name: "Color hue",
+                        read: true,
+                        write: true,
+                        min: 0,
+                        max: 360,
+                        unit: "°",
+                        type: "number",
+                        role: "level.color.hue",
+                    },
+                    native: {
+                        path: "lightList.[0].hue",
+                    },
+                };
+                stateObjs["lightbulb.saturation"] = {
+                    _id: `${objId}.lightbulb.saturation`,
+                    type: "state",
+                    common: {
+                        name: "Color saturation",
+                        read: true,
+                        write: true,
+                        min: 0,
+                        max: 100,
+                        unit: "%",
+                        type: "number",
+                        role: "level.color.saturation",
+                    },
+                    native: {
+                        path: "lightList.[0].saturation",
+                    },
+                };
+            }
             stateObjs["lightbulb.brightness"] = {
                 _id: `${objId}.lightbulb.brightness`,
                 type: "state",
@@ -1061,7 +1155,7 @@ function renameDevice(accessory, newName) {
     let payload = JSON.stringify(serializedObj);
     global_1.Global.log("renameDevice > sending payload: " + payload, "debug");
     payload = Buffer.from(payload);
-    node_coap_client_1.CoapClient.request(`${requestBase}${endpoints_1.default.devices}/${accessory.instanceId}`, "put", payload);
+    node_coap_client_1.CoapClient.request(`${requestBase}${endpoints_1.endpoints.devices}/${accessory.instanceId}`, "put", payload);
 }
 /**
  * Renames a group
@@ -1083,7 +1177,7 @@ function renameGroup(group, newName) {
     let payload = JSON.stringify(serializedObj);
     global_1.Global.log("renameDevice > sending payload: " + payload, "debug");
     payload = Buffer.from(payload);
-    node_coap_client_1.CoapClient.request(`${requestBase}${endpoints_1.default.groups}/${group.instanceId}`, "put", payload);
+    node_coap_client_1.CoapClient.request(`${requestBase}${endpoints_1.endpoints.groups}/${group.instanceId}`, "put", payload);
 }
 // ==================================
 // Custom subscriptions

@@ -6,7 +6,7 @@ require("reflect-metadata");
 
 // Eigene Module laden
 import { CoapClient as coap, CoapResponse } from "node-coap-client";
-import coapEndpoints from "./ipso/endpoints";
+import { endpoints as coapEndpoints} from "./ipso/endpoints";
 import { except } from "./lib/array-extensions";
 import { ExtendedAdapter, Global as _ } from "./lib/global";
 import { composeObject, DictionaryLike, dig, entries, filter, values } from "./lib/object-polyfill";
@@ -17,7 +17,7 @@ import { str2regex } from "./lib/str2regex";
 import { Accessory, AccessoryTypes } from "./ipso/accessory";
 import { Group } from "./ipso/group";
 import { IPSOObject } from "./ipso/ipsoObject";
-import { Light } from "./ipso/light";
+import { Light, Spectrum } from "./ipso/light";
 import { Scene } from "./ipso/scene";
 
 // Adapter-Utils laden
@@ -334,9 +334,31 @@ let adapter: ExtendedAdapter = utils.adapter({
 									transitionTime: await getTransitionDuration(accessory),
 								});
 							} else if (id.endsWith(".color")) {
+								if (light.spectrum === "rgb") {
+									light.merge({
+										color: val,
+										transitionTime: await getTransitionDuration(accessory),
+									});
+								} else if (light.spectrum === "white") {
+									light.merge({
+										colorTemperature: val,
+										transitionTime: await getTransitionDuration(accessory),
+									});
+								}
+							} else if (id.endsWith(".colorTemperature")) {
 								light.merge({
-									colorX: val,
-									colorY: 27000,
+									colorTemperature: val,
+									transitionTime: await getTransitionDuration(accessory),
+								});
+							} else if (id.endsWith(".hue")) {
+								// TODO: transform HSL to RGB
+								light.merge({
+									hue: val,
+									transitionTime: await getTransitionDuration(accessory),
+								});
+							} else if (id.endsWith(".saturation")) {
+								light.merge({
+									saturation: val,
 									transitionTime: await getTransitionDuration(accessory),
 								});
 							} else if (id.endsWith(".transitionDuration")) {
@@ -508,8 +530,7 @@ function coap_getDevice_cb(instanceId: number, response: CoapResponse) {
 	}
 	const result = parsePayload(response);
 	// parse device info
-	const accessory = new Accessory();
-	accessory.parse(result);
+	const accessory = new Accessory().parse(result).createProxy();
 	// remember the device object, so we can later use it as a reference for updates
 	devices[instanceId] = accessory;
 	// create ioBroker device
@@ -584,7 +605,7 @@ function coap_getGroup_cb(instanceId: number, response: CoapResponse) {
 
 	const result = parsePayload(response);
 	// parse group info
-	const group = (new Group()).parse(result);
+	const group = (new Group()).parse(result).createProxy();
 	// remember the group object, so we can later use it as a reference for updates
 	let groupInfo: GroupInfo;
 	if (!(instanceId in groups)) {
@@ -667,7 +688,7 @@ function coap_getScene_cb(groupId: number, instanceId: number, response: CoapRes
 
 	const result = parsePayload(response);
 	// parse scene info
-	const scene = (new Scene()).parse(result);
+	const scene = (new Scene()).parse(result).createProxy();
 	// remember the scene object, so we can later use it as a reference for updates
 	groups[groupId].scenes[instanceId] = scene;
 	// Update the scene dropdown for the group
@@ -870,43 +891,107 @@ function extendDevice(accessory: Accessory) {
 		};
 
 		if (accessory.type === AccessoryTypes.lightbulb) {
+			let channelName;
+			let spectrum: Spectrum = "none";
+			if (accessory.lightList != null && accessory.lightList.length > 0) {
+				spectrum = accessory.lightList[0].spectrum;
+			}
+			if (spectrum === "none") {
+				channelName = "Lightbulb";
+			} else if (spectrum === "white") {
+				channelName = "Lightbulb (white spectrum)";
+			} else if (spectrum === "rgb") {
+				channelName = "RGB Lightbulb";
+			}
 			// obj.lightbulb should be a channel
 			stateObjs.lightbulb = {
 				_id: `${objId}.lightbulb`,
 				type: "channel",
 				common: {
-					name: "Lightbulb",
+					name: channelName,
 					role: "light",
 				},
 				native: {
-					/* Nothing here */
+					spectrum: spectrum, // remember the spectrum, so we can update different properties later
 				},
 			};
-			stateObjs["lightbulb.color"] = {
-				_id: `${objId}.lightbulb.color`,
-				type: "state",
-				common: {
-					name: "color temperature of the lightbulb",
-					read: true, // TODO: check
-					write: true, // TODO: check
-					min: 0,
-					max: 100,
-					unit: "%",
-					type: "number",
-					role: "level.color.temperature",
-					desc: "range: 0% = cold, 100% = warm",
-				},
-				native: {
-					path: "lightList.[0].colorX",
-				},
-			};
+			if (spectrum === "white") {
+				stateObjs["lightbulb.color"] = {
+					_id: `${objId}.lightbulb.color`,
+					type: "state",
+					common: {
+						name: "Color temperature",
+						read: true,
+						write: true,
+						min: 0,
+						max: 100,
+						unit: "%",
+						type: "number",
+						role: "level.color.temperature",
+						desc: "range: 0% = cold, 100% = warm",
+					},
+					native: {
+						path: "lightList.[0].colorTemperature",
+					},
+				};
+			} else if (spectrum === "rgb") {
+				stateObjs["lightbulb.color"] = {
+					_id: `${objId}.lightbulb.color`,
+					type: "state",
+					common: {
+						name: "RGB color",
+						read: true,
+						write: true,
+						type: "string",
+						role: "level.color",
+						desc: "6-digit RGB hex string",
+					},
+					native: {
+						path: "lightList.[0].color",
+					},
+				};
+				stateObjs["lightbulb.hue"] = {
+					_id: `${objId}.lightbulb.hue`,
+					type: "state",
+					common: {
+						name: "Color hue",
+						read: true,
+						write: true,
+						min: 0,
+						max: 360,
+						unit: "°",
+						type: "number",
+						role: "level.color.hue",
+					},
+					native: {
+						path: "lightList.[0].hue",
+					},
+				};
+				stateObjs["lightbulb.saturation"] = {
+					_id: `${objId}.lightbulb.saturation`,
+					type: "state",
+					common: {
+						name: "Color saturation",
+						read: true,
+						write: true,
+						min: 0,
+						max: 100,
+						unit: "%",
+						type: "number",
+						role: "level.color.saturation",
+					},
+					native: {
+						path: "lightList.[0].saturation",
+					},
+				};
+			}
 			stateObjs["lightbulb.brightness"] = {
 				_id: `${objId}.lightbulb.brightness`,
 				type: "state",
 				common: {
 					name: "brightness",
-					read: true, // TODO: check
-					write: true, // TODO: check
+					read: true,
+					write: true,
 					min: 0,
 					max: 254,
 					type: "number",
@@ -922,8 +1007,8 @@ function extendDevice(accessory: Accessory) {
 				type: "state",
 				common: {
 					name: "on/off",
-					read: true, // TODO: check
-					write: true, // TODO: check
+					read: true,
+					write: true,
 					type: "boolean",
 					role: "switch",
 				},

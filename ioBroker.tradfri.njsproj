@@ -38,18 +38,21 @@
     <TypeScriptCompile Include="src\ipso\group.ts" />
     <TypeScriptCompile Include="src\ipso\ipsoDevice.ts" />
     <TypeScriptCompile Include="src\ipso\ipsoObject.ts" />
+    <TypeScriptCompile Include="src\ipso\light.test.ts" />
     <TypeScriptCompile Include="src\ipso\light.ts" />
     <TypeScriptCompile Include="src\ipso\lightSetting.ts" />
     <TypeScriptCompile Include="src\ipso\notification.ts" />
+    <TypeScriptCompile Include="src\ipso\plug.ts" />
     <TypeScriptCompile Include="src\ipso\scene.ts" />
+    <TypeScriptCompile Include="src\ipso\sensor.ts" />
     <TypeScriptCompile Include="src\lib\array-extensions.test.ts" />
     <TypeScriptCompile Include="src\lib\array-extensions.ts" />
     <TypeScriptCompile Include="src\lib\constants.ts" />
-    <TypeScriptCompile Include="src\lib\conversions.test.ts">
+    <TypeScriptCompile Include="src\tradfri\conversions.test.ts">
       <SubType>Code</SubType>
       <TestFramework>Mocha</TestFramework>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\lib\conversions.ts" />
+    <TypeScriptCompile Include="src\tradfri\conversions.ts" />
     <TypeScriptCompile Include="src\lib\defer-promise.test.ts" />
     <TypeScriptCompile Include="src\lib\defer-promise.ts" />
     <TypeScriptCompile Include="src\lib\enums.test.ts" />
@@ -86,6 +89,7 @@
     <TypeScriptCompile Include="src\deploy_local.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="src\tradfri\predefined-colors.ts" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="admin" />
@@ -93,6 +97,7 @@
     <Folder Include="src\flow" />
     <Folder Include="src\ipso\" />
     <Folder Include="src\lib\" />
+    <Folder Include="src\tradfri\" />
     <Folder Include="test" />
     <Folder Include="test\lib" />
     <Folder Include="travis\" />

@@ -1,11 +1,14 @@
-declare const _default: {
+export declare const endpoints: {
     devices: string;
     hsAccessoryLink: string;
     groups: string;
     scenes: string;
     notifications: string;
-    UNKNOWN1: string;
+    smartTasks: string;
     gateway: string;
     gatewayDetails: string;
 };
-export default _default;
+export declare const gatewayEndpoints: {
+    alexaCertificate: string;
+    alexa: string;
+};

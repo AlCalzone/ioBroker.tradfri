@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "0.3.4",
+        "version": "0.4.3",
         "news": {
+            "0.4.3": {
+                "en": "Experimental support for RGB and lightbulbs with fixed color.",
+                "de": "Experimentelle Unterstützung für RGB und Lampen mit fester Farbtemperatur."
+            },
             "0.3.4": {
                 "en": "Disabled automatic restart on connection loss.",
                 "de": "Automatischen Neustart bei Verbindungsverlust deaktiviert."
