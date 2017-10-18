@@ -44,7 +44,7 @@
         "keywords": [ "ikea", "tradfri" ],
         "readme": "https://github.com/AlCalzone/ioBroker.tradfri/blob/master/README.md",
         "loglevel": "info",
-        "type": "hardware",
+        "type": "lighting",
         "messagebox": true
     },
     "native": {
