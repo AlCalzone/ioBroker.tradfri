@@ -40,6 +40,36 @@ const template = {
 	9054: 0,
 };
 
+const rgbTemplate = {
+	3: {
+		0: "IKEA of Sweden",
+		1: "TRADFRI bulb E27 CWS opal 600lm",
+		2: "",
+		3: "1.3.002",
+		6: 1,
+	},
+	3311: [
+		{
+			5706: "f5faf6",
+			5707: 0,
+			5708: 0,
+			5709: 24930,
+			5710: 24694,
+			5711: 0,
+			5850: 1,
+			5851: 254,
+			9003: 0,
+		},
+	],
+	5750: 2,
+	9001: "Woonkamer_Bank_Rechts",
+	9002: 1508005342,
+	9003: 65537,
+	9019: 1,
+	9020: 1508012549,
+	9054: 0,
+};
+
 const acc = new Accessory().parse(template);
 const proxyAcc = new Accessory().parse(template).createProxy();
 
@@ -107,5 +137,10 @@ describe("ipso/accessory => ", () => {
 	});
 	it("should serialize correctly when a reference is given and proxied", () => {
 		testSerializeReference(proxyAcc);
+	});
+
+	it("the name of RGB bulbs (v1.3.002) should be parsed correctly", () => {
+		const rgb = new Accessory().parse(rgbTemplate);
+		expect(rgb.name).to.equal(rgbTemplate["9001"]);
 	});
 });
