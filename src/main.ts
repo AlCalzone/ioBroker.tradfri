@@ -119,8 +119,6 @@ let adapter: ExtendedAdapter = utils.adapter({
 			} else if (i === maxTries) {
 				// no working connection
 				_.log(`Could not connect to the gateway ${requestBase} after ${maxTries} tries, shutting down.`, "error");
-
-				process.exit(1);
 				return;
 			}
 		}
