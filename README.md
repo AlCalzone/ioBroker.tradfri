@@ -46,6 +46,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### 0.4.4 (2017-10-19)
+* (AlCalzone) RGB and connection fixes.
+
 #### 0.4.3 (2017-10-17)
 * (AlCalzone) Experimental support for RGB and lightbulbs with fixed color
 

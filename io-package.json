@@ -1,9 +1,9 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "0.4.3",
+        "version": "0.4.4",
         "news": {
-            "0.4.3": {
+            "0.4.4": {
                 "en": "Experimental support for RGB and lightbulbs with fixed color.",
                 "de": "Experimentelle Unterstützung für RGB und Lampen mit fester Farbtemperatur."
             },

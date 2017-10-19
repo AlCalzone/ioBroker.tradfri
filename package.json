@@ -1,6 +1,6 @@
 {
   "name": "iobroker.tradfri",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "ioBroker tradfri Adapter",
   "author": {
     "name": "AlCalzone",
@@ -16,7 +16,7 @@
     }
   ],
   "dependencies": {
-    "node-coap-client": "^0.4.7",
+    "node-coap-client": "^0.4.8",
     "reflect-metadata": "^0.1.10"
   },
   "devDependencies": {
