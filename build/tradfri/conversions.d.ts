@@ -12,14 +12,15 @@ export declare const deserializers: {
 export declare const conversions: {
     whiteSpectrumToColorX: PropertyTransform;
     whiteSpectrumFromColorX: PropertyTransform;
-    rgbFromCIExy: (x: number, y: number) => {
+    rgbFromCIExyY: (x: number, y: number, Y?: number) => {
         r: number;
         g: number;
         b: number;
     };
-    rgbToCIExy: (r: number, g: number, b: number) => {
+    rgbToCIExyY: (r: number, g: number, b: number) => {
         x: number;
         y: number;
+        Y: number;
     };
     rgbFromHSV: (h: number, s: number, v: number) => {
         r: number;

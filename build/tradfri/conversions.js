@@ -21,50 +21,66 @@ const whiteSpectrumFromColorX = value => {
 };
 // ==========================
 // RGB conversions
-// see https://github.com/mikz/PhilipsHueSDKiOS/blob/master/ApplicationDesignNotes/RGB%20to%20xy%20Color%20conversion.md
-function rgbToCIExy(r, g, b) {
+// Tradfri lights seem to be Philips Hue Gamut B, see
+// https://developers.meethue.com/documentation/core-concepts#color_gets_more_complicated
+// Conversion based on
+// https://github.com/Q42/Q42.HueApi/blob/master/src/Q42.HueApi.ColorConverters/OriginalWithModel/HueColorConverter.cs
+function rgbToCIExyY(r, g, b) {
     // transform [0..255] => [0..1]
     [r, g, b] = [r, g, b].map(c => c / 255);
     // gamma correction
     [r, g, b] = [r, g, b].map(c => (c > 0.04045) ? Math.pow(((c + 0.055) / 1.055), 2.4) : c / 12.92);
-    // transform using wide RGB D65 formula
-    const X = r * 0.649926 + g * 0.103455 + b * 0.197109;
-    const Y = r * 0.234327 + g * 0.743075 + b * 0.022598;
-    const Z = r * 0.0000000 + g * 0.053077 + b * 1.035763;
-    // calculate CIE xy
-    const x = X / (X + Y + Z);
-    const y = Y / (X + Y + Z);
-    return { x, y };
-}
-function rgbFromCIExy(x, y) {
-    // we don't know the actual gamut of the lamps, so we use the following triangle
-    // G (0, 1) |\
-    //          | \
-    // B (0, 0) |__\ R (1, 0)
-    // map the colors to the newest point on the triangle
-    x = math_1.clamp(x, 0, 1);
-    y = math_1.clamp(y, 0, 1);
-    if (x + y > 1) {
-        // this is easy for the above triangle
-        const delta = (x + y - 1) / 2;
-        x -= delta;
-        y -= delta;
+    // transform using custom RGB->XYZ matrix. See comment in Q42
+    const X = r * 0.664511 + g * 0.154324 + b * 0.162028;
+    const Y = r * 0.283881 + g * 0.668433 + b * 0.047685;
+    const Z = r * 0.000088 + g * 0.072310 + b * 0.986039;
+    let [x, y] = [0, 0];
+    if (X + Y + Z > 0) {
+        // calculate CIE xy
+        x = X / (X + Y + Z);
+        y = Y / (X + Y + Z);
     }
+    ({ x, y } = mapToGamut(x, y, DEFAULT_GAMUT));
+    return { x, y, Y };
+}
+function rgbFromCIExyY(x, y, Y = 1) {
+    // Map the given point to lie inside the bulb gamut
+    ({ x, y } = mapToGamut(x, y, DEFAULT_GAMUT));
     // calculate X/Y/Z
     const z = 1 - x - y;
-    const Y = 1; // full brightness
     const X = (Y / y) * x;
     const Z = (Y / y) * z;
-    const [min, max] = predefined_colors_1.whiteSpectrumRange;
     // convert to RGB
-    let r = X * 1.612 - Y * 0.203 - Z * 0.302;
-    let g = -X * 0.509 + Y * 1.412 + Z * 0.066;
-    let b = X * 0.026 - Y * 0.072 + Z * 0.962;
+    let r = X * 1.656492 - Y * 0.354851 - Z * 0.255038;
+    let g = -X * 0.707196 + Y * 1.655397 + Z * 0.036152;
+    let b = X * 0.051713 - Y * 0.121364 + Z * 1.011530;
+    // downscale so the maximum component is not > 1
+    const maxRGB = Math.max(r, g, b);
+    if (maxRGB > 1) {
+        [r, g, b] = [r, g, b].map(c => c / maxRGB);
+    }
     // reverse gamma correction
     [r, g, b] = [r, g, b].map(c => c <= 0.0031308 ? 12.92 * c : (1.0 + 0.055) * Math.pow(c, (1.0 / 2.4)) - 0.055);
     // transform back to [0..255]
     [r, g, b] = [r, g, b].map(c => Math.round(math_1.clamp(c, 0, 1) * 255));
     return { r, g, b };
+}
+const DEFAULT_GAMUT = {
+    red: { x: 0.700607, y: 0.299301 },
+    green: { x: 0.172416, y: 0.746797 },
+    blue: { x: 0.135503, y: 0.039879 },
+};
+function mapToGamut(x, y, gamut) {
+    const point = { x, y };
+    const gamutAsTriangle = [gamut.red, gamut.green, gamut.blue];
+    if (!math_1.pointInTriangle(gamutAsTriangle, point)) {
+        const closestEdge = math_1.findClosestTriangleEdge(point, gamutAsTriangle);
+        const projected = math_1.projectPointOnEdge(point, closestEdge);
+        return projected;
+    }
+    else {
+        return { x, y };
+    }
 }
 function rgbToHSV(r, g, b) {
     // transform [0..255] => [0..1]
@@ -190,8 +206,8 @@ exports.deserializers = {
 exports.conversions = {
     whiteSpectrumToColorX,
     whiteSpectrumFromColorX,
-    rgbFromCIExy,
-    rgbToCIExy,
+    rgbFromCIExyY,
+    rgbToCIExyY,
     rgbFromHSV,
     rgbToHSV,
     rgbToString,

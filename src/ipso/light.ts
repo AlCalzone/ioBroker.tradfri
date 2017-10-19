@@ -179,7 +179,7 @@ function createRGBProxy<T extends Light>() {
 					return me.color;
 				} else {
 					// calculate it from colorX/Y
-					const {r, g, b} = conversions.rgbFromCIExy(me.colorX, me.colorY);
+					const {r, g, b} = conversions.rgbFromCIExyY(me.colorX, me.colorY);
 					return conversions.rgbToString(r, g, b);
 				}
 			}
@@ -209,7 +209,7 @@ function createRGBProxy<T extends Light>() {
 					if (rgbRegex.test(value)) {
 						// calculate the X/Y values
 						const {r, g, b} = conversions.rgbFromString(value);
-						const {x, y} = conversions.rgbToCIExy(r, g, b);
+						const {x, y} = conversions.rgbToCIExyY(r, g, b);
 						me.colorX = Math.round(x * MAX_COLOR);
 						me.colorY = Math.round(y * MAX_COLOR);
 					}

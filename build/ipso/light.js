@@ -201,7 +201,7 @@ function createRGBProxy() {
                 }
                 else {
                     // calculate it from colorX/Y
-                    const { r, g, b } = conversions_1.conversions.rgbFromCIExy(me.colorX, me.colorY);
+                    const { r, g, b } = conversions_1.conversions.rgbFromCIExyY(me.colorX, me.colorY);
                     return conversions_1.conversions.rgbToString(r, g, b);
                 }
             }
@@ -232,7 +232,7 @@ function createRGBProxy() {
                     if (rgbRegex.test(value)) {
                         // calculate the X/Y values
                         const { r, g, b } = conversions_1.conversions.rgbFromString(value);
-                        const { x, y } = conversions_1.conversions.rgbToCIExy(r, g, b);
+                        const { x, y } = conversions_1.conversions.rgbToCIExyY(r, g, b);
                         me.colorX = Math.round(x * predefined_colors_1.MAX_COLOR);
                         me.colorY = Math.round(y * predefined_colors_1.MAX_COLOR);
                     }
