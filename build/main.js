@@ -461,10 +461,10 @@ function coapCb_getAllDevices(response) {
         // translate that into added and removed devices
         const addedKeys = array_extensions_1.except(newKeys, oldKeys);
         global_1.Global.log(`adding devices with keys ${JSON.stringify(addedKeys)}`, "debug");
-        const addDevices = addedKeys.map(id => {
+        const observeDevicePromises = newKeys.map(id => {
             return observeResource(`${endpoints_1.endpoints.devices}/${id}`, (resp) => coap_getDevice_cb(id, resp));
         });
-        yield Promise.all(addDevices);
+        yield Promise.all(observeDevicePromises);
         const removedKeys = array_extensions_1.except(oldKeys, newKeys);
         global_1.Global.log(`removing devices with keys ${JSON.stringify(removedKeys)}`, "debug");
         removedKeys.forEach((id) => __awaiter(this, void 0, void 0, function* () {
@@ -514,10 +514,10 @@ function coapCb_getAllGroups(response) {
         // translate that into added and removed devices
         const addedKeys = array_extensions_1.except(newKeys, oldKeys);
         global_1.Global.log(`adding groups with keys ${JSON.stringify(addedKeys)}`, "debug");
-        const addGroups = addedKeys.map(id => {
+        const observeGroupPromises = newKeys.map(id => {
             return observeResource(`${endpoints_1.endpoints.groups}/${id}`, (resp) => coap_getGroup_cb(id, resp));
         });
-        yield Promise.all(addGroups);
+        yield Promise.all(observeGroupPromises);
         const removedKeys = array_extensions_1.except(oldKeys, newKeys);
         global_1.Global.log(`removing groups with keys ${JSON.stringify(removedKeys)}`, "debug");
         removedKeys.forEach((id) => __awaiter(this, void 0, void 0, function* () {
@@ -583,10 +583,10 @@ function coap_getAllScenes_cb(groupId, response) {
         // translate that into added and removed devices
         const addedKeys = array_extensions_1.except(newKeys, oldKeys);
         global_1.Global.log(`adding scenes with keys ${JSON.stringify(addedKeys)} to group ${groupId}`, "debug");
-        const addScenes = addedKeys.map(id => {
+        const observeScenePromises = newKeys.map(id => {
             return observeResource(`${endpoints_1.endpoints.scenes}/${groupId}/${id}`, (resp) => coap_getScene_cb(groupId, id, resp));
         });
-        yield Promise.all(addScenes);
+        yield Promise.all(observeScenePromises);
         const removedKeys = array_extensions_1.except(oldKeys, newKeys);
         global_1.Global.log(`removing scenes with keys ${JSON.stringify(removedKeys)} from group ${groupId}`, "debug");
         removedKeys.forEach(id => {

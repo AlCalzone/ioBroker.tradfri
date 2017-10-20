@@ -507,13 +507,13 @@ async function coapCb_getAllDevices(response: CoapResponse) {
 	const addedKeys = except(newKeys, oldKeys);
 	_.log(`adding devices with keys ${JSON.stringify(addedKeys)}`, "debug");
 
-	const addDevices = addedKeys.map(id => {
+	const observeDevicePromises = newKeys.map(id => {
 		return observeResource(
 			`${coapEndpoints.devices}/${id}`,
 			(resp) => coap_getDevice_cb(id, resp),
 		);
 	});
-	await Promise.all(addDevices);
+	await Promise.all(observeDevicePromises);
 
 	const removedKeys = except(oldKeys, newKeys);
 	_.log(`removing devices with keys ${JSON.stringify(removedKeys)}`, "debug");
@@ -573,13 +573,13 @@ async function coapCb_getAllGroups(response: CoapResponse) {
 	const addedKeys = except(newKeys, oldKeys);
 	_.log(`adding groups with keys ${JSON.stringify(addedKeys)}`, "debug");
 
-	const addGroups = addedKeys.map(id => {
+	const observeGroupPromises = newKeys.map(id => {
 		return observeResource(
 			`${coapEndpoints.groups}/${id}`,
 			(resp) => coap_getGroup_cb(id, resp),
 		);
 	});
-	await Promise.all(addGroups);
+	await Promise.all(observeGroupPromises);
 
 	const removedKeys = except(oldKeys, newKeys);
 	_.log(`removing groups with keys ${JSON.stringify(removedKeys)}`, "debug");
@@ -656,16 +656,15 @@ async function coap_getAllScenes_cb(groupId: number, response: CoapResponse) {
 	const newKeys = newScenes.sort();
 	// translate that into added and removed devices
 	const addedKeys = except(newKeys, oldKeys);
-
 	_.log(`adding scenes with keys ${JSON.stringify(addedKeys)} to group ${groupId}`, "debug");
 
-	const addScenes = addedKeys.map(id => {
+	const observeScenePromises = newKeys.map(id => {
 		return observeResource(
 			`${coapEndpoints.scenes}/${groupId}/${id}`,
 			(resp) => coap_getScene_cb(groupId, id, resp),
 		);
 	});
-	await Promise.all(addScenes);
+	await Promise.all(observeScenePromises);
 
 	const removedKeys = except(oldKeys, newKeys);
 	_.log(`removing scenes with keys ${JSON.stringify(removedKeys)} from group ${groupId}`, "debug");
