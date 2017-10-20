@@ -118,7 +118,8 @@ let adapter: ExtendedAdapter = utils.adapter({
 				await wait(1000);
 			} else if (i === maxTries) {
 				// no working connection
-				_.log(`Could not connect to the gateway ${requestBase} after ${maxTries} tries, shutting down.`, "error");
+				_.log(`Could not connect to the gateway ${requestBase} after ${maxTries} tries!`, "error");
+				_.log(`Please check your network and adapter settings and restart the adapter!`, "error");
 				return;
 			}
 		}
@@ -127,8 +128,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 		pingTimer = setInterval(pingThread, 10000);
 
 		// TODO: load known devices from ioBroker into <devices> & <objects>
-		observeDevices();
-		observeGroups();
+		observeAll();
 
 	},
 
@@ -467,6 +467,18 @@ function stopObservingResource(path: string): void {
 
 	coap.stopObserving(observerUrl);
 	observers.splice(index, 1);
+}
+
+/**
+ * Clears the list of observers after a network reset
+ */
+function clearObservers(): void {
+	observers.splice(0, observers.length);
+}
+
+function observeAll(): void {
+	observeDevices();
+	observeGroups();
 }
 
 /** Sets up an observer for all devices */
@@ -1407,6 +1419,8 @@ async function pingThread() {
 		if (!oldValue) {
 			// connection is now alive again
 			_.log("Connection to gateway reestablished", "info");
+			// restart observing if neccessary
+			if (observers.length === 0) observeAll();
 			// TODO: send buffered messages
 		}
 	} else {
@@ -1424,6 +1438,8 @@ async function pingThread() {
 				_.log(`3 consecutive pings failed, resetting connection (attempt #${resetAttempts})...`, "warn");
 				pingFails = 0;
 				coap.reset();
+				// after a reset, our observers references are orphaned, clear them.
+				clearObservers();
 			} else {
 				// not sure what to do here, try restarting the adapter
 				_.log(`Three consecutive reset attempts failed!`, "error");

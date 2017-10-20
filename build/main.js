@@ -93,7 +93,8 @@ let adapter = utils_1.default.adapter({
             }
             else if (i === maxTries) {
                 // no working connection
-                global_1.Global.log(`Could not connect to the gateway ${requestBase} after ${maxTries} tries, shutting down.`, "error");
+                global_1.Global.log(`Could not connect to the gateway ${requestBase} after ${maxTries} tries!`, "error");
+                global_1.Global.log(`Please check your network and adapter settings and restart the adapter!`, "error");
                 return;
             }
         }
@@ -101,8 +102,7 @@ let adapter = utils_1.default.adapter({
         connectionAlive = true;
         pingTimer = setInterval(pingThread, 10000);
         // TODO: load known devices from ioBroker into <devices> & <objects>
-        observeDevices();
-        observeGroups();
+        observeAll();
     }),
     message: (obj) => __awaiter(this, void 0, void 0, function* () {
         // responds to the adapter that sent the original message
@@ -430,6 +430,16 @@ function stopObservingResource(path) {
         return;
     node_coap_client_1.CoapClient.stopObserving(observerUrl);
     observers.splice(index, 1);
+}
+/**
+ * Clears the list of observers after a network reset
+ */
+function clearObservers() {
+    observers.splice(0, observers.length);
+}
+function observeAll() {
+    observeDevices();
+    observeGroups();
 }
 /** Sets up an observer for all devices */
 function observeDevices() {
@@ -1281,6 +1291,9 @@ function pingThread() {
             if (!oldValue) {
                 // connection is now alive again
                 global_1.Global.log("Connection to gateway reestablished", "info");
+                // restart observing if neccessary
+                if (observers.length === 0)
+                    observeAll();
                 // TODO: send buffered messages
             }
         }
@@ -1298,6 +1311,8 @@ function pingThread() {
                     global_1.Global.log(`3 consecutive pings failed, resetting connection (attempt #${resetAttempts})...`, "warn");
                     pingFails = 0;
                     node_coap_client_1.CoapClient.reset();
+                    // after a reset, our observers references are orphaned, clear them.
+                    clearObservers();
                 }
                 else {
                     // not sure what to do here, try restarting the adapter
