@@ -46,7 +46,7 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
-#### 0.4.4 (2017-10-19)
+#### 0.4.5 (2017-10-20)
 * (AlCalzone) RGB and connection fixes.
 
 #### 0.4.3 (2017-10-17)
