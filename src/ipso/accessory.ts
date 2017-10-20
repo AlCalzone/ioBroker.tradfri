@@ -2,11 +2,14 @@ import { DeviceInfo } from "./deviceInfo";
 import { IPSODevice } from "./ipsoDevice";
 import { deserializeWith, ipsoKey, IPSOObject, PropertyTransform, required, serializeWith } from "./ipsoObject";
 import { Light } from "./light";
+import { Plug } from "./plug";
+import { Sensor } from "./sensor";
 
 // list of known endpoints defined on the gateway
 export enum AccessoryTypes {
 	remote = 0,
 	lightbulb = 2,
+	motionSensor = 4,
 	// TODO: find out the other ones
 }
 
@@ -26,16 +29,16 @@ export class Accessory extends IPSODevice {
 	public lastSeen: number = 0;
 
 	@ipsoKey("3311")
-	@deserializeWith(obj => new Light().parse(obj))
+	@deserializeWith((obj, me: Accessory) => new Light(me).parse(obj))
 	public lightList: Light[];
 
 	@ipsoKey("3312")
-	@deserializeWith(obj => new IPSODevice().parse(obj))
-	public plugList: IPSODevice[]; // <[Plug]> // seems unsupported atm.
+	@deserializeWith(obj => new Plug().parse(obj))
+	public plugList: Plug[];
 
 	@ipsoKey("3300")
-	@deserializeWith(obj => new IPSODevice().parse(obj))
-	public sensorList: IPSODevice[]; // <[Sensor]> // seems unsupported atm.
+	@deserializeWith(obj => new Sensor().parse(obj))
+	public sensorList: Sensor[];
 
 	@ipsoKey("15009")
 	@deserializeWith(obj => new IPSODevice().parse(obj))

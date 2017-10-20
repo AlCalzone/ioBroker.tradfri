@@ -7,6 +7,22 @@
                 "en": "Support of virtual groups",
                 "de": "Unterstützung virtueller Gruppen"
             },
+            "0.4.5": {
+                "en": "Bugfixes.",
+                "de": "Bugfixes."
+            },
+            "0.4.4": {
+                "en": "Experimental support for RGB and lightbulbs with fixed color.",
+                "de": "Experimentelle Unterstützung für RGB und Lampen mit fester Farbtemperatur."
+            },
+            "0.3.4": {
+                "en": "Disabled automatic restart on connection loss.",
+                "de": "Automatischen Neustart bei Verbindungsverlust deaktiviert."
+            },
+            "0.3.3": {
+                "en": "Eliminated potential sources of infinite loops",
+                "de": "Potentielle Auslöser von Endlosschleifen eliminiert"
+            },
             "0.3.0": {
                 "en": "Support of groups and scenes, improved connection handling, internal improvements.",
                 "de": "Unterstützung von Gruppen und Szenen, verbesserte Verbindungsverwaltung, interne Verbesserungen."
@@ -25,6 +41,9 @@
             "en": "Communicates with IKEA Trådfri Gateway to control devices",
             "de": "Kommuniziert mit IKEA Trådfri Gateway um Geräte zu steuern"
         },
+        "authors": [
+            "AlCalzone <d.griesel@gmx.net>"
+        ],
         "platform": "Javascript/Node.js",
         "mode": "daemon",
         "icon": "tradfri.png",
@@ -33,7 +52,7 @@
         "keywords": [ "ikea", "tradfri" ],
         "readme": "https://github.com/AlCalzone/ioBroker.tradfri/blob/master/README.md",
         "loglevel": "info",
-        "type": "hardware",
+        "type": "lighting",
         "messagebox": true
     },
     "native": {

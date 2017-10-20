@@ -6,7 +6,7 @@ require("reflect-metadata");
 
 // Eigene Module laden
 import { CoapClient as coap, CoapResponse } from "node-coap-client";
-import coapEndpoints from "./ipso/endpoints";
+import { endpoints as coapEndpoints} from "./ipso/endpoints";
 import { except } from "./lib/array-extensions";
 import { ExtendedAdapter, Global as _ } from "./lib/global";
 import { composeObject, DictionaryLike, dig, entries, filter, values } from "./lib/object-polyfill";
@@ -18,6 +18,7 @@ import { padStart } from "./lib/strings";
 import { Accessory, AccessoryTypes } from "./ipso/accessory";
 import { Group, GroupOperation } from "./ipso/group";
 import { LightOperation } from "./ipso/light";
+import { Light, Spectrum } from "./ipso/light";
 import { Scene } from "./ipso/scene";
 import { VirtualGroup } from "./lib/virtual-group";
 
@@ -120,9 +121,8 @@ let adapter: ExtendedAdapter = utils.adapter({
 				await wait(1000);
 			} else if (i === maxTries) {
 				// no working connection
-				_.log(`Could not connect to the gateway ${requestBase} after ${maxTries} tries, shutting down.`, "error");
-
-				process.exit(1);
+				_.log(`Could not connect to the gateway ${requestBase} after ${maxTries} tries!`, "error");
+				_.log(`Please check your network and adapter settings and restart the adapter!`, "error");
 				return;
 			}
 		}
@@ -132,8 +132,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 
 		loadVirtualGroups();
 		// TODO: load known devices from ioBroker into <devices> & <objects>
-		observeDevices();
-		observeGroups();
+		observeAll();
 
 	},
 
@@ -317,6 +316,13 @@ let adapter: ExtendedAdapter = utils.adapter({
 			_.log(`{{blue}} state with id ${id} deleted`, "debug");
 		}
 
+		if (dead) {
+			_.log("The connection to the gateway is dead.", "error");
+			_.log("Cannot send changes.", "error");
+			_.log("Please restart the adapter!", "error");
+			return;
+		}
+
 		// Custom subscriptions durchgehen, um die passenden Callbacks aufzurufen
 		try {
 			for (const sub of customStateSubscriptions.subscriptions.values()) {
@@ -430,6 +436,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 						if (id.indexOf(".lightbulb.") > -1) {
 							// read the instanceId and get a reference value
 							const accessory = devices[rootObj.native.instanceId];
+							const light = accessory.lightList[0];
 							// if the change was acknowledged, update the state later
 							let wasAcked: boolean;
 
@@ -445,9 +452,31 @@ let adapter: ExtendedAdapter = utils.adapter({
 									transitionTime: await getTransitionDuration(accessory),
 								});
 							} else if (id.endsWith(".color")) {
+								if (light.spectrum === "rgb") {
+									wasAcked = !await operateLight(accessory, {
+										color: val,
+										transitionTime: await getTransitionDuration(accessory),
+									});
+								} else if (light.spectrum === "white") {
+									wasAcked = !await operateLight(accessory, {
+										colorTemperature: val,
+										transitionTime: await getTransitionDuration(accessory),
+									});
+								}
+							} else if (id.endsWith(".colorTemperature")) {
 								wasAcked = !await operateLight(accessory, {
-									colorX: val,
-									colorY: 27000,
+									colorTemperature: val,
+									transitionTime: await getTransitionDuration(accessory),
+								});
+							} else if (id.endsWith(".hue")) {
+								// TODO: transform HSL to RGB
+								wasAcked = !await operateLight(accessory, {
+									hue: val,
+									transitionTime: await getTransitionDuration(accessory),
+								});
+							} else if (id.endsWith(".saturation")) {
+								wasAcked = !await operateLight(accessory, {
+									saturation: val,
 									transitionTime: await getTransitionDuration(accessory),
 								});
 							} else if (id.endsWith(".transitionDuration")) {
@@ -626,6 +655,18 @@ function stopObservingResource(path: string): void {
 	observers.splice(index, 1);
 }
 
+/**
+ * Clears the list of observers after a network reset
+ */
+function clearObservers(): void {
+	observers.splice(0, observers.length);
+}
+
+function observeAll(): void {
+	observeDevices();
+	observeGroups();
+}
+
 /** Sets up an observer for all devices */
 function observeDevices() {
 	observeResource(
@@ -652,13 +693,13 @@ async function coapCb_getAllDevices(response: CoapResponse) {
 	const addedKeys = except(newKeys, oldKeys);
 	_.log(`adding devices with keys ${JSON.stringify(addedKeys)}`, "debug");
 
-	const addDevices = addedKeys.map(id => {
+	const observeDevicePromises = newKeys.map(id => {
 		return observeResource(
 			`${coapEndpoints.devices}/${id}`,
 			(resp) => coap_getDevice_cb(id, resp),
 		);
 	});
-	await Promise.all(addDevices);
+	await Promise.all(observeDevicePromises);
 
 	const removedKeys = except(oldKeys, newKeys);
 	_.log(`removing devices with keys ${JSON.stringify(removedKeys)}`, "debug");
@@ -685,8 +726,7 @@ function coap_getDevice_cb(instanceId: number, response: CoapResponse) {
 	}
 	const result = parsePayload(response);
 	// parse device info
-	const accessory = new Accessory();
-	accessory.parse(result);
+	const accessory = new Accessory().parse(result).createProxy();
 	// remember the device object, so we can later use it as a reference for updates
 	devices[instanceId] = accessory;
 	// create ioBroker device
@@ -719,13 +759,13 @@ async function coapCb_getAllGroups(response: CoapResponse) {
 	const addedKeys = except(newKeys, oldKeys);
 	_.log(`adding groups with keys ${JSON.stringify(addedKeys)}`, "debug");
 
-	const addGroups = addedKeys.map(id => {
+	const observeGroupPromises = newKeys.map(id => {
 		return observeResource(
 			`${coapEndpoints.groups}/${id}`,
 			(resp) => coap_getGroup_cb(id, resp),
 		);
 	});
-	await Promise.all(addGroups);
+	await Promise.all(observeGroupPromises);
 
 	const removedKeys = except(oldKeys, newKeys);
 	_.log(`removing groups with keys ${JSON.stringify(removedKeys)}`, "debug");
@@ -761,7 +801,7 @@ function coap_getGroup_cb(instanceId: number, response: CoapResponse) {
 
 	const result = parsePayload(response);
 	// parse group info
-	const group = (new Group()).parse(result);
+	const group = (new Group()).parse(result).createProxy();
 	// remember the group object, so we can later use it as a reference for updates
 	let groupInfo: GroupInfo;
 	if (!(instanceId in groups)) {
@@ -802,16 +842,15 @@ async function coap_getAllScenes_cb(groupId: number, response: CoapResponse) {
 	const newKeys = newScenes.sort();
 	// translate that into added and removed devices
 	const addedKeys = except(newKeys, oldKeys);
-
 	_.log(`adding scenes with keys ${JSON.stringify(addedKeys)} to group ${groupId}`, "debug");
 
-	const addScenes = addedKeys.map(id => {
+	const observeScenePromises = newKeys.map(id => {
 		return observeResource(
 			`${coapEndpoints.scenes}/${groupId}/${id}`,
 			(resp) => coap_getScene_cb(groupId, id, resp),
 		);
 	});
-	await Promise.all(addScenes);
+	await Promise.all(observeScenePromises);
 
 	const removedKeys = except(oldKeys, newKeys);
 	_.log(`removing scenes with keys ${JSON.stringify(removedKeys)} from group ${groupId}`, "debug");
@@ -844,7 +883,7 @@ function coap_getScene_cb(groupId: number, instanceId: number, response: CoapRes
 
 	const result = parsePayload(response);
 	// parse scene info
-	const scene = (new Scene()).parse(result);
+	const scene = (new Scene()).parse(result).createProxy();
 	// remember the scene object, so we can later use it as a reference for updates
 	groups[groupId].scenes[instanceId] = scene;
 	// Update the scene dropdown for the group
@@ -1056,43 +1095,107 @@ function extendDevice(accessory: Accessory) {
 		};
 
 		if (accessory.type === AccessoryTypes.lightbulb) {
+			let channelName;
+			let spectrum: Spectrum = "none";
+			if (accessory.lightList != null && accessory.lightList.length > 0) {
+				spectrum = accessory.lightList[0].spectrum;
+			}
+			if (spectrum === "none") {
+				channelName = "Lightbulb";
+			} else if (spectrum === "white") {
+				channelName = "Lightbulb (white spectrum)";
+			} else if (spectrum === "rgb") {
+				channelName = "RGB Lightbulb";
+			}
 			// obj.lightbulb should be a channel
 			stateObjs.lightbulb = {
 				_id: `${objId}.lightbulb`,
 				type: "channel",
 				common: {
-					name: "Lightbulb",
+					name: channelName,
 					role: "light",
 				},
 				native: {
-					/* Nothing here */
+					spectrum: spectrum, // remember the spectrum, so we can update different properties later
 				},
 			};
-			stateObjs["lightbulb.color"] = {
-				_id: `${objId}.lightbulb.color`,
-				type: "state",
-				common: {
-					name: "color temperature of the lightbulb",
-					read: true, // TODO: check
-					write: true, // TODO: check
-					min: 0,
-					max: 100,
-					unit: "%",
-					type: "number",
-					role: "level.color.temperature",
-					desc: "range: 0% = cold, 100% = warm",
-				},
-				native: {
-					path: "lightList.[0].colorX",
-				},
-			};
+			if (spectrum === "white") {
+				stateObjs["lightbulb.color"] = {
+					_id: `${objId}.lightbulb.color`,
+					type: "state",
+					common: {
+						name: "Color temperature",
+						read: true,
+						write: true,
+						min: 0,
+						max: 100,
+						unit: "%",
+						type: "number",
+						role: "level.color.temperature",
+						desc: "range: 0% = cold, 100% = warm",
+					},
+					native: {
+						path: "lightList.[0].colorTemperature",
+					},
+				};
+			} else if (spectrum === "rgb") {
+				stateObjs["lightbulb.color"] = {
+					_id: `${objId}.lightbulb.color`,
+					type: "state",
+					common: {
+						name: "RGB color",
+						read: true,
+						write: true,
+						type: "string",
+						role: "level.color",
+						desc: "6-digit RGB hex string",
+					},
+					native: {
+						path: "lightList.[0].color",
+					},
+				};
+				stateObjs["lightbulb.hue"] = {
+					_id: `${objId}.lightbulb.hue`,
+					type: "state",
+					common: {
+						name: "Color hue",
+						read: true,
+						write: true,
+						min: 0,
+						max: 360,
+						unit: "°",
+						type: "number",
+						role: "level.color.hue",
+					},
+					native: {
+						path: "lightList.[0].hue",
+					},
+				};
+				stateObjs["lightbulb.saturation"] = {
+					_id: `${objId}.lightbulb.saturation`,
+					type: "state",
+					common: {
+						name: "Color saturation",
+						read: true,
+						write: true,
+						min: 0,
+						max: 100,
+						unit: "%",
+						type: "number",
+						role: "level.color.saturation",
+					},
+					native: {
+						path: "lightList.[0].saturation",
+					},
+				};
+			}
 			stateObjs["lightbulb.brightness"] = {
 				_id: `${objId}.lightbulb.brightness`,
 				type: "state",
 				common: {
 					name: "brightness",
-					read: true, // TODO: check
-					write: true, // TODO: check
+					read: true,
+					write: true,
 					min: 0,
 					max: 254,
 					type: "number",
@@ -1108,8 +1211,8 @@ function extendDevice(accessory: Accessory) {
 				type: "state",
 				common: {
 					name: "on/off",
-					read: true, // TODO: check
-					write: true, // TODO: check
+					read: true,
+					write: true,
 					type: "boolean",
 					role: "switch",
 				},
@@ -1669,6 +1772,7 @@ let pingTimer: NodeJS.Timer;
 let connectionAlive: boolean = false;
 let pingFails: number = 0;
 let resetAttempts: number = 0;
+let dead: boolean = false;
 async function pingThread() {
 	const oldValue = connectionAlive;
 	connectionAlive = await coap.ping(requestBase);
@@ -1681,6 +1785,8 @@ async function pingThread() {
 		if (!oldValue) {
 			// connection is now alive again
 			_.log("Connection to gateway reestablished", "info");
+			// restart observing if neccessary
+			if (observers.length === 0) observeAll();
 			// TODO: send buffered messages
 		}
 	} else {
@@ -1698,12 +1804,14 @@ async function pingThread() {
 				_.log(`3 consecutive pings failed, resetting connection (attempt #${resetAttempts})...`, "warn");
 				pingFails = 0;
 				coap.reset();
+				// after a reset, our observers references are orphaned, clear them.
+				clearObservers();
 			} else {
 				// not sure what to do here, try restarting the adapter
-				_.log(`3 consecutive reset attempts failed, restarting the adapter`, "warn");
-				setTimeout(() => {
-					process.exit(1);
-				}, 1000);
+				_.log(`Three consecutive reset attempts failed!`, "error");
+				_.log(`Please restart the adapter manually!`, "error");
+				clearTimeout(pingTimer);
+				dead = true;
 			}
 		}
 	}

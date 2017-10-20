@@ -20,4 +20,3 @@ class VirtualGroup {
     }
 }
 exports.VirtualGroup = VirtualGroup;
-//# sourceMappingURL=virtual-group.js.map

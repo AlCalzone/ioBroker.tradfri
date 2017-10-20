@@ -49,6 +49,15 @@ The result object `ret` looks as follows:
 #### 0.5.0 (2017-10-XX)
 * (AlCalzone) Support virtual groups
 
+#### 0.4.5 (2017-10-20)
+* (AlCalzone) RGB and connection fixes.
+
+#### 0.4.3 (2017-10-17)
+* (AlCalzone) Experimental support for RGB and lightbulbs with fixed color
+
+#### 0.3.4 (2017-10-17)
+* (AlCalzone) Disabled automatic restart on connection loss.
+
 #### 0.3.3 (2017-10-07)
 * (AlCalzone) Eliminated potential sources of infinite loops
 

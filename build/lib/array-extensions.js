@@ -51,4 +51,3 @@ function firstOrDefault(arr, filter) {
     return null;
 }
 exports.firstOrDefault = firstOrDefault;
-//# sourceMappingURL=array-extensions.js.map

@@ -12,4 +12,3 @@ function createDeferredPromise() {
     return promise;
 }
 exports.createDeferredPromise = createDeferredPromise;
-//# sourceMappingURL=defer-promise.js.map

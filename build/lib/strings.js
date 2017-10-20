@@ -19,4 +19,3 @@ function padStart(str, targetLen, fill = " ") {
     return fill.repeat(repeats).substr(0, missingLength) + str;
 }
 exports.padStart = padStart;
-//# sourceMappingURL=strings.js.map

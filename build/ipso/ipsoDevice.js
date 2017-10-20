@@ -32,4 +32,3 @@ __decorate([
     __metadata("design:type", Number)
 ], IPSODevice.prototype, "instanceId", void 0);
 exports.IPSODevice = IPSODevice;
-//# sourceMappingURL=ipsoDevice.js.map

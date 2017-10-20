@@ -156,4 +156,3 @@ class Global {
     }
 }
 exports.Global = Global;
-//# sourceMappingURL=global.js.map

@@ -1,1 +1,0 @@
-{"version":3,"file":"str2regex.js","sourceRoot":"D:/ioBroker.tradfri/src/","sources":["lib/str2regex.ts"],"names":[],"mappings":";;AAAA,gCAAgC;AAChC,mBAA0B,OAAe;IACxC,MAAM,CAAC,IAAI,MAAM,CAChB,OAAO;SACL,OAAO,CAAC,KAAK,EAAE,IAAI,CAAC,CAAC,4BAA4B;SACjD,OAAO,CAAC,KAAK,EAAE,IAAI,CAAC,CAAC,6BAA6B;SAClD,OAAO,CAAC,KAAK,EAAE,IAAI,CAAC,CAAC,qBAAqB;KAC5C,CAAC;AACH,CAAC;AAPD,8BAOC"}

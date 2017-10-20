@@ -17,10 +17,10 @@
         // enable the new reflection API
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
-
-        "sourceMap": true,
+        
+        "sourceMap": false,
         "inlineSourceMap": false,
-        "sourceRoot": "src/",
+        //"sourceRoot": "src/",
         "target": "es2015"
         //"watch": true
     },

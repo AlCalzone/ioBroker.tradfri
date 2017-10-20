@@ -7,9 +7,9 @@ export class LightSetting extends IPSODevice {
 	public color: string = "f1e0b5"; // hex string
 
 	@ipsoKey("5707")
-	public UNKNOWN1: number = 0; // ???
+	public hue: number = 0; // TODO: TODO: range unknown! [0-359]?
 	@ipsoKey("5708")
-	public UNKNOWN2: number = 0; // ???
+	public saturation: number = 0; // TODO: range unknown!
 
 	@ipsoKey("5709")
 	public colorX: number = 0; // int
@@ -17,7 +17,7 @@ export class LightSetting extends IPSODevice {
 	public colorY: number = 0; // int
 
 	@ipsoKey("5711")
-	public UNKNOWN3: number = 0; // ???
+	public colorTemperature: number = 0; // TODO: range unknown!
 
 	@ipsoKey("5851")
 	public dimmer: number = 0; // <int> [0..254]

@@ -43,4 +43,3 @@ function wait(ms) {
     });
 }
 exports.wait = wait;
-//# sourceMappingURL=promises.js.map

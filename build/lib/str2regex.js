@@ -9,4 +9,3 @@ function str2regex(pattern) {
     );
 }
 exports.str2regex = str2regex;
-//# sourceMappingURL=str2regex.js.map

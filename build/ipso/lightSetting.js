@@ -15,11 +15,11 @@ class LightSetting extends ipsoDevice_1.IPSODevice {
     constructor() {
         super(...arguments);
         this.color = "f1e0b5"; // hex string
-        this.UNKNOWN1 = 0; // ???
-        this.UNKNOWN2 = 0; // ???
+        this.hue = 0; // TODO: TODO: range unknown! [0-359]?
+        this.saturation = 0; // TODO: range unknown!
         this.colorX = 0; // int
         this.colorY = 0; // int
-        this.UNKNOWN3 = 0; // ???
+        this.colorTemperature = 0; // TODO: range unknown!
         this.dimmer = 0; // <int> [0..254]
         this.onOff = false; // <bool>
     }
@@ -31,11 +31,11 @@ __decorate([
 __decorate([
     ipsoObject_1.ipsoKey("5707"),
     __metadata("design:type", Number)
-], LightSetting.prototype, "UNKNOWN1", void 0);
+], LightSetting.prototype, "hue", void 0);
 __decorate([
     ipsoObject_1.ipsoKey("5708"),
     __metadata("design:type", Number)
-], LightSetting.prototype, "UNKNOWN2", void 0);
+], LightSetting.prototype, "saturation", void 0);
 __decorate([
     ipsoObject_1.ipsoKey("5709"),
     __metadata("design:type", Number)
@@ -47,7 +47,7 @@ __decorate([
 __decorate([
     ipsoObject_1.ipsoKey("5711"),
     __metadata("design:type", Number)
-], LightSetting.prototype, "UNKNOWN3", void 0);
+], LightSetting.prototype, "colorTemperature", void 0);
 __decorate([
     ipsoObject_1.ipsoKey("5851"),
     __metadata("design:type", Number)
@@ -57,4 +57,3 @@ __decorate([
     __metadata("design:type", Boolean)
 ], LightSetting.prototype, "onOff", void 0);
 exports.LightSetting = LightSetting;
-//# sourceMappingURL=lightSetting.js.map

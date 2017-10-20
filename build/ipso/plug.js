@@ -9,40 +9,39 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const ipsoDevice_1 = require("./ipsoDevice");
 const ipsoObject_1 = require("./ipsoObject");
-// contains information about a specific device
-class DeviceInfo extends ipsoObject_1.IPSOObject {
+class Plug extends ipsoDevice_1.IPSODevice {
     constructor() {
         super(...arguments);
-        this.firmwareVersion = "";
-        this.manufacturer = "";
-        this.modelNumber = "";
-        this.power = 0;
-        this.serialNumber = "";
+        this.cumulativeActivePower = 0.0; // <float>
+        this.dimmer = 0; // <int> [0..254]
+        this.onOff = false;
+        this.onTime = 0; // <int>
+        this.powerFactor = 0.0; // <float>
+        // TODO: no unit???
+        // @ipsoKey("5701")
+        // public unit: string = "";
     }
 }
 __decorate([
-    ipsoObject_1.ipsoKey("9"),
+    ipsoObject_1.ipsoKey("5805"),
     __metadata("design:type", Number)
-], DeviceInfo.prototype, "battery", void 0);
+], Plug.prototype, "cumulativeActivePower", void 0);
 __decorate([
-    ipsoObject_1.ipsoKey("3"),
-    __metadata("design:type", String)
-], DeviceInfo.prototype, "firmwareVersion", void 0);
-__decorate([
-    ipsoObject_1.ipsoKey("0"),
-    __metadata("design:type", String)
-], DeviceInfo.prototype, "manufacturer", void 0);
-__decorate([
-    ipsoObject_1.ipsoKey("1"),
-    __metadata("design:type", String)
-], DeviceInfo.prototype, "modelNumber", void 0);
-__decorate([
-    ipsoObject_1.ipsoKey("6"),
+    ipsoObject_1.ipsoKey("5851"),
     __metadata("design:type", Number)
-], DeviceInfo.prototype, "power", void 0);
+], Plug.prototype, "dimmer", void 0);
 __decorate([
-    ipsoObject_1.ipsoKey("2"),
-    __metadata("design:type", String)
-], DeviceInfo.prototype, "serialNumber", void 0);
-exports.DeviceInfo = DeviceInfo;
+    ipsoObject_1.ipsoKey("5850"),
+    __metadata("design:type", Boolean)
+], Plug.prototype, "onOff", void 0);
+__decorate([
+    ipsoObject_1.ipsoKey("5852"),
+    __metadata("design:type", Number)
+], Plug.prototype, "onTime", void 0);
+__decorate([
+    ipsoObject_1.ipsoKey("5820"),
+    __metadata("design:type", Number)
+], Plug.prototype, "powerFactor", void 0);
+exports.Plug = Plug;

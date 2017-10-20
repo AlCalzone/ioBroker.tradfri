@@ -9,4 +9,3 @@ function getEnumValueAsName(enumeration, value) {
     return "";
 }
 exports.getEnumValueAsName = getEnumValueAsName;
-//# sourceMappingURL=enums.js.map

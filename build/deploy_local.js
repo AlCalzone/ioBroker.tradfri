@@ -43,19 +43,32 @@ const remoteRoot = `/opt/iobroker/node_modules/iobroker.${ADAPTER_NAME}`;
     return __awaiter(this, void 0, void 0, function* () {
         yield ssh.connect(sshConfig);
         for (const dir of uploadDirs) {
+            console.log(`cleaning ${dir} dir...`);
+            yield ssh.execCommand(`rm -rf ${path.join(remoteRoot, dir)}`);
             console.log(`uploading ${dir} dir...`);
-            yield ssh.putDirectory(path.join(localRoot, dir), path.join(remoteRoot, dir), {
-                recursive: true,
-                concurrency: 10,
-                validate: (pathname) => {
-                    const basename = path.basename(pathname);
-                    if (basename.startsWith("deploy_"))
-                        return false;
-                    if (basename.endsWith("Thumbs.db"))
-                        return false;
-                    return true;
-                },
-            });
+            try {
+                yield ssh.putDirectory(path.join(localRoot, dir), path.join(remoteRoot, dir), {
+                    recursive: true,
+                    concurrency: 10,
+                    validate: (pathname) => {
+                        const basename = path.basename(pathname);
+                        if (basename.startsWith("deploy_"))
+                            return false;
+                        if (basename.endsWith("Thumbs.db"))
+                            return false;
+                        if (basename.endsWith(".map"))
+                            return false;
+                        if (basename.indexOf(".test.") > -1)
+                            return false;
+                        if (basename === "src")
+                            return false;
+                        return true;
+                    },
+                });
+            }
+            catch (e) {
+                console.error(e);
+            }
         }
         for (const file of uploadFiles) {
             console.log(`uploading ${file}...`);
@@ -74,4 +87,3 @@ const remoteRoot = `/opt/iobroker/node_modules/iobroker.${ADAPTER_NAME}`;
         process.exit(0);
     });
 })();
-//# sourceMappingURL=deploy_local.js.map
