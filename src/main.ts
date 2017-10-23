@@ -8,6 +8,7 @@ require("reflect-metadata");
 import { CoapClient as coap, CoapResponse } from "node-coap-client";
 import { endpoints as coapEndpoints} from "./ipso/endpoints";
 import { except } from "./lib/array-extensions";
+import { parsePayload } from "./lib/coap-payload";
 import { ExtendedAdapter, Global as _ } from "./lib/global";
 import { composeObject, DictionaryLike, dig, entries, filter, values } from "./lib/object-polyfill";
 import { wait } from "./lib/promises";
@@ -24,6 +25,13 @@ import { VirtualGroup } from "./lib/virtual-group";
 
 // Adapter-Utils laden
 import utils from "./lib/utils";
+
+// Adapter-Module laden
+import { gateway as gw, GroupInfo } from "./adapter/gateway";
+import { onMessage } from "./adapter/message";
+
+// dictionary of ioBroker objects
+const objects: DictionaryLike<ioBroker.Object> = {};
 
 interface CustomStateSubscription {
 	pattern: RegExp;
@@ -47,23 +55,6 @@ const customObjectSubscriptions: {
 		subscriptions: new Map(),
 		counter: 0,
 	};
-
-// dictionary of COAP observers
-const observers: string[] = [];
-// dictionary of known devices
-const devices: DictionaryLike<Accessory> = {};
-// dictionary of known groups
-interface GroupInfo {
-	group: Group;
-	scenes: DictionaryLike<Scene>;
-}
-const groups: DictionaryLike<GroupInfo> = {};
-const virtualGroups: DictionaryLike<VirtualGroup> = {};
-// dictionary of ioBroker objects
-const objects: DictionaryLike<ioBroker.Object> = {};
-
-// the base of all requests
-let requestBase: string;
 
 // Adapter-Objekt erstellen
 let adapter: ExtendedAdapter = utils.adapter({
@@ -109,19 +100,19 @@ let adapter: ExtendedAdapter = utils.adapter({
 		coap.setSecurityParams(hostname, {
 			psk: { "Client_identity": adapter.config.securityCode },
 		});
-		requestBase = `coaps://${hostname}:5684/`;
+		gw.requestBase = `coaps://${hostname}:5684/`;
 
 		// Try a few times to setup a working connection
 		const maxTries = 3;
 		for (let i = 1; i <= maxTries; i++) {
-			if (await coap.tryToConnect(requestBase)) {
+			if (await coap.tryToConnect(gw.requestBase)) {
 				break; // it worked
 			} else if (i < maxTries) {
 				_.log(`Could not connect to gateway, try #${i}`, "warn");
 				await wait(1000);
 			} else if (i === maxTries) {
 				// no working connection
-				_.log(`Could not connect to the gateway ${requestBase} after ${maxTries} tries!`, "error");
+				_.log(`Could not connect to the gateway ${gw.requestBase} after ${maxTries} tries!`, "error");
 				_.log(`Please check your network and adapter settings and restart the adapter!`, "error");
 				return;
 			}
@@ -136,130 +127,8 @@ let adapter: ExtendedAdapter = utils.adapter({
 
 	},
 
-	message: async (obj) => {
-		// responds to the adapter that sent the original message
-		function respond(response) {
-			if (obj.callback) adapter.sendTo(obj.from, obj.command, response, obj.callback);
-		}
-		// some predefined responses so we only have to define them once
-		const responses = {
-			ACK: { error: null },
-			OK: { error: null, result: "ok" },
-			ERROR_UNKNOWN_COMMAND: { error: "Unknown command!" },
-			MISSING_PARAMETER: (paramName) => {
-				return { error: 'missing parameter "' + paramName + '"!' };
-			},
-			COMMAND_RUNNING: { error: "command running" },
-			RESULT: (result) => ({ error: null, result }),
-			ERROR: (error: string) => ({ error }),
-		};
-		// make required parameters easier
-		function requireParams(...params: string[]) {
-			if (!(params && params.length)) return true;
-			for (const param of params) {
-				if (!(obj.message && obj.message.hasOwnProperty(param))) {
-					respond(responses.MISSING_PARAMETER(param));
-					return false;
-				}
-			}
-			return true;
-		}
-
-		// handle the message
-		if (obj) {
-			switch (obj.command) {
-				case "request": {// custom CoAP request
-					// require the path to be given
-					if (!requireParams("path")) return;
-
-					// check the given params
-					const params = obj.message as any;
-					params.method = params.method || "get";
-					if (["get", "post", "put", "delete"].indexOf(params.method) === -1) {
-						respond({ error: `unsupported request method "${params.method}"` });
-						return;
-					}
-
-					_.log(`custom coap request: ${params.method.toUpperCase()} "${requestBase}${params.path}"`);
-
-					// create payload
-					let payload: string | Buffer;
-					if (params.payload) {
-						payload = JSON.stringify(params.payload);
-						_.log("sending custom payload: " + payload);
-						payload = Buffer.from(payload);
-					}
-
-					// wait for the CoAP response and respond to the message
-					const resp = await coap.request(`${requestBase}${params.path}`, params.method, payload as Buffer);
-					respond(responses.RESULT({
-						code: resp.code.toString(),
-						payload: parsePayload(resp),
-					}));
-					return;
-				}
-
-				case "getGroups": { // get all groups defined on the gateway
-					// check the given params
-					const params = obj.message as any;
-					// group type must be "real", "virtual" or "both"
-					const groupType = params.type || "real";
-					if (["real", "virtual", "both"].indexOf(groupType) === -1) {
-						respond(responses.ERROR(`group type must be "real", "virtual" or "both"`));
-						return;
-					}
-
-					const ret = {};
-					if (groupType === "real" || groupType === "both") {
-						for (const [id, group] of entries(groups)) {
-							ret[id] = {
-								name: group.group.name,
-								deviceIDs: group.group.deviceIDs,
-								type: "real",
-							};
-						}
-					}
-					if (groupType === "virtual" || groupType === "both") {
-						for (const [id, group] of entries(virtualGroups)) {
-							ret[id] = {
-								name: group.name,
-								deviceIDs: group.deviceIDs,
-								type: "virtual",
-							};
-						}
-					}
-
-					respond(responses.RESULT(ret));
-					return;
-				}
-
-				case "getDevice": { // get preprocessed information about a device
-					// require the id to be given
-					if (!requireParams("id")) return;
-
-					// check the given params
-					const params = obj.message as any;
-					if (!(params.id in devices)) {
-						respond(responses.ERROR(`device with id ${params.id} not found`));
-						return;
-					}
-
-					const device = devices[params.id];
-					// TODO: Do we need more?
-					const ret = {
-						name: device.name,
-						type: AccessoryTypes[device.type], // type as string
-					};
-					respond(responses.RESULT(ret));
-					return;
-				}
-
-				default:
-					respond(responses.ERROR_UNKNOWN_COMMAND);
-					return;
-			}
-		}
-	},
+	// Handle sendTo-Messages
+	message: onMessage,
 
 	objectChange: (id, obj) => {
 		_.log(`{{blue}} object with id ${id} ${obj ? "updated" : "deleted"}`, "debug");
@@ -269,17 +138,17 @@ let adapter: ExtendedAdapter = utils.adapter({
 			if (obj) {
 				// first check if we have to modify a device/group/whatever
 				const instanceId = getInstanceId(id);
-				if (obj.type === "device" && instanceId in devices && devices[instanceId] != null) {
+				if (obj.type === "device" && instanceId in gw.devices && gw.devices[instanceId] != null) {
 					// if this device is in the device list, check for changed properties
-					const acc = devices[instanceId];
+					const acc = gw.devices[instanceId];
 					if (obj.common && obj.common.name !== acc.name) {
 						// the name has changed, notify the gateway
 						_.log(`the device ${id} was renamed to "${obj.common.name}"`);
 						renameDevice(acc, obj.common.name);
 					}
-				} else if (obj.type === "channel" && instanceId in groups && groups[instanceId] != null) {
+				} else if (obj.type === "channel" && instanceId in gw.groups && gw.groups[instanceId] != null) {
 					// if this group is in the groups list, check for changed properties
-					const grp = groups[instanceId].group;
+					const grp = gw.groups[instanceId].group;
 					if (obj.common && obj.common.name !== grp.name) {
 						// the name has changed, notify the gateway
 						_.log(`the group ${id} was renamed to "${obj.common.name}"`);
@@ -361,7 +230,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 				switch (rootObj.native.type) {
 					case "group": {
 						// read the instanceId and get a reference value
-						const group = groups[rootObj.native.instanceId].group;
+						const group = gw.groups[rootObj.native.instanceId].group;
 						// if the change was acknowledged, update the state later
 						let wasAcked: boolean;
 
@@ -398,7 +267,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 
 					case "virtual group": {
 						// find the virtual group instance
-						const vGroup = virtualGroups[rootObj.native.instanceId];
+						const vGroup = gw.virtualGroups[rootObj.native.instanceId];
 
 						let operation: LightOperation;
 
@@ -435,7 +304,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 
 						if (id.indexOf(".lightbulb.") > -1) {
 							// read the instanceId and get a reference value
-							const accessory = devices[rootObj.native.instanceId];
+							const accessory = gw.devices[rootObj.native.instanceId];
 							const light = accessory.lightList[0];
 							// if the change was acknowledged, update the state later
 							let wasAcked: boolean;
@@ -504,7 +373,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 			if (pingTimer != null) clearInterval(pingTimer);
 
 			// stop all observers
-			for (const url of observers) {
+			for (const url of gw.observers) {
 				coap.stopObserving(url);
 			}
 			// close all sockets
@@ -528,7 +397,7 @@ async function operateLight(accessory: Accessory, operation: LightOperation): Pr
 	}
 
 	// the url to be requested
-	const url: string = `${requestBase}${coapEndpoints.devices}/${accessory.instanceId}`;
+	const url: string = `${gw.requestBase}${coapEndpoints.devices}/${accessory.instanceId}`;
 
 	// create a copy to modify
 	const newAccessory = accessory.clone();
@@ -562,7 +431,7 @@ async function operateLight(accessory: Accessory, operation: LightOperation): Pr
 async function operateGroup(group: Group, operation: GroupOperation): Promise<boolean> {
 
 	// the url to be requested
-	const url: string = `${requestBase}${coapEndpoints.groups}/${group.instanceId}`;
+	const url: string = `${gw.requestBase}${coapEndpoints.groups}/${group.instanceId}`;
 
 	// create a copy to modify
 	const newGroup = group.clone();
@@ -596,7 +465,7 @@ async function operateVirtualGroup(group: Group | VirtualGroup, operation: Light
 
 	// find all lightbulbs belonging to this group
 	const lightbulbAccessories = group.deviceIDs
-		.map(did => devices[did])
+		.map(did => gw.devices[did])
 		.filter(dev => dev != null && dev.type === AccessoryTypes.lightbulb)
 		;
 
@@ -630,11 +499,11 @@ async function observeResource(path: string, callback: (resp: CoapResponse) => v
 	path = normalizeResourcePath(path);
 
 	// check if we are already observing this resource
-	const observerUrl = `${requestBase}${path}`;
-	if (observers.indexOf(observerUrl) > -1) return;
+	const observerUrl = `${gw.requestBase}${path}`;
+	if (gw.observers.indexOf(observerUrl) > -1) return;
 
 	// start observing
-	observers.push(observerUrl);
+	gw.observers.push(observerUrl);
 	return coap.observe(observerUrl, "get", callback);
 }
 
@@ -647,19 +516,19 @@ function stopObservingResource(path: string): void {
 	path = normalizeResourcePath(path);
 
 	// remove observer
-	const observerUrl = `${requestBase}${path}`;
-	const index = observers.indexOf(observerUrl);
+	const observerUrl = `${gw.requestBase}${path}`;
+	const index = gw.observers.indexOf(observerUrl);
 	if (index === -1) return;
 
 	coap.stopObserving(observerUrl);
-	observers.splice(index, 1);
+	gw.observers.splice(index, 1);
 }
 
 /**
- * Clears the list of observers after a network reset
+ * Clears the list of gw.observers after a network reset
  */
 function clearObservers(): void {
-	observers.splice(0, observers.length);
+	gw.observers.splice(0, gw.observers.length);
 }
 
 function observeAll(): void {
@@ -686,7 +555,7 @@ async function coapCb_getAllDevices(response: CoapResponse) {
 	_.log(`got all devices: ${JSON.stringify(newDevices)}`);
 
 	// get old keys as int array
-	const oldKeys = Object.keys(devices).map(k => +k).sort();
+	const oldKeys = Object.keys(gw.devices).map(k => +k).sort();
 	// get new keys as int array
 	const newKeys = newDevices.sort();
 	// translate that into added and removed devices
@@ -704,12 +573,12 @@ async function coapCb_getAllDevices(response: CoapResponse) {
 	const removedKeys = except(oldKeys, newKeys);
 	_.log(`removing devices with keys ${JSON.stringify(removedKeys)}`, "debug");
 	removedKeys.forEach(async (id) => {
-		if (id in devices) {
+		if (id in gw.devices) {
 			// delete ioBroker device
-			const deviceName = calcObjName(devices[id]);
+			const deviceName = calcObjName(gw.devices[id]);
 			await adapter.$deleteDevice(deviceName);
 			// remove device from dictionary
-			delete groups[id];
+			delete gw.groups[id];
 		}
 
 		// remove observer
@@ -728,7 +597,7 @@ function coap_getDevice_cb(instanceId: number, response: CoapResponse) {
 	// parse device info
 	const accessory = new Accessory().parse(result).createProxy();
 	// remember the device object, so we can later use it as a reference for updates
-	devices[instanceId] = accessory;
+	gw.devices[instanceId] = accessory;
 	// create ioBroker device
 	extendDevice(accessory);
 }
@@ -752,7 +621,7 @@ async function coapCb_getAllGroups(response: CoapResponse) {
 	_.log(`got all groups: ${JSON.stringify(newGroups)}`);
 
 	// get old keys as int array
-	const oldKeys = Object.keys(groups).map(k => +k).sort();
+	const oldKeys = Object.keys(gw.groups).map(k => +k).sort();
 	// get new keys as int array
 	const newKeys = newGroups.sort();
 	// translate that into added and removed devices
@@ -770,12 +639,12 @@ async function coapCb_getAllGroups(response: CoapResponse) {
 	const removedKeys = except(oldKeys, newKeys);
 	_.log(`removing groups with keys ${JSON.stringify(removedKeys)}`, "debug");
 	removedKeys.forEach(async (id) => {
-		if (id in groups) {
+		if (id in gw.groups) {
 			// delete ioBroker group
-			const groupName = calcGroupName(groups[id].group);
+			const groupName = calcGroupName(gw.groups[id].group);
 			await adapter.$deleteChannel(groupName);
 			// remove group from dictionary
-			delete groups[id];
+			delete gw.groups[id];
 		}
 
 		// remove observer
@@ -804,14 +673,14 @@ function coap_getGroup_cb(instanceId: number, response: CoapResponse) {
 	const group = (new Group()).parse(result).createProxy();
 	// remember the group object, so we can later use it as a reference for updates
 	let groupInfo: GroupInfo;
-	if (!(instanceId in groups)) {
+	if (!(instanceId in gw.groups)) {
 		// if there's none, create one
-		groups[instanceId] = {
+		gw.groups[instanceId] = {
 			group: null,
 			scenes: {},
 		};
 	}
-	groupInfo = groups[instanceId];
+	groupInfo = gw.groups[instanceId];
 	groupInfo.group = group;
 
 	// create ioBroker states
@@ -831,7 +700,7 @@ async function coap_getAllScenes_cb(groupId: number, response: CoapResponse) {
 		return;
 	}
 
-	const groupInfo = groups[groupId];
+	const groupInfo = gw.groups[groupId];
 	const newScenes = parsePayload(response);
 
 	_.log(`got all scenes in group ${groupId}: ${JSON.stringify(newScenes)}`);
@@ -885,9 +754,9 @@ function coap_getScene_cb(groupId: number, instanceId: number, response: CoapRes
 	// parse scene info
 	const scene = (new Scene()).parse(result).createProxy();
 	// remember the scene object, so we can later use it as a reference for updates
-	groups[groupId].scenes[instanceId] = scene;
+	gw.groups[groupId].scenes[instanceId] = scene;
 	// Update the scene dropdown for the group
-	updatePossibleScenes(groups[groupId]);
+	updatePossibleScenes(gw.groups[groupId]);
 }
 
 /**
@@ -1444,7 +1313,7 @@ function extendGroup(group: Group) {
 async function updatePossibleScenes(groupInfo: GroupInfo): Promise<void> {
 	const group = groupInfo.group;
 	// if this group is not in the dictionary, don't do anything
-	if (!(group.instanceId in groups)) return;
+	if (!(group.instanceId in gw.groups)) return;
 	// find out which is the root object id
 	const objId = calcGroupId(group);
 	// scenes are stored under <objId>.activeScene
@@ -1614,7 +1483,7 @@ function renameDevice(accessory: Accessory, newName: string): void {
 	payload = Buffer.from(payload);
 
 	coap.request(
-		`${requestBase}${coapEndpoints.devices}/${accessory.instanceId}`, "put", payload,
+		`${gw.requestBase}${coapEndpoints.devices}/${accessory.instanceId}`, "put", payload,
 	);
 
 }
@@ -1643,7 +1512,7 @@ function renameGroup(group: Group, newName: string): void {
 	payload = Buffer.from(payload);
 
 	coap.request(
-		`${requestBase}${coapEndpoints.groups}/${group.instanceId}`, "put", payload,
+		`${gw.requestBase}${coapEndpoints.groups}/${group.instanceId}`, "put", payload,
 	);
 
 }
@@ -1728,21 +1597,6 @@ function unsubscribeObjects(id: string) {
 	}
 }
 
-function parsePayload(response: CoapResponse): any {
-	switch (response.format) {
-		case 0: // text/plain
-		case null: // assume text/plain
-			return response.payload.toString("utf-8");
-		case 50: // application/json
-			const json = response.payload.toString("utf-8");
-			return JSON.parse(json);
-		default:
-			// dunno how to parse this
-			_.log(`unknown CoAP response format ${response.format}`, "warn");
-			return response.payload;
-	}
-}
-
 /**
  * Loads defined virtual groups from the ioBroker objects DB
  */
@@ -1755,7 +1609,7 @@ async function loadVirtualGroups(): Promise<void> {
 			g.native.type === "virtual group";
 	});
 	// load them into the virtualGroups dict
-	Object.assign(virtualGroups, composeObject<VirtualGroup>(
+	Object.assign(gw.virtualGroups, composeObject<VirtualGroup>(
 		groupObjects.map(g => {
 			const id: number = g.native.instanceId;
 			const instanceIDs: number[] = g.native.instanceIDs;
@@ -1775,7 +1629,7 @@ let resetAttempts: number = 0;
 let dead: boolean = false;
 async function pingThread() {
 	const oldValue = connectionAlive;
-	connectionAlive = await coap.ping(requestBase);
+	connectionAlive = await coap.ping(gw.requestBase);
 	_.log(`ping ${connectionAlive ? "" : "un"}successful...`, "debug");
 	await adapter.$setStateChanged("info.connection", connectionAlive, true);
 
@@ -1786,7 +1640,7 @@ async function pingThread() {
 			// connection is now alive again
 			_.log("Connection to gateway reestablished", "info");
 			// restart observing if neccessary
-			if (observers.length === 0) observeAll();
+			if (gw.observers.length === 0) observeAll();
 			// TODO: send buffered messages
 		}
 	} else {
