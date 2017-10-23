@@ -11,5 +11,5 @@ export interface JQueryWithTabs {
 	tabs: (selector?: any) => JQuery & JQueryWithTabs;
 }
 export const $$ = $window.jQuery as any as (...args: any[]) => JQuery & JQueryWithTabs;
-export const instance = $window.instance;
-export const _ = $window._;
+export const instance = $window.instance || 0;
+export const _ = $window._ || ((text: string) => text);

@@ -205,8 +205,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // fix missing property errors/warnings
 exports.$window = window;
 exports.$$ = exports.$window.jQuery;
-exports.instance = exports.$window.instance;
-exports._ = exports.$window._;
+exports.instance = exports.$window.instance || 0;
+exports._ = exports.$window._ || ((text) => text);
 
 
 /***/ })
