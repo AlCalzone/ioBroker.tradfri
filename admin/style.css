@@ -2,11 +2,21 @@
 	box-sizing: border-box
 }
 #adapter-container {
-	font-size: initial;
 	padding: 0 0.5em;
 }
-#adapter-container > * {
-	width: 100%;
+#adapter-container .ui-tabs-panel {
+	padding: 0;
+}
+#adapter-container, #adapter-container .ui-tabs {
+	font-size: initial;
+}
+#adapter-container .ui-tabs-nav {
+	margin: 0 -0.5em;
+}
+#adapter-container > *, 
+.ui-tabs > *, 
+.ui-tabs-panel > * {
+	width: auto;
 }
 div.loading:first-child {
 	margin-top: 2em;
@@ -23,6 +33,7 @@ div.loading {
 	background-size: 64px auto;
 	background-position: left center;
 	background-repeat: no-repeat;
+	margin: 0.5em auto;
 }
 [data-role="adapter-name"]::before {
 	content: "";

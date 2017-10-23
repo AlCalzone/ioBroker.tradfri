@@ -44,7 +44,6 @@ exports.Groups = Groups;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = __webpack_require__("./node_modules/react/index.js");
-const fragment_1 = __webpack_require__("./admin/src/components/fragment.tsx");
 const $window = window;
 /** Translates text */
 const _ = $window._;
@@ -105,16 +104,14 @@ class Settings extends React.Component {
         return this.state;
     }
     render() {
-        return (React.createElement(fragment_1.default, null,
-            React.createElement("h4", { key: "header", className: "translate" }, "Settings"),
-            React.createElement("p", { key: "content", className: "settings-table" },
-                React.createElement(Label, { for: "host", text: "Gateway IP/Hostname:" }),
-                React.createElement(Tooltip, { text: "Der Hostname ist \"gw-\" gefolgt von der MAC-Adresse bzw. Seriennummer des Gateways, ohne Sonderzeichen, z.B. gw-a0b1c2d3e4f5. Er findet sich auf der Unterseite des Gateways" }),
-                React.createElement("input", { className: "value", id: "host", value: this.getSetting("host"), onChange: this.handleChange }),
-                React.createElement("br", null),
-                React.createElement(Label, { for: "securityCode", text: "Security-Code:" }),
-                React.createElement(Tooltip, { text: "Der Security-Code findet sich auf der Unterseite des Gateways" }),
-                React.createElement("input", { className: "value", id: "securityCode", value: this.getSetting("securityCode"), onChange: this.handleChange }))));
+        return (React.createElement("p", { key: "content", className: "settings-table" },
+            React.createElement(Label, { for: "host", text: "Gateway IP/Hostname:" }),
+            React.createElement(Tooltip, { text: "Der Hostname ist \"gw-\" gefolgt von der MAC-Adresse bzw. Seriennummer des Gateways, ohne Sonderzeichen, z.B. gw-a0b1c2d3e4f5. Er findet sich auf der Unterseite des Gateways" }),
+            React.createElement("input", { className: "value", id: "host", value: this.getSetting("host"), onChange: this.handleChange }),
+            React.createElement("br", null),
+            React.createElement(Label, { for: "securityCode", text: "Security-Code:" }),
+            React.createElement(Tooltip, { text: "Der Security-Code findet sich auf der Unterseite des Gateways" }),
+            React.createElement("input", { className: "value", id: "securityCode", value: this.getSetting("securityCode"), onChange: this.handleChange })));
     }
 }
 exports.Settings = Settings;
@@ -151,7 +148,7 @@ class Tabs extends React.Component {
         return (React.createElement("div", { id: this.containerId },
             React.createElement("ul", null, Object.keys(this.state.tabs).map((k, i) => React.createElement("li", { key: i },
                 React.createElement("a", { href: `#${this.containerId}-${i}`, className: "translate" }, k)))),
-            Object.keys(this.state.tabs).map((k, i) => React.createElement("div", { key: i, id: `#${this.containerId}-${i}` }, this.state.tabs[k]))));
+            Object.keys(this.state.tabs).map((k, i) => React.createElement("div", { key: i, id: `${this.containerId}-${i}` }, this.state.tabs[k]))));
     }
 }
 exports.Tabs = Tabs;

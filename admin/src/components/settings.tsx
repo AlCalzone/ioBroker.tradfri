@@ -88,18 +88,15 @@ export class Settings extends React.Component<SettingsProps, DictionaryLike<any>
 
 	public render() {
 		return (
-			<Fragment>
-				<h4 key="header" className="translate">Settings</h4>
-				<p key="content" className="settings-table">
-					<Label for="host" text="Gateway IP/Hostname:" />
-					<Tooltip text="Der Hostname ist &quot;gw-&quot; gefolgt von der MAC-Adresse bzw. Seriennummer des Gateways, ohne Sonderzeichen, z.B. gw-a0b1c2d3e4f5. Er findet sich auf der Unterseite des Gateways" />
-					<input className="value" id="host" value={this.getSetting("host")} onChange={this.handleChange} /><br />
+			<p key="content" className="settings-table">
+				<Label for="host" text="Gateway IP/Hostname:" />
+				<Tooltip text="Der Hostname ist &quot;gw-&quot; gefolgt von der MAC-Adresse bzw. Seriennummer des Gateways, ohne Sonderzeichen, z.B. gw-a0b1c2d3e4f5. Er findet sich auf der Unterseite des Gateways" />
+				<input className="value" id="host" value={this.getSetting("host")} onChange={this.handleChange} /><br />
 
-					<Label for="securityCode" text="Security-Code:" />
-					<Tooltip text="Der Security-Code findet sich auf der Unterseite des Gateways" />
-					<input className="value" id="securityCode" value={this.getSetting("securityCode")} onChange={this.handleChange}  />
-				</p>
-			</Fragment>
+				<Label for="securityCode" text="Security-Code:" />
+				<Tooltip text="Der Security-Code findet sich auf der Unterseite des Gateways" />
+				<input className="value" id="securityCode" value={this.getSetting("securityCode")} onChange={this.handleChange}  />
+			</p>
 		);
 	}
 }

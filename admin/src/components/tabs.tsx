@@ -34,7 +34,7 @@ export class Tabs extends React.Component<any, any> {
 					)}
 				</ul>
 				{Object.keys(this.state.tabs).map(
-					(k, i) => <div key={i} id={`#${this.containerId}-${i}`}>{this.state.tabs[k]}</div>,
+					(k, i) => <div key={i} id={`${this.containerId}-${i}`}>{this.state.tabs[k]}</div>,
 				)}
 			</div>
 		);
