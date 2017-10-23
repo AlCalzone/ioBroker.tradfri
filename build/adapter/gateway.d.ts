@@ -17,6 +17,7 @@ export declare class Gateway {
     /** dictionary of known virtual groups */
     virtualGroups: DictionaryLike<VirtualGroup>;
     private _requestBase;
+    objects: DictionaryLike<ioBroker.Object>;
     /** Common URL for all requests */
     requestBase: string;
 }

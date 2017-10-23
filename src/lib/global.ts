@@ -205,7 +205,7 @@ export class Global {
 	 * Kurzschreibweise für die Ermittlung mehrerer Objekte
 	 * @param id
 	 */
-	public static async $$(pattern: string, type: ioBroker.ObjectType, role?: string) {
+	public static async $$(pattern: string, type: ioBroker.ObjectType, role?: string): Promise<DictionaryLike<ioBroker.Object>> {
 		const objects = await Global._adapter.$getForeignObjects(pattern, type);
 		if (role) {
 			return objFilter(objects, o => (o.common as any).role === role);

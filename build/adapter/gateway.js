@@ -10,6 +10,8 @@ class Gateway {
         this.groups = {};
         /** dictionary of known virtual groups */
         this.virtualGroups = {};
+        // dictionary of ioBroker objects
+        this.objects = {};
     }
     /** Common URL for all requests */
     get requestBase() { return this._requestBase; }

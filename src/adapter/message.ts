@@ -3,7 +3,9 @@ import { Accessory, AccessoryTypes } from "../ipso/accessory";
 import { parsePayload } from "../lib/coap-payload";
 import { ExtendedAdapter, Global as _ } from "../lib/global";
 import { entries } from "../lib/object-polyfill";
+import { VirtualGroup } from "../lib/virtual-group";
 import { gateway as gw } from "./gateway";
+import { extendVirtualGroup } from "./groups";
 
 export async function onMessage(obj) {
 	// responds to the adapter that sent the original message
@@ -65,6 +67,52 @@ export async function onMessage(obj) {
 					code: resp.code.toString(),
 					payload: parsePayload(resp),
 				}));
+				return;
+			}
+
+			case "addVirtualGroup": {
+				// check the given params
+				const params = obj.message as any;
+				// calculate the next ID
+				const nextID = Math.max(0, ...Object.keys(gw.virtualGroups).map(k => +k)) + 1;
+				// create the group
+				const newGroup = new VirtualGroup(nextID);
+				newGroup.name = `virtual group ${nextID}`;
+				// create the ioBroker objects
+				gw.virtualGroups[nextID] = newGroup;
+				extendVirtualGroup(newGroup);
+				// and return the id
+				respond(responses.RESULT(nextID));
+
+				return;
+			}
+
+			case "editVirtualGroup": {
+				// require the id to be given
+				if (!requireParams("id")) return;
+
+				// check the given params
+				const params = obj.message as any;
+				const id = parseInt(params.id, 10);
+
+				if (!(id in gw.virtualGroups)) {
+					respond({ error: `no virtual group with ID ${id} found!` });
+					return;
+				}
+
+				const group = gw.virtualGroups[id];
+				// Update the device ids
+				if (params.deviceIDs != null && params.deviceIDs instanceof Array) {
+					group.deviceIDs = params.deviceIDs;
+				}
+				// Change the name
+				if (typeof params.name === "string" && params.name.length > 0) {
+					group.name = params.name;
+				}
+				// save the changes
+				extendVirtualGroup(group);
+
+				respond(responses.OK);
 				return;
 			}
 

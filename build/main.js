@@ -21,7 +21,6 @@ const global_1 = require("./lib/global");
 const object_polyfill_1 = require("./lib/object-polyfill");
 const promises_1 = require("./lib/promises");
 const str2regex_1 = require("./lib/str2regex");
-const strings_1 = require("./lib/strings");
 // Datentypen laden
 const accessory_1 = require("./ipso/accessory");
 const group_1 = require("./ipso/group");
@@ -31,9 +30,8 @@ const virtual_group_1 = require("./lib/virtual-group");
 const utils_1 = require("./lib/utils");
 // Adapter-Module laden
 const gateway_1 = require("./adapter/gateway");
+const groups_1 = require("./adapter/groups");
 const message_1 = require("./adapter/message");
-// dictionary of ioBroker objects
-const objects = {};
 const customStateSubscriptions = {
     subscriptions: new Map(),
     counter: 0,
@@ -132,12 +130,12 @@ let adapter = utils_1.default.adapter({
                     }
                 }
                 // remember the object
-                objects[id] = obj;
+                gateway_1.gateway.objects[id] = obj;
             }
             else {
                 // object deleted, forget it
-                if (id in objects)
-                    delete objects[id];
+                if (id in gateway_1.gateway.objects)
+                    delete gateway_1.gateway.objects[id];
             }
         }
         // Custom subscriptions durchgehen, um die passenden Callbacks aufzurufen
@@ -183,14 +181,14 @@ let adapter = utils_1.default.adapter({
         // Eigene Handling-Logik zum Schluss, damit wir return benutzen können
         if (state && !state.ack && id.startsWith(adapter.namespace)) {
             // our own state was changed from within ioBroker, react to it
-            const stateObj = objects[id];
+            const stateObj = gateway_1.gateway.objects[id];
             if (!(stateObj && stateObj.type === "state" && stateObj.native && stateObj.native.path))
                 return;
             // get "official" value for the parent object
             const rootId = getRootId(id);
             if (rootId) {
                 // get the ioBroker object
-                const rootObj = objects[rootId];
+                const rootObj = gateway_1.gateway.objects[rootId];
                 // for now: handle changes on a case by case basis
                 // everything else is too complicated for now
                 let val = state.val;
@@ -576,7 +574,7 @@ function coapCb_getAllGroups(response) {
         removedKeys.forEach((id) => __awaiter(this, void 0, void 0, function* () {
             if (id in gateway_1.gateway.groups) {
                 // delete ioBroker group
-                const groupName = calcGroupName(gateway_1.gateway.groups[id].group);
+                const groupName = groups_1.calcGroupName(gateway_1.gateway.groups[id].group);
                 yield adapter.$deleteChannel(groupName);
                 // remove group from dictionary
                 delete gateway_1.gateway.groups[id];
@@ -615,7 +613,7 @@ function coap_getGroup_cb(instanceId, response) {
     groupInfo = gateway_1.gateway.groups[instanceId];
     groupInfo.group = group;
     // create ioBroker states
-    extendGroup(group);
+    groups_1.extendGroup(group);
     // and load scene information
     observeResource(`${endpoints_1.endpoints.scenes}/${instanceId}`, (resp) => coap_getAllScenes_cb(instanceId, resp));
 }
@@ -719,27 +717,6 @@ function calcObjName(accessory) {
     return `${prefix}-${accessory.instanceId}`;
 }
 /**
- * Determines the object ID under which the given group should be stored
- */
-function calcGroupId(group) {
-    return `${adapter.namespace}.${calcGroupName(group)}`;
-}
-/**
- * Determines the object name under which the given group should be stored,
- * excluding the adapter namespace
- */
-function calcGroupName(group) {
-    let prefix;
-    if (group instanceof group_1.Group) {
-        prefix = "G";
-    }
-    else if (group instanceof virtual_group_1.VirtualGroup) {
-        prefix = "VG";
-    }
-    const postfix = group.instanceId.toString();
-    return `${prefix}-${strings_1.padStart(postfix, 5, "0")}`;
-}
-/**
  * Determines the object ID under which the given scene should be stored
  */
 function calcSceneId(scene) {
@@ -765,7 +742,7 @@ function getTransitionDuration(accessoryOrGroup) {
             }
         }
         else if (accessoryOrGroup instanceof group_1.Group || accessoryOrGroup instanceof virtual_group_1.VirtualGroup) {
-            stateId = calcGroupId(accessoryOrGroup) + ".transitionDuration";
+            stateId = groups_1.calcGroupId(accessoryOrGroup) + ".transitionDuration";
         }
         const ret = yield adapter.$getState(stateId);
         if (ret != null)
@@ -797,9 +774,9 @@ function accessoryToNative(accessory) {
 /* creates or edits an existing <device>-object for an accessory */
 function extendDevice(accessory) {
     const objId = calcObjId(accessory);
-    if (objId in objects) {
+    if (objId in gateway_1.gateway.objects) {
         // check if we need to edit the existing object
-        const devObj = objects[objId];
+        const devObj = gateway_1.gateway.objects[objId];
         let changed = false;
         // update common part if neccessary
         const newCommon = accessoryToCommon(accessory);
@@ -820,7 +797,7 @@ function extendDevice(accessory) {
         // ====
         // from here we can update the states
         // filter out the ones belonging to this device with a property path
-        const stateObjs = object_polyfill_1.filter(objects, obj => obj._id.startsWith(objId) && obj.native && obj.native.path);
+        const stateObjs = object_polyfill_1.filter(gateway_1.gateway.objects, obj => obj._id.startsWith(objId) && obj.native && obj.native.path);
         // for each property try to update the value
         for (const [id, obj] of object_polyfill_1.entries(stateObjs)) {
             try {
@@ -1036,179 +1013,6 @@ function extendDevice(accessory) {
         Promise.all(createObjects);
     }
 }
-/**
- * Returns the common part of the ioBroker object representing the given group
- */
-function groupToCommon(group) {
-    if (group instanceof group_1.Group) {
-        return {
-            name: group.name,
-        };
-    }
-    else {
-        return {
-            name: `virtual group ${group.instanceId}`,
-        };
-    }
-}
-/**
- * Returns the native part of the ioBroker object representing the given group
- */
-function groupToNative(group) {
-    return {
-        instanceId: group.instanceId,
-        deviceIDs: group.deviceIDs,
-        type: (group instanceof virtual_group_1.VirtualGroup ? "virtual " : "") + "group",
-    };
-}
-/* creates or edits an existing <group>-object for a group */
-function extendGroup(group) {
-    const objId = calcGroupId(group);
-    if (objId in objects) {
-        // check if we need to edit the existing object
-        const grpObj = objects[objId];
-        let changed = false;
-        // update common part if neccessary
-        const newCommon = groupToCommon(group);
-        if (JSON.stringify(grpObj.common) !== JSON.stringify(newCommon)) {
-            // merge the common objects
-            Object.assign(grpObj.common, newCommon);
-            changed = true;
-        }
-        const newNative = groupToNative(group);
-        // update native part if neccessary
-        if (JSON.stringify(grpObj.native) !== JSON.stringify(newNative)) {
-            // merge the native objects
-            Object.assign(grpObj.native, newNative);
-            changed = true;
-        }
-        if (changed)
-            adapter.extendObject(objId, grpObj);
-        // ====
-        // from here we can update the states
-        // filter out the ones belonging to this device with a property path
-        const stateObjs = object_polyfill_1.filter(objects, obj => obj._id.startsWith(objId) && obj.native && obj.native.path);
-        // for each property try to update the value
-        for (const [id, obj] of object_polyfill_1.entries(stateObjs)) {
-            try {
-                // Object could have a default value, find it
-                const newValue = object_polyfill_1.dig(group, obj.native.path);
-                adapter.setState(id, newValue, true);
-            }
-            catch (e) { }
-        }
-    }
-    else {
-        // create new object
-        const devObj = {
-            _id: objId,
-            type: "channel",
-            common: groupToCommon(group),
-            native: groupToNative(group),
-        };
-        adapter.setObject(objId, devObj);
-        // also create state objects, depending on the accessory type
-        const stateObjs = {
-            activeScene: {
-                _id: `${objId}.activeScene`,
-                type: "state",
-                common: {
-                    name: "active scene",
-                    read: true,
-                    write: true,
-                    type: "number",
-                    role: "value.id",
-                    desc: "the instance id of the currently active scene",
-                },
-                native: {
-                    path: "sceneId",
-                },
-            },
-            state: {
-                _id: `${objId}.state`,
-                type: "state",
-                common: {
-                    name: "on/off",
-                    read: true,
-                    write: true,
-                    type: "boolean",
-                    role: "switch",
-                },
-                native: {
-                    path: "onOff",
-                },
-            },
-            transitionDuration: {
-                _id: `${objId}.transitionDuration`,
-                type: "state",
-                common: {
-                    name: "Transition duration",
-                    read: false,
-                    write: true,
-                    type: "number",
-                    min: 0,
-                    max: 100,
-                    def: 0,
-                    role: "light.dimmer",
-                    desc: "Duration for brightness changes of this group's lightbulbs",
-                    unit: "s",
-                },
-                native: {
-                    path: "transitionTime",
-                },
-            },
-            brightness: {
-                _id: `${objId}.brightness`,
-                type: "state",
-                common: {
-                    name: "Brightness",
-                    read: false,
-                    write: true,
-                    min: 0,
-                    max: 254,
-                    type: "number",
-                    role: "light.dimmer",
-                    desc: "Brightness of this group's lightbulbs",
-                },
-                native: {
-                    path: "dimmer",
-                },
-            },
-            color: {
-                _id: `${objId}.color`,
-                type: "state",
-                common: {
-                    name: "Color temperature",
-                    read: true,
-                    write: true,
-                    min: 0,
-                    max: 100,
-                    unit: "%",
-                    type: "number",
-                    role: "level.color.temperature",
-                    desc: "Color temperature of this group's lightbulbs. Range: 0% = cold, 100% = warm",
-                },
-                native: {
-                    // virtual state, so no real path to an object exists
-                    // we still have to give path a value, because other functions check for its existence
-                    path: "__virtual__",
-                },
-            },
-        };
-        const createObjects = Object.keys(stateObjs)
-            .map((key) => {
-            const obj = stateObjs[key];
-            let initialValue = null;
-            if (obj.native.path != null) {
-                // Object could have a default value, find it
-                initialValue = object_polyfill_1.dig(group, obj.native.path);
-            }
-            // create object and return the promise, so we can wait
-            return adapter.$createOwnStateEx(obj._id, obj, initialValue);
-        });
-        Promise.all(createObjects);
-    }
-}
 function updatePossibleScenes(groupInfo) {
     return __awaiter(this, void 0, void 0, function* () {
         const group = groupInfo.group;
@@ -1216,11 +1020,11 @@ function updatePossibleScenes(groupInfo) {
         if (!(group.instanceId in gateway_1.gateway.groups))
             return;
         // find out which is the root object id
-        const objId = calcGroupId(group);
+        const objId = groups_1.calcGroupId(group);
         // scenes are stored under <objId>.activeScene
         const scenesId = `${objId}.activeScene`;
         // only extend that object if it exists already
-        if (scenesId in objects) {
+        if (scenesId in gateway_1.gateway.objects) {
             global_1.Global.log(`updating possible scenes for group ${group.instanceId}: ${JSON.stringify(Object.keys(groupInfo.scenes))}`);
             const scenes = groupInfo.scenes;
             // map scene ids and names to the dropdown
@@ -1230,125 +1034,6 @@ function updatePossibleScenes(groupInfo) {
             yield adapter.$setObject(scenesId, obj);
         }
     });
-}
-/* creates or edits an existing <group>-object for a virtual group */
-function extendVirtualGroup(group) {
-    const objId = calcGroupId(group);
-    if (objId in objects) {
-        // check if we need to edit the existing object
-        const grpObj = objects[objId];
-        let changed = false;
-        // update common part if neccessary
-        const newCommon = groupToCommon(group);
-        if (JSON.stringify(grpObj.common) !== JSON.stringify(newCommon)) {
-            // merge the common objects
-            Object.assign(grpObj.common, newCommon);
-            changed = true;
-        }
-        const newNative = groupToNative(group);
-        // update native part if neccessary
-        if (JSON.stringify(grpObj.native) !== JSON.stringify(newNative)) {
-            // merge the native objects
-            Object.assign(grpObj.native, newNative);
-            changed = true;
-        }
-        if (changed)
-            adapter.extendObject(objId, grpObj);
-        // TODO: Update group states where applicable. See extendGroup for the code
-    }
-    else {
-        // create new object
-        const devObj = {
-            _id: objId,
-            type: "channel",
-            common: groupToCommon(group),
-            native: groupToNative(group),
-        };
-        adapter.setObject(objId, devObj);
-        // also create state objects, depending on the accessory type
-        const stateObjs = {
-            state: {
-                _id: `${objId}.state`,
-                type: "state",
-                common: {
-                    name: "on/off",
-                    read: true,
-                    write: true,
-                    type: "boolean",
-                    role: "switch",
-                },
-                native: {
-                    path: "onOff",
-                },
-            },
-            transitionDuration: {
-                _id: `${objId}.transitionDuration`,
-                type: "state",
-                common: {
-                    name: "Transition duration",
-                    read: false,
-                    write: true,
-                    type: "number",
-                    min: 0,
-                    max: 100,
-                    def: 0,
-                    role: "light.dimmer",
-                    desc: "Duration for brightness changes of this group's lightbulbs",
-                    unit: "s",
-                },
-                native: {
-                    path: "transitionTime",
-                },
-            },
-            brightness: {
-                _id: `${objId}.brightness`,
-                type: "state",
-                common: {
-                    name: "Brightness",
-                    read: false,
-                    write: true,
-                    min: 0,
-                    max: 254,
-                    type: "number",
-                    role: "light.dimmer",
-                    desc: "Brightness of this group's lightbulbs",
-                },
-                native: {
-                    path: "dimmer",
-                },
-            },
-            color: {
-                _id: `${objId}.color`,
-                type: "state",
-                common: {
-                    name: "Color temperature",
-                    read: true,
-                    write: true,
-                    min: 0,
-                    max: 100,
-                    unit: "%",
-                    type: "number",
-                    role: "level.color.temperature",
-                    desc: "Color temperature of this group's lightbulbs. Range: 0% = cold, 100% = warm",
-                },
-                native: {
-                    path: "colorX",
-                },
-            },
-        };
-        const createObjects = Object.keys(stateObjs)
-            .map((key) => {
-            const obj = stateObjs[key];
-            let initialValue = null;
-            if (obj.native.path != null) {
-                // Object could have a default value, find it
-                initialValue = object_polyfill_1.dig(group, obj.native.path);
-            }
-            // create object and return the promise, so we can wait
-            return adapter.$createOwnStateEx(obj._id, obj, initialValue);
-        });
-        Promise.all(createObjects);
-    }
 }
 /**
  * Renames a device
@@ -1471,8 +1156,8 @@ function unsubscribeObjects(id) {
 function loadVirtualGroups() {
     return __awaiter(this, void 0, void 0, function* () {
         // find all defined virtual groups
-        let groupObjects = object_polyfill_1.values(yield global_1.Global.$$("VG-*", "channel"));
-        groupObjects = groupObjects.filter(g => {
+        const iobObjects = yield global_1.Global.$$(`${adapter.namespace}.VG-*`, "channel");
+        const groupObjects = object_polyfill_1.values(iobObjects).filter(g => {
             return g.native &&
                 g.native.instanceId != null &&
                 g.native.type === "virtual group";
@@ -1486,6 +1171,11 @@ function loadVirtualGroups() {
             ret.name = g.common.name;
             return [`${id}`, ret];
         })));
+        // remember the actual objects
+        for (const obj of object_polyfill_1.values(gateway_1.gateway.virtualGroups)) {
+            const id = groups_1.calcGroupId(obj);
+            gateway_1.gateway.objects[id] = iobObjects[id];
+        }
     });
 }
 // Connection check

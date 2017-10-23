@@ -19,6 +19,9 @@ export class Gateway {
 	/** dictionary of known virtual groups */
 	public virtualGroups: DictionaryLike<VirtualGroup> = {};
 	private _requestBase: string;
+	// dictionary of ioBroker objects
+	public objects: DictionaryLike<ioBroker.Object> = {};
+
 	/** Common URL for all requests */
 	public get requestBase(): string { return this._requestBase; }
 	public set requestBase(value: string) { this._requestBase = value; }

@@ -13,7 +13,9 @@ const accessory_1 = require("../ipso/accessory");
 const coap_payload_1 = require("../lib/coap-payload");
 const global_1 = require("../lib/global");
 const object_polyfill_1 = require("../lib/object-polyfill");
+const virtual_group_1 = require("../lib/virtual-group");
 const gateway_1 = require("./gateway");
+const groups_1 = require("./groups");
 function onMessage(obj) {
     return __awaiter(this, void 0, void 0, function* () {
         // responds to the adapter that sent the original message
@@ -73,6 +75,46 @@ function onMessage(obj) {
                         code: resp.code.toString(),
                         payload: coap_payload_1.parsePayload(resp),
                     }));
+                    return;
+                }
+                case "addVirtualGroup": {
+                    // check the given params
+                    const params = obj.message;
+                    // calculate the next ID
+                    const nextID = Math.max(0, ...Object.keys(gateway_1.gateway.virtualGroups).map(k => +k)) + 1;
+                    // create the group
+                    const newGroup = new virtual_group_1.VirtualGroup(nextID);
+                    newGroup.name = `virtual group ${nextID}`;
+                    // create the ioBroker objects
+                    gateway_1.gateway.virtualGroups[nextID] = newGroup;
+                    groups_1.extendVirtualGroup(newGroup);
+                    // and return the id
+                    respond(responses.RESULT(nextID));
+                    return;
+                }
+                case "editVirtualGroup": {
+                    // require the id to be given
+                    if (!requireParams("id"))
+                        return;
+                    // check the given params
+                    const params = obj.message;
+                    const id = parseInt(params.id, 10);
+                    if (!(id in gateway_1.gateway.virtualGroups)) {
+                        respond({ error: `no virtual group with ID ${id} found!` });
+                        return;
+                    }
+                    const group = gateway_1.gateway.virtualGroups[id];
+                    // Update the device ids
+                    if (params.deviceIDs != null && params.deviceIDs instanceof Array) {
+                        group.deviceIDs = params.deviceIDs;
+                    }
+                    // Change the name
+                    if (typeof params.name === "string" && params.name.length > 0) {
+                        group.name = params.name;
+                    }
+                    // save the changes
+                    groups_1.extendVirtualGroup(group);
+                    respond(responses.OK);
                     return;
                 }
                 case "getGroups": {
