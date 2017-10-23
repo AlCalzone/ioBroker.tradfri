@@ -3,11 +3,6 @@ import * as ReactDOM from "react-dom";
 
 import Fragment from "./fragment";
 
-const $window = window as any;
-
-/** Translates text */
-const _ = $window._ as (text: string) => string;
-
 export class Groups extends React.Component<any, any> {
 
 	constructor(props) {

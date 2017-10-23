@@ -21,9 +21,6 @@ exports.default = Fragment;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = __webpack_require__("./node_modules/react/index.js");
-const $window = window;
-/** Translates text */
-const _ = $window._;
 class Groups extends React.Component {
     constructor(props) {
         super(props);
@@ -44,18 +41,16 @@ exports.Groups = Groups;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = __webpack_require__("./node_modules/react/index.js");
-const $window = window;
-/** Translates text */
-const _ = $window._;
+const adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
 /** Helper component for a settings label */
 function Label(props) {
-    return React.createElement("label", { htmlFor: props.for, className: ["translate"].concat(...(props.class || [])).join(" ") },
-        props.text,
+    return React.createElement("label", { htmlFor: props.for, className: (props.class || []).join(" ") },
+        adapter_1._(props.text),
         " ");
 }
 /** Helper component for a tooltip */
 function Tooltip(props) {
-    return React.createElement("img", { className: "admin-tooltip-icon", src: "../../img/info.png", title: _(props.text) });
+    return React.createElement("img", { className: "admin-tooltip-icon", src: "../../img/info.png", title: adapter_1._(props.text) });
 }
 class Settings extends React.Component {
     constructor(props) {
@@ -125,12 +120,8 @@ exports.Settings = Settings;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-// Renders some components in jQuery UI tabs
 const React = __webpack_require__("./node_modules/react/index.js");
-// fix missing property errors/warnings
-const $window = window;
-const $ = $window.jQuery;
-const $$ = $;
+const adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
 class Tabs extends React.Component {
     constructor(props) {
         super(props);
@@ -140,14 +131,14 @@ class Tabs extends React.Component {
         this.containerId = this.props.id || "tabs";
     }
     componentDidMount() {
-        if (!$)
+        if (!adapter_1.$$)
             return; // we're in a test environment without jQuery
-        $$(`#${this.containerId}`).tabs();
+        adapter_1.$$(`#${this.containerId}`).tabs();
     }
     render() {
         return (React.createElement("div", { id: this.containerId },
             React.createElement("ul", null, Object.keys(this.state.tabs).map((k, i) => React.createElement("li", { key: i },
-                React.createElement("a", { href: `#${this.containerId}-${i}`, className: "translate" }, k)))),
+                React.createElement("a", { href: `#${this.containerId}-${i}` }, adapter_1._(k))))),
             Object.keys(this.state.tabs).map((k, i) => React.createElement("div", { key: i, id: `${this.containerId}-${i}` }, this.state.tabs[k]))));
     }
 }
@@ -164,16 +155,16 @@ exports.Tabs = Tabs;
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = __webpack_require__("./node_modules/react/index.js");
 const ReactDOM = __webpack_require__("./node_modules/react-dom/index.js");
+const adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
 // components
 const fragment_1 = __webpack_require__("./admin/src/components/fragment.tsx");
 const groups_1 = __webpack_require__("./admin/src/components/groups.tsx");
 const settings_1 = __webpack_require__("./admin/src/components/settings.tsx");
 const tabs_1 = __webpack_require__("./admin/src/components/tabs.tsx");
-const $window = window;
-const namespace = `tradfri.${$window.instance}`;
+const namespace = `tradfri.${adapter_1.instance}`;
 // layout components
 function Header() {
-    return (React.createElement("h3", { className: "translate", "data-role": "adapter-name" }, "Tradfri adapter settings"));
+    return (React.createElement("h3", { className: "translate", "data-role": "adapter-name" }, adapter_1._("Tradfri adapter settings")));
 }
 function Root(props) {
     return (React.createElement(fragment_1.default, null,
@@ -185,7 +176,7 @@ function Root(props) {
 }
 let curSettings;
 // the function loadSettings has to exist ...
-$window.load = (settings, onChange) => {
+adapter_1.$window.load = (settings, onChange) => {
     const settingsChanged = (newSettings, hasChanges) => {
         curSettings = newSettings;
         onChange(hasChanges);
@@ -197,10 +188,25 @@ $window.load = (settings, onChange) => {
 };
 // ... and the function save has to exist.
 // you have to make sure the callback is called with the settings object as first param!
-$window.save = (callback) => {
+adapter_1.$window.save = (callback) => {
     // save the settings
     callback(curSettings);
 };
+
+
+/***/ }),
+
+/***/ "./admin/src/lib/adapter.ts":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+// fix missing property errors/warnings
+exports.$window = window;
+exports.$$ = exports.$window.jQuery;
+exports.instance = exports.$window.instance;
+exports._ = exports.$window._;
 
 
 /***/ })

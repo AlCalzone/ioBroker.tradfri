@@ -3,19 +3,20 @@ import * as $ from "jquery";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
+import {$$, $window, _, instance} from "./lib/adapter";
+
 // components
 import Fragment from "./components/fragment";
 import { Groups } from "./components/groups";
 import { OnSettingsChangedCallback, Settings } from "./components/settings";
 import { Tabs } from "./components/tabs";
 
-const $window = window as any;
-const namespace = `tradfri.${$window.instance}`;
+const namespace = `tradfri.${instance}`;
 
 // layout components
 function Header() {
 	return (
-		<h3 className="translate" data-role="adapter-name">Tradfri adapter settings</h3>
+		<h3 className="translate" data-role="adapter-name">{_("Tradfri adapter settings")}</h3>
 	);
 }
 

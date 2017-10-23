@@ -4,7 +4,7 @@ systemDictionary = {
 		"de": "Lade Einstellungen...",
 		"en": "loading settings..."
 	},
-	"tradfri adapter settings": {
+	"Tradfri adapter settings": {
 		"de": "Einstellungen für Trådfri-Adapter",
 		"en": "Trådfri adapter settings"
 	},
@@ -15,5 +15,13 @@ systemDictionary = {
 	"security code tooltip": {
 		"de": "Der Security-Code findet sich auf der Unterseite des Gateways",
 		"en": "The security code can be found on the bottom of the gateway"
+	},
+	"Settings": {
+		"de": "Einstellungen",
+		"en": "Settings"
+	},
+	"Groups": {
+		"de": "Virtuelle Gruppen",
+		"en": "Virtual groups"
 	},
 };

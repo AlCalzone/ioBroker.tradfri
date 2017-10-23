@@ -1,11 +1,9 @@
 // Renders some components in jQuery UI tabs
+import * as $ from "jquery";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
-// fix missing property errors/warnings
-const $window = window as any;
-const $ = $window.jQuery as JQuery;
-const $$ = $ as any;
+import {$$, $window, _, instance} from "../lib/adapter";
 
 export class Tabs extends React.Component<any, any> {
 
@@ -20,7 +18,7 @@ export class Tabs extends React.Component<any, any> {
 	private containerId: string;
 
 	public componentDidMount() {
-		if (!$) return; // we're in a test environment without jQuery
+		if (!$$) return; // we're in a test environment without jQuery
 
 		$$(`#${this.containerId}`).tabs();
 	}
@@ -30,7 +28,7 @@ export class Tabs extends React.Component<any, any> {
 			<div id={this.containerId}>
 				<ul>
 					{Object.keys(this.state.tabs).map(
-						(k, i) => <li key={i}><a href={`#${this.containerId}-${i}`} className="translate">{k}</a></li>,
+						(k, i) => <li key={i}><a href={`#${this.containerId}-${i}`}>{_(k)}</a></li>,
 					)}
 				</ul>
 				{Object.keys(this.state.tabs).map(

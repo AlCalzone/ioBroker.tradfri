@@ -1,12 +1,9 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
+import {$$, $window, _, instance} from "../lib/adapter";
+
 import Fragment from "./fragment";
-
-const $window = window as any;
-
-/** Translates text */
-const _ = $window._ as (text: string) => string;
 
 export type OnSettingsChangedCallback = (newSettings: DictionaryLike<any>, hasChanges: boolean) => void;
 
@@ -21,7 +18,7 @@ interface DictionaryLike<T> {
 
 /** Helper component for a settings label */
 function Label(props) {
-	return <label htmlFor={props.for} className={["translate"].concat(...(props.class || [])).join(" ")}>{props.text} </label>;
+	return <label htmlFor={props.for} className={(props.class || []).join(" ")}>{_(props.text)} </label>;
 }
 /** Helper component for a tooltip */
 function Tooltip(props) {
