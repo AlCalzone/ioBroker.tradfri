@@ -24,4 +24,16 @@ systemDictionary = {
 		"de": "Virtuelle Gruppen",
 		"en": "Virtual groups"
 	},
+	"ID": {
+		"de": "ID",
+		"en": "ID"
+	},
+	"Name": {
+		"de": "Name",
+		"en": "Name"
+	},
+	"Devices": {
+		"de": "Geräte",
+		"en": "Devices"
+	},
 };

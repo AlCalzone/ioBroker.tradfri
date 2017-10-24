@@ -21,12 +21,27 @@ exports.default = Fragment;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = __webpack_require__("./node_modules/react/index.js");
+const adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
+const fragment_1 = __webpack_require__("./admin/src/components/fragment.tsx");
 class Groups extends React.Component {
     constructor(props) {
         super(props);
     }
     render() {
-        return (React.createElement("div", null, "Placeholder for group management functions"));
+        return (React.createElement(fragment_1.default, null,
+            React.createElement("table", { id: "virtual-groups" },
+                React.createElement("thead", null,
+                    React.createElement("tr", { className: "ui-widget-header" },
+                        React.createElement("td", { className: "id" }, adapter_1._("ID")),
+                        React.createElement("td", { className: "name" }, adapter_1._("Name")),
+                        React.createElement("td", { className: "devices" }, adapter_1._("Devices")))),
+                React.createElement("tbody", null,
+                    React.createElement("tr", null,
+                        React.createElement("td", { colSpan: 3 }, "Placeholder")),
+                    React.createElement("tr", null,
+                        React.createElement("td", { colSpan: 3 }, "Placeholder")),
+                    React.createElement("tr", null,
+                        React.createElement("td", { colSpan: 3 }, "Placeholder"))))));
     }
 }
 exports.Groups = Groups;
@@ -101,11 +116,11 @@ class Settings extends React.Component {
     render() {
         return (React.createElement("p", { key: "content", className: "settings-table" },
             React.createElement(Label, { for: "host", text: "Gateway IP/Hostname:" }),
-            React.createElement(Tooltip, { text: "Der Hostname ist \"gw-\" gefolgt von der MAC-Adresse bzw. Seriennummer des Gateways, ohne Sonderzeichen, z.B. gw-a0b1c2d3e4f5. Er findet sich auf der Unterseite des Gateways" }),
+            React.createElement(Tooltip, { text: "hostname tooltip" }),
             React.createElement("input", { className: "value", id: "host", value: this.getSetting("host"), onChange: this.handleChange }),
             React.createElement("br", null),
             React.createElement(Label, { for: "securityCode", text: "Security-Code:" }),
-            React.createElement(Tooltip, { text: "Der Security-Code findet sich auf der Unterseite des Gateways" }),
+            React.createElement(Tooltip, { text: "security code tooltip" }),
             React.createElement("input", { className: "value", id: "securityCode", value: this.getSetting("securityCode"), onChange: this.handleChange })));
     }
 }

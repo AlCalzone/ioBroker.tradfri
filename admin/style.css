@@ -55,3 +55,37 @@ div.loading {
 	font-size: 80%;
 	padding-left: 1em;
 }	
+
+#virtual-groups {
+	margin-top: 0.5em;
+	width: calc(100% - 20px);
+}
+#virtual-groups td {
+	padding: 0.2em 0.4em;
+}
+#virtual-groups thead .id {
+	width: 100px;
+}
+#virtual-groups thead .name {
+	width: 200px;
+}
+#virtual-groups thead .devices {
+	/* ? */
+}
+
+#virtual-groups tbody tr:nth-child(2n) {
+	background-color: lightgray;
+}
+#virtual-groups tbody td {
+	padding-top: 0.25em;
+	padding-bottom: 0.25em;
+}
+#virtual-groups tbody .id {
+	text-align: right;
+}
+#virtual-groups thead .name {
+	text-align: left;
+}
+#virtual-groups thead .devices {
+	text-align: left;
+}

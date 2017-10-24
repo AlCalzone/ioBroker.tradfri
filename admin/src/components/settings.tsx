@@ -87,11 +87,11 @@ export class Settings extends React.Component<SettingsProps, DictionaryLike<any>
 		return (
 			<p key="content" className="settings-table">
 				<Label for="host" text="Gateway IP/Hostname:" />
-				<Tooltip text="Der Hostname ist &quot;gw-&quot; gefolgt von der MAC-Adresse bzw. Seriennummer des Gateways, ohne Sonderzeichen, z.B. gw-a0b1c2d3e4f5. Er findet sich auf der Unterseite des Gateways" />
+				<Tooltip text="hostname tooltip" />
 				<input className="value" id="host" value={this.getSetting("host")} onChange={this.handleChange} /><br />
 
 				<Label for="securityCode" text="Security-Code:" />
-				<Tooltip text="Der Security-Code findet sich auf der Unterseite des Gateways" />
+				<Tooltip text="security code tooltip" />
 				<input className="value" id="securityCode" value={this.getSetting("securityCode")} onChange={this.handleChange}  />
 			</p>
 		);
