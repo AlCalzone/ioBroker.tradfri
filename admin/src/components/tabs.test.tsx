@@ -23,13 +23,18 @@ describe("jQuery-UI tabs", () => {
 	};
 	const tabCount = Object.keys(definition).length;
 
-	const tab = <Tabs tabs={definition} />;
+	const tab = <Tabs labels={Object.keys(definition)}>{
+		Object.keys(definition).map(k => definition[k])
+	}</Tabs>;
 
 	it(`renders the correct amount (${tabCount}) of headers`, () => {
 		expect(shallow(tab).find("li")).to.have.length(tabCount);
 	});
 	it(`renders the correct amount (${tabCount}) of tab divs`, () => {
 		expect(shallow(tab).find("div#tabs > div")).to.have.length(tabCount);
+	});
+	it(`renders the defined tabs`, () => {
+		expect(shallow(tab).find("div#test")).to.have.length(1);
 	});
 
 });
