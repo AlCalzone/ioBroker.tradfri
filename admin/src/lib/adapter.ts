@@ -13,10 +13,11 @@ export const $window = window as any as {
 	socket: any;
 	sendTo: (instance: any | null, command: string, message: any, callback: (result: SendToResult) => void) => void;
 };
-export interface JQueryWithTabs {
-	tabs: (selector?: any) => JQuery & JQueryWithTabs;
+export interface JQueryUI {
+	tabs: (selector?: any) => JQuery & JQueryUI;
+	button: (selector?: any) => JQuery & JQueryUI;
 }
-export const $$ = $window.jQuery as any as (...args: any[]) => JQuery & JQueryWithTabs;
+export const $$ = $window.jQuery as any as (...args: any[]) => JQuery & JQueryUI;
 export const instance = $window.instance || 0;
 export const _ = $window._ || ((text: string) => text);
 export const socket = $window.socket;

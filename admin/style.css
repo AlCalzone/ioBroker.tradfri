@@ -72,6 +72,9 @@ div.loading {
 #virtual-groups thead .devices {
 	width: 200px;
 }
+#virtual-groups thead .delete {
+	width: 30px;
+}
 
 #virtual-groups tbody tr:nth-child(2n) {
 	background-color: lightgray;
@@ -92,4 +95,11 @@ div.loading {
 
 #virtual-groups tbody .empty {
 	text-align: center;
+}
+
+#virtual-groups .delete-group {
+	margin-top: -0.25em;
+	margin-bottom: -0.25em;
+	width: 24px;
+	height: 20px;
 }

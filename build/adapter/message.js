@@ -117,6 +117,24 @@ function onMessage(obj) {
                     respond(responses.OK);
                     return;
                 }
+                case "deleteVirtualGroup": {
+                    // require the id to be given
+                    if (!requireParams("id"))
+                        return;
+                    // check the given params
+                    const params = obj.message;
+                    const id = parseInt(params.id, 10);
+                    if (!(id in gateway_1.gateway.virtualGroups)) {
+                        respond({ error: `no virtual group with ID ${id} found!` });
+                        return;
+                    }
+                    const group = gateway_1.gateway.virtualGroups[id];
+                    const channel = groups_1.calcGroupName(group);
+                    yield global_1.Global.adapter.deleteChannel(channel);
+                    delete gateway_1.gateway.virtualGroups[id];
+                    respond(responses.OK);
+                    return;
+                }
                 case "getGroups": {
                     // check the given params
                     const params = obj.message;

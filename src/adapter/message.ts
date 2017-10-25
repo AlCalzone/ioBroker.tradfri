@@ -6,7 +6,7 @@ import { DictionaryLike, entries } from "../lib/object-polyfill";
 import { VirtualGroup } from "../lib/virtual-group";
 import { Group as SendToGroup} from "./communication";
 import { gateway as gw } from "./gateway";
-import { extendVirtualGroup } from "./groups";
+import { calcGroupId, calcGroupName, extendVirtualGroup } from "./groups";
 
 export async function onMessage(obj) {
 	// responds to the adapter that sent the original message
@@ -112,6 +112,28 @@ export async function onMessage(obj) {
 				}
 				// save the changes
 				extendVirtualGroup(group);
+
+				respond(responses.OK);
+				return;
+			}
+
+			case "deleteVirtualGroup": {
+				// require the id to be given
+				if (!requireParams("id")) return;
+
+				// check the given params
+				const params = obj.message as any;
+				const id = parseInt(params.id, 10);
+
+				if (!(id in gw.virtualGroups)) {
+					respond({ error: `no virtual group with ID ${id} found!` });
+					return;
+				}
+
+				const group = gw.virtualGroups[id];
+				const channel = calcGroupName(group);
+				await _.adapter.deleteChannel(channel);
+				delete gw.virtualGroups[id];
 
 				respond(responses.OK);
 				return;

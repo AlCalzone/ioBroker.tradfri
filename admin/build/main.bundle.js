@@ -160,26 +160,65 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const React = __webpack_require__("./node_modules/react/index.js");
 const adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
 const fragment_1 = __webpack_require__("./admin/src/components/fragment.tsx");
+const ADD_GROUP_BUTTON_ID = "btnAddGroup";
 class Groups extends React.Component {
     constructor(props) {
         super(props);
     }
+    componentDidMount() {
+        if (!adapter_1.$$)
+            return; // we're in a test environment without jQuery
+        adapter_1.$$(`#${ADD_GROUP_BUTTON_ID}`).button({
+            icons: { primary: "ui-icon-plusthick" },
+        });
+        adapter_1.$$(`#virtual-groups .delete-group`).button({
+            icons: { primary: "ui-icon-trash" },
+            text: false,
+        });
+    }
+    componentDidUpdate() {
+        if (!adapter_1.$$)
+            return; // we're in a test environment without jQuery
+        adapter_1.$$(`#virtual-groups .delete-group`).button({
+            icons: { primary: "ui-icon-trash" },
+            text: false,
+        });
+    }
+    addGroup() {
+        adapter_1.sendTo(null, "addVirtualGroup", null, (result) => {
+            if (result && result.error) {
+                console.error(result.error);
+            }
+        });
+    }
+    deleteGroup(id) {
+        adapter_1.sendTo(null, "deleteVirtualGroup", { id }, (result) => {
+            if (result && result.error) {
+                console.error(result.error);
+            }
+        });
+    }
     render() {
         console.log(`rendering groups (length=${Object.keys(this.props.groups).length})`);
         return (React.createElement(fragment_1.default, null,
+            React.createElement("p", { className: "actions-panel" },
+                React.createElement("button", { id: ADD_GROUP_BUTTON_ID, onClick: this.addGroup }, adapter_1._("add group"))),
             React.createElement("table", { id: "virtual-groups" },
                 React.createElement("thead", null,
                     React.createElement("tr", { className: "ui-widget-header" },
                         React.createElement("td", { className: "id" }, adapter_1._("ID")),
                         React.createElement("td", { className: "name" }, adapter_1._("Name")),
-                        React.createElement("td", { className: "devices" }, adapter_1._("Devices")))),
+                        React.createElement("td", { className: "devices" }, adapter_1._("Devices")),
+                        React.createElement("td", { className: "delete" }))),
                 React.createElement("tbody", null, (this.props.groups && Object.keys(this.props.groups).length > 0 ? (Object.keys(this.props.groups)
                     .map(k => this.props.groups[k])
-                    .map(group => (React.createElement("tr", null,
+                    .map(group => (React.createElement("tr", { key: group.id },
                     React.createElement("td", null, group.id),
                     React.createElement("td", null, group.name),
-                    React.createElement("td", null, group.deviceIDs ? group.deviceIDs.join(", ") : ""))))) : (React.createElement("tr", null,
-                    React.createElement("td", { className: "empty", colSpan: 3 }, adapter_1._("No virtual groups defined")))))))));
+                    React.createElement("td", null, group.deviceIDs ? group.deviceIDs.join(", ") : ""),
+                    React.createElement("td", null,
+                        React.createElement("button", { title: adapter_1._("delete group"), className: "delete-group", onClick: () => this.deleteGroup(group.id) })))))) : (React.createElement("tr", null,
+                    React.createElement("td", { className: "empty", colSpan: 4 }, adapter_1._("No virtual groups defined")))))))));
     }
 }
 exports.Groups = Groups;
