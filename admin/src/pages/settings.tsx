@@ -3,7 +3,7 @@ import * as ReactDOM from "react-dom";
 
 import {$$, $window, _, instance} from "../lib/adapter";
 
-import Fragment from "./fragment";
+import Fragment from "../components/fragment";
 
 export type OnSettingsChangedCallback = (newSettings: DictionaryLike<any>, hasChanges: boolean) => void;
 

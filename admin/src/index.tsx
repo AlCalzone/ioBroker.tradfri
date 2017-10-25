@@ -3,13 +3,13 @@ import * as $ from "jquery";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
-import {$$, $window, _, instance} from "./lib/adapter";
+import {$$, $window, _, instance, sendTo, socket} from "./lib/adapter";
 
 // components
 import Fragment from "./components/fragment";
-import { Groups } from "./components/groups";
-import { OnSettingsChangedCallback, Settings } from "./components/settings";
 import { Tabs } from "./components/tabs";
+import { GroupDictionary, Groups } from "./pages/groups";
+import { OnSettingsChangedCallback, Settings } from "./pages/settings";
 
 const namespace = `tradfri.${instance}`;
 
@@ -20,16 +20,51 @@ function Header() {
 	);
 }
 
-function Root(props) {
-	return (
-		<Fragment>
-			<Header />
-			<Tabs tabs={{
-				Settings: <Settings settings={props.settings} onChange={props.onSettingsChanged} />,
-				Groups: <Groups />,
-			}} />
-		</Fragment>
-	);
+export class Root extends React.Component<any, any> {
+
+	constructor(props) {
+		super(props);
+		this.state = {
+			groups: {},
+		};
+
+		// subscribe to changes of virtual group objects
+		socket.emit("subscribeObjects", namespace + ".VG-*");
+		socket.on("objectChange", (id: string, obj) => {
+			if (id.substring(0, namespace.length) !== namespace) return;
+			if (id.match(/VG\-\d+$/)) this.updateGroups();
+		});
+	}
+
+	public get groups(): GroupDictionary {
+		return this.state.groups;
+	}
+	public set groups(value: GroupDictionary) {
+		this.setState({groups: value});
+	}
+
+	public updateGroups() {
+		sendTo(null, "getGroups", { type: "virtual" }, (result) => {
+			if (result && result.error) {
+				console.error(result.error);
+			} else {
+				this.groups = result.result as GroupDictionary;
+			}
+		});
+	}
+
+	public render() {
+		return (
+			<Fragment>
+				<Header />
+				<Tabs tabs={{
+					Settings: <Settings settings={this.props.settings} onChange={this.props.onSettingsChanged} />,
+					Groups: <Groups groups={this.state.groups} />,
+				}} />
+			</Fragment>
+		);
+	}
+
 }
 
 let curSettings: any;

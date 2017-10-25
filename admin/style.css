@@ -83,9 +83,13 @@ div.loading {
 #virtual-groups tbody .id {
 	text-align: right;
 }
-#virtual-groups thead .name {
+#virtual-groups tbody .name {
 	text-align: left;
 }
-#virtual-groups thead .devices {
+#virtual-groups tbody .devices {
 	text-align: left;
+}
+
+#virtual-groups tbody .empty {
+	text-align: center;
 }

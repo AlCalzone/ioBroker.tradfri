@@ -2,8 +2,9 @@ import { CoapClient as coap, CoapResponse } from "node-coap-client";
 import { Accessory, AccessoryTypes } from "../ipso/accessory";
 import { parsePayload } from "../lib/coap-payload";
 import { ExtendedAdapter, Global as _ } from "../lib/global";
-import { entries } from "../lib/object-polyfill";
+import { DictionaryLike, entries } from "../lib/object-polyfill";
 import { VirtualGroup } from "../lib/virtual-group";
+import { Group as SendToGroup} from "./communication";
 import { gateway as gw } from "./gateway";
 import { extendVirtualGroup } from "./groups";
 
@@ -126,7 +127,7 @@ export async function onMessage(obj) {
 					return;
 				}
 
-				const ret = {};
+				const ret: DictionaryLike<SendToGroup> = {};
 				if (groupType === "real" || groupType === "both") {
 					for (const [id, group] of entries(gw.groups)) {
 						ret[id] = {

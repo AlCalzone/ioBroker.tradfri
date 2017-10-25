@@ -14,7 +14,138 @@ exports.default = Fragment;
 
 /***/ }),
 
-/***/ "./admin/src/components/groups.tsx":
+/***/ "./admin/src/components/tabs.tsx":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const React = __webpack_require__("./node_modules/react/index.js");
+const adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
+class Tabs extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            tabs: props.tabs,
+        };
+        this.containerId = this.props.id || "tabs";
+    }
+    componentDidMount() {
+        if (!adapter_1.$$)
+            return; // we're in a test environment without jQuery
+        adapter_1.$$(`#${this.containerId}`).tabs();
+    }
+    render() {
+        return (React.createElement("div", { id: this.containerId },
+            React.createElement("ul", null, Object.keys(this.state.tabs).map((k, i) => React.createElement("li", { key: i },
+                React.createElement("a", { href: `#${this.containerId}-${i}` }, adapter_1._(k))))),
+            Object.keys(this.state.tabs).map((k, i) => React.createElement("div", { key: i, id: `${this.containerId}-${i}` }, this.state.tabs[k]))));
+    }
+}
+exports.Tabs = Tabs;
+
+
+/***/ }),
+
+/***/ "./admin/src/index.tsx":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const React = __webpack_require__("./node_modules/react/index.js");
+const ReactDOM = __webpack_require__("./node_modules/react-dom/index.js");
+const adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
+// components
+const fragment_1 = __webpack_require__("./admin/src/components/fragment.tsx");
+const tabs_1 = __webpack_require__("./admin/src/components/tabs.tsx");
+const groups_1 = __webpack_require__("./admin/src/pages/groups.tsx");
+const settings_1 = __webpack_require__("./admin/src/pages/settings.tsx");
+const namespace = `tradfri.${adapter_1.instance}`;
+// layout components
+function Header() {
+    return (React.createElement("h3", { className: "translate", "data-role": "adapter-name" }, adapter_1._("Tradfri adapter settings")));
+}
+class Root extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            groups: {},
+        };
+        // subscribe to changes of virtual group objects
+        adapter_1.socket.emit("subscribeObjects", namespace + ".VG-*");
+        adapter_1.socket.on("objectChange", (id, obj) => {
+            if (id.substring(0, namespace.length) !== namespace)
+                return;
+            if (id.match(/VG\-\d+$/))
+                this.updateGroups();
+        });
+    }
+    get groups() {
+        return this.state.groups;
+    }
+    set groups(value) {
+        this.setState({ groups: value });
+    }
+    updateGroups() {
+        adapter_1.sendTo(null, "getGroups", { type: "virtual" }, (result) => {
+            if (result && result.error) {
+                console.error(result.error);
+            }
+            else {
+                this.groups = result.result;
+            }
+        });
+    }
+    render() {
+        return (React.createElement(fragment_1.default, null,
+            React.createElement(Header, null),
+            React.createElement(tabs_1.Tabs, { tabs: {
+                    Settings: React.createElement(settings_1.Settings, { settings: this.props.settings, onChange: this.props.onSettingsChanged }),
+                    Groups: React.createElement(groups_1.Groups, { groups: this.state.groups }),
+                } })));
+    }
+}
+exports.Root = Root;
+let curSettings;
+// the function loadSettings has to exist ...
+adapter_1.$window.load = (settings, onChange) => {
+    const settingsChanged = (newSettings, hasChanges) => {
+        curSettings = newSettings;
+        onChange(hasChanges);
+        console.log(`settings changed: ${JSON.stringify(curSettings)}, hasChanges=${hasChanges}`);
+    };
+    ReactDOM.render(React.createElement(Root, { settings: settings, onSettingsChanged: settingsChanged }), document.getElementById("adapter-container"));
+    // Signal to admin, that no changes yet
+    onChange(false);
+};
+// ... and the function save has to exist.
+// you have to make sure the callback is called with the settings object as first param!
+adapter_1.$window.save = (callback) => {
+    // save the settings
+    callback(curSettings);
+};
+
+
+/***/ }),
+
+/***/ "./admin/src/lib/adapter.ts":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.$window = window;
+exports.$$ = exports.$window.jQuery;
+exports.instance = exports.$window.instance || 0;
+exports._ = exports.$window._ || ((text) => text);
+exports.socket = exports.$window.socket;
+exports.sendTo = exports.$window.sendTo;
+
+
+/***/ }),
+
+/***/ "./admin/src/pages/groups.tsx":
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -35,13 +166,13 @@ class Groups extends React.Component {
                         React.createElement("td", { className: "id" }, adapter_1._("ID")),
                         React.createElement("td", { className: "name" }, adapter_1._("Name")),
                         React.createElement("td", { className: "devices" }, adapter_1._("Devices")))),
-                React.createElement("tbody", null,
-                    React.createElement("tr", null,
-                        React.createElement("td", { colSpan: 3 }, "Placeholder")),
-                    React.createElement("tr", null,
-                        React.createElement("td", { colSpan: 3 }, "Placeholder")),
-                    React.createElement("tr", null,
-                        React.createElement("td", { colSpan: 3 }, "Placeholder"))))));
+                React.createElement("tbody", null, (this.props.groups && Object.keys(this.props.groups).length > 0 ? (Object.keys(this.props.groups)
+                    .map(k => this.props.groups[k])
+                    .map(group => (React.createElement("tr", null,
+                    React.createElement("td", null, group.id),
+                    React.createElement("td", null, group.name),
+                    React.createElement("td", null, group.deviceIDs.join(", ")))))) : (React.createElement("tr", null,
+                    React.createElement("td", { className: "empty", colSpan: 3 }, adapter_1._("No virtual groups defined")))))))));
     }
 }
 exports.Groups = Groups;
@@ -49,7 +180,7 @@ exports.Groups = Groups;
 
 /***/ }),
 
-/***/ "./admin/src/components/settings.tsx":
+/***/ "./admin/src/pages/settings.tsx":
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -125,103 +256,6 @@ class Settings extends React.Component {
     }
 }
 exports.Settings = Settings;
-
-
-/***/ }),
-
-/***/ "./admin/src/components/tabs.tsx":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const React = __webpack_require__("./node_modules/react/index.js");
-const adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
-class Tabs extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            tabs: props.tabs,
-        };
-        this.containerId = this.props.id || "tabs";
-    }
-    componentDidMount() {
-        if (!adapter_1.$$)
-            return; // we're in a test environment without jQuery
-        adapter_1.$$(`#${this.containerId}`).tabs();
-    }
-    render() {
-        return (React.createElement("div", { id: this.containerId },
-            React.createElement("ul", null, Object.keys(this.state.tabs).map((k, i) => React.createElement("li", { key: i },
-                React.createElement("a", { href: `#${this.containerId}-${i}` }, adapter_1._(k))))),
-            Object.keys(this.state.tabs).map((k, i) => React.createElement("div", { key: i, id: `${this.containerId}-${i}` }, this.state.tabs[k]))));
-    }
-}
-exports.Tabs = Tabs;
-
-
-/***/ }),
-
-/***/ "./admin/src/index.tsx":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const React = __webpack_require__("./node_modules/react/index.js");
-const ReactDOM = __webpack_require__("./node_modules/react-dom/index.js");
-const adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
-// components
-const fragment_1 = __webpack_require__("./admin/src/components/fragment.tsx");
-const groups_1 = __webpack_require__("./admin/src/components/groups.tsx");
-const settings_1 = __webpack_require__("./admin/src/components/settings.tsx");
-const tabs_1 = __webpack_require__("./admin/src/components/tabs.tsx");
-const namespace = `tradfri.${adapter_1.instance}`;
-// layout components
-function Header() {
-    return (React.createElement("h3", { className: "translate", "data-role": "adapter-name" }, adapter_1._("Tradfri adapter settings")));
-}
-function Root(props) {
-    return (React.createElement(fragment_1.default, null,
-        React.createElement(Header, null),
-        React.createElement(tabs_1.Tabs, { tabs: {
-                Settings: React.createElement(settings_1.Settings, { settings: props.settings, onChange: props.onSettingsChanged }),
-                Groups: React.createElement(groups_1.Groups, null),
-            } })));
-}
-let curSettings;
-// the function loadSettings has to exist ...
-adapter_1.$window.load = (settings, onChange) => {
-    const settingsChanged = (newSettings, hasChanges) => {
-        curSettings = newSettings;
-        onChange(hasChanges);
-        console.log(`settings changed: ${JSON.stringify(curSettings)}, hasChanges=${hasChanges}`);
-    };
-    ReactDOM.render(React.createElement(Root, { settings: settings, onSettingsChanged: settingsChanged }), document.getElementById("adapter-container"));
-    // Signal to admin, that no changes yet
-    onChange(false);
-};
-// ... and the function save has to exist.
-// you have to make sure the callback is called with the settings object as first param!
-adapter_1.$window.save = (callback) => {
-    // save the settings
-    callback(curSettings);
-};
-
-
-/***/ }),
-
-/***/ "./admin/src/lib/adapter.ts":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-// fix missing property errors/warnings
-exports.$window = window;
-exports.$$ = exports.$window.jQuery;
-exports.instance = exports.$window.instance || 0;
-exports._ = exports.$window._ || ((text) => text);
 
 
 /***/ })
