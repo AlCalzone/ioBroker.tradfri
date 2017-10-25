@@ -56,7 +56,7 @@ const remoteRoot = `/opt/iobroker/node_modules/iobroker.${ADAPTER_NAME}`;
                             return false;
                         if (basename.endsWith("Thumbs.db"))
                             return false;
-                        if (basename.endsWith(".map"))
+                        if (basename.endsWith(".map") && basename.indexOf(".bundle.") === -1)
                             return false;
                         if (basename.indexOf(".test.") > -1)
                             return false;
@@ -80,9 +80,11 @@ const remoteRoot = `/opt/iobroker/node_modules/iobroker.${ADAPTER_NAME}`;
         execResult = yield ssh.execCommand(`iobroker upload ${ADAPTER_NAME}`);
         console.log(execResult.stdout);
         console.log(execResult.stderr);
-        execResult = yield ssh.execCommand(`iobroker restart ${ADAPTER_NAME}`);
-        console.log(execResult.stdout);
-        console.log(execResult.stderr);
+        if (process.argv.indexOf("--restart") > -1) {
+            execResult = yield ssh.execCommand(`iobroker restart ${ADAPTER_NAME}`);
+            console.log(execResult.stdout);
+            console.log(execResult.stderr);
+        }
         console.log("done");
         process.exit(0);
     });

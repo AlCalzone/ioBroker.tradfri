@@ -52,7 +52,7 @@ const remoteRoot = `/opt/iobroker/node_modules/iobroker.${ADAPTER_NAME}`;
 					const basename = path.basename(pathname);
 					if (basename.startsWith("deploy_")) return false;
 					if (basename.endsWith("Thumbs.db")) return false;
-					if (basename.endsWith(".map")) return false;
+					if (basename.endsWith(".map") && basename.indexOf(".bundle.") === -1) return false;
 					if (basename.indexOf(".test.") > -1) return false;
 					if (basename === "src") return false;
 					return true;
@@ -73,9 +73,11 @@ const remoteRoot = `/opt/iobroker/node_modules/iobroker.${ADAPTER_NAME}`;
 	execResult = await ssh.execCommand(`iobroker upload ${ADAPTER_NAME}`);
 	console.log(execResult.stdout);
 	console.log(execResult.stderr);
-	execResult = await ssh.execCommand(`iobroker restart ${ADAPTER_NAME}`);
-	console.log(execResult.stdout);
-	console.log(execResult.stderr);
+	if (process.argv.indexOf("--restart") > -1) {
+		execResult = await ssh.execCommand(`iobroker restart ${ADAPTER_NAME}`);
+		console.log(execResult.stdout);
+		console.log(execResult.stderr);
+	}
 
 	console.log("done");
 	process.exit(0);

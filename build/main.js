@@ -1165,9 +1165,9 @@ function loadVirtualGroups() {
         // load them into the virtualGroups dict
         Object.assign(gateway_1.gateway.virtualGroups, object_polyfill_1.composeObject(groupObjects.map(g => {
             const id = g.native.instanceId;
-            const instanceIDs = g.native.instanceIDs;
+            const deviceIDs = g.native.deviceIDs;
             const ret = new virtual_group_1.VirtualGroup(id);
-            ret.deviceIDs = instanceIDs;
+            ret.deviceIDs = deviceIDs;
             ret.name = g.common.name;
             return [`${id}`, ret];
         })));

@@ -67,10 +67,10 @@ div.loading {
 	width: 100px;
 }
 #virtual-groups thead .name {
-	width: 200px;
+	width: auto;
 }
 #virtual-groups thead .devices {
-	/* ? */
+	width: 200px;
 }
 
 #virtual-groups tbody tr:nth-child(2n) {

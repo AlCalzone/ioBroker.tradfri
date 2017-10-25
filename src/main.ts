@@ -1281,9 +1281,9 @@ async function loadVirtualGroups(): Promise<void> {
 	Object.assign(gw.virtualGroups, composeObject<VirtualGroup>(
 		groupObjects.map(g => {
 			const id: number = g.native.instanceId;
-			const instanceIDs: number[] = g.native.instanceIDs;
+			const deviceIDs: number[] = g.native.deviceIDs;
 			const ret = new VirtualGroup(id);
-			ret.deviceIDs = instanceIDs;
+			ret.deviceIDs = deviceIDs;
 			ret.name = g.common.name;
 			return [`${id}`, ret] as [string, VirtualGroup];
 		}),

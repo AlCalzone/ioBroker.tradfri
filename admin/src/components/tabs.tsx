@@ -9,9 +9,9 @@ export class Tabs extends React.Component<any, any> {
 
 	constructor(props) {
 		super(props);
-		this.state = {
-			tabs: props.tabs,
-		};
+		// this.state = {
+		// 	tabs: props.tabs,
+		// };
 		this.containerId = this.props.id || "tabs";
 	}
 
@@ -24,15 +24,16 @@ export class Tabs extends React.Component<any, any> {
 	}
 
 	public render() {
+		console.log("Tabs rendering");
 		return (
 			<div id={this.containerId}>
 				<ul>
-					{Object.keys(this.state.tabs).map(
+					{this.props.labels.map(
 						(k, i) => <li key={i}><a href={`#${this.containerId}-${i}`}>{_(k)}</a></li>,
 					)}
 				</ul>
-				{Object.keys(this.state.tabs).map(
-					(k, i) => <div key={i} id={`${this.containerId}-${i}`}>{this.state.tabs[k]}</div>,
+				{this.props.labels.map(
+					(k, i) => <div key={i} id={`${this.containerId}-${i}`}>{this.props.children[i]}</div>,
 				)}
 			</div>
 		);

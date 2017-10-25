@@ -22,6 +22,7 @@ export class Groups extends React.Component<GroupsProps, any> {
 	}
 
 	public render() {
+		console.log(`rendering groups (length=${Object.keys(this.props.groups).length})`);
 		return (
 			<Fragment>
 				<table id="virtual-groups">
@@ -41,7 +42,7 @@ export class Groups extends React.Component<GroupsProps, any> {
 								<td>{group.id}</td>
 								<td>{group.name}</td>
 								{/* TODO: Turn this into a multiselect dropdown */}
-								<td>{group.deviceIDs.join(", ")}</td>
+								<td>{group.deviceIDs ? group.deviceIDs.join(", ") : ""}</td>
 							</tr>
 							))
 						) : (

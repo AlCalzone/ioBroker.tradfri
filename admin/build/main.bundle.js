@@ -25,9 +25,9 @@ const adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
 class Tabs extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            tabs: props.tabs,
-        };
+        // this.state = {
+        // 	tabs: props.tabs,
+        // };
         this.containerId = this.props.id || "tabs";
     }
     componentDidMount() {
@@ -36,10 +36,11 @@ class Tabs extends React.Component {
         adapter_1.$$(`#${this.containerId}`).tabs();
     }
     render() {
+        console.log("Tabs rendering");
         return (React.createElement("div", { id: this.containerId },
-            React.createElement("ul", null, Object.keys(this.state.tabs).map((k, i) => React.createElement("li", { key: i },
+            React.createElement("ul", null, this.props.labels.map((k, i) => React.createElement("li", { key: i },
                 React.createElement("a", { href: `#${this.containerId}-${i}` }, adapter_1._(k))))),
-            Object.keys(this.state.tabs).map((k, i) => React.createElement("div", { key: i, id: `${this.containerId}-${i}` }, this.state.tabs[k]))));
+            this.props.labels.map((k, i) => React.createElement("div", { key: i, id: `${this.containerId}-${i}` }, this.props.children[i]))));
     }
 }
 exports.Tabs = Tabs;
@@ -72,6 +73,8 @@ class Root extends React.Component {
         this.state = {
             groups: {},
         };
+    }
+    componentDidMount() {
         // subscribe to changes of virtual group objects
         adapter_1.socket.emit("subscribeObjects", namespace + ".VG-*");
         adapter_1.socket.on("objectChange", (id, obj) => {
@@ -80,6 +83,8 @@ class Root extends React.Component {
             if (id.match(/VG\-\d+$/))
                 this.updateGroups();
         });
+        // and update once on start
+        this.updateGroups();
     }
     get groups() {
         return this.state.groups;
@@ -93,17 +98,18 @@ class Root extends React.Component {
                 console.error(result.error);
             }
             else {
+                console.log("updated groups");
                 this.groups = result.result;
             }
         });
     }
     render() {
+        console.log("Root rendering");
         return (React.createElement(fragment_1.default, null,
             React.createElement(Header, null),
-            React.createElement(tabs_1.Tabs, { tabs: {
-                    Settings: React.createElement(settings_1.Settings, { settings: this.props.settings, onChange: this.props.onSettingsChanged }),
-                    Groups: React.createElement(groups_1.Groups, { groups: this.state.groups }),
-                } })));
+            React.createElement(tabs_1.Tabs, { labels: ["Settings", "Groups"] },
+                React.createElement(settings_1.Settings, { settings: this.props.settings, onChange: this.props.onSettingsChanged }),
+                React.createElement(groups_1.Groups, { groups: this.state.groups }))));
     }
 }
 exports.Root = Root;
@@ -159,6 +165,7 @@ class Groups extends React.Component {
         super(props);
     }
     render() {
+        console.log(`rendering groups (length=${Object.keys(this.props.groups).length})`);
         return (React.createElement(fragment_1.default, null,
             React.createElement("table", { id: "virtual-groups" },
                 React.createElement("thead", null,
@@ -171,7 +178,7 @@ class Groups extends React.Component {
                     .map(group => (React.createElement("tr", null,
                     React.createElement("td", null, group.id),
                     React.createElement("td", null, group.name),
-                    React.createElement("td", null, group.deviceIDs.join(", ")))))) : (React.createElement("tr", null,
+                    React.createElement("td", null, group.deviceIDs ? group.deviceIDs.join(", ") : ""))))) : (React.createElement("tr", null,
                     React.createElement("td", { className: "empty", colSpan: 3 }, adapter_1._("No virtual groups defined")))))))));
     }
 }

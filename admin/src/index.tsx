@@ -27,13 +27,17 @@ export class Root extends React.Component<any, any> {
 		this.state = {
 			groups: {},
 		};
+	}
 
+	public componentDidMount() {
 		// subscribe to changes of virtual group objects
 		socket.emit("subscribeObjects", namespace + ".VG-*");
 		socket.on("objectChange", (id: string, obj) => {
 			if (id.substring(0, namespace.length) !== namespace) return;
 			if (id.match(/VG\-\d+$/)) this.updateGroups();
 		});
+		// and update once on start
+		this.updateGroups();
 	}
 
 	public get groups(): GroupDictionary {
@@ -48,19 +52,21 @@ export class Root extends React.Component<any, any> {
 			if (result && result.error) {
 				console.error(result.error);
 			} else {
+				console.log("updated groups");
 				this.groups = result.result as GroupDictionary;
 			}
 		});
 	}
 
 	public render() {
+		console.log("Root rendering");
 		return (
 			<Fragment>
 				<Header />
-				<Tabs tabs={{
-					Settings: <Settings settings={this.props.settings} onChange={this.props.onSettingsChanged} />,
-					Groups: <Groups groups={this.state.groups} />,
-				}} />
+				<Tabs labels={["Settings", "Groups"]}>
+					<Settings settings={this.props.settings} onChange={this.props.onSettingsChanged} />
+					<Groups groups={this.state.groups} />
+				</Tabs>
 			</Fragment>
 		);
 	}
