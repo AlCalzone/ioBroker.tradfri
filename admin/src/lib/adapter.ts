@@ -17,6 +17,7 @@ export const $window = window as any as {
 export interface JQueryUI {
 	tabs: (selector?: any) => JQuery & JQueryUI;
 	button: (selector?: any) => JQuery & JQueryUI;
+	multiselect: (selector?: any) => JQuery & JQueryUI;
 }
 export const $$ = $window.jQuery as any as (...args: any[]) => JQuery & JQueryUI;
 export const instance = $window.instance || 0;

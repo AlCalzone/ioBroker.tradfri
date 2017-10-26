@@ -25,3 +25,4 @@ const $ = require('jquery');
 const jQuery = $;
 global.$ = global.jQuery = window.$ = window.jQuery = $;
 require('jquery-ui');
+require("jquery-ui-multiselect-widget");
