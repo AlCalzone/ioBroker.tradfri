@@ -52,14 +52,12 @@ export class Root extends React.Component<any, any> {
 			if (result && result.error) {
 				console.error(result.error);
 			} else {
-				console.log("updated groups");
 				this.groups = result.result as GroupDictionary;
 			}
 		});
 	}
 
 	public render() {
-		console.log("Root rendering");
 		return (
 			<Fragment>
 				<Header />
@@ -81,7 +79,6 @@ $window.load = (settings, onChange) => {
 	const settingsChanged: OnSettingsChangedCallback = (newSettings, hasChanges: boolean) => {
 		curSettings = newSettings;
 		onChange(hasChanges);
-		console.log(`settings changed: ${JSON.stringify(curSettings)}, hasChanges=${hasChanges}`);
 	};
 
 	ReactDOM.render(

@@ -18,13 +18,10 @@ export class Tabs extends React.Component<any, any> {
 	private containerId: string;
 
 	public componentDidMount() {
-		if (!$$) return; // we're in a test environment without jQuery
-
 		$$(`#${this.containerId}`).tabs();
 	}
 
 	public render() {
-		console.log("Tabs rendering");
 		return (
 			<div id={this.containerId}>
 				<ul>

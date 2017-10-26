@@ -31,12 +31,9 @@ class Tabs extends React.Component {
         this.containerId = this.props.id || "tabs";
     }
     componentDidMount() {
-        if (!adapter_1.$$)
-            return; // we're in a test environment without jQuery
         adapter_1.$$(`#${this.containerId}`).tabs();
     }
     render() {
-        console.log("Tabs rendering");
         return (React.createElement("div", { id: this.containerId },
             React.createElement("ul", null, this.props.labels.map((k, i) => React.createElement("li", { key: i },
                 React.createElement("a", { href: `#${this.containerId}-${i}` }, adapter_1._(k))))),
@@ -98,13 +95,11 @@ class Root extends React.Component {
                 console.error(result.error);
             }
             else {
-                console.log("updated groups");
                 this.groups = result.result;
             }
         });
     }
     render() {
-        console.log("Root rendering");
         return (React.createElement(fragment_1.default, null,
             React.createElement(Header, null),
             React.createElement(tabs_1.Tabs, { labels: ["Settings", "Groups"] },
@@ -119,7 +114,6 @@ adapter_1.$window.load = (settings, onChange) => {
     const settingsChanged = (newSettings, hasChanges) => {
         curSettings = newSettings;
         onChange(hasChanges);
-        console.log(`settings changed: ${JSON.stringify(curSettings)}, hasChanges=${hasChanges}`);
     };
     ReactDOM.render(React.createElement(Root, { settings: settings, onSettingsChanged: settingsChanged }), document.getElementById("adapter-container"));
     // Signal to admin, that no changes yet
@@ -166,8 +160,6 @@ class Groups extends React.Component {
         super(props);
     }
     componentDidMount() {
-        if (!adapter_1.$$)
-            return; // we're in a test environment without jQuery
         adapter_1.$$(`#${ADD_GROUP_BUTTON_ID}`).button({
             icons: { primary: "ui-icon-plusthick" },
         });
@@ -177,8 +169,6 @@ class Groups extends React.Component {
         });
     }
     componentDidUpdate() {
-        if (!adapter_1.$$)
-            return; // we're in a test environment without jQuery
         adapter_1.$$(`#virtual-groups .delete-group`).button({
             icons: { primary: "ui-icon-trash" },
             text: false,
@@ -199,7 +189,6 @@ class Groups extends React.Component {
         });
     }
     render() {
-        console.log(`rendering groups (length=${Object.keys(this.props.groups).length})`);
         return (React.createElement(fragment_1.default, null,
             React.createElement("p", { className: "actions-panel" },
                 React.createElement("button", { id: ADD_GROUP_BUTTON_ID, onClick: this.addGroup }, adapter_1._("add group"))),

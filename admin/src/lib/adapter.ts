@@ -10,6 +10,7 @@ export const $window = window as any as {
 	/** Translates text */
 	_: (text: string) => string;
 	jQuery: JQueryStatic;
+	$: JQueryStatic;
 	socket: any;
 	sendTo: (instance: any | null, command: string, message: any, callback: (result: SendToResult) => void) => void;
 };

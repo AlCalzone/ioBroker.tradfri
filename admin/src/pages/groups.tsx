@@ -24,8 +24,6 @@ export class Groups extends React.Component<GroupsProps, any> {
 	}
 
 	public componentDidMount() {
-		if (!$$) return; // we're in a test environment without jQuery
-
 		$$(`#${ADD_GROUP_BUTTON_ID}`).button({
 			icons: { primary: "ui-icon-plusthick" },
 		});
@@ -36,8 +34,6 @@ export class Groups extends React.Component<GroupsProps, any> {
 	}
 
 	public componentDidUpdate() {
-		if (!$$) return; // we're in a test environment without jQuery
-
 		$$(`#virtual-groups .delete-group`).button({
 			icons: { primary: "ui-icon-trash" },
 			text: false,
@@ -61,7 +57,6 @@ export class Groups extends React.Component<GroupsProps, any> {
 	}
 
 	public render() {
-		console.log(`rendering groups (length=${Object.keys(this.props.groups).length})`);
 		return (
 			<Fragment>
 				<p className="actions-panel">
