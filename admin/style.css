@@ -103,3 +103,7 @@ div.loading {
 	width: 24px;
 	height: 20px;
 }
+
+label[for^="ui-multiselect"].ui-state-hover {
+	font-weight: normal;
+}

@@ -12,20 +12,34 @@ class EditableLabel extends React.Component {
         super(props);
         this.beginEdit = () => {
             this.setState({ editMode: true });
+            this.selectPending = true;
         };
-        this.endEdit = () => {
+        this.onEdit = () => {
             this.setState({
-                editMode: false,
                 text: this.txtEdit.value,
             });
-            this.props.textChanged(this.state.text);
         };
-        this.keyPressed = (e) => {
-            if (e.keyCode === 13) {
-                // Enter
-                this.endEdit();
+        this.endEdit = (save = true) => {
+            this.setState({
+                editMode: false,
+            });
+            this.selectPending = false;
+            if (save) {
+                this.props.textChanged(this.state.text);
+            }
+            else {
+                this.setState({ text: this.props.text });
             }
         };
+        this.keyDown = (e) => {
+            if (e.keyCode === 13 /* Enter */) {
+                this.endEdit();
+            }
+            else if (e.keyCode === 27 /* Escape */) {
+                this.endEdit(false);
+            }
+        };
+        this.selectPending = false;
         this.state = {
             editMode: false,
             text: props.text,
@@ -33,7 +47,13 @@ class EditableLabel extends React.Component {
     }
     render() {
         if (this.state.editMode) {
-            return (React.createElement("input", { type: "text", ref: (me) => this.txtEdit = me, onBlur: this.endEdit, onKeyPress: this.keyPressed, value: this.state.text }));
+            return (React.createElement("input", { type: "text", ref: (me) => {
+                    this.txtEdit = me;
+                    if (this.txtEdit != null && this.selectPending) {
+                        this.txtEdit.select();
+                        this.selectPending = false;
+                    }
+                }, onBlur: () => this.endEdit(), onKeyDown: this.keyDown, onChange: this.onEdit, value: this.state.text, maxLength: this.props.maxLength || 200, autoFocus: true }));
         }
         else {
             return (React.createElement("span", { onClick: this.beginEdit }, this.state.text));
@@ -55,6 +75,80 @@ function Fragment(props) {
     return props.children;
 }
 exports.default = Fragment;
+
+
+/***/ }),
+
+/***/ "./admin/src/components/multi-dropdown.tsx":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const React = __webpack_require__("./node_modules/react/index.js");
+const adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
+class MultiDropdown extends React.Component {
+    constructor(props) {
+        super(props);
+        this.optionClicked = (event, ui) => {
+            const index = this.state.checkedOptions.indexOf(ui.value);
+            const checked = [...this.state.checkedOptions];
+            if (ui.checked) {
+                if (index === -1)
+                    checked.push(ui.value);
+            }
+            else {
+                if (index !== -1)
+                    checked.splice(index, 1);
+            }
+            this.setState({ checkedOptions: checked });
+        };
+        this.dropdownClosed = () => {
+            this.props.checkedChanged(this.state.checkedOptions);
+        };
+        this.state = {
+            checkedOptions: props.checkedOptions,
+        };
+    }
+    componentDidMount() {
+        adapter_1.$$(this.dropdown).multiselect({
+            minWidth: 250,
+            header: false,
+            classes: "ui-selectmenu-button",
+            noneSelectedText: adapter_1._("select devices"),
+            selectedText: adapter_1._("# devices selected"),
+            click: this.optionClicked,
+            close: this.dropdownClosed,
+        });
+        this.updateChecked();
+    }
+    componentDidUpdate() {
+        this.updateChecked();
+    }
+    updateChecked() {
+        const $dropdown = adapter_1.$$(this.dropdown);
+        $dropdown.find("option:selected").prop("selected", false);
+        this.state.checkedOptions.forEach(val => {
+            $dropdown.find(`option[value=${val}]`).prop("selected", true);
+        });
+        $dropdown.multiselect("refresh");
+    }
+    render() {
+        return (React.createElement("select", { multiple: true, ref: (me) => this.dropdown = me }, Object.keys(this.props.options).map(k => (React.createElement("option", { key: k, value: k }, this.props.options[k])))));
+    }
+}
+exports.MultiDropdown = MultiDropdown;
+// $('#assAssNodes').multiselect({
+// 	header: false,
+// 	minWidth: 250,
+// 	noneSelectedText: '<span class="ui-selectmenu-text">select nodes</span>',
+// 	selectedText: '<span class="ui-selectmenu-text"># nodes selected</span>',
+// 	classes: 'ui-selectmenu-button',
+// 	click: function(event, ui){
+// 		if (ui.checked) {
+// 		}
+// 	}
+// })
 
 
 /***/ }),
@@ -114,6 +208,7 @@ class Root extends React.Component {
         super(props);
         this.state = {
             groups: {},
+            devices: {},
         };
     }
     componentDidMount() {
@@ -122,17 +217,16 @@ class Root extends React.Component {
         adapter_1.socket.on("objectChange", (id, obj) => {
             if (id.substring(0, namespace.length) !== namespace)
                 return;
-            if (id.match(/VG\-\d+$/))
+            if (id.match(/VG\-\d+$/)) {
                 this.updateGroups();
+            }
+            else if (!obj || obj.common.type === "device") {
+                this.updateDevices();
+            }
         });
         // and update once on start
         this.updateGroups();
-    }
-    get groups() {
-        return this.state.groups;
-    }
-    set groups(value) {
-        this.setState({ groups: value });
+        this.updateDevices();
     }
     updateGroups() {
         adapter_1.sendTo(null, "getGroups", { type: "virtual" }, (result) => {
@@ -140,7 +234,17 @@ class Root extends React.Component {
                 console.error(result.error);
             }
             else {
-                this.groups = result.result;
+                this.setState({ groups: result.result });
+            }
+        });
+    }
+    updateDevices() {
+        adapter_1.sendTo(null, "getDevices", { type: "lightbulb" }, (result) => {
+            if (result && result.error) {
+                console.error(result.error);
+            }
+            else {
+                this.setState({ devices: result.result });
             }
         });
     }
@@ -149,7 +253,7 @@ class Root extends React.Component {
             React.createElement(Header, null),
             React.createElement(tabs_1.Tabs, { labels: ["Settings", "Groups"] },
                 React.createElement(settings_1.Settings, { settings: this.props.settings, onChange: this.props.onSettingsChanged }),
-                React.createElement(groups_1.Groups, { groups: this.state.groups }))));
+                React.createElement(groups_1.Groups, { groups: this.state.groups, devices: this.state.devices }))));
     }
 }
 exports.Root = Root;
@@ -200,6 +304,7 @@ const React = __webpack_require__("./node_modules/react/index.js");
 const adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
 const editable_label_1 = __webpack_require__("./admin/src/components/editable-label.tsx");
 const fragment_1 = __webpack_require__("./admin/src/components/fragment.tsx");
+const multi_dropdown_1 = __webpack_require__("./admin/src/components/multi-dropdown.tsx");
 const ADD_GROUP_BUTTON_ID = "btnAddGroup";
 class Groups extends React.Component {
     constructor(props) {
@@ -246,6 +351,21 @@ class Groups extends React.Component {
             });
         }
     }
+    changeGroupDevices(id, deviceIDs) {
+        // update it on the server
+        adapter_1.sendTo(null, "editVirtualGroup", { id, deviceIDs }, (result) => {
+            if (result && result.error) {
+                console.error(result.error);
+            }
+        });
+    }
+    devicesToDropdownSource(devices) {
+        const ret = {};
+        for (const key of Object.keys(devices)) {
+            ret[key] = devices[key].name;
+        }
+        return ret;
+    }
     render() {
         return (React.createElement(fragment_1.default, null,
             React.createElement("p", { className: "actions-panel" },
@@ -262,8 +382,8 @@ class Groups extends React.Component {
                     .map(group => (React.createElement("tr", { key: group.id },
                     React.createElement("td", null, group.id),
                     React.createElement("td", null,
-                        React.createElement(editable_label_1.EditableLabel, { text: group.name, textChanged: (newText) => this.renameGroup(group.id, newText) })),
-                    React.createElement("td", null, group.deviceIDs ? group.deviceIDs.join(", ") : ""),
+                        React.createElement(editable_label_1.EditableLabel, { text: group.name, maxLength: 100, textChanged: (newText) => this.renameGroup(group.id, newText) })),
+                    React.createElement("td", null, (this.props.devices && Object.keys(this.props.devices).length > 0) ? (React.createElement(multi_dropdown_1.MultiDropdown, { options: this.devicesToDropdownSource(this.props.devices), checkedOptions: (group.deviceIDs || []).map(id => `${id}`), checkedChanged: (checked) => this.changeGroupDevices(group.id, checked) })) : adapter_1._("no devices")),
                     React.createElement("td", null,
                         React.createElement("button", { title: adapter_1._("delete group"), className: "delete-group", onClick: () => this.deleteGroup(group.id) })))))) : (React.createElement("tr", null,
                     React.createElement("td", { className: "empty", colSpan: 4 }, adapter_1._("No virtual groups defined")))))))));

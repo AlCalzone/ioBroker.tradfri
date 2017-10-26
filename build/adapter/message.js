@@ -168,6 +168,29 @@ function onMessage(obj) {
                     respond(responses.RESULT(ret));
                     return;
                 }
+                case "getDevices": {
+                    // check the given params
+                    const params = obj.message;
+                    // group type must be "real", "virtual" or "both"
+                    const deviceType = params.type || "lightbulb";
+                    if (["lightbulb"].indexOf(deviceType) === -1) {
+                        respond(responses.ERROR(`device type must be "lightbulb"`));
+                        return;
+                    }
+                    const ret = {};
+                    if (deviceType === "lightbulb") {
+                        const lightbulbs = object_polyfill_1.entries(gateway_1.gateway.devices).filter(([id, device]) => device.type === accessory_1.AccessoryTypes.lightbulb);
+                        for (const [id, bulb] of lightbulbs) {
+                            ret[id] = {
+                                id,
+                                name: bulb.name,
+                                type: deviceType,
+                            };
+                        }
+                    }
+                    respond(responses.RESULT(ret));
+                    return;
+                }
                 case "getDevice": {
                     // require the id to be given
                     if (!requireParams("id"))

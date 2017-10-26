@@ -9,6 +9,7 @@ interface EditableLabelState {
 }
 interface EditableLabelProps {
 	text: string;
+	maxLength?: number;
 	textChanged: (newText: string) => void;
 }
 
@@ -22,35 +23,57 @@ export class EditableLabel extends React.Component<EditableLabelProps, EditableL
 		};
 	}
 
-	private txtEdit: any;
+	private txtEdit: HTMLInputElement;
 
 	private readonly beginEdit = () => {
 		this.setState({editMode: true});
+		this.selectPending = true;
 	}
-	private readonly endEdit = () => {
+	private readonly onEdit = () => {
 		this.setState({
-			editMode: false,
 			text: this.txtEdit.value,
 		});
-		this.props.textChanged(this.state.text);
 	}
-
-	private readonly keyPressed = (e: React.KeyboardEvent<HTMLInputElement>) => {
-		if (e.keyCode === 13) {
-			// Enter
-			this.endEdit();
+	private readonly endEdit = (save: boolean = true) => {
+		this.setState({
+			editMode: false,
+		});
+		this.selectPending = false;
+		if (save) {
+			this.props.textChanged(this.state.text);
+		} else {
+			this.setState({text: this.props.text});
 		}
 	}
+
+	private readonly keyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+		if (e.keyCode === 13 /* Enter */) {
+			this.endEdit();
+		} else if (e.keyCode === 27 /* Escape */) {
+			this.endEdit(false);
+		}
+	}
+
+	private selectPending: boolean = false;
 
 	public render() {
 		if (this.state.editMode) {
 			return (
 				<input
 					type="text"
-					ref={(me) => this.txtEdit = me}
-					onBlur={this.endEdit}
-					onKeyPress={this.keyPressed}
+					ref={(me) => {
+						this.txtEdit = me;
+						if (this.txtEdit != null && this.selectPending) {
+							this.txtEdit.select();
+							this.selectPending = false;
+						}
+					}}
+					onBlur={() => this.endEdit()}
+					onKeyDown={this.keyDown}
+					onChange={this.onEdit}
 					value={this.state.text}
+					maxLength={this.props.maxLength || 200}
+					autoFocus
 				/>
 			);
 		} else {

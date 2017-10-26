@@ -4,3 +4,8 @@ export interface Group {
     deviceIDs: number[];
     type: "real" | "virtual";
 }
+export interface Device {
+    id: string;
+    name: string;
+    type: "lightbulb";
+}

@@ -26,6 +26,7 @@ export class Root extends React.Component<any, any> {
 		super(props);
 		this.state = {
 			groups: {},
+			devices: {},
 		};
 	}
 
@@ -34,17 +35,15 @@ export class Root extends React.Component<any, any> {
 		socket.emit("subscribeObjects", namespace + ".VG-*");
 		socket.on("objectChange", (id: string, obj) => {
 			if (id.substring(0, namespace.length) !== namespace) return;
-			if (id.match(/VG\-\d+$/)) this.updateGroups();
+			if (id.match(/VG\-\d+$/)) {
+				this.updateGroups();
+			} else if (!obj || obj.common.type === "device") {
+				this.updateDevices();
+			}
 		});
 		// and update once on start
 		this.updateGroups();
-	}
-
-	public get groups(): GroupDictionary {
-		return this.state.groups;
-	}
-	public set groups(value: GroupDictionary) {
-		this.setState({groups: value});
+		this.updateDevices();
 	}
 
 	public updateGroups() {
@@ -52,7 +51,17 @@ export class Root extends React.Component<any, any> {
 			if (result && result.error) {
 				console.error(result.error);
 			} else {
-				this.groups = result.result as GroupDictionary;
+				this.setState({groups: result.result as GroupDictionary});
+			}
+		});
+	}
+
+	public updateDevices() {
+		sendTo(null, "getDevices", { type: "lightbulb" }, (result) => {
+			if (result && result.error) {
+				console.error(result.error);
+			} else {
+				this.setState({devices: result.result as GroupDictionary});
 			}
 		});
 	}
@@ -63,7 +72,7 @@ export class Root extends React.Component<any, any> {
 				<Header />
 				<Tabs labels={["Settings", "Groups"]}>
 					<Settings settings={this.props.settings} onChange={this.props.onSettingsChanged} />
-					<Groups groups={this.state.groups} />
+					<Groups groups={this.state.groups} devices={this.state.devices} />
 				</Tabs>
 			</Fragment>
 		);

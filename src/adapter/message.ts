@@ -4,7 +4,7 @@ import { parsePayload } from "../lib/coap-payload";
 import { ExtendedAdapter, Global as _ } from "../lib/global";
 import { DictionaryLike, entries } from "../lib/object-polyfill";
 import { VirtualGroup } from "../lib/virtual-group";
-import { Group as SendToGroup} from "./communication";
+import { Device as SendToDevice, Group as SendToGroup } from "./communication";
 import { gateway as gw } from "./gateway";
 import { calcGroupId, calcGroupName, extendVirtualGroup } from "./groups";
 
@@ -167,6 +167,32 @@ export async function onMessage(obj) {
 							name: group.name,
 							deviceIDs: group.deviceIDs,
 							type: "virtual",
+						};
+					}
+				}
+
+				respond(responses.RESULT(ret));
+				return;
+			}
+
+			case "getDevices": { // get all devices defined on the gateway
+				// check the given params
+				const params = obj.message as any;
+				// group type must be "real", "virtual" or "both"
+				const deviceType = params.type || "lightbulb";
+				if (["lightbulb"].indexOf(deviceType) === -1) {
+					respond(responses.ERROR(`device type must be "lightbulb"`));
+					return;
+				}
+
+				const ret: DictionaryLike<SendToDevice> = {};
+				if (deviceType === "lightbulb") {
+					const lightbulbs = entries(gw.devices).filter(([id, device]) => device.type === AccessoryTypes.lightbulb);
+					for (const [id, bulb] of lightbulbs) {
+						ret[id] = {
+							id,
+							name: bulb.name,
+							type: deviceType,
 						};
 					}
 				}

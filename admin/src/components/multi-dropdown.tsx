@@ -27,20 +27,29 @@ export class MultiDropdown extends React.Component<MultiDropdownProps, MultiDrop
 	private dropdown: any;
 
 	public componentDidMount() {
-		this.doJQueryStuff();
-	}
-
-	public componentDidUpdate() {
-		this.doJQueryStuff();
-	}
-
-	private doJQueryStuff() {
 		$$(this.dropdown).multiselect({
 			minWidth: 250,
+			header: false,
 			classes: "ui-selectmenu-button",
+			noneSelectedText: _("select devices"),
+			selectedText: _("# devices selected"),
 			click: this.optionClicked,
 			close: this.dropdownClosed,
 		});
+		this.updateChecked();
+	}
+
+	public componentDidUpdate() {
+		this.updateChecked();
+	}
+
+	private updateChecked() {
+		const $dropdown = $$(this.dropdown);
+		$dropdown.find("option:selected").prop("selected", false);
+		this.state.checkedOptions.forEach(val => {
+			$dropdown.find(`option[value=${val}]`).prop("selected", true);
+		});
+		$dropdown.multiselect("refresh");
 	}
 
 	private optionClicked = (event, ui) => {
@@ -65,10 +74,7 @@ export class MultiDropdown extends React.Component<MultiDropdownProps, MultiDrop
 				ref={(me) => this.dropdown = me}
 			>
 			{Object.keys(this.props.options).map(k => (
-				<option key={k}
-					value={k}
-					selected={this.state.checkedOptions.indexOf(k) > -1}
-				>
+				<option key={k} value={k}>
 					{this.props.options[k]}
 				</option>
 			))}

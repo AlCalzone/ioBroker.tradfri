@@ -36,4 +36,20 @@ systemDictionary = {
 		"de": "Geräte",
 		"en": "Devices"
 	},
+	"add group": {
+		"de": "Neue Gruppe",
+		"en": "Add group"
+	},
+	"delete group": {
+		"de": "Gruppe löschen",
+		"en": "delete group"
+	},
+	"select devices": {
+		"de": "Geräte auswählen",
+		"en": "select devices"
+	},
+	"# devices selected": {
+		"de": "# Geräte ausgewählt",
+		"en": "# devices selected"
+	},
 };
