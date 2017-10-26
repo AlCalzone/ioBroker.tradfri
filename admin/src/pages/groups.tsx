@@ -3,6 +3,7 @@ import * as ReactDOM from "react-dom";
 
 import {$$, $window, _, instance, sendTo, socket} from "../lib/adapter";
 
+import { EditableLabel } from "../components/editable-label";
 import Fragment from "../components/fragment";
 
 // Load communication objects as defined in the message module
@@ -56,6 +57,19 @@ export class Groups extends React.Component<GroupsProps, any> {
 		});
 	}
 
+	private renameGroup(id: string, newName: string) {
+		const group = this.props.groups[id];
+		// if we have a valid name
+		if (typeof newName === "string" && newName.length > 0 && newName !== group.name) {
+			// update it on the server
+			sendTo(null, "editVirtualGroup", {id, name: newName}, (result) => {
+				if (result && result.error) {
+					console.error(result.error);
+				}
+			});
+		}
+	}
+
 	public render() {
 		return (
 			<Fragment>
@@ -78,7 +92,12 @@ export class Groups extends React.Component<GroupsProps, any> {
 							.map(group => (
 							<tr key={group.id}>
 								<td>{group.id}</td>
-								<td>{group.name}</td>
+								<td>
+									<EditableLabel
+										text={group.name}
+										textChanged={(newText: string) => this.renameGroup(group.id, newText)}
+									/>
+								</td>
 								{/* TODO: Turn this into a multiselect dropdown */}
 								<td>{group.deviceIDs ? group.deviceIDs.join(", ") : ""}</td>
 								<td>

@@ -1,5 +1,50 @@
 webpackJsonp(["main"],{
 
+/***/ "./admin/src/components/editable-label.tsx":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const React = __webpack_require__("./node_modules/react/index.js");
+class EditableLabel extends React.Component {
+    constructor(props) {
+        super(props);
+        this.beginEdit = () => {
+            this.setState({ editMode: true });
+        };
+        this.endEdit = () => {
+            this.setState({
+                editMode: false,
+                text: this.txtEdit.value,
+            });
+            this.props.textChanged(this.state.text);
+        };
+        this.keyPressed = (e) => {
+            if (e.keyCode === 13) {
+                // Enter
+                this.endEdit();
+            }
+        };
+        this.state = {
+            editMode: false,
+            text: props.text,
+        };
+    }
+    render() {
+        if (this.state.editMode) {
+            return (React.createElement("input", { type: "text", ref: (me) => this.txtEdit = me, onBlur: this.endEdit, onKeyPress: this.keyPressed, value: this.state.text }));
+        }
+        else {
+            return (React.createElement("span", { onClick: this.beginEdit }, this.state.text));
+        }
+    }
+}
+exports.EditableLabel = EditableLabel;
+
+
+/***/ }),
+
 /***/ "./admin/src/components/fragment.tsx":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -153,6 +198,7 @@ exports.sendTo = exports.$window.sendTo;
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = __webpack_require__("./node_modules/react/index.js");
 const adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
+const editable_label_1 = __webpack_require__("./admin/src/components/editable-label.tsx");
 const fragment_1 = __webpack_require__("./admin/src/components/fragment.tsx");
 const ADD_GROUP_BUTTON_ID = "btnAddGroup";
 class Groups extends React.Component {
@@ -188,6 +234,18 @@ class Groups extends React.Component {
             }
         });
     }
+    renameGroup(id, newName) {
+        const group = this.props.groups[id];
+        // if we have a valid name
+        if (typeof newName === "string" && newName.length > 0 && newName !== group.name) {
+            // update it on the server
+            adapter_1.sendTo(null, "editVirtualGroup", { id, name: newName }, (result) => {
+                if (result && result.error) {
+                    console.error(result.error);
+                }
+            });
+        }
+    }
     render() {
         return (React.createElement(fragment_1.default, null,
             React.createElement("p", { className: "actions-panel" },
@@ -203,7 +261,8 @@ class Groups extends React.Component {
                     .map(k => this.props.groups[k])
                     .map(group => (React.createElement("tr", { key: group.id },
                     React.createElement("td", null, group.id),
-                    React.createElement("td", null, group.name),
+                    React.createElement("td", null,
+                        React.createElement(editable_label_1.EditableLabel, { text: group.name, textChanged: (newText) => this.renameGroup(group.id, newText) })),
                     React.createElement("td", null, group.deviceIDs ? group.deviceIDs.join(", ") : ""),
                     React.createElement("td", null,
                         React.createElement("button", { title: adapter_1._("delete group"), className: "delete-group", onClick: () => this.deleteGroup(group.id) })))))) : (React.createElement("tr", null,
