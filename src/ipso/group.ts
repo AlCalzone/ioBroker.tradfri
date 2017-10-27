@@ -1,4 +1,4 @@
-import { deserializers, serializers } from "../tradfri/conversions";
+import { deserializers, serializers } from "../modules/conversions";
 import { IPSODevice } from "./ipsoDevice";
 import { deserializeWith, ipsoKey, IPSOObject, PropertyTransform, required, serializeWith } from "./ipsoObject";
 

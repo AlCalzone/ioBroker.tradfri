@@ -1,11 +1,11 @@
-import { conversions, deserializers, serializers } from "../tradfri/conversions";
-import { MAX_COLOR, predefinedColors } from "../tradfri/predefined-colors";
+import { conversions, deserializers, serializers } from "../modules/conversions";
+import { MAX_COLOR, predefinedColors } from "../modules/predefined-colors";
 import { Accessory } from "./accessory";
 import { DeviceInfo } from "./deviceInfo";
 import { IPSODevice } from "./ipsoDevice";
 import { deserializeWith, doNotSerialize, ipsoKey, IPSOObject, PropertyTransform, required, serializeWith } from "./ipsoObject";
 
-// see https://github.com/hreichert/smarthome/blob/master/extensions/binding/org.eclipse.smarthome.binding.tradfri/src/main/java/org/eclipse/smarthome/binding/tradfri/internal/TradfriColor.java
+// see https://github.com/hreichert/smarthome/blob/master/extensions/binding/org.eclipse.smarthome.binding.tradfri/src/main/java/org/eclipse/smarthome/binding/modules/internal/TradfriColor.java
 // for some color conversion
 
 export type LightOperation = Partial<Pick<Light,

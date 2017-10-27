@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { Light } from "./ipso/light";
-import { conversions } from "./tradfri/conversions";
-import { predefinedColors } from "./tradfri/predefined-colors";
+import { conversions } from "./modules/conversions";
+import { predefinedColors } from "./modules/predefined-colors";
 // tslint:disable:no-unused-expression
 
 describe("RGB debug =>", () => {
