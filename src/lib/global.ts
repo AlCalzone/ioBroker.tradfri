@@ -214,12 +214,6 @@ export class Global {
 		}
 	}
 
-	// custom subscriptions
-	public static subscribeStates: (pattern: string | RegExp, callback: (id: string, state: ioBroker.State) => void) => string;
-	public static unsubscribeStates: (id: string) => void;
-	public static subscribeObjects: (pattern: string | RegExp, callback: (id: string, object: ioBroker.Object) => void) => string;
-	public static unsubscribeObjects: (id: string) => void;
-
 	// Workaround für unvollständige Adapter-Upgrades
 	public static async ensureInstanceObjects(): Promise<void> {
 		// read io-package.json

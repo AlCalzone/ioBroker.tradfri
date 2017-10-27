@@ -27,33 +27,11 @@ import { VirtualGroup } from "./lib/virtual-group";
 import utils from "./lib/utils";
 
 // Adapter-Module laden
+import { applyCustomObjectSubscriptions, applyCustomStateSubscriptions } from "./modules/custom-subscriptions";
 import { gateway as gw, GroupInfo } from "./modules/gateway";
 import { calcGroupId, calcGroupName, extendGroup, groupToCommon, groupToNative } from "./modules/groups";
 import { onMessage } from "./modules/message";
 import { operateGroup, operateLight, operateVirtualGroup, renameDevice, renameGroup } from "./modules/operations";
-
-interface CustomStateSubscription {
-	pattern: RegExp;
-	callback: (id: string, state: ioBroker.State) => void;
-}
-interface CustomObjectSubscription {
-	pattern: RegExp;
-	callback: (id: string, obj: ioBroker.Object) => void;
-}
-const customStateSubscriptions: {
-	subscriptions: Map<string, CustomStateSubscription>,
-	counter: number,
-} = {
-		subscriptions: new Map(),
-		counter: 0,
-	};
-const customObjectSubscriptions: {
-	subscriptions: Map<string, CustomObjectSubscription>,
-	counter: number,
-} = {
-		subscriptions: new Map(),
-		counter: 0,
-	};
 
 // Adapter-Objekt erstellen
 let adapter: ExtendedAdapter = utils.adapter({
@@ -87,12 +65,6 @@ let adapter: ExtendedAdapter = utils.adapter({
 		// Eigene Objekte/States beobachten
 		adapter.subscribeStates("*");
 		adapter.subscribeObjects("*");
-
-		// Custom subscriptions erlauben
-		_.subscribeStates = subscribeStates;
-		_.unsubscribeStates = unsubscribeStates;
-		_.subscribeObjects = subscribeObjects;
-		_.unsubscribeObjects = unsubscribeObjects;
 
 		// initialize CoAP client
 		const hostname = (adapter.config.host as string).toLowerCase();
@@ -163,17 +135,8 @@ let adapter: ExtendedAdapter = utils.adapter({
 
 		}
 
-		// Custom subscriptions durchgehen, um die passenden Callbacks aufzurufen
-		try {
-			for (const sub of customObjectSubscriptions.subscriptions.values()) {
-				if (sub && sub.pattern && sub.callback) {
-					// Wenn die ID zum aktuellen Pattern passt, dann Callback aufrufen
-					if (sub.pattern.test(id)) sub.callback(id, obj);
-				}
-			}
-		} catch (e) {
-			_.log("error handling custom sub: " + e);
-		}
+		// apply additional subscriptions we've defined
+		applyCustomObjectSubscriptions(id, obj);
 
 	},
 
@@ -191,17 +154,8 @@ let adapter: ExtendedAdapter = utils.adapter({
 			return;
 		}
 
-		// Custom subscriptions durchgehen, um die passenden Callbacks aufzurufen
-		try {
-			for (const sub of customStateSubscriptions.subscriptions.values()) {
-				if (sub && sub.pattern && sub.callback) {
-					// Wenn die ID zum aktuellen Pattern passt, dann Callback aufrufen
-					if (sub.pattern.test(id)) sub.callback(id, state);
-				}
-			}
-		} catch (e) {
-			_.log("error handling custom sub: " + e);
-		}
+		// apply additional subscriptions we've defined
+		applyCustomStateSubscriptions(id, state);
 
 		// Eigene Handling-Logik zum Schluss, damit wir return benutzen können
 		if (state && !state.ack && id.startsWith(adapter.namespace)) {
@@ -1031,86 +985,6 @@ async function updatePossibleScenes(groupInfo: GroupInfo): Promise<void> {
 		const obj = await adapter.$getObject(scenesId) as ioBroker.StateObject;
 		obj.common.states = states;
 		await adapter.$setObject(scenesId, obj);
-	}
-}
-
-// ==================================
-// Custom subscriptions
-
-/**
- * Ensures the subscription pattern is valid
- */
-function checkPattern(pattern: string | RegExp): RegExp {
-	try {
-		if (typeof pattern === "string") {
-			return str2regex(pattern);
-		} else if (pattern instanceof RegExp) {
-			return pattern;
-		} else {
-			// NOPE
-			throw new Error("must be regex or string");
-		}
-	} catch (e) {
-		_.log("cannot subscribe with this pattern. reason: " + e);
-		return null;
-	}
-}
-
-/**
- * Subscribe to some ioBroker states
- * @param pattern
- * @param callback
- * @returns a subscription ID
- */
-function subscribeStates(pattern: string | RegExp, callback: (id: string, state: ioBroker.State) => void): string {
-
-	pattern = checkPattern(pattern);
-	if (!pattern) return;
-
-	const newCounter = (++customStateSubscriptions.counter);
-	const id = "" + newCounter;
-
-	customStateSubscriptions.subscriptions.set(id, { pattern, callback });
-
-	return id;
-}
-
-/**
- * Release the custom subscription with the given id
- * @param id The subscription ID returned by @link{subscribeStates}
- */
-function unsubscribeStates(id: string) {
-	if (customStateSubscriptions.subscriptions.has(id)) {
-		customStateSubscriptions.subscriptions.delete(id);
-	}
-}
-
-/**
- * Subscribe to some ioBroker objects
- * @param pattern
- * @param callback
- * @returns a subscription ID
- */
-function subscribeObjects(pattern: string | RegExp, callback: (id: string, object: ioBroker.Object) => void): string {
-
-	pattern = checkPattern(pattern);
-	if (!pattern) return;
-
-	const newCounter = (++customObjectSubscriptions.counter);
-	const id = "" + newCounter;
-
-	customObjectSubscriptions.subscriptions.set(id, { pattern, callback });
-
-	return id;
-}
-
-/**
- * Release the custom subscription with the given id
- * @param id The subscription ID returned by @link{subscribeObjects}
- */
-function unsubscribeObjects(id: string) {
-	if (customObjectSubscriptions.subscriptions.has(id)) {
-		customObjectSubscriptions.subscriptions.delete(id);
 	}
 }
 
