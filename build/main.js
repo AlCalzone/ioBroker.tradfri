@@ -228,8 +228,7 @@ let adapter = utils_1.default.adapter({
                             // color change is only supported manually, so we operate
                             // the virtual state of this group
                             yield operateVirtualGroup(group, {
-                                colorX: val,
-                                colorY: 27000,
+                                colorTemperature: val,
                                 transitionTime: yield getTransitionDuration(group),
                             });
                             wasAcked = true;
@@ -256,8 +255,7 @@ let adapter = utils_1.default.adapter({
                         }
                         else if (id.endsWith(".color")) {
                             operation = {
-                                colorX: val,
-                                colorY: 27000,
+                                colorTemperature: val,
                                 transitionTime: yield getTransitionDuration(vGroup),
                             };
                         }

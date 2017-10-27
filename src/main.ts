@@ -251,8 +251,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 							// color change is only supported manually, so we operate
 							// the virtual state of this group
 							await operateVirtualGroup(group, {
-								colorX: val,
-								colorY: 27000,
+								colorTemperature: val,
 								transitionTime: await getTransitionDuration(group),
 							});
 							wasAcked = true;
@@ -280,8 +279,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 							};
 						} else if (id.endsWith(".color")) {
 							operation = {
-								colorX: val,
-								colorY: 27000,
+								colorTemperature: val,
 								transitionTime: await getTransitionDuration(vGroup),
 							};
 						} else if (id.endsWith(".transitionDuration")) {
