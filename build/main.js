@@ -949,6 +949,11 @@ function loadVirtualGroups() {
         for (const obj of object_polyfill_1.values(gateway_1.gateway.virtualGroups)) {
             const id = groups_1.calcGroupId(obj);
             gateway_1.gateway.objects[id] = iobObjects[id];
+            // also remember all states
+            const stateObjs = yield global_1.Global.$$(`${id}.*`, "state");
+            for (const [sid, sobj] of object_polyfill_1.entries(stateObjs)) {
+                gateway_1.gateway.objects[sid] = sobj;
+            }
         }
     });
 }

@@ -1014,7 +1014,13 @@ async function loadVirtualGroups(): Promise<void> {
 	for (const obj of values(gw.virtualGroups)) {
 		const id = calcGroupId(obj);
 		gw.objects[id] = iobObjects[id];
+		// also remember all states
+		const stateObjs = await _.$$(`${id}.*`, "state");
+		for (const [sid, sobj] of entries(stateObjs)) {
+			gw.objects[sid] = sobj;
+		}
 	}
+
 }
 
 // Connection check
