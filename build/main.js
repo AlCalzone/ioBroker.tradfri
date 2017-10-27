@@ -32,6 +32,7 @@ const utils_1 = require("./lib/utils");
 const gateway_1 = require("./modules/gateway");
 const groups_1 = require("./modules/groups");
 const message_1 = require("./modules/message");
+const operations_1 = require("./modules/operations");
 const customStateSubscriptions = {
     subscriptions: new Map(),
     counter: 0,
@@ -117,7 +118,7 @@ let adapter = utils_1.default.adapter({
                     if (obj.common && obj.common.name !== acc.name) {
                         // the name has changed, notify the gateway
                         global_1.Global.log(`the device ${id} was renamed to "${obj.common.name}"`);
-                        renameDevice(acc, obj.common.name);
+                        operations_1.renameDevice(acc, obj.common.name);
                     }
                 }
                 else if (obj.type === "channel" && instanceId in gateway_1.gateway.groups && gateway_1.gateway.groups[instanceId] != null) {
@@ -126,7 +127,7 @@ let adapter = utils_1.default.adapter({
                     if (obj.common && obj.common.name !== grp.name) {
                         // the name has changed, notify the gateway
                         global_1.Global.log(`the group ${id} was renamed to "${obj.common.name}"`);
-                        renameGroup(grp, obj.common.name);
+                        operations_1.renameGroup(grp, obj.common.name);
                     }
                 }
                 // remember the object
@@ -207,19 +208,19 @@ let adapter = utils_1.default.adapter({
                         // if the change was acknowledged, update the state later
                         let wasAcked;
                         if (id.endsWith(".state")) {
-                            wasAcked = !(yield operateGroup(group, {
+                            wasAcked = !(yield operations_1.operateGroup(group, {
                                 onOff: val,
                             }));
                         }
                         else if (id.endsWith(".brightness")) {
-                            wasAcked = !(yield operateGroup(group, {
+                            wasAcked = !(yield operations_1.operateGroup(group, {
                                 dimmer: val,
                                 transitionTime: yield getTransitionDuration(group),
                             }));
                         }
                         else if (id.endsWith(".activeScene")) {
                             // turn on and activate a scene
-                            wasAcked = !(yield operateGroup(group, {
+                            wasAcked = !(yield operations_1.operateGroup(group, {
                                 onOff: true,
                                 sceneId: val,
                             }));
@@ -227,7 +228,7 @@ let adapter = utils_1.default.adapter({
                         else if (id.endsWith(".color")) {
                             // color change is only supported manually, so we operate
                             // the virtual state of this group
-                            yield operateVirtualGroup(group, {
+                            yield operations_1.operateVirtualGroup(group, {
                                 colorTemperature: val,
                                 transitionTime: yield getTransitionDuration(group),
                             });
@@ -264,7 +265,7 @@ let adapter = utils_1.default.adapter({
                         }
                         // update all lightbulbs in this group
                         if (operation != null) {
-                            operateVirtualGroup(vGroup, operation);
+                            operations_1.operateVirtualGroup(vGroup, operation);
                         }
                         // and ack the state change
                         adapter.$setState(id, state, true);
@@ -280,45 +281,45 @@ let adapter = utils_1.default.adapter({
                             // operate the lights depending on the set state
                             // if no request was sent, we can ack the state immediately
                             if (id.endsWith(".state")) {
-                                wasAcked = !(yield operateLight(accessory, {
+                                wasAcked = !(yield operations_1.operateLight(accessory, {
                                     onOff: val,
                                 }));
                             }
                             else if (id.endsWith(".brightness")) {
-                                wasAcked = !(yield operateLight(accessory, {
+                                wasAcked = !(yield operations_1.operateLight(accessory, {
                                     dimmer: val,
                                     transitionTime: yield getTransitionDuration(accessory),
                                 }));
                             }
                             else if (id.endsWith(".color")) {
                                 if (light.spectrum === "rgb") {
-                                    wasAcked = !(yield operateLight(accessory, {
+                                    wasAcked = !(yield operations_1.operateLight(accessory, {
                                         color: val,
                                         transitionTime: yield getTransitionDuration(accessory),
                                     }));
                                 }
                                 else if (light.spectrum === "white") {
-                                    wasAcked = !(yield operateLight(accessory, {
+                                    wasAcked = !(yield operations_1.operateLight(accessory, {
                                         colorTemperature: val,
                                         transitionTime: yield getTransitionDuration(accessory),
                                     }));
                                 }
                             }
                             else if (id.endsWith(".colorTemperature")) {
-                                wasAcked = !(yield operateLight(accessory, {
+                                wasAcked = !(yield operations_1.operateLight(accessory, {
                                     colorTemperature: val,
                                     transitionTime: yield getTransitionDuration(accessory),
                                 }));
                             }
                             else if (id.endsWith(".hue")) {
                                 // TODO: transform HSL to RGB
-                                wasAcked = !(yield operateLight(accessory, {
+                                wasAcked = !(yield operations_1.operateLight(accessory, {
                                     hue: val,
                                     transitionTime: yield getTransitionDuration(accessory),
                                 }));
                             }
                             else if (id.endsWith(".saturation")) {
-                                wasAcked = !(yield operateLight(accessory, {
+                                wasAcked = !(yield operations_1.operateLight(accessory, {
                                     saturation: val,
                                     transitionTime: yield getTransitionDuration(accessory),
                                 }));
@@ -359,85 +360,6 @@ let adapter = utils_1.default.adapter({
         }
     },
 });
-/**
- * Sets some properties on a lightbulb
- * @param accessory The parent accessory of the lightbulb
- * @param operation The properties to be set
- * @returns true if a request was sent, false otherwise
- */
-function operateLight(accessory, operation) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (accessory.type !== accessory_1.AccessoryTypes.lightbulb) {
-            throw new Error("The parameter accessory must be a lightbulb!");
-        }
-        // the url to be requested
-        const url = `${gateway_1.gateway.requestBase}${endpoints_1.endpoints.devices}/${accessory.instanceId}`;
-        // create a copy to modify
-        const newAccessory = accessory.clone();
-        // get the Light instance to modify
-        const light = newAccessory.lightList[0];
-        light.merge(operation);
-        const serializedObj = newAccessory.serialize(accessory); // serialize with the old object as a reference
-        // If the serialized object contains no properties, we don't need to send anything
-        if (!serializedObj || Object.keys(serializedObj).length === 0) {
-            global_1.Global.log("stateChange > empty object, not sending any payload", "debug");
-            return false; // signal that no request was made
-        }
-        let payload = JSON.stringify(serializedObj);
-        global_1.Global.log("stateChange > sending payload: " + payload, "debug");
-        payload = Buffer.from(payload);
-        yield node_coap_client_1.CoapClient.request(url, "put", payload);
-        return true;
-    });
-}
-/**
- * Sets some properties on a group
- * @param group The group to be updated
- * @param operation The properties to be set
- * @returns true if a request was sent, false otherwise
- */
-function operateGroup(group, operation) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // the url to be requested
-        const url = `${gateway_1.gateway.requestBase}${endpoints_1.endpoints.groups}/${group.instanceId}`;
-        // create a copy to modify
-        const newGroup = group.clone();
-        newGroup.merge(operation);
-        const serializedObj = newGroup.serialize(group); // serialize with the old object as a reference
-        // If the serialized object contains no properties, we don't need to send anything
-        if (!serializedObj || Object.keys(serializedObj).length === 0) {
-            global_1.Global.log("stateChange > empty object, not sending any payload", "debug");
-            return false; // signal that no request was made
-        }
-        let payload = JSON.stringify(serializedObj);
-        global_1.Global.log("stateChange > sending payload: " + payload, "debug");
-        payload = Buffer.from(payload);
-        yield node_coap_client_1.CoapClient.request(url, "put", payload);
-        return true;
-    });
-}
-/**
- * Sets some properties on virtual group or virtual properties on a real group.
- * Can be used to manually update non-existing endpoints on real groups.
- * @param group The group to be updated
- * @param operation The properties to be set
- * @returns true if a request was sent, false otherwise
- */
-function operateVirtualGroup(group, operation) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // find all lightbulbs belonging to this group
-        const lightbulbAccessories = group.deviceIDs
-            .map(did => gateway_1.gateway.devices[did])
-            .filter(dev => dev != null && dev.type === accessory_1.AccessoryTypes.lightbulb);
-        for (const acc of lightbulbAccessories) {
-            yield operateLight(acc, operation);
-        }
-        // and update the group
-        if (group instanceof virtual_group_1.VirtualGroup) {
-            group.merge(operation);
-        }
-    });
-}
 // ==================================
 // manage devices
 /** Normalizes the path to a resource, so it can be used for storing the observer */
@@ -1032,50 +954,6 @@ function updatePossibleScenes(groupInfo) {
             yield adapter.$setObject(scenesId, obj);
         }
     });
-}
-/**
- * Renames a device
- * @param accessory The device to be renamed
- * @param newName The new name to be given to the device
- */
-function renameDevice(accessory, newName) {
-    // create a copy to modify
-    const newAccessory = accessory.clone();
-    newAccessory.name = newName;
-    // serialize with the old object as a reference
-    const serializedObj = newAccessory.serialize(accessory);
-    // If the serialized object contains no properties, we don't need to send anything
-    if (!serializedObj || Object.keys(serializedObj).length === 0) {
-        global_1.Global.log("renameDevice > empty object, not sending any payload", "debug");
-        return;
-    }
-    // get the payload
-    let payload = JSON.stringify(serializedObj);
-    global_1.Global.log("renameDevice > sending payload: " + payload, "debug");
-    payload = Buffer.from(payload);
-    node_coap_client_1.CoapClient.request(`${gateway_1.gateway.requestBase}${endpoints_1.endpoints.devices}/${accessory.instanceId}`, "put", payload);
-}
-/**
- * Renames a group
- * @param group The group to be renamed
- * @param newName The new name to be given to the group
- */
-function renameGroup(group, newName) {
-    // create a copy to modify
-    const newGroup = group.clone();
-    newGroup.name = newName;
-    // serialize with the old object as a reference
-    const serializedObj = newGroup.serialize(group);
-    // If the serialized object contains no properties, we don't need to send anything
-    if (!serializedObj || Object.keys(serializedObj).length === 0) {
-        global_1.Global.log("renameGroup > empty object, not sending any payload", "debug");
-        return;
-    }
-    // get the payload
-    let payload = JSON.stringify(serializedObj);
-    global_1.Global.log("renameDevice > sending payload: " + payload, "debug");
-    payload = Buffer.from(payload);
-    node_coap_client_1.CoapClient.request(`${gateway_1.gateway.requestBase}${endpoints_1.endpoints.groups}/${group.instanceId}`, "put", payload);
 }
 // ==================================
 // Custom subscriptions
