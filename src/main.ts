@@ -207,6 +207,9 @@ let adapter: ExtendedAdapter = utils.adapter({
 								transitionTime: await getTransitionDuration(group),
 							});
 							wasAcked = true;
+						} else if (id.endsWith(".transitionDuration")) {
+							// this is part of another operation, just ack the state
+							wasAcked = true;
 						}
 
 						// ack the state if neccessary and return

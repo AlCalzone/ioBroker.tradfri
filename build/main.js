@@ -199,6 +199,10 @@ let adapter = utils_1.default.adapter({
                             });
                             wasAcked = true;
                         }
+                        else if (id.endsWith(".transitionDuration")) {
+                            // this is part of another operation, just ack the state
+                            wasAcked = true;
+                        }
                         // ack the state if neccessary and return
                         if (wasAcked)
                             adapter.$setState(id, state, true);
