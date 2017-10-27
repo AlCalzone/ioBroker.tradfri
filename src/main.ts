@@ -27,9 +27,9 @@ import { VirtualGroup } from "./lib/virtual-group";
 import utils from "./lib/utils";
 
 // Adapter-Module laden
-import { gateway as gw, GroupInfo } from "./adapter/gateway";
-import { calcGroupId, calcGroupName, extendGroup, groupToCommon, groupToNative } from "./adapter/groups";
-import { onMessage } from "./adapter/message";
+import { gateway as gw, GroupInfo } from "./modules/gateway";
+import { calcGroupId, calcGroupName, extendGroup, groupToCommon, groupToNative } from "./modules/groups";
+import { onMessage } from "./modules/message";
 
 interface CustomStateSubscription {
 	pattern: RegExp;

@@ -29,9 +29,9 @@ const virtual_group_1 = require("./lib/virtual-group");
 // Adapter-Utils laden
 const utils_1 = require("./lib/utils");
 // Adapter-Module laden
-const gateway_1 = require("./adapter/gateway");
-const groups_1 = require("./adapter/groups");
-const message_1 = require("./adapter/message");
+const gateway_1 = require("./modules/gateway");
+const groups_1 = require("./modules/groups");
+const message_1 = require("./modules/message");
 const customStateSubscriptions = {
     subscriptions: new Map(),
     counter: 0,

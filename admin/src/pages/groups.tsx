@@ -8,7 +8,7 @@ import Fragment from "../components/fragment";
 import { MultiDropdown } from "../components/multi-dropdown";
 
 // Load communication objects as defined in the message module
-import { Device, Group } from "../../../src/adapter/communication";
+import { Device, Group } from "../../../src/modules/communication";
 
 export interface GroupDictionary {
 	[id: string]: Group;
