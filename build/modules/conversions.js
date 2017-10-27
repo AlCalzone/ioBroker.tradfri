@@ -171,7 +171,7 @@ const hue_out = (value, light) => {
     return math_1.roundTo(value / 360 * predefined_colors_1.MAX_COLOR, 0);
 };
 // interpolate hue from [0..COLOR_MAX] to [0..360]
-const hue_in = (value, light) => {
+const hue_in = (value /*, light: Light*/) => {
     value = math_1.clamp(value / predefined_colors_1.MAX_COLOR, 0, 1);
     return math_1.roundTo(value * 360, 0);
 };
@@ -183,7 +183,7 @@ const saturation_out = (value, light) => {
     return math_1.roundTo(value / 100 * predefined_colors_1.MAX_COLOR, 0);
 };
 // interpolate saturation from [0..COLOR_MAX] to [0..100%]
-const saturation_in = (value, light) => {
+const saturation_in = (value /*, light: Light*/) => {
     value = math_1.clamp(value / predefined_colors_1.MAX_COLOR, 0, 1);
     return math_1.roundTo(value * 100, 0);
 };

@@ -1,12 +1,12 @@
-import { CoapClient as coap, CoapResponse } from "node-coap-client";
-import { Accessory, AccessoryTypes } from "../ipso/accessory";
+import { CoapClient as coap } from "node-coap-client";
+import { AccessoryTypes } from "../ipso/accessory";
 import { parsePayload } from "../lib/coap-payload";
-import { ExtendedAdapter, Global as _ } from "../lib/global";
+import { Global as _ } from "../lib/global";
 import { DictionaryLike, entries } from "../lib/object-polyfill";
 import { VirtualGroup } from "../lib/virtual-group";
 import { Device as SendToDevice, Group as SendToGroup } from "./communication";
 import { gateway as gw } from "./gateway";
-import { calcGroupId, calcGroupName, extendVirtualGroup } from "./groups";
+import { calcGroupName, extendVirtualGroup } from "./groups";
 
 export async function onMessage(obj) {
 	// responds to the adapter that sent the original message
@@ -72,8 +72,6 @@ export async function onMessage(obj) {
 			}
 
 			case "addVirtualGroup": {
-				// check the given params
-				const params = obj.message as any;
 				// calculate the next ID
 				const nextID = Math.max(0, ...Object.keys(gw.virtualGroups).map(k => +k)) + 1;
 				// create the group

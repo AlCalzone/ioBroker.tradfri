@@ -1,7 +1,6 @@
 import { conversions, deserializers, serializers } from "../modules/conversions";
 import { MAX_COLOR, predefinedColors } from "../modules/predefined-colors";
 import { Accessory } from "./accessory";
-import { DeviceInfo } from "./deviceInfo";
 import { IPSODevice } from "./ipsoDevice";
 import { deserializeWith, doNotSerialize, ipsoKey, IPSOObject, PropertyTransform, required, serializeWith } from "./ipsoObject";
 
@@ -156,7 +155,7 @@ function createWhiteSpectrumProxy<T extends Light>() {
 				default: return me[key];
 			}
 		},
-		set: (me: T, key: PropertyKey, value, receiver) => {
+		set: (me: T, key: PropertyKey, value) => {
 			switch (key) {
 				case "colorTemperature": {
 					me.colorX = conversions.whiteSpectrumToColorX(value);
@@ -191,12 +190,12 @@ function createRGBProxy<T extends Light>() {
 			}
 			case "hue": {
 				const {r, g, b} = conversions.rgbFromString(get(me, "color"));
-				const {h, s, v} = conversions.rgbToHSV(r, g, b);
+				const {h} = conversions.rgbToHSV(r, g, b);
 				return h;
 			}
 			case "saturation": {
 				const {r, g, b} = conversions.rgbFromString(get(me, "color"));
-				const {h, s, v} = conversions.rgbToHSV(r, g, b);
+				const {s} = conversions.rgbToHSV(r, g, b);
 				return Math.round(s * 100);
 			}
 			default: return me[key];

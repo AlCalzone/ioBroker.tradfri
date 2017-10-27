@@ -1,4 +1,4 @@
-import { Accessory, AccessoryTypes } from "../ipso/accessory";
+import { Accessory } from "../ipso/accessory";
 import { Group } from "../ipso/group";
 import { Scene } from "../ipso/scene";
 import { DictionaryLike } from "../lib/object-polyfill";

@@ -1,10 +1,9 @@
 import { Group } from "../ipso/group";
-import { Scene } from "../ipso/scene";
 import { Global as _ } from "../lib/global";
-import { composeObject, DictionaryLike, dig, entries, filter, values } from "../lib/object-polyfill";
+import { DictionaryLike, dig, entries, filter } from "../lib/object-polyfill";
 import { padStart } from "../lib/strings";
 import { VirtualGroup } from "../lib/virtual-group";
-import { gateway as gw, GroupInfo } from "./gateway";
+import { gateway as gw } from "./gateway";
 
 /**
  * Returns the common part of the ioBroker object representing the given group

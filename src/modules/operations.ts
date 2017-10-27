@@ -2,7 +2,7 @@
  * Provides operations for Tradfri devices using the CoAP layer
  */
 
-import { CoapClient as coap, CoapResponse } from "node-coap-client";
+import { CoapClient as coap } from "node-coap-client";
 import { Accessory, AccessoryTypes } from "../ipso/accessory";
 import { endpoints as coapEndpoints} from "../ipso/endpoints";
 import { Group, GroupOperation } from "../ipso/group";

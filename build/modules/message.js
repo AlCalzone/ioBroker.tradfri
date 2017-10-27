@@ -78,8 +78,6 @@ function onMessage(obj) {
                     return;
                 }
                 case "addVirtualGroup": {
-                    // check the given params
-                    const params = obj.message;
                     // calculate the next ID
                     const nextID = Math.max(0, ...Object.keys(gateway_1.gateway.virtualGroups).map(k => +k)) + 1;
                     // create the group

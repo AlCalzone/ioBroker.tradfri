@@ -12,14 +12,11 @@ import { parsePayload } from "./lib/coap-payload";
 import { ExtendedAdapter, Global as _ } from "./lib/global";
 import { composeObject, DictionaryLike, dig, entries, filter, values } from "./lib/object-polyfill";
 import { wait } from "./lib/promises";
-import { str2regex } from "./lib/str2regex";
-import { padStart } from "./lib/strings";
 
 // Datentypen laden
 import { Accessory, AccessoryTypes } from "./ipso/accessory";
-import { Group, GroupOperation } from "./ipso/group";
-import { LightOperation } from "./ipso/light";
-import { Light, Spectrum } from "./ipso/light";
+import { Group } from "./ipso/group";
+import { LightOperation, Spectrum } from "./ipso/light";
 import { Scene } from "./ipso/scene";
 import { VirtualGroup } from "./lib/virtual-group";
 
@@ -29,7 +26,7 @@ import utils from "./lib/utils";
 // Adapter-Module laden
 import { applyCustomObjectSubscriptions, applyCustomStateSubscriptions } from "./modules/custom-subscriptions";
 import { gateway as gw, GroupInfo } from "./modules/gateway";
-import { calcGroupId, calcGroupName, extendGroup, groupToCommon, groupToNative } from "./modules/groups";
+import { calcGroupId, calcGroupName, extendGroup } from "./modules/groups";
 import { onMessage } from "./modules/message";
 import { operateGroup, operateLight, operateVirtualGroup, renameDevice, renameGroup } from "./modules/operations";
 

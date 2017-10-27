@@ -171,7 +171,7 @@ function createWhiteSpectrumProxy() {
                 default: return me[key];
             }
         },
-        set: (me, key, value, receiver) => {
+        set: (me, key, value) => {
             switch (key) {
                 case "colorTemperature": {
                     me.colorX = conversions_1.conversions.whiteSpectrumToColorX(value);
@@ -205,12 +205,12 @@ function createRGBProxy() {
             }
             case "hue": {
                 const { r, g, b } = conversions_1.conversions.rgbFromString(get(me, "color"));
-                const { h, s, v } = conversions_1.conversions.rgbToHSV(r, g, b);
+                const { h } = conversions_1.conversions.rgbToHSV(r, g, b);
                 return h;
             }
             case "saturation": {
                 const { r, g, b } = conversions_1.conversions.rgbFromString(get(me, "color"));
-                const { h, s, v } = conversions_1.conversions.rgbToHSV(r, g, b);
+                const { s } = conversions_1.conversions.rgbToHSV(r, g, b);
                 return Math.round(s * 100);
             }
             default: return me[key];
