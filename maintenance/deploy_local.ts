@@ -7,7 +7,7 @@
 
 /*
 	CONFIGURATION:
-		- provide a deploy_password.json file in the project root with contents
+		- provide a deploy_password.json file in the local dir with contents
 			{
 				"host": "<HOSTNAME>",
 				"username": "<USERNAME>",
@@ -33,7 +33,7 @@ const ioPack = require(path.join(rootDir, "io-package.json"));
 const ADAPTER_NAME = ioPack.common.name;
 
 const ssh = new nodeSSH();
-const sshConfig = require(path.join(rootDir, "deploy_password.json"));
+const sshConfig = require(path.join(__dirname, "deploy_password.json"));
 
 const remoteRoot = `/opt/iobroker/node_modules/iobroker.${ADAPTER_NAME}`;
 
