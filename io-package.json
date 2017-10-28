@@ -1,15 +1,11 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "0.5.2",
+        "version": "0.5.3",
         "news": {
-            "0.5.2": {
-                "en": "Added icons for devices",
-                "de": "Icons für Geräte hinzugefügt"
-            },
-            "0.5.1": {
-                "en": "Support of virtual groups",
-                "de": "Unterstützung virtueller Gruppen"
+            "0.5.3": {
+                "en": "Support of virtual groups. Added icons for devices.",
+                "de": "Unterstützung virtueller Gruppen. Icons für Geräte hinzugefügt."
             },
             "0.4.5": {
                 "en": "Bugfixes",

@@ -46,6 +46,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### 0.5.3 (2017-10-28)
+* (AlCalzone) Fixed transition duration for groups
+
 #### 0.5.2 (2017-10-28)
 * (AlCalzone) Added icons for devices
 
