@@ -13,14 +13,6 @@ const conversions_1 = require("../modules/conversions");
 const ipsoDevice_1 = require("./ipsoDevice");
 const ipsoObject_1 = require("./ipsoObject");
 class Group extends ipsoDevice_1.IPSODevice {
-    constructor() {
-        super(...arguments);
-        this.onOff = false; // <bool>
-        this.dimmer = 0; // <int> [0..254]
-        // The transition time is not reported by the gateway
-        // but it accepts it for a state change
-        this.transitionTime = 0; // <float>
-    }
 }
 __decorate([
     ipsoObject_1.ipsoKey("5850"),
@@ -42,6 +34,7 @@ __decorate([
 ], Group.prototype, "deviceIDs", void 0);
 __decorate([
     ipsoObject_1.ipsoKey("5712"),
+    ipsoObject_1.required,
     ipsoObject_1.serializeWith(conversions_1.serializers.transitionTime),
     ipsoObject_1.deserializeWith(conversions_1.deserializers.transitionTime),
     __metadata("design:type", Number)

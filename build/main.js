@@ -508,38 +508,42 @@ function coapCb_getAllGroups(response) {
 }
 // gets called whenever "get /15004/<instanceId>" updates
 function coap_getGroup_cb(instanceId, response) {
-    // check response code
-    switch (response.code.toString()) {
-        case "2.05": break; // all good
-        case "4.04":// not found
-            // We know this group existed or we wouldn't have requested it
-            // This means it has been deleted
-            // TODO: Should we delete it here or where its being handled right now?
-            return;
-        default:
-            global_1.Global.log(`unexpected response (${response.code.toString()}) to getGroup(${instanceId}).`, "error");
-            return;
-    }
-    const result = coap_payload_1.parsePayload(response);
-    // parse group info
-    const group = (new group_1.Group()).parse(result).createProxy();
-    // remember the group object, so we can later use it as a reference for updates
-    let groupInfo;
-    if (!(instanceId in gateway_1.gateway.groups)) {
-        // if there's none, create one
-        gateway_1.gateway.groups[instanceId] = {
-            group: null,
-            scenes: {},
-        };
-    }
-    groupInfo = gateway_1.gateway.groups[instanceId];
-    groupInfo.group = group;
-    // create ioBroker states
-    groups_1.extendGroup(group);
-    // clean up any states that might be incorrectly defined
-    groups_1.updateGroupStates(group);
-    // and load scene information
-    observeResource(`${endpoints_1.endpoints.scenes}/${instanceId}`, (resp) => coap_getAllScenes_cb(instanceId, resp));
+    return __awaiter(this, void 0, void 0, function* () {
+        // check response code
+        switch (response.code.toString()) {
+            case "2.05": break; // all good
+            case "4.04":// not found
+                // We know this group existed or we wouldn't have requested it
+                // This means it has been deleted
+                // TODO: Should we delete it here or where its being handled right now?
+                return;
+            default:
+                global_1.Global.log(`unexpected response (${response.code.toString()}) to getGroup(${instanceId}).`, "error");
+                return;
+        }
+        const result = coap_payload_1.parsePayload(response);
+        // parse group info
+        const group = (new group_1.Group()).parse(result).createProxy();
+        // remember the group object, so we can later use it as a reference for updates
+        let groupInfo;
+        if (!(instanceId in gateway_1.gateway.groups)) {
+            // if there's none, create one
+            gateway_1.gateway.groups[instanceId] = {
+                group: null,
+                scenes: {},
+            };
+        }
+        groupInfo = gateway_1.gateway.groups[instanceId];
+        groupInfo.group = group;
+        // create ioBroker states
+        groups_1.extendGroup(group);
+        // clean up any states that might be incorrectly defined
+        groups_1.updateGroupStates(group);
+        // read the transition duration, because the gateway won't report it
+        group.transitionTime = yield getTransitionDuration(group);
+        // and load scene information
+        observeResource(`${endpoints_1.endpoints.scenes}/${instanceId}`, (resp) => coap_getAllScenes_cb(instanceId, resp));
+    });
 }
 // gets called whenever "get /15005/<groupId>" updates
 function coap_getAllScenes_cb(groupId, response) {

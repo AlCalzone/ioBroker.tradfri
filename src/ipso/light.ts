@@ -37,22 +37,22 @@ export class Light extends IPSODevice {
 	@ipsoKey("5707")
 	@serializeWith(serializers.hue)
 	@deserializeWith(deserializers.hue)
-	public hue: number = 0; // 0-360
+	public hue: number; // 0-360
 	@ipsoKey("5708")
 	@serializeWith(serializers.saturation)
 	@deserializeWith(deserializers.saturation)
-	public saturation: number = 0; // 0-100%
+	public saturation: number; // 0-100%
 
 	@ipsoKey("5709")
-	public colorX: number = 0; // int
+	public colorX: number; // int
 
 	@ipsoKey("5710")
-	public colorY: number = 0; // int
+	public colorY: number; // int
 
 	// currently not used directly, since the gateway only accepts 3 distinct values
 	// we have to set colorX to set more than those 3 color temps
 	@ipsoKey("5711")
-	public colorTemperature: number = 0; // TODO: CoAP range unknown!
+	public colorTemperature: number; // TODO: CoAP range unknown!
 
 	@ipsoKey("5712")
 	@required
@@ -61,22 +61,22 @@ export class Light extends IPSODevice {
 	public transitionTime: number = 0.5; // <float>
 
 	@ipsoKey("5805")
-	public cumulativeActivePower: number = 0.0; // <float>
+	public cumulativeActivePower: number; // <float>
 
 	@ipsoKey("5851")
-	public dimmer: number = 0; // <int> [0..254]
+	public dimmer: number; // <int> [0..254]
 
 	@ipsoKey("5850")
-	public onOff: boolean = false;
+	public onOff: boolean;
 
 	@ipsoKey("5852")
-	public onTime: number = 0; // <int>
+	public onTime: number; // <int>
 
 	@ipsoKey("5820")
-	public powerFactor: number = 0.0; // <float>
+	public powerFactor: number; // <float>
 
 	@ipsoKey("5701")
-	public unit: string = "";
+	public unit: string;
 
 	/**
 	 * Returns true if the current lightbulb is dimmable

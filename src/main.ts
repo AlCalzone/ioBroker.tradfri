@@ -545,7 +545,7 @@ async function coapCb_getAllGroups(response: CoapResponse) {
 
 }
 // gets called whenever "get /15004/<instanceId>" updates
-function coap_getGroup_cb(instanceId: number, response: CoapResponse) {
+async function coap_getGroup_cb(instanceId: number, response: CoapResponse) {
 
 	// check response code
 	switch (response.code.toString()) {
@@ -579,6 +579,8 @@ function coap_getGroup_cb(instanceId: number, response: CoapResponse) {
 	extendGroup(group);
 	// clean up any states that might be incorrectly defined
 	updateGroupStates(group);
+	// read the transition duration, because the gateway won't report it
+	group.transitionTime = await getTransitionDuration(group);
 	// and load scene information
 	observeResource(
 		`${coapEndpoints.scenes}/${instanceId}`,

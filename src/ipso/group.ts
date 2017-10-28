@@ -5,10 +5,10 @@ import { deserializeWith, ipsoKey, IPSOObject, PropertyTransform, required, seri
 export class Group extends IPSODevice {
 
 	@ipsoKey("5850")
-	public onOff: boolean = false; // <bool>
+	public onOff: boolean; // <bool>
 
 	@ipsoKey("5851")
-	public dimmer: number = 0; // <int> [0..254]
+	public dimmer: number; // <int> [0..254]
 
 	@ipsoKey("9039")
 	public sceneId: number;
@@ -21,9 +21,10 @@ export class Group extends IPSODevice {
 	// The transition time is not reported by the gateway
 	// but it accepts it for a state change
 	@ipsoKey("5712")
+	@required
 	@serializeWith(serializers.transitionTime)
 	@deserializeWith(deserializers.transitionTime)
-	public transitionTime: number = 0; // <float>
+	public transitionTime: number; // <float>
 
 }
 

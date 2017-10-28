@@ -17,20 +17,7 @@ class Light extends ipsoDevice_1.IPSODevice {
     constructor(accessory) {
         super();
         this.color = "f1e0b5"; // hex string
-        this.hue = 0; // 0-360
-        this.saturation = 0; // 0-100%
-        this.colorX = 0; // int
-        this.colorY = 0; // int
-        // currently not used directly, since the gateway only accepts 3 distinct values
-        // we have to set colorX to set more than those 3 color temps
-        this.colorTemperature = 0; // TODO: CoAP range unknown!
         this.transitionTime = 0.5; // <float>
-        this.cumulativeActivePower = 0.0; // <float>
-        this.dimmer = 0; // <int> [0..254]
-        this.onOff = false;
-        this.onTime = 0; // <int>
-        this.powerFactor = 0.0; // <float>
-        this.unit = "";
         /**
          * Returns the supported color spectrum of the lightbulb
          */
