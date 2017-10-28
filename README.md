@@ -46,6 +46,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### 0.5.2 (2017-10-28)
+* (AlCalzone) Added icons for devices
+
 #### 0.5.1 (2017-10-28)
 * (AlCalzone) Support virtual groups
 * (AlCalzone) Validate hex colors on input

@@ -674,13 +674,54 @@ function getTransitionDuration(accessoryOrGroup) {
         return 0.5; // default
     });
 }
+function getAccessoryIcon(accessory) {
+    const model = accessory.deviceInfo.modelNumber;
+    switch (model) {
+        case "TRADFRI remote control":
+            return "remote.png";
+        case "TRADFRI motion sensor":
+            return "motion_sensor.png";
+        case "TRADFRI wireless dimmer":
+            return "remote_dimmer.png";
+        case "TRADFRI plug":
+            return "plug.png";
+    }
+    if (accessory.type === accessory_1.AccessoryTypes.lightbulb) {
+        let prefix;
+        if (model.indexOf(" panel ") > -1) {
+            prefix = "panel";
+        }
+        else if (model.indexOf(" door ") > -1) {
+            prefix = "door";
+        }
+        else if (model.indexOf(" GU10 ") > -1) {
+            prefix = "gu10";
+        }
+        else {
+            prefix = "bulb";
+        }
+        let suffix = "";
+        const spectrum = accessory.lightList[0].spectrum;
+        if (spectrum === "white") {
+            suffix = "_ws";
+        }
+        else if (spectrum === "rgb") {
+            suffix = "_rgb";
+        }
+        return prefix + suffix + ".png";
+    }
+}
 /**
  * Returns the common part of the ioBroker object representing the given accessory
  */
 function accessoryToCommon(accessory) {
-    return {
+    const ret = {
         name: accessory.name,
     };
+    const icon = getAccessoryIcon(accessory);
+    if (icon != null)
+        ret.icon = "icons/" + icon;
+    return ret;
 }
 /**
  * Returns the native part of the ioBroker object representing the given accessory

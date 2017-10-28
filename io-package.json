@@ -1,15 +1,19 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "0.5.1",
+        "version": "0.5.2",
         "news": {
+            "0.5.2": {
+                "en": "Added icons for devices",
+                "de": "Icons für Geräte hinzugefügt"
+            },
             "0.5.1": {
                 "en": "Support of virtual groups",
                 "de": "Unterstützung virtueller Gruppen"
             },
             "0.4.5": {
-                "en": "Bugfixes.",
-                "de": "Bugfixes."
+                "en": "Bugfixes",
+                "de": "Bugfixes"
             },
             "0.4.4": {
                 "en": "Experimental support for RGB and lightbulbs with fixed color.",

@@ -728,13 +728,50 @@ async function getTransitionDuration(accessoryOrGroup: Accessory | Group | Virtu
 	return 0.5; // default
 }
 
+function getAccessoryIcon(accessory: Accessory): string {
+	const model = accessory.deviceInfo.modelNumber;
+	switch (model) {
+		case "TRADFRI remote control":
+			return "remote.png";
+		case "TRADFRI motion sensor":
+			return "motion_sensor.png";
+		case "TRADFRI wireless dimmer":
+			return "remote_dimmer.png";
+		case "TRADFRI plug":
+			return "plug.png";
+	}
+	if (accessory.type === AccessoryTypes.lightbulb) {
+		let prefix: string;
+		if (model.indexOf(" panel ") > -1) {
+			prefix = "panel";
+		} else if (model.indexOf(" door ") > -1) {
+			prefix = "door";
+		} else if (model.indexOf(" GU10 ") > -1) {
+			prefix = "gu10";
+		} else {
+			prefix = "bulb";
+		}
+		let suffix: string = "";
+		const spectrum = accessory.lightList[0].spectrum;
+		if (spectrum === "white") {
+			suffix = "_ws";
+		} else if (spectrum === "rgb") {
+			suffix = "_rgb";
+		}
+		return prefix + suffix + ".png";
+	}
+}
+
 /**
  * Returns the common part of the ioBroker object representing the given accessory
  */
 function accessoryToCommon(accessory: Accessory): ioBroker.ObjectCommon {
-	return {
+	const ret: ioBroker.ObjectCommon = {
 		name: accessory.name,
 	};
+	const icon = getAccessoryIcon(accessory);
+	if (icon != null) ret.icon = "icons/" + icon;
+	return ret;
 }
 
 /**
