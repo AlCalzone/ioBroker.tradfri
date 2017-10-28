@@ -142,6 +142,7 @@ export class Groups extends React.Component<GroupsProps, any> {
 						))}
 					</tbody>
 				</table>
+				<p>{_("changes are live")}</p>
 			</Fragment>
 		);
 	}

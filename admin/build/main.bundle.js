@@ -386,7 +386,8 @@ class Groups extends React.Component {
                     React.createElement("td", null, (this.props.devices && Object.keys(this.props.devices).length > 0) ? (React.createElement(multi_dropdown_1.MultiDropdown, { options: this.devicesToDropdownSource(this.props.devices), checkedOptions: (group.deviceIDs || []).map(id => `${id}`), checkedChanged: (checked) => this.changeGroupDevices(group.id, checked) })) : adapter_1._("no devices")),
                     React.createElement("td", null,
                         React.createElement("button", { title: adapter_1._("delete group"), className: "delete-group", onClick: () => this.deleteGroup(group.id) })))))) : (React.createElement("tr", null,
-                    React.createElement("td", { className: "empty", colSpan: 4 }, adapter_1._("No virtual groups defined")))))))));
+                    React.createElement("td", { className: "empty", colSpan: 4 }, adapter_1._("No virtual groups defined"))))))),
+            React.createElement("p", null, adapter_1._("changes are live"))));
     }
 }
 exports.Groups = Groups;

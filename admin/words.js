@@ -48,8 +48,16 @@ systemDictionary = {
 		"de": "Geräte auswählen",
 		"en": "select devices"
 	},
+	"No virtual groups defined": {
+		"de": "Noch keine virtuellen Gruppen definiert",
+		"en": "No virtual groups defined"
+	},
 	"# devices selected": {
 		"de": "# Geräte ausgewählt",
 		"en": "# devices selected"
+	},
+	"changes are live": {
+		"de": "Achtung: Alle Änderungen an virtuellen Gruppen greifen sofort!",
+		"en": "Warning: All changes to virtual groups are active immediately!"
 	},
 };
