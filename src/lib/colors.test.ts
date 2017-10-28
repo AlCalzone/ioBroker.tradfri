@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { normalizeHexColor } from "./colors";
 // tslint:disable:no-unused-expression
 
-describe.only("lib/colors => normalizeHexColor() =>", () => {
+describe("lib/colors => normalizeHexColor() =>", () => {
 
 	it("should not change valid hex colors without #", () => {
 		const sampleColors = [
