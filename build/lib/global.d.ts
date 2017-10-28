@@ -62,6 +62,8 @@ export interface ExtendedAdapter extends ioBroker.Adapter {
     $deleteState(stateName: string, options?: any): Promise<void>;
     $deleteState(parentChannel: string, stateName: string, options?: any): Promise<void>;
     $deleteState(parentDevice: string, parentChannel: string, stateName: string, options?: any): Promise<void>;
+    /** Deletes a state from the states DB, but not the associated object. Consider using @link{$deleteState} instead */
+    $delState(id: string, options?: any): Promise<void>;
     /** Read a value (which might not belong to this adapter) from the states DB. */
     $getForeignState(id: string, options?: any): Promise<ioBroker.State>;
     /** Writes a value (which might not belong to this adapter) into the states DB. */
@@ -94,10 +96,5 @@ export declare class Global {
      * @param id
      */
     static $$(pattern: string, type: ioBroker.ObjectType, role?: string): Promise<DictionaryLike<ioBroker.Object>>;
-    static isdef(value: any): boolean;
-    static subscribeStates: (pattern: string | RegExp, callback: (id: string, state: ioBroker.State) => void) => string;
-    static unsubscribeStates: (id: string) => void;
-    static subscribeObjects: (pattern: string | RegExp, callback: (id: string, object: ioBroker.Object) => void) => string;
-    static unsubscribeObjects: (id: string) => void;
     static ensureInstanceObjects(): Promise<void>;
 }

@@ -9,6 +9,11 @@
         "outDir": "build/",
         "removeComments": false,
 
+        // "noUnusedLocals": true,
+        // "noUnusedParameters": true,
+
+        "jsx": "react",
+        
         // enable the new reflection API
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
@@ -18,5 +23,11 @@
         //"sourceRoot": "src/",
         "target": "es2015"
         //"watch": true
-    }
+    },
+    "include": [
+        "src/**/*.ts"
+    ],
+    "exclude": [
+        "admin/**/*.ts"
+    ]
 }

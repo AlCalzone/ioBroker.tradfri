@@ -81,6 +81,8 @@ export interface ExtendedAdapter extends ioBroker.Adapter {
 	$deleteState(stateName: string, options?: any): Promise<void>;
 	$deleteState(parentChannel: string, stateName: string, options?: any): Promise<void>;
 	$deleteState(parentDevice: string, parentChannel: string, stateName: string, options?: any): Promise<void>;
+	/** Deletes a state from the states DB, but not the associated object. Consider using @link{$deleteState} instead */
+	$delState(id: string, options?: any): Promise<void>;
 
 	/** Read a value (which might not belong to this adapter) from the states DB. */
 	$getForeignState(id: string, options?: any): Promise<ioBroker.State>;
@@ -141,6 +143,7 @@ export class Global {
 				$setStateChanged: promisify<string>(adapter.setStateChanged, adapter),
 				$createState: promisify<{ id: string }>(adapter.createState, adapter),
 				$deleteState: promisify<void>(adapter.deleteState, adapter),
+				$delState: promisify<void>(adapter.delState, adapter),
 
 				$getForeignState: promisify<ioBroker.State>(adapter.getForeignState, adapter),
 				$setForeignState: promisify<string>(adapter.setForeignState, adapter),
@@ -205,7 +208,7 @@ export class Global {
 	 * Kurzschreibweise für die Ermittlung mehrerer Objekte
 	 * @param id
 	 */
-	public static async $$(pattern: string, type: ioBroker.ObjectType, role?: string) {
+	public static async $$(pattern: string, type: ioBroker.ObjectType, role?: string): Promise<DictionaryLike<ioBroker.Object>> {
 		const objects = await Global._adapter.$getForeignObjects(pattern, type);
 		if (role) {
 			return objFilter(objects, o => (o.common as any).role === role);
@@ -213,15 +216,6 @@ export class Global {
 			return objects;
 		}
 	}
-
-	// Prüfen auf (un)defined
-	public static isdef(value: any): boolean { return value != undefined; }
-
-	// custom subscriptions
-	public static subscribeStates: (pattern: string | RegExp, callback: (id: string, state: ioBroker.State) => void) => string;
-	public static unsubscribeStates: (id: string) => void;
-	public static subscribeObjects: (pattern: string | RegExp, callback: (id: string, object: ioBroker.Object) => void) => string;
-	public static unsubscribeObjects: (id: string) => void;
 
 	// Workaround für unvollständige Adapter-Upgrades
 	public static async ensureInstanceObjects(): Promise<void> {

@@ -22,7 +22,7 @@ exports.promisify = promisify;
 function promisifyNoError(fn, context) {
     return function (...args) {
         context = context || this;
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             fn.apply(context, [...args, (result) => {
                     return resolve(result);
                 }]);
@@ -38,7 +38,7 @@ function waterfall(...fn) {
 exports.waterfall = waterfall;
 /** Creates a promise that waits for the specified time and then resolves */
 function wait(ms) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         setTimeout(resolve, ms);
     });
 }

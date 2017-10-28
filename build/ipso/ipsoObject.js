@@ -306,7 +306,7 @@ class IPSOObject {
             reference.isProxy)
             reference = reference.unproxy();
         const ret = {};
-        const serializeValue = (key, propName, value, refValue, transform) => {
+        const serializeValue = (propName, value, refValue, transform) => {
             const _required = isRequired(this, propName);
             let _ret = value;
             if (value instanceof IPSOObject) {
@@ -318,7 +318,7 @@ class IPSOObject {
             }
             else {
                 // if the value is not the default one, then remember it
-                if (global_1.Global.isdef(refValue)) {
+                if (refValue != null) {
                     if (!_required && refValue === value)
                         return null;
                 }
@@ -345,7 +345,7 @@ class IPSOObject {
                 // find value and reference (default) value
                 let value = this[propName];
                 let refValue = null;
-                if (global_1.Global.isdef(reference) && reference.hasOwnProperty(propName)) {
+                if (reference != null && reference.hasOwnProperty(propName)) {
                     refValue = reference[propName];
                 }
                 // try to find serializer for this property
@@ -353,26 +353,26 @@ class IPSOObject {
                 const requiresArraySplitting = serializerRequiresArraySplitting(this, propName);
                 if (value instanceof Array && requiresArraySplitting) {
                     // serialize each item
-                    if (global_1.Global.isdef(refValue)) {
+                    if (refValue != null) {
                         // reference value exists, make sure we have the same amount of items
                         if (!(refValue instanceof Array && refValue.length === value.length)) {
                             throw new Error("cannot serialize arrays when the reference values don't match");
                         }
                         // serialize each item with the matching reference value
-                        value = value.map((v, i) => serializeValue(key, propName, v, refValue[i], serializer));
+                        value = value.map((v, i) => serializeValue(propName, v, refValue[i], serializer));
                     }
                     else {
                         // no reference value, makes things easier
-                        value = value.map(v => serializeValue(key, propName, v, null, serializer));
+                        value = value.map(v => serializeValue(propName, v, null, serializer));
                     }
                     // now remove null items
-                    value = value.filter(v => global_1.Global.isdef(v));
+                    value = value.filter(v => v != null);
                     if (value.length === 0)
                         value = null;
                 }
                 else {
                     // directly serialize the value
-                    value = serializeValue(key, propName, value, refValue, serializer);
+                    value = serializeValue(propName, value, refValue, serializer);
                 }
                 // only output the value if it's != null
                 if (value != null)

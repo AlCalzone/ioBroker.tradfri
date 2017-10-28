@@ -2,7 +2,7 @@
 // tslint:disable-next-line:no-var-requires
 require("reflect-metadata");
 
-import { assert, expect } from "chai";
+import { expect } from "chai";
 import { Group } from "./group";
 // tslint:disable:no-unused-expression
 

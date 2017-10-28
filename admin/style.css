@@ -1,0 +1,109 @@
+* {
+	box-sizing: border-box
+}
+#adapter-container {
+	padding: 0 0.5em;
+}
+#adapter-container .ui-tabs-panel {
+	padding: 0;
+}
+#adapter-container, #adapter-container .ui-tabs {
+	font-size: initial;
+}
+#adapter-container .ui-tabs-nav {
+	margin: 0 -0.5em;
+}
+#adapter-container > *, 
+.ui-tabs > *, 
+.ui-tabs-panel > * {
+	width: auto;
+}
+div.loading:first-child {
+	margin-top: 2em;
+}
+div.loading {
+	text-align: center;
+}
+
+[data-role="adapter-name"] {
+	min-height: 64px;
+	padding-left: 80px;
+	vertical-align: middle;
+	background-image: url(tradfri.png);
+	background-size: 64px auto;
+	background-position: left center;
+	background-repeat: no-repeat;
+	margin: 0.5em auto;
+}
+[data-role="adapter-name"]::before {
+	content: "";
+	display: inline-block;
+	height: 64px;
+	vertical-align: middle;
+}
+.settings-table > * {
+	display: inline-block;
+}
+.settings-table > label {
+	min-width: 25%;
+	white-space: nowrap;
+}
+.settings-table > .admin-tooltip-icon {
+	margin-right: 0.25em;
+}
+.settings-table > label ~ span {
+	font-size: 80%;
+	padding-left: 1em;
+}	
+
+#virtual-groups {
+	margin-top: 0.5em;
+	width: calc(100% - 20px);
+}
+#virtual-groups td {
+	padding: 0.2em 0.4em;
+}
+#virtual-groups thead .id {
+	width: 100px;
+}
+#virtual-groups thead .name {
+	width: auto;
+}
+#virtual-groups thead .devices {
+	width: 200px;
+}
+#virtual-groups thead .delete {
+	width: 30px;
+}
+
+#virtual-groups tbody tr:nth-child(2n) {
+	background-color: lightgray;
+}
+#virtual-groups tbody td {
+	padding-top: 0.25em;
+	padding-bottom: 0.25em;
+}
+#virtual-groups tbody .id {
+	text-align: right;
+}
+#virtual-groups tbody .name {
+	text-align: left;
+}
+#virtual-groups tbody .devices {
+	text-align: left;
+}
+
+#virtual-groups tbody .empty {
+	text-align: center;
+}
+
+#virtual-groups .delete-group {
+	margin-top: -0.25em;
+	margin-bottom: -0.25em;
+	width: 24px;
+	height: 20px;
+}
+
+label[for^="ui-multiselect"].ui-state-hover {
+	font-weight: normal;
+}

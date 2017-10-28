@@ -3,9 +3,8 @@
 import { PropertyTransform } from "../ipso/ipsoObject";
 import { Light } from "../ipso/light";
 import { clamp, findClosestTriangleEdge, Point, pointInTriangle, projectPointOnEdge, roundTo } from "../lib/math";
-import { DictionaryLike } from "../lib/object-polyfill";
 import { padStart } from "../lib/strings";
-import { MAX_COLOR, predefinedColors, whiteSpectrumRange, whiteSpectrumTemp } from "./predefined-colors";
+import { MAX_COLOR, whiteSpectrumRange } from "./predefined-colors";
 
 // ==========================
 // WHITE SPECTRUM conversions
@@ -177,7 +176,7 @@ const hue_out: PropertyTransform = (value, light: Light) => {
 	return roundTo(value / 360 * MAX_COLOR, 0);
 };
 // interpolate hue from [0..COLOR_MAX] to [0..360]
-const hue_in: PropertyTransform = (value, light: Light) => {
+const hue_in: PropertyTransform = (value /*, light: Light*/) => {
 	value = clamp(value / MAX_COLOR, 0, 1);
 	return roundTo(value * 360, 0);
 };
@@ -190,7 +189,7 @@ const saturation_out: PropertyTransform = (value, light: Light) => {
 	return roundTo(value / 100 * MAX_COLOR, 0);
 };
 // interpolate saturation from [0..COLOR_MAX] to [0..100%]
-const saturation_in: PropertyTransform = (value, light: Light) => {
+const saturation_in: PropertyTransform = (value /*, light: Light*/) => {
 	value = clamp(value / MAX_COLOR, 0, 1);
 	return roundTo(value * 100, 0);
 };

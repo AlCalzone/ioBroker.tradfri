@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "0.4.5",
+        "version": "0.5.0",
         "news": {
+            "0.5.0": {
+                "en": "Support of virtual groups",
+                "de": "Unterstützung virtueller Gruppen"
+            },
             "0.4.5": {
                 "en": "Bugfixes.",
                 "de": "Bugfixes."
@@ -45,19 +49,20 @@
         "icon": "tradfri.png",
         "enabled": false,
         "extIcon": "https://raw.githubusercontent.com/AlCalzone/ioBroker.tradfri/master/admin/tradfri.png",
-        "keywords": [ "ikea", "tradfri" ],
+        "keywords": [
+            "ikea",
+            "tradfri"
+        ],
         "readme": "https://github.com/AlCalzone/ioBroker.tradfri/blob/master/README.md",
         "loglevel": "info",
         "type": "lighting",
         "messagebox": true
     },
     "native": {
-        "host":         "",
+        "host": "",
         "securityCode": ""
     },
-    "objects": [
-
-    ],
+    "objects": [],
     "instanceObjects": [
         {
             "_id": "info",

@@ -46,6 +46,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### 0.5.0 (2017-10-28)
+* (AlCalzone) Support virtual groups
+
 #### 0.4.5 (2017-10-20)
 * (AlCalzone) RGB and connection fixes.
 

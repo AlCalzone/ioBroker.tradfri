@@ -20,9 +20,17 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
   <ItemGroup>
+    <Compile Include="webpack.config.js" />
     <Content Include=".gitignore" />
     <Content Include=".npmignore" />
     <Content Include=".travis.yml" />
+    <Content Include="admin\build\main.bundle.js.map" />
+    <Content Include="admin\build\runtime.bundle.js.map" />
+    <Content Include="admin\build\vendor.bundle.js.map" />
+    <Content Include="admin\src\index.test.tsx" />
+    <Content Include="admin\src\index.tsx" />
+    <Content Include="admin\src\settings.tsx" />
+    <Content Include="admin\style.css" />
     <Content Include="appveyor.yml" />
     <Content Include="io-package.json" />
     <Content Include="LICENSE" />
@@ -31,7 +39,12 @@
     <Content Include="README.md" />
     <Content Include="admin\index.html" />
     <Content Include="admin\tradfri.png" />
+    <Compile Include="admin\build\main.bundle.js" />
+    <Compile Include="admin\build\runtime.bundle.js" />
+    <Compile Include="admin\build\vendor.bundle.js" />
     <Compile Include="admin\words.js" />
+    <Content Include="webpack.tsconfig.json" />
+    <TypeScriptCompile Include="admin\src\config.ts" />
     <TypeScriptCompile Include="src\ipso\accessory.test.ts" />
     <TypeScriptCompile Include="src\ipso\accessory.ts" />
     <TypeScriptCompile Include="src\ipso\deviceInfo.test.ts" />
@@ -76,7 +89,10 @@
     <TypeScriptCompile Include="src\lib\promises.ts" />
     <TypeScriptCompile Include="src\lib\str2regex.test.ts" />
     <TypeScriptCompile Include="src\lib\str2regex.ts" />
+    <TypeScriptCompile Include="src\lib\strings.test.ts" />
+    <TypeScriptCompile Include="src\lib\strings.ts" />
     <TypeScriptCompile Include="src\lib\utils.ts" />
+    <TypeScriptCompile Include="src\lib\virtual-group.ts" />
     <TypeScriptCompile Include="src\main.ts" />
     <Compile Include="main.js" />
     <Compile Include="test\testAdapter.js" />
@@ -103,6 +119,8 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="admin" />
+    <Folder Include="admin\build\" />
+    <Folder Include="admin\src\" />
     <Folder Include="src" />
     <Folder Include="src\flow" />
     <Folder Include="src\ipso\" />

@@ -8,59 +8,27 @@ require("reflect-metadata");
 import { CoapClient as coap, CoapResponse } from "node-coap-client";
 import { endpoints as coapEndpoints} from "./ipso/endpoints";
 import { except } from "./lib/array-extensions";
+import { parsePayload } from "./lib/coap-payload";
 import { ExtendedAdapter, Global as _ } from "./lib/global";
 import { composeObject, DictionaryLike, dig, entries, filter, values } from "./lib/object-polyfill";
 import { wait } from "./lib/promises";
-import { str2regex } from "./lib/str2regex";
 
 // Datentypen laden
 import { Accessory, AccessoryTypes } from "./ipso/accessory";
 import { Group } from "./ipso/group";
-import { IPSOObject } from "./ipso/ipsoObject";
-import { Light, Spectrum } from "./ipso/light";
+import { LightOperation, Spectrum } from "./ipso/light";
 import { Scene } from "./ipso/scene";
+import { VirtualGroup } from "./lib/virtual-group";
 
 // Adapter-Utils laden
 import utils from "./lib/utils";
 
-interface CustomStateSubscription {
-	pattern: RegExp;
-	callback: (id: string, state: ioBroker.State) => void;
-}
-interface CustomObjectSubscription {
-	pattern: RegExp;
-	callback: (id: string, obj: ioBroker.Object) => void;
-}
-const customStateSubscriptions: {
-	subscriptions: Map<string, CustomStateSubscription>,
-	counter: number,
-} = {
-		subscriptions: new Map(),
-		counter: 0,
-	};
-const customObjectSubscriptions: {
-	subscriptions: Map<string, CustomObjectSubscription>,
-	counter: number,
-} = {
-		subscriptions: new Map(),
-		counter: 0,
-	};
-
-// dictionary of COAP observers
-const observers: string[] = [];
-// dictionary of known devices
-const devices: DictionaryLike<Accessory> = {};
-// dictionary of known groups
-interface GroupInfo {
-	group: Group;
-	scenes: DictionaryLike<Scene>;
-}
-const groups: DictionaryLike<GroupInfo> = {};
-// dictionary of ioBroker objects
-const objects: DictionaryLike<ioBroker.Object> = {};
-
-// the base of all requests
-let requestBase: string;
+// Adapter-Module laden
+import { applyCustomObjectSubscriptions, applyCustomStateSubscriptions, subscribeStates } from "./modules/custom-subscriptions";
+import { gateway as gw, GroupInfo } from "./modules/gateway";
+import { calcGroupId, calcGroupName, extendGroup, updateGroupStates, updateMultipleGroupStates } from "./modules/groups";
+import { onMessage } from "./modules/message";
+import { operateGroup, operateLight, operateVirtualGroup, renameDevice, renameGroup } from "./modules/operations";
 
 // Adapter-Objekt erstellen
 let adapter: ExtendedAdapter = utils.adapter({
@@ -91,34 +59,30 @@ let adapter: ExtendedAdapter = utils.adapter({
 		// console.error = (msg) => adapter.log.error("STDERR > " + msg);
 		_.log(`startfile = ${process.argv[1]}`);
 
-		// Eigene Objekte/States beobachten
-		adapter.subscribeStates("*");
-		adapter.subscribeObjects("*");
-
-		// Custom subscriptions erlauben
-		_.subscribeStates = subscribeStates;
-		_.unsubscribeStates = unsubscribeStates;
-		_.subscribeObjects = subscribeObjects;
-		_.unsubscribeObjects = unsubscribeObjects;
+		// watch own states
+		adapter.subscribeStates(`${adapter.namespace}.*`);
+		adapter.subscribeObjects(`${adapter.namespace}.*`);
+		// add special watch for lightbulb states, so we can later sync the group states
+		subscribeStates(/L\-\d+\.lightbulb\./, syncGroupsWithState);
 
 		// initialize CoAP client
 		const hostname = (adapter.config.host as string).toLowerCase();
 		coap.setSecurityParams(hostname, {
 			psk: { "Client_identity": adapter.config.securityCode },
 		});
-		requestBase = `coaps://${hostname}:5684/`;
+		gw.requestBase = `coaps://${hostname}:5684/`;
 
 		// Try a few times to setup a working connection
 		const maxTries = 3;
 		for (let i = 1; i <= maxTries; i++) {
-			if (await coap.tryToConnect(requestBase)) {
+			if (await coap.tryToConnect(gw.requestBase)) {
 				break; // it worked
 			} else if (i < maxTries) {
 				_.log(`Could not connect to gateway, try #${i}`, "warn");
 				await wait(1000);
 			} else if (i === maxTries) {
 				// no working connection
-				_.log(`Could not connect to the gateway ${requestBase} after ${maxTries} tries!`, "error");
+				_.log(`Could not connect to the gateway ${gw.requestBase} after ${maxTries} tries!`, "error");
 				_.log(`Please check your network and adapter settings and restart the adapter!`, "error");
 				return;
 			}
@@ -127,98 +91,35 @@ let adapter: ExtendedAdapter = utils.adapter({
 		connectionAlive = true;
 		pingTimer = setInterval(pingThread, 10000);
 
+		loadVirtualGroups();
 		// TODO: load known devices from ioBroker into <devices> & <objects>
 		observeAll();
 
 	},
 
-	message: async (obj) => {
-		// responds to the adapter that sent the original message
-		function respond(response) {
-			if (obj.callback) adapter.sendTo(obj.from, obj.command, response, obj.callback);
-		}
-		// some predefined responses so we only have to define them once
-		const predefinedResponses = {
-			ACK: { error: null },
-			OK: { error: null, result: "ok" },
-			ERROR_UNKNOWN_COMMAND: { error: "Unknown command!" },
-			MISSING_PARAMETER: (paramName) => {
-				return { error: 'missing parameter "' + paramName + '"!' };
-			},
-			COMMAND_RUNNING: { error: "command running" },
-		};
-		// make required parameters easier
-		function requireParams(...params: string[]) {
-			if (!(params && params.length)) return true;
-			for (const param of params) {
-				if (!(obj.message && obj.message.hasOwnProperty(param))) {
-					respond(predefinedResponses.MISSING_PARAMETER(param));
-					return false;
-				}
-			}
-			return true;
-		}
-
-		// handle the message
-		if (obj) {
-			switch (obj.command) {
-				case "request":
-					// require the path to be given
-					if (!requireParams("path")) return;
-
-					// check the given params
-					const params = obj.message as any;
-					params.method = params.method || "get";
-					if (["get", "post", "put", "delete"].indexOf(params.method) === -1) {
-						respond({ error: `unsupported request method "${params.method}"` });
-						return;
-					}
-
-					_.log(`custom coap request: ${params.method.toUpperCase()} "${requestBase}${params.path}"`);
-
-					// create payload
-					let payload: string | Buffer;
-					if (params.payload) {
-						payload = JSON.stringify(params.payload);
-						_.log("sending custom payload: " + payload);
-						payload = Buffer.from(payload);
-					}
-
-					// wait for the CoAP response and respond to the message
-					const resp = await coap.request(`${requestBase}${params.path}`, params.method, payload as Buffer);
-					respond({
-						error: null, result: {
-							code: resp.code.toString(),
-							payload: parsePayload(resp),
-						},
-					});
-					return;
-				default:
-					respond(predefinedResponses.ERROR_UNKNOWN_COMMAND);
-					return;
-			}
-		}
-	},
+	// Handle sendTo-Messages
+	message: onMessage,
 
 	objectChange: (id, obj) => {
 		_.log(`{{blue}} object with id ${id} ${obj ? "updated" : "deleted"}`, "debug");
+
 		if (id.startsWith(adapter.namespace)) {
 			// this is our own object.
 
 			if (obj) {
 				// first check if we have to modify a device/group/whatever
 				const instanceId = getInstanceId(id);
-				if (obj.type === "device" && instanceId in devices && devices[instanceId] != null) {
+				if (obj.type === "device" && instanceId in gw.devices && gw.devices[instanceId] != null) {
 					// if this device is in the device list, check for changed properties
-					const acc = devices[instanceId];
+					const acc = gw.devices[instanceId];
 					if (obj.common && obj.common.name !== acc.name) {
 						// the name has changed, notify the gateway
 						_.log(`the device ${id} was renamed to "${obj.common.name}"`);
 						renameDevice(acc, obj.common.name);
 					}
-				} else if (obj.type === "channel" && instanceId in groups && groups[instanceId] != null) {
+				} else if (obj.type === "channel" && instanceId in gw.groups && gw.groups[instanceId] != null) {
 					// if this group is in the groups list, check for changed properties
-					const grp = groups[instanceId].group;
+					const grp = gw.groups[instanceId].group;
 					if (obj.common && obj.common.name !== grp.name) {
 						// the name has changed, notify the gateway
 						_.log(`the group ${id} was renamed to "${obj.common.name}"`);
@@ -226,25 +127,16 @@ let adapter: ExtendedAdapter = utils.adapter({
 					}
 				}
 				// remember the object
-				objects[id] = obj;
+				gw.objects[id] = obj;
 			} else {
 				// object deleted, forget it
-				if (id in objects) delete objects[id];
+				if (id in gw.objects) delete gw.objects[id];
 			}
 
 		}
 
-		// Custom subscriptions durchgehen, um die passenden Callbacks aufzurufen
-		try {
-			for (const sub of customObjectSubscriptions.subscriptions.values()) {
-				if (sub && sub.pattern && sub.callback) {
-					// Wenn die ID zum aktuellen Pattern passt, dann Callback aufrufen
-					if (sub.pattern.test(id)) sub.callback(id, obj);
-				}
-			}
-		} catch (e) {
-			_.log("error handling custom sub: " + e);
-		}
+		// apply additional subscriptions we've defined
+		applyCustomObjectSubscriptions(id, obj);
 
 	},
 
@@ -262,17 +154,21 @@ let adapter: ExtendedAdapter = utils.adapter({
 			return;
 		}
 
+		// apply additional subscriptions we've defined
+		applyCustomStateSubscriptions(id, state);
+
+		// Eigene Handling-Logik zum Schluss, damit wir return benutzen können
 		if (state && !state.ack && id.startsWith(adapter.namespace)) {
 			// our own state was changed from within ioBroker, react to it
 
-			const stateObj = objects[id];
+			const stateObj = gw.objects[id];
 			if (!(stateObj && stateObj.type === "state" && stateObj.native && stateObj.native.path)) return;
 
 			// get "official" value for the parent object
 			const rootId = getRootId(id);
 			if (rootId) {
 				// get the ioBroker object
-				const rootObj = objects[rootId];
+				const rootObj = gw.objects[rootId];
 
 				// for now: handle changes on a case by case basis
 				// everything else is too complicated for now
@@ -280,126 +176,138 @@ let adapter: ExtendedAdapter = utils.adapter({
 				// make sure we have whole numbers
 				if (stateObj.common.type === "number") {
 					val = Math.round(val); // TODO: check if there are situations where decimal numbers are allowed
-					if (_.isdef(stateObj.common.min)) val = Math.max(stateObj.common.min, val);
-					if (_.isdef(stateObj.common.max)) val = Math.min(stateObj.common.max, val);
+					if (stateObj.common.min != null) val = Math.max(stateObj.common.min, val);
+					if (stateObj.common.max != null) val = Math.min(stateObj.common.max, val);
 				}
 
-				// this will contain the serialized payload
-				let serializedObj: DictionaryLike<any>;
-				// this will contain the url to be requested
-				let url: string;
-
 				switch (rootObj.native.type) {
-					case "group":
+					case "group": {
 						// read the instanceId and get a reference value
-						const group = groups[rootObj.native.instanceId].group;
-						// create a copy to modify
-						const newGroup = group.clone();
+						const group = gw.groups[rootObj.native.instanceId].group;
+						// if the change was acknowledged, update the state later
+						let wasAcked: boolean;
 
 						if (id.endsWith(".state")) {
-							newGroup.onOff = val;
+							wasAcked = !await operateGroup(group, {
+								onOff: val,
+							});
 						} else if (id.endsWith(".brightness")) {
-							newGroup.merge({
+							wasAcked = !await operateGroup(group, {
 								dimmer: val,
 								transitionTime: await getTransitionDuration(group),
 							});
 						} else if (id.endsWith(".activeScene")) {
 							// turn on and activate a scene
-							newGroup.merge({
+							wasAcked = !await operateGroup(group, {
 								onOff: true,
 								sceneId: val,
 							});
+						} else if (/\.(colorTemperature|color|hue|saturation)$/.test(id)) {
+							// color change is only supported manually, so we operate
+							// the virtual state of this group
+							await operateVirtualGroup(group, {
+								[id.substr(id.lastIndexOf(".") + 1)]: val,
+								transitionTime: await getTransitionDuration(group),
+							});
+							wasAcked = true;
+						} else if (id.endsWith(".transitionDuration")) {
+							// this is part of another operation, just ack the state
+							wasAcked = true;
 						}
 
-						serializedObj = newGroup.serialize(group); // serialize with the old object as a reference
-						url = `${requestBase}${coapEndpoints.groups}/${rootObj.native.instanceId}`;
-						break;
+						// ack the state if neccessary and return
+						if (wasAcked) adapter.$setState(id, state, true);
+						return;
+					}
 
-					default: // accessory
-						// read the instanceId and get a reference value
-						const accessory = devices[rootObj.native.instanceId];
-						// create a copy to modify
-						const newAccessory = accessory.clone();
+					case "virtual group": {
+						// find the virtual group instance
+						const vGroup = gw.virtualGroups[rootObj.native.instanceId];
+
+						let operation: LightOperation;
+
+						if (id.endsWith(".state")) {
+							operation = {
+								onOff: val,
+							};
+						} else if (id.endsWith(".brightness")) {
+							operation = {
+								dimmer: val,
+								transitionTime: await getTransitionDuration(vGroup),
+							};
+						} else if (/\.(colorTemperature|color|hue|saturation)$/.test(id)) {
+							operation = {
+								[id.substr(id.lastIndexOf(".") + 1)]: val,
+								transitionTime: await getTransitionDuration(vGroup),
+							};
+						} else if (id.endsWith(".transitionDuration")) {
+							// No operation here, since this is part of another one
+						}
+
+						// update all lightbulbs in this group
+						if (operation != null) {
+							operateVirtualGroup(vGroup, operation);
+						}
+
+						// and ack the state change
+						adapter.$setState(id, state, true);
+						return;
+					}
+
+					default: { // accessory
+
 						if (id.indexOf(".lightbulb.") > -1) {
-							// get the Light instance to modify
-							const light = newAccessory.lightList[0];
+							// read the instanceId and get a reference value
+							const accessory = gw.devices[rootObj.native.instanceId];
+							const light = accessory.lightList[0];
+							// if the change was acknowledged, update the state later
+							let wasAcked: boolean;
 
+							// operate the lights depending on the set state
+							// if no request was sent, we can ack the state immediately
 							if (id.endsWith(".state")) {
-								light.onOff = val;
+								wasAcked = !await operateLight(accessory, {
+									onOff: val,
+								});
 							} else if (id.endsWith(".brightness")) {
-								light.merge({
+								wasAcked = !await operateLight(accessory, {
 									dimmer: val,
 									transitionTime: await getTransitionDuration(accessory),
 								});
 							} else if (id.endsWith(".color")) {
+								// we need to differentiate here, because some ppl
+								// might already have "color" states for white spectrum bulbs
+								// in the future, we create different states for white and RGB bulbs
 								if (light.spectrum === "rgb") {
-									light.merge({
+									wasAcked = !await operateLight(accessory, {
 										color: val,
 										transitionTime: await getTransitionDuration(accessory),
 									});
 								} else if (light.spectrum === "white") {
-									light.merge({
+									wasAcked = !await operateLight(accessory, {
 										colorTemperature: val,
 										transitionTime: await getTransitionDuration(accessory),
 									});
 								}
-							} else if (id.endsWith(".colorTemperature")) {
-								light.merge({
-									colorTemperature: val,
-									transitionTime: await getTransitionDuration(accessory),
-								});
-							} else if (id.endsWith(".hue")) {
-								// TODO: transform HSL to RGB
-								light.merge({
-									hue: val,
-									transitionTime: await getTransitionDuration(accessory),
-								});
-							} else if (id.endsWith(".saturation")) {
-								light.merge({
-									saturation: val,
+							} else if (/\.(colorTemperature|hue|saturation)$/.test(id)) {
+								wasAcked = !await operateLight(accessory, {
+									[id.substr(id.lastIndexOf(".") + 1)]: val,
 									transitionTime: await getTransitionDuration(accessory),
 								});
 							} else if (id.endsWith(".transitionDuration")) {
-								// TODO: check if we need to buffer this somehow
-								// for now just ack the change
-								await adapter.$setState(id, state, true);
-								return;
+								// this is part of another operation, just ack the state
+								wasAcked = true;
 							}
+
+							// ack the state if neccessary and return
+							if (wasAcked) adapter.$setState(id, state, true);
+							return;
 						}
-
-						serializedObj = newAccessory.serialize(accessory); // serialize with the old object as a reference
-						url = `${requestBase}${coapEndpoints.devices}/${rootObj.native.instanceId}`;
-						break;
+					}
 				}
-
-				// If the serialized object contains no properties, we don't need to send anything
-				if (!serializedObj || Object.keys(serializedObj).length === 0) {
-					_.log("stateChange > empty object, not sending any payload", "debug");
-					await adapter.$setState(id, state.val, true);
-					return;
-				}
-
-				let payload: string | Buffer = JSON.stringify(serializedObj);
-				_.log("stateChange > sending payload: " + payload, "debug");
-
-				payload = Buffer.from(payload);
-				coap.request(url, "put", payload);
-
 			}
 		} else if (!state) {
 			// TODO: find out what to do when states are deleted
-		}
-
-		// Custom subscriptions durchgehen, um die passenden Callbacks aufzurufen
-		try {
-			for (const sub of customStateSubscriptions.subscriptions.values()) {
-				if (sub && sub.pattern && sub.callback) {
-					// Wenn die ID zum aktuellen Pattern passt, dann Callback aufrufen
-					if (sub.pattern.test(id)) sub.callback(id, state);
-				}
-			}
-		} catch (e) {
-			_.log("error handling custom sub: " + e);
 		}
 
 	},
@@ -411,7 +319,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 			if (pingTimer != null) clearInterval(pingTimer);
 
 			// stop all observers
-			for (const url of observers) {
+			for (const url of gw.observers) {
 				coap.stopObserving(url);
 			}
 			// close all sockets
@@ -425,6 +333,18 @@ let adapter: ExtendedAdapter = utils.adapter({
 
 // ==================================
 // manage devices
+
+// gets called when a lightbulb state gets updated
+// we use this to sync group states because those are not advertised by the gateway
+function syncGroupsWithState(id: string, state: ioBroker.State) {
+	if (state && state.ack) {
+		const instanceId = getInstanceId(id);
+		if (instanceId in gw.devices && gw.devices[instanceId] != null) {
+			const accessory = gw.devices[instanceId];
+			updateMultipleGroupStates(accessory, id);
+		}
+	}
+}
 
 /** Normalizes the path to a resource, so it can be used for storing the observer */
 function normalizeResourcePath(path: string): string {
@@ -444,11 +364,11 @@ async function observeResource(path: string, callback: (resp: CoapResponse) => v
 	path = normalizeResourcePath(path);
 
 	// check if we are already observing this resource
-	const observerUrl = `${requestBase}${path}`;
-	if (observers.indexOf(observerUrl) > -1) return;
+	const observerUrl = `${gw.requestBase}${path}`;
+	if (gw.observers.indexOf(observerUrl) > -1) return;
 
 	// start observing
-	observers.push(observerUrl);
+	gw.observers.push(observerUrl);
 	return coap.observe(observerUrl, "get", callback);
 }
 
@@ -461,19 +381,19 @@ function stopObservingResource(path: string): void {
 	path = normalizeResourcePath(path);
 
 	// remove observer
-	const observerUrl = `${requestBase}${path}`;
-	const index = observers.indexOf(observerUrl);
+	const observerUrl = `${gw.requestBase}${path}`;
+	const index = gw.observers.indexOf(observerUrl);
 	if (index === -1) return;
 
 	coap.stopObserving(observerUrl);
-	observers.splice(index, 1);
+	gw.observers.splice(index, 1);
 }
 
 /**
- * Clears the list of observers after a network reset
+ * Clears the list of gw.observers after a network reset
  */
 function clearObservers(): void {
-	observers.splice(0, observers.length);
+	gw.observers.splice(0, gw.observers.length);
 }
 
 function observeAll(): void {
@@ -500,7 +420,7 @@ async function coapCb_getAllDevices(response: CoapResponse) {
 	_.log(`got all devices: ${JSON.stringify(newDevices)}`);
 
 	// get old keys as int array
-	const oldKeys = Object.keys(devices).map(k => +k).sort();
+	const oldKeys = Object.keys(gw.devices).map(k => +k).sort();
 	// get new keys as int array
 	const newKeys = newDevices.sort();
 	// translate that into added and removed devices
@@ -518,12 +438,12 @@ async function coapCb_getAllDevices(response: CoapResponse) {
 	const removedKeys = except(oldKeys, newKeys);
 	_.log(`removing devices with keys ${JSON.stringify(removedKeys)}`, "debug");
 	removedKeys.forEach(async (id) => {
-		if (id in devices) {
+		if (id in gw.devices) {
 			// delete ioBroker device
-			const deviceName = calcObjName(devices[id]);
+			const deviceName = calcObjName(gw.devices[id]);
 			await adapter.$deleteDevice(deviceName);
 			// remove device from dictionary
-			delete groups[id];
+			delete gw.groups[id];
 		}
 
 		// remove observer
@@ -542,7 +462,7 @@ function coap_getDevice_cb(instanceId: number, response: CoapResponse) {
 	// parse device info
 	const accessory = new Accessory().parse(result).createProxy();
 	// remember the device object, so we can later use it as a reference for updates
-	devices[instanceId] = accessory;
+	gw.devices[instanceId] = accessory;
 	// create ioBroker device
 	extendDevice(accessory);
 }
@@ -566,7 +486,7 @@ async function coapCb_getAllGroups(response: CoapResponse) {
 	_.log(`got all groups: ${JSON.stringify(newGroups)}`);
 
 	// get old keys as int array
-	const oldKeys = Object.keys(groups).map(k => +k).sort();
+	const oldKeys = Object.keys(gw.groups).map(k => +k).sort();
 	// get new keys as int array
 	const newKeys = newGroups.sort();
 	// translate that into added and removed devices
@@ -584,12 +504,12 @@ async function coapCb_getAllGroups(response: CoapResponse) {
 	const removedKeys = except(oldKeys, newKeys);
 	_.log(`removing groups with keys ${JSON.stringify(removedKeys)}`, "debug");
 	removedKeys.forEach(async (id) => {
-		if (id in groups) {
+		if (id in gw.groups) {
 			// delete ioBroker group
-			const groupName = calcGroupName(groups[id].group);
+			const groupName = calcGroupName(gw.groups[id].group);
 			await adapter.$deleteChannel(groupName);
 			// remove group from dictionary
-			delete groups[id];
+			delete gw.groups[id];
 		}
 
 		// remove observer
@@ -618,18 +538,20 @@ function coap_getGroup_cb(instanceId: number, response: CoapResponse) {
 	const group = (new Group()).parse(result).createProxy();
 	// remember the group object, so we can later use it as a reference for updates
 	let groupInfo: GroupInfo;
-	if (!(instanceId in groups)) {
+	if (!(instanceId in gw.groups)) {
 		// if there's none, create one
-		groups[instanceId] = {
+		gw.groups[instanceId] = {
 			group: null,
 			scenes: {},
 		};
 	}
-	groupInfo = groups[instanceId];
+	groupInfo = gw.groups[instanceId];
 	groupInfo.group = group;
 
 	// create ioBroker states
 	extendGroup(group);
+	// clean up any states that might be incorrectly defined
+	updateGroupStates(group);
 	// and load scene information
 	observeResource(
 		`${coapEndpoints.scenes}/${instanceId}`,
@@ -645,7 +567,7 @@ async function coap_getAllScenes_cb(groupId: number, response: CoapResponse) {
 		return;
 	}
 
-	const groupInfo = groups[groupId];
+	const groupInfo = gw.groups[groupId];
 	const newScenes = parsePayload(response);
 
 	_.log(`got all scenes in group ${groupId}: ${JSON.stringify(newScenes)}`);
@@ -699,9 +621,9 @@ function coap_getScene_cb(groupId: number, instanceId: number, response: CoapRes
 	// parse scene info
 	const scene = (new Scene()).parse(result).createProxy();
 	// remember the scene object, so we can later use it as a reference for updates
-	groups[groupId].scenes[instanceId] = scene;
+	gw.groups[groupId].scenes[instanceId] = scene;
 	// Update the scene dropdown for the group
-	updatePossibleScenes(groups[groupId]);
+	updatePossibleScenes(gw.groups[groupId]);
 }
 
 /**
@@ -731,32 +653,20 @@ function calcObjId(accessory: Accessory): string {
  * excluding the adapter namespace
  */
 function calcObjName(accessory: Accessory): string {
-	const prefix = (() => {
-		switch (accessory.type) {
-			case AccessoryTypes.remote:
-				return "RC";
-			case AccessoryTypes.lightbulb:
-				return "L";
-			default:
-				_.log(`Unknown accessory type ${accessory.type}. Please send this info to the developer with a short description of the device!`, "warn");
-				return "XYZ";
-		}
-	})();
+	let prefix: string;
+	switch (accessory.type) {
+		case AccessoryTypes.remote:
+			prefix = "RC";
+			break;
+		case AccessoryTypes.lightbulb:
+			prefix = "L";
+			break;
+		default:
+			_.log(`Unknown accessory type ${accessory.type}. Please send this info to the developer with a short description of the device!`, "warn");
+			prefix = "XYZ";
+			break;
+	}
 	return `${prefix}-${accessory.instanceId}`;
-}
-
-/**
- * Determines the object ID under which the given group should be stored
- */
-function calcGroupId(group: Group): string {
-	return `${adapter.namespace}.${calcGroupName(group)}`;
-}
-/**
- * Determines the object name under which the given group should be stored,
- * excluding the adapter namespace
- */
-function calcGroupName(group: Group): string {
-	return `G-${group.instanceId}`;
 }
 
 /**
@@ -776,14 +686,14 @@ function calcSceneName(scene: Scene): string {
 /**
  * Returns the configured transition duration for an accessory or a group
  */
-async function getTransitionDuration(accessoryOrGroup: Accessory | Group): Promise<number> {
+async function getTransitionDuration(accessoryOrGroup: Accessory | Group | VirtualGroup): Promise<number> {
 	let stateId: string;
 	if (accessoryOrGroup instanceof Accessory) {
 		switch (accessoryOrGroup.type) {
 			case AccessoryTypes.lightbulb:
 				stateId = calcObjId(accessoryOrGroup) + ".lightbulb.transitionDuration";
 		}
-	} else if (accessoryOrGroup instanceof Group) {
+	} else if (accessoryOrGroup instanceof Group || accessoryOrGroup instanceof VirtualGroup) {
 		stateId = calcGroupId(accessoryOrGroup) + ".transitionDuration";
 	}
 	const ret = await adapter.$getState(stateId);
@@ -818,9 +728,9 @@ function accessoryToNative(accessory: Accessory): DictionaryLike<any> {
 function extendDevice(accessory: Accessory) {
 	const objId = calcObjId(accessory);
 
-	if (_.isdef(objects[objId])) {
+	if (objId in gw.objects) {
 		// check if we need to edit the existing object
-		const devObj = objects[objId];
+		const devObj = gw.objects[objId];
 		let changed = false;
 		// update common part if neccessary
 		const newCommon = accessoryToCommon(accessory);
@@ -843,7 +753,7 @@ function extendDevice(accessory: Accessory) {
 		// from here we can update the states
 		// filter out the ones belonging to this device with a property path
 		const stateObjs = filter(
-			objects,
+			gw.objects,
 			obj => obj._id.startsWith(objId) && obj.native && obj.native.path,
 		);
 		// for each property try to update the value
@@ -852,7 +762,7 @@ function extendDevice(accessory: Accessory) {
 				// Object could have a default value, find it
 				const newValue = dig<any>(accessory, obj.native.path);
 				adapter.setState(id, newValue, true);
-			} catch (e) {/* skip this value */}
+			} catch (e) { /* skip this value */ }
 		}
 
 	} else {
@@ -925,8 +835,8 @@ function extendDevice(accessory: Accessory) {
 				},
 			};
 			if (spectrum === "white") {
-				stateObjs["lightbulb.color"] = {
-					_id: `${objId}.lightbulb.color`,
+				stateObjs["lightbulb.colorTemperature"] = {
+					_id: `${objId}.lightbulb.colorTemperature`,
 					type: "state",
 					common: {
 						name: "Color temperature",
@@ -963,7 +873,7 @@ function extendDevice(accessory: Accessory) {
 					_id: `${objId}.lightbulb.hue`,
 					type: "state",
 					common: {
-						name: "Color hue",
+						name: "Hue",
 						read: true,
 						write: true,
 						min: 0,
@@ -980,7 +890,7 @@ function extendDevice(accessory: Accessory) {
 					_id: `${objId}.lightbulb.saturation`,
 					type: "state",
 					common: {
-						name: "Color saturation",
+						name: "Saturation",
 						read: true,
 						write: true,
 						min: 0,
@@ -1048,173 +958,14 @@ function extendDevice(accessory: Accessory) {
 
 		const createObjects = Object.keys(stateObjs)
 			.map((key) => {
-				const stateId = `${objId}.${key}`;
 				const obj = stateObjs[key];
 				let initialValue = null;
-				if (_.isdef(obj.native.path)) {
+				if (obj.native.path != null) {
 					// Object could have a default value, find it
 					initialValue = dig<any>(accessory, obj.native.path);
 				}
 				// create object and return the promise, so we can wait
-				return adapter.$createOwnStateEx(stateId, obj, initialValue);
-			})
-			;
-		Promise.all(createObjects);
-
-	}
-}
-
-/**
- * Returns the common part of the ioBroker object representing the given group
- */
-function groupToCommon(group: Group): ioBroker.ObjectCommon {
-	return {
-		name: group.name,
-	};
-}
-
-/**
- * Returns the native part of the ioBroker object representing the given group
- */
-function groupToNative(group: Group): DictionaryLike<any> {
-	return {
-		instanceId: group.instanceId,
-		deviceIDs: group.deviceIDs,
-		type: "group",
-	};
-}
-
-/* creates or edits an existing <group>-object for a group */
-function extendGroup(group: Group) {
-	const objId = calcGroupId(group);
-
-	if (_.isdef(objects[objId])) {
-		// check if we need to edit the existing object
-		const grpObj = objects[objId];
-		let changed = false;
-		// update common part if neccessary
-		const newCommon = groupToCommon(group);
-		if (JSON.stringify(grpObj.common) !== JSON.stringify(newCommon)) {
-			// merge the common objects
-			Object.assign(grpObj.common, newCommon);
-			changed = true;
-		}
-		const newNative = groupToNative(group);
-		// update native part if neccessary
-		if (JSON.stringify(grpObj.native) !== JSON.stringify(newNative)) {
-			// merge the native objects
-			Object.assign(grpObj.native, newNative);
-			changed = true;
-		}
-		if (changed) adapter.extendObject(objId, grpObj);
-
-		// ====
-
-		// from here we can update the states
-		// filter out the ones belonging to this device with a property path
-		const stateObjs = filter(
-			objects,
-			obj => obj._id.startsWith(objId) && obj.native && obj.native.path,
-		);
-		// for each property try to update the value
-		for (const [id, obj] of entries(stateObjs)) {
-			try {
-				// Object could have a default value, find it
-				const newValue = dig<any>(group, obj.native.path);
-				adapter.setState(id, newValue, true);
-			} catch (e) {/* skip this value */ }
-		}
-
-	} else {
-		// create new object
-		const devObj: ioBroker.Object = {
-			_id: objId,
-			type: "channel",
-			common: groupToCommon(group),
-			native: groupToNative(group),
-		};
-		adapter.setObject(objId, devObj);
-
-		// also create state objects, depending on the accessory type
-		const stateObjs: DictionaryLike<ioBroker.Object> = {
-			activeScene: { // currently active scene
-				_id: `${objId}.activeScene`,
-				type: "state",
-				common: {
-					name: "active scene",
-					read: true,
-					write: true,
-					type: "number",
-					role: "value.id",
-					desc: "the instance id of the currently active scene",
-				},
-				native: {
-					path: "sceneId",
-				},
-			},
-			state: {
-				_id: `${objId}.state`,
-				type: "state",
-				common: {
-					name: "on/off",
-					read: true, // TODO: check
-					write: true, // TODO: check
-					type: "boolean",
-					role: "switch",
-				},
-				native: {
-					path: "onOff",
-				},
-			},
-			transitionDuration: {
-				_id: `${objId}.transitionDuration`,
-				type: "state",
-				common: {
-					name: "Transition duration",
-					read: false,
-					write: true,
-					type: "number",
-					min: 0,
-					max: 100, // TODO: check
-					def: 0,
-					role: "light.dimmer", // TODO: better role?
-					desc: "Duration for brightness changes of this group's lightbulbs",
-					unit: "s",
-				},
-				native: {
-					path: "transitionTime",
-				},
-			},
-			brightness: {
-				_id: `${objId}.brightness`,
-				type: "state",
-				common: {
-					name: "Brightness",
-					read: false, // TODO: check
-					write: true, // TODO: check
-					min: 0,
-					max: 254,
-					type: "number",
-					role: "light.dimmer",
-					desc: "Brightness of this group's lightbulbs",
-				},
-				native: {
-					path: "dimmer",
-				},
-			},
-		};
-
-		const createObjects = Object.keys(stateObjs)
-			.map((key) => {
-				const stateId = `${objId}.${key}`;
-				const obj = stateObjs[key];
-				let initialValue = null;
-				if (_.isdef(obj.native.path)) {
-					// Object could have a default value, find it
-					initialValue = dig<any>(group, obj.native.path);
-				}
-				// create object and return the promise, so we can wait
-				return adapter.$createOwnStateEx(stateId, obj, initialValue);
+				return adapter.$createOwnStateEx(obj._id, obj, initialValue);
 			})
 			;
 		Promise.all(createObjects);
@@ -1225,17 +976,16 @@ function extendGroup(group: Group) {
 async function updatePossibleScenes(groupInfo: GroupInfo): Promise<void> {
 	const group = groupInfo.group;
 	// if this group is not in the dictionary, don't do anything
-	if (!(group.instanceId in groups)) return;
+	if (!(group.instanceId in gw.groups)) return;
 	// find out which is the root object id
 	const objId = calcGroupId(group);
 	// scenes are stored under <objId>.activeScene
 	const scenesId = `${objId}.activeScene`;
 
 	// only extend that object if it exists already
-	if (_.isdef(objects[scenesId])) {
+	if (scenesId in gw.objects) {
 		_.log(`updating possible scenes for group ${group.instanceId}: ${JSON.stringify(Object.keys(groupInfo.scenes))}`);
 
-		const activeSceneObj = objects[scenesId];
 		const scenes = groupInfo.scenes;
 		// map scene ids and names to the dropdown
 		const states = composeObject(
@@ -1248,156 +998,38 @@ async function updatePossibleScenes(groupInfo: GroupInfo): Promise<void> {
 }
 
 /**
- * Renames a device
- * @param accessory The device to be renamed
- * @param newName The new name to be given to the device
+ * Loads defined virtual groups from the ioBroker objects DB
  */
-function renameDevice(accessory: Accessory, newName: string): void {
-	// create a copy to modify
-	const newAccessory = accessory.clone();
-	newAccessory.name = newName;
-
-	// serialize with the old object as a reference
-	const serializedObj = newAccessory.serialize(accessory);
-	// If the serialized object contains no properties, we don't need to send anything
-	if (!serializedObj || Object.keys(serializedObj).length === 0) {
-		_.log("renameDevice > empty object, not sending any payload", "debug");
-		return;
-	}
-
-	// get the payload
-	let payload: string | Buffer = JSON.stringify(serializedObj);
-	_.log("renameDevice > sending payload: " + payload, "debug");
-	payload = Buffer.from(payload);
-
-	coap.request(
-		`${requestBase}${coapEndpoints.devices}/${accessory.instanceId}`, "put", payload,
-	);
-
-}
-
-/**
- * Renames a group
- * @param group The group to be renamed
- * @param newName The new name to be given to the group
- */
-function renameGroup(group: Group, newName: string): void {
-	// create a copy to modify
-	const newGroup = group.clone();
-	newGroup.name = newName;
-
-	// serialize with the old object as a reference
-	const serializedObj = newGroup.serialize(group);
-	// If the serialized object contains no properties, we don't need to send anything
-	if (!serializedObj || Object.keys(serializedObj).length === 0) {
-		_.log("renameGroup > empty object, not sending any payload", "debug");
-		return;
-	}
-
-	// get the payload
-	let payload: string | Buffer = JSON.stringify(serializedObj);
-	_.log("renameDevice > sending payload: " + payload, "debug");
-	payload = Buffer.from(payload);
-
-	coap.request(
-		`${requestBase}${coapEndpoints.groups}/${group.instanceId}`, "put", payload,
-	);
-
-}
-
-// ==================================
-// Custom subscriptions
-
-/**
- * Ensures the subscription pattern is valid
- */
-function checkPattern(pattern: string | RegExp): RegExp {
-	try {
-		if (typeof pattern === "string") {
-			return str2regex(pattern);
-		} else if (pattern instanceof RegExp) {
-			return pattern;
-		} else {
-			// NOPE
-			throw new Error("must be regex or string");
+async function loadVirtualGroups(): Promise<void> {
+	// find all defined virtual groups
+	const iobObjects = await _.$$(`${adapter.namespace}.VG-*`, "channel");
+	const groupObjects: ioBroker.Object[] = values(iobObjects).filter(g => {
+		return g.native &&
+			g.native.instanceId != null &&
+			g.native.type === "virtual group";
+	});
+	// load them into the virtualGroups dict
+	Object.assign(gw.virtualGroups, composeObject<VirtualGroup>(
+		groupObjects.map(g => {
+			const id: number = g.native.instanceId;
+			const deviceIDs: number[] = g.native.deviceIDs.map(d => parseInt(d, 10));
+			const ret = new VirtualGroup(id);
+			ret.deviceIDs = deviceIDs;
+			ret.name = g.common.name;
+			return [`${id}`, ret] as [string, VirtualGroup];
+		}),
+	));
+	// remember the actual objects
+	for (const obj of values(gw.virtualGroups)) {
+		const id = calcGroupId(obj);
+		gw.objects[id] = iobObjects[id];
+		// also remember all states
+		const stateObjs = await _.$$(`${id}.*`, "state");
+		for (const [sid, sobj] of entries(stateObjs)) {
+			gw.objects[sid] = sobj;
 		}
-	} catch (e) {
-		_.log("cannot subscribe with this pattern. reason: " + e);
-		return null;
 	}
-}
 
-/**
- * Subscribe to some ioBroker states
- * @param pattern
- * @param callback
- * @returns a subscription ID
- */
-function subscribeStates(pattern: string | RegExp, callback: (id: string, state: ioBroker.State) => void): string {
-
-	pattern = checkPattern(pattern);
-	if (!pattern) return;
-
-	const newCounter = (++customStateSubscriptions.counter);
-	const id = "" + newCounter;
-
-	customStateSubscriptions.subscriptions.set(id, { pattern, callback });
-
-	return id;
-}
-
-/**
- * Release the custom subscription with the given id
- * @param id The subscription ID returned by @link{subscribeStates}
- */
-function unsubscribeStates(id: string) {
-	if (customStateSubscriptions.subscriptions.has(id)) {
-		customStateSubscriptions.subscriptions.delete(id);
-	}
-}
-
-/**
- * Subscribe to some ioBroker objects
- * @param pattern
- * @param callback
- * @returns a subscription ID
- */
-function subscribeObjects(pattern: string | RegExp, callback: (id: string, object: ioBroker.Object) => void): string {
-
-	pattern = checkPattern(pattern);
-	if (!pattern) return;
-
-	const newCounter = (++customObjectSubscriptions.counter);
-	const id = "" + newCounter;
-
-	customObjectSubscriptions.subscriptions.set(id, { pattern, callback });
-
-	return id;
-}
-
-/**
- * Release the custom subscription with the given id
- * @param id The subscription ID returned by @link{subscribeObjects}
- */
-function unsubscribeObjects(id: string) {
-	if (customObjectSubscriptions.subscriptions.has(id)) {
-		customObjectSubscriptions.subscriptions.delete(id);
-	}
-}
-
-function parsePayload(response: CoapResponse): any {
-	switch (response.format) {
-		case 0: // text/plain
-		case null: // assume text/plain
-			return response.payload.toString("utf-8");
-		case 50: // application/json
-			const json = response.payload.toString("utf-8");
-			return JSON.parse(json);
-		default:
-			// dunno how to parse this
-			_.log(`unknown CoAP response format ${response.format}`, "warn");
-			return response.payload;
-	}
 }
 
 // Connection check
@@ -1408,7 +1040,7 @@ let resetAttempts: number = 0;
 let dead: boolean = false;
 async function pingThread() {
 	const oldValue = connectionAlive;
-	connectionAlive = await coap.ping(requestBase);
+	connectionAlive = await coap.ping(gw.requestBase);
 	_.log(`ping ${connectionAlive ? "" : "un"}successful...`, "debug");
 	await adapter.$setStateChanged("info.connection", connectionAlive, true);
 
@@ -1419,7 +1051,7 @@ async function pingThread() {
 			// connection is now alive again
 			_.log("Connection to gateway reestablished", "info");
 			// restart observing if neccessary
-			if (observers.length === 0) observeAll();
+			if (gw.observers.length === 0) observeAll();
 			// TODO: send buffered messages
 		}
 	} else {

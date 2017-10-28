@@ -1,3 +1,0 @@
--> put 15004/132848 = /groups/<groupid>
-   {"9001":"STARTERSET2"}
-<- changed (code 68)

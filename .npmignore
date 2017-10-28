@@ -14,10 +14,11 @@ bin/
 .vs*/
 tslint.json
 tsconfig.json
+webpack.config.js
 *.sln
 *.njsproj*
 iobroker.*.tgz
-build/**/*.map
+**/build/**/*.map
 
 # Local debugging password
 *_password.json
@@ -38,7 +39,15 @@ coverage
 .nyc*
 
 # test files
-src/**/*.test.ts
-build/**/*.test.js
-build/**/*.test.d.ts
-build/**/*.test.map
+**/src/**/*.test.ts*
+**/build/**/*.test.js*
+**/build/**/*.test.d.ts
+**/build/**/*.test.map
+
+# react sources
+admin/src/**/*.*
+# no clue why those are generated
+build/admin/**/*.d.ts
+
+# maintenance scripts
+maintenance/**

@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { conversions, deserializers, serializers } from "./conversions";
-import { MAX_COLOR, predefinedColors, whiteSpectrumRange } from "./predefined-colors";
+import { whiteSpectrumRange } from "./predefined-colors";
 // tslint:disable:no-unused-expression
 
 describe("tradfri/conversions => whiteSpectrum <=> colorX =>", () => {

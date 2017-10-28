@@ -1,4 +1,4 @@
-import { deserializers, serializers } from "../tradfri/conversions";
+import { deserializers, serializers } from "../modules/conversions";
 import { IPSODevice } from "./ipsoDevice";
 import { deserializeWith, ipsoKey, IPSOObject, PropertyTransform, required, serializeWith } from "./ipsoObject";
 
@@ -26,6 +26,8 @@ export class Group extends IPSODevice {
 	public transitionTime: number = 0; // <float>
 
 }
+
+export type GroupOperation = Partial<Pick<Group, "onOff" | "dimmer" | "sceneId" | "transitionTime">>;
 
 // TODO: Type annotation
 function parseAccessoryLink(link): number[] {

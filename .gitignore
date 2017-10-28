@@ -282,6 +282,9 @@ coverage
 .nyc*
 
 # Compiled test files
-build/**/*.test.js
-build/**/*.test.d.ts
-build/**/*.test.js.map
+**/build/**/*.test.js*
+**/build/**/*.test.d.ts
+**/build/**/*.test.js.map
+
+# no clue why those are generated
+build/admin/**/*.d.ts

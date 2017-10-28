@@ -16,33 +16,23 @@ require("reflect-metadata");
 const node_coap_client_1 = require("node-coap-client");
 const endpoints_1 = require("./ipso/endpoints");
 const array_extensions_1 = require("./lib/array-extensions");
+const coap_payload_1 = require("./lib/coap-payload");
 const global_1 = require("./lib/global");
 const object_polyfill_1 = require("./lib/object-polyfill");
 const promises_1 = require("./lib/promises");
-const str2regex_1 = require("./lib/str2regex");
 // Datentypen laden
 const accessory_1 = require("./ipso/accessory");
 const group_1 = require("./ipso/group");
 const scene_1 = require("./ipso/scene");
+const virtual_group_1 = require("./lib/virtual-group");
 // Adapter-Utils laden
 const utils_1 = require("./lib/utils");
-const customStateSubscriptions = {
-    subscriptions: new Map(),
-    counter: 0,
-};
-const customObjectSubscriptions = {
-    subscriptions: new Map(),
-    counter: 0,
-};
-// dictionary of COAP observers
-const observers = [];
-// dictionary of known devices
-const devices = {};
-const groups = {};
-// dictionary of ioBroker objects
-const objects = {};
-// the base of all requests
-let requestBase;
+// Adapter-Module laden
+const custom_subscriptions_1 = require("./modules/custom-subscriptions");
+const gateway_1 = require("./modules/gateway");
+const groups_1 = require("./modules/groups");
+const message_1 = require("./modules/message");
+const operations_1 = require("./modules/operations");
 // Adapter-Objekt erstellen
 let adapter = utils_1.default.adapter({
     name: "tradfri",
@@ -67,24 +57,21 @@ let adapter = utils_1.default.adapter({
         // console.log = (msg) => adapter.log.debug("STDOUT > " + msg);
         // console.error = (msg) => adapter.log.error("STDERR > " + msg);
         global_1.Global.log(`startfile = ${process.argv[1]}`);
-        // Eigene Objekte/States beobachten
-        adapter.subscribeStates("*");
-        adapter.subscribeObjects("*");
-        // Custom subscriptions erlauben
-        global_1.Global.subscribeStates = subscribeStates;
-        global_1.Global.unsubscribeStates = unsubscribeStates;
-        global_1.Global.subscribeObjects = subscribeObjects;
-        global_1.Global.unsubscribeObjects = unsubscribeObjects;
+        // watch own states
+        adapter.subscribeStates(`${adapter.namespace}.*`);
+        adapter.subscribeObjects(`${adapter.namespace}.*`);
+        // add special watch for lightbulb states, so we can later sync the group states
+        custom_subscriptions_1.subscribeStates(/L\-\d+\.lightbulb\./, syncGroupsWithState);
         // initialize CoAP client
         const hostname = adapter.config.host.toLowerCase();
         node_coap_client_1.CoapClient.setSecurityParams(hostname, {
             psk: { "Client_identity": adapter.config.securityCode },
         });
-        requestBase = `coaps://${hostname}:5684/`;
+        gateway_1.gateway.requestBase = `coaps://${hostname}:5684/`;
         // Try a few times to setup a working connection
         const maxTries = 3;
         for (let i = 1; i <= maxTries; i++) {
-            if (yield node_coap_client_1.CoapClient.tryToConnect(requestBase)) {
+            if (yield node_coap_client_1.CoapClient.tryToConnect(gateway_1.gateway.requestBase)) {
                 break; // it worked
             }
             else if (i < maxTries) {
@@ -93,7 +80,7 @@ let adapter = utils_1.default.adapter({
             }
             else if (i === maxTries) {
                 // no working connection
-                global_1.Global.log(`Could not connect to the gateway ${requestBase} after ${maxTries} tries!`, "error");
+                global_1.Global.log(`Could not connect to the gateway ${gateway_1.gateway.requestBase} after ${maxTries} tries!`, "error");
                 global_1.Global.log(`Please check your network and adapter settings and restart the adapter!`, "error");
                 return;
             }
@@ -101,74 +88,12 @@ let adapter = utils_1.default.adapter({
         yield adapter.$setState("info.connection", true, true);
         connectionAlive = true;
         pingTimer = setInterval(pingThread, 10000);
+        loadVirtualGroups();
         // TODO: load known devices from ioBroker into <devices> & <objects>
         observeAll();
     }),
-    message: (obj) => __awaiter(this, void 0, void 0, function* () {
-        // responds to the adapter that sent the original message
-        function respond(response) {
-            if (obj.callback)
-                adapter.sendTo(obj.from, obj.command, response, obj.callback);
-        }
-        // some predefined responses so we only have to define them once
-        const predefinedResponses = {
-            ACK: { error: null },
-            OK: { error: null, result: "ok" },
-            ERROR_UNKNOWN_COMMAND: { error: "Unknown command!" },
-            MISSING_PARAMETER: (paramName) => {
-                return { error: 'missing parameter "' + paramName + '"!' };
-            },
-            COMMAND_RUNNING: { error: "command running" },
-        };
-        // make required parameters easier
-        function requireParams(...params) {
-            if (!(params && params.length))
-                return true;
-            for (const param of params) {
-                if (!(obj.message && obj.message.hasOwnProperty(param))) {
-                    respond(predefinedResponses.MISSING_PARAMETER(param));
-                    return false;
-                }
-            }
-            return true;
-        }
-        // handle the message
-        if (obj) {
-            switch (obj.command) {
-                case "request":
-                    // require the path to be given
-                    if (!requireParams("path"))
-                        return;
-                    // check the given params
-                    const params = obj.message;
-                    params.method = params.method || "get";
-                    if (["get", "post", "put", "delete"].indexOf(params.method) === -1) {
-                        respond({ error: `unsupported request method "${params.method}"` });
-                        return;
-                    }
-                    global_1.Global.log(`custom coap request: ${params.method.toUpperCase()} "${requestBase}${params.path}"`);
-                    // create payload
-                    let payload;
-                    if (params.payload) {
-                        payload = JSON.stringify(params.payload);
-                        global_1.Global.log("sending custom payload: " + payload);
-                        payload = Buffer.from(payload);
-                    }
-                    // wait for the CoAP response and respond to the message
-                    const resp = yield node_coap_client_1.CoapClient.request(`${requestBase}${params.path}`, params.method, payload);
-                    respond({
-                        error: null, result: {
-                            code: resp.code.toString(),
-                            payload: parsePayload(resp),
-                        },
-                    });
-                    return;
-                default:
-                    respond(predefinedResponses.ERROR_UNKNOWN_COMMAND);
-                    return;
-            }
-        }
-    }),
+    // Handle sendTo-Messages
+    message: message_1.onMessage,
     objectChange: (id, obj) => {
         global_1.Global.log(`{{blue}} object with id ${id} ${obj ? "updated" : "deleted"}`, "debug");
         if (id.startsWith(adapter.namespace)) {
@@ -176,46 +101,35 @@ let adapter = utils_1.default.adapter({
             if (obj) {
                 // first check if we have to modify a device/group/whatever
                 const instanceId = getInstanceId(id);
-                if (obj.type === "device" && instanceId in devices && devices[instanceId] != null) {
+                if (obj.type === "device" && instanceId in gateway_1.gateway.devices && gateway_1.gateway.devices[instanceId] != null) {
                     // if this device is in the device list, check for changed properties
-                    const acc = devices[instanceId];
+                    const acc = gateway_1.gateway.devices[instanceId];
                     if (obj.common && obj.common.name !== acc.name) {
                         // the name has changed, notify the gateway
                         global_1.Global.log(`the device ${id} was renamed to "${obj.common.name}"`);
-                        renameDevice(acc, obj.common.name);
+                        operations_1.renameDevice(acc, obj.common.name);
                     }
                 }
-                else if (obj.type === "channel" && instanceId in groups && groups[instanceId] != null) {
+                else if (obj.type === "channel" && instanceId in gateway_1.gateway.groups && gateway_1.gateway.groups[instanceId] != null) {
                     // if this group is in the groups list, check for changed properties
-                    const grp = groups[instanceId].group;
+                    const grp = gateway_1.gateway.groups[instanceId].group;
                     if (obj.common && obj.common.name !== grp.name) {
                         // the name has changed, notify the gateway
                         global_1.Global.log(`the group ${id} was renamed to "${obj.common.name}"`);
-                        renameGroup(grp, obj.common.name);
+                        operations_1.renameGroup(grp, obj.common.name);
                     }
                 }
                 // remember the object
-                objects[id] = obj;
+                gateway_1.gateway.objects[id] = obj;
             }
             else {
                 // object deleted, forget it
-                if (id in objects)
-                    delete objects[id];
+                if (id in gateway_1.gateway.objects)
+                    delete gateway_1.gateway.objects[id];
             }
         }
-        // Custom subscriptions durchgehen, um die passenden Callbacks aufzurufen
-        try {
-            for (const sub of customObjectSubscriptions.subscriptions.values()) {
-                if (sub && sub.pattern && sub.callback) {
-                    // Wenn die ID zum aktuellen Pattern passt, dann Callback aufrufen
-                    if (sub.pattern.test(id))
-                        sub.callback(id, obj);
-                }
-            }
-        }
-        catch (e) {
-            global_1.Global.log("error handling custom sub: " + e);
-        }
+        // apply additional subscriptions we've defined
+        custom_subscriptions_1.applyCustomObjectSubscriptions(id, obj);
     },
     stateChange: (id, state) => __awaiter(this, void 0, void 0, function* () {
         if (state) {
@@ -230,144 +144,162 @@ let adapter = utils_1.default.adapter({
             global_1.Global.log("Please restart the adapter!", "error");
             return;
         }
+        // apply additional subscriptions we've defined
+        custom_subscriptions_1.applyCustomStateSubscriptions(id, state);
+        // Eigene Handling-Logik zum Schluss, damit wir return benutzen können
         if (state && !state.ack && id.startsWith(adapter.namespace)) {
             // our own state was changed from within ioBroker, react to it
-            const stateObj = objects[id];
+            const stateObj = gateway_1.gateway.objects[id];
             if (!(stateObj && stateObj.type === "state" && stateObj.native && stateObj.native.path))
                 return;
             // get "official" value for the parent object
             const rootId = getRootId(id);
             if (rootId) {
                 // get the ioBroker object
-                const rootObj = objects[rootId];
+                const rootObj = gateway_1.gateway.objects[rootId];
                 // for now: handle changes on a case by case basis
                 // everything else is too complicated for now
                 let val = state.val;
                 // make sure we have whole numbers
                 if (stateObj.common.type === "number") {
                     val = Math.round(val); // TODO: check if there are situations where decimal numbers are allowed
-                    if (global_1.Global.isdef(stateObj.common.min))
+                    if (stateObj.common.min != null)
                         val = Math.max(stateObj.common.min, val);
-                    if (global_1.Global.isdef(stateObj.common.max))
+                    if (stateObj.common.max != null)
                         val = Math.min(stateObj.common.max, val);
                 }
-                // this will contain the serialized payload
-                let serializedObj;
-                // this will contain the url to be requested
-                let url;
                 switch (rootObj.native.type) {
-                    case "group":
+                    case "group": {
                         // read the instanceId and get a reference value
-                        const group = groups[rootObj.native.instanceId].group;
-                        // create a copy to modify
-                        const newGroup = group.clone();
+                        const group = gateway_1.gateway.groups[rootObj.native.instanceId].group;
+                        // if the change was acknowledged, update the state later
+                        let wasAcked;
                         if (id.endsWith(".state")) {
-                            newGroup.onOff = val;
+                            wasAcked = !(yield operations_1.operateGroup(group, {
+                                onOff: val,
+                            }));
                         }
                         else if (id.endsWith(".brightness")) {
-                            newGroup.merge({
+                            wasAcked = !(yield operations_1.operateGroup(group, {
                                 dimmer: val,
                                 transitionTime: yield getTransitionDuration(group),
-                            });
+                            }));
                         }
                         else if (id.endsWith(".activeScene")) {
                             // turn on and activate a scene
-                            newGroup.merge({
+                            wasAcked = !(yield operations_1.operateGroup(group, {
                                 onOff: true,
                                 sceneId: val,
-                            });
+                            }));
                         }
-                        serializedObj = newGroup.serialize(group); // serialize with the old object as a reference
-                        url = `${requestBase}${endpoints_1.endpoints.groups}/${rootObj.native.instanceId}`;
-                        break;
-                    default:// accessory
-                        // read the instanceId and get a reference value
-                        const accessory = devices[rootObj.native.instanceId];
-                        // create a copy to modify
-                        const newAccessory = accessory.clone();
+                        else if (/\.(colorTemperature|color|hue|saturation)$/.test(id)) {
+                            // color change is only supported manually, so we operate
+                            // the virtual state of this group
+                            yield operations_1.operateVirtualGroup(group, {
+                                [id.substr(id.lastIndexOf(".") + 1)]: val,
+                                transitionTime: yield getTransitionDuration(group),
+                            });
+                            wasAcked = true;
+                        }
+                        else if (id.endsWith(".transitionDuration")) {
+                            // this is part of another operation, just ack the state
+                            wasAcked = true;
+                        }
+                        // ack the state if neccessary and return
+                        if (wasAcked)
+                            adapter.$setState(id, state, true);
+                        return;
+                    }
+                    case "virtual group": {
+                        // find the virtual group instance
+                        const vGroup = gateway_1.gateway.virtualGroups[rootObj.native.instanceId];
+                        let operation;
+                        if (id.endsWith(".state")) {
+                            operation = {
+                                onOff: val,
+                            };
+                        }
+                        else if (id.endsWith(".brightness")) {
+                            operation = {
+                                dimmer: val,
+                                transitionTime: yield getTransitionDuration(vGroup),
+                            };
+                        }
+                        else if (/\.(colorTemperature|color|hue|saturation)$/.test(id)) {
+                            operation = {
+                                [id.substr(id.lastIndexOf(".") + 1)]: val,
+                                transitionTime: yield getTransitionDuration(vGroup),
+                            };
+                        }
+                        else if (id.endsWith(".transitionDuration")) {
+                            // No operation here, since this is part of another one
+                        }
+                        // update all lightbulbs in this group
+                        if (operation != null) {
+                            operations_1.operateVirtualGroup(vGroup, operation);
+                        }
+                        // and ack the state change
+                        adapter.$setState(id, state, true);
+                        return;
+                    }
+                    default: {
                         if (id.indexOf(".lightbulb.") > -1) {
-                            // get the Light instance to modify
-                            const light = newAccessory.lightList[0];
+                            // read the instanceId and get a reference value
+                            const accessory = gateway_1.gateway.devices[rootObj.native.instanceId];
+                            const light = accessory.lightList[0];
+                            // if the change was acknowledged, update the state later
+                            let wasAcked;
+                            // operate the lights depending on the set state
+                            // if no request was sent, we can ack the state immediately
                             if (id.endsWith(".state")) {
-                                light.onOff = val;
+                                wasAcked = !(yield operations_1.operateLight(accessory, {
+                                    onOff: val,
+                                }));
                             }
                             else if (id.endsWith(".brightness")) {
-                                light.merge({
+                                wasAcked = !(yield operations_1.operateLight(accessory, {
                                     dimmer: val,
                                     transitionTime: yield getTransitionDuration(accessory),
-                                });
+                                }));
                             }
                             else if (id.endsWith(".color")) {
+                                // we need to differentiate here, because some ppl
+                                // might already have "color" states for white spectrum bulbs
+                                // in the future, we create different states for white and RGB bulbs
                                 if (light.spectrum === "rgb") {
-                                    light.merge({
+                                    wasAcked = !(yield operations_1.operateLight(accessory, {
                                         color: val,
                                         transitionTime: yield getTransitionDuration(accessory),
-                                    });
+                                    }));
                                 }
                                 else if (light.spectrum === "white") {
-                                    light.merge({
+                                    wasAcked = !(yield operations_1.operateLight(accessory, {
                                         colorTemperature: val,
                                         transitionTime: yield getTransitionDuration(accessory),
-                                    });
+                                    }));
                                 }
                             }
-                            else if (id.endsWith(".colorTemperature")) {
-                                light.merge({
-                                    colorTemperature: val,
+                            else if (/\.(colorTemperature|hue|saturation)$/.test(id)) {
+                                wasAcked = !(yield operations_1.operateLight(accessory, {
+                                    [id.substr(id.lastIndexOf(".") + 1)]: val,
                                     transitionTime: yield getTransitionDuration(accessory),
-                                });
-                            }
-                            else if (id.endsWith(".hue")) {
-                                // TODO: transform HSL to RGB
-                                light.merge({
-                                    hue: val,
-                                    transitionTime: yield getTransitionDuration(accessory),
-                                });
-                            }
-                            else if (id.endsWith(".saturation")) {
-                                light.merge({
-                                    saturation: val,
-                                    transitionTime: yield getTransitionDuration(accessory),
-                                });
+                                }));
                             }
                             else if (id.endsWith(".transitionDuration")) {
-                                // TODO: check if we need to buffer this somehow
-                                // for now just ack the change
-                                yield adapter.$setState(id, state, true);
-                                return;
+                                // this is part of another operation, just ack the state
+                                wasAcked = true;
                             }
+                            // ack the state if neccessary and return
+                            if (wasAcked)
+                                adapter.$setState(id, state, true);
+                            return;
                         }
-                        serializedObj = newAccessory.serialize(accessory); // serialize with the old object as a reference
-                        url = `${requestBase}${endpoints_1.endpoints.devices}/${rootObj.native.instanceId}`;
-                        break;
+                    }
                 }
-                // If the serialized object contains no properties, we don't need to send anything
-                if (!serializedObj || Object.keys(serializedObj).length === 0) {
-                    global_1.Global.log("stateChange > empty object, not sending any payload", "debug");
-                    yield adapter.$setState(id, state.val, true);
-                    return;
-                }
-                let payload = JSON.stringify(serializedObj);
-                global_1.Global.log("stateChange > sending payload: " + payload, "debug");
-                payload = Buffer.from(payload);
-                node_coap_client_1.CoapClient.request(url, "put", payload);
             }
         }
         else if (!state) {
             // TODO: find out what to do when states are deleted
-        }
-        // Custom subscriptions durchgehen, um die passenden Callbacks aufzurufen
-        try {
-            for (const sub of customStateSubscriptions.subscriptions.values()) {
-                if (sub && sub.pattern && sub.callback) {
-                    // Wenn die ID zum aktuellen Pattern passt, dann Callback aufrufen
-                    if (sub.pattern.test(id))
-                        sub.callback(id, state);
-                }
-            }
-        }
-        catch (e) {
-            global_1.Global.log("error handling custom sub: " + e);
         }
     }),
     unload: (callback) => {
@@ -377,7 +309,7 @@ let adapter = utils_1.default.adapter({
             if (pingTimer != null)
                 clearInterval(pingTimer);
             // stop all observers
-            for (const url of observers) {
+            for (const url of gateway_1.gateway.observers) {
                 node_coap_client_1.CoapClient.stopObserving(url);
             }
             // close all sockets
@@ -391,6 +323,17 @@ let adapter = utils_1.default.adapter({
 });
 // ==================================
 // manage devices
+// gets called when a lightbulb state gets updated
+// we use this to sync group states because those are not advertised by the gateway
+function syncGroupsWithState(id, state) {
+    if (state && state.ack) {
+        const instanceId = getInstanceId(id);
+        if (instanceId in gateway_1.gateway.devices && gateway_1.gateway.devices[instanceId] != null) {
+            const accessory = gateway_1.gateway.devices[instanceId];
+            groups_1.updateMultipleGroupStates(accessory, id);
+        }
+    }
+}
 /** Normalizes the path to a resource, so it can be used for storing the observer */
 function normalizeResourcePath(path) {
     path = path || "";
@@ -409,11 +352,11 @@ function observeResource(path, callback) {
     return __awaiter(this, void 0, void 0, function* () {
         path = normalizeResourcePath(path);
         // check if we are already observing this resource
-        const observerUrl = `${requestBase}${path}`;
-        if (observers.indexOf(observerUrl) > -1)
+        const observerUrl = `${gateway_1.gateway.requestBase}${path}`;
+        if (gateway_1.gateway.observers.indexOf(observerUrl) > -1)
             return;
         // start observing
-        observers.push(observerUrl);
+        gateway_1.gateway.observers.push(observerUrl);
         return node_coap_client_1.CoapClient.observe(observerUrl, "get", callback);
     });
 }
@@ -424,18 +367,18 @@ function observeResource(path, callback) {
 function stopObservingResource(path) {
     path = normalizeResourcePath(path);
     // remove observer
-    const observerUrl = `${requestBase}${path}`;
-    const index = observers.indexOf(observerUrl);
+    const observerUrl = `${gateway_1.gateway.requestBase}${path}`;
+    const index = gateway_1.gateway.observers.indexOf(observerUrl);
     if (index === -1)
         return;
     node_coap_client_1.CoapClient.stopObserving(observerUrl);
-    observers.splice(index, 1);
+    gateway_1.gateway.observers.splice(index, 1);
 }
 /**
- * Clears the list of observers after a network reset
+ * Clears the list of gw.observers after a network reset
  */
 function clearObservers() {
-    observers.splice(0, observers.length);
+    gateway_1.gateway.observers.splice(0, gateway_1.gateway.observers.length);
 }
 function observeAll() {
     observeDevices();
@@ -452,10 +395,10 @@ function coapCb_getAllDevices(response) {
             global_1.Global.log(`unexpected response (${response.code.toString()}) to getAllDevices.`, "error");
             return;
         }
-        const newDevices = parsePayload(response);
+        const newDevices = coap_payload_1.parsePayload(response);
         global_1.Global.log(`got all devices: ${JSON.stringify(newDevices)}`);
         // get old keys as int array
-        const oldKeys = Object.keys(devices).map(k => +k).sort();
+        const oldKeys = Object.keys(gateway_1.gateway.devices).map(k => +k).sort();
         // get new keys as int array
         const newKeys = newDevices.sort();
         // translate that into added and removed devices
@@ -468,12 +411,12 @@ function coapCb_getAllDevices(response) {
         const removedKeys = array_extensions_1.except(oldKeys, newKeys);
         global_1.Global.log(`removing devices with keys ${JSON.stringify(removedKeys)}`, "debug");
         removedKeys.forEach((id) => __awaiter(this, void 0, void 0, function* () {
-            if (id in devices) {
+            if (id in gateway_1.gateway.devices) {
                 // delete ioBroker device
-                const deviceName = calcObjName(devices[id]);
+                const deviceName = calcObjName(gateway_1.gateway.devices[id]);
                 yield adapter.$deleteDevice(deviceName);
                 // remove device from dictionary
-                delete groups[id];
+                delete gateway_1.gateway.groups[id];
             }
             // remove observer
             stopObservingResource(`${endpoints_1.endpoints.devices}/${id}`);
@@ -486,11 +429,11 @@ function coap_getDevice_cb(instanceId, response) {
         global_1.Global.log(`unexpected response (${response.code.toString()}) to getDevice(${instanceId}).`, "error");
         return;
     }
-    const result = parsePayload(response);
+    const result = coap_payload_1.parsePayload(response);
     // parse device info
     const accessory = new accessory_1.Accessory().parse(result).createProxy();
     // remember the device object, so we can later use it as a reference for updates
-    devices[instanceId] = accessory;
+    gateway_1.gateway.devices[instanceId] = accessory;
     // create ioBroker device
     extendDevice(accessory);
 }
@@ -505,10 +448,10 @@ function coapCb_getAllGroups(response) {
             global_1.Global.log(`unexpected response (${response.code.toString()}) to getAllGroups.`, "error");
             return;
         }
-        const newGroups = parsePayload(response);
+        const newGroups = coap_payload_1.parsePayload(response);
         global_1.Global.log(`got all groups: ${JSON.stringify(newGroups)}`);
         // get old keys as int array
-        const oldKeys = Object.keys(groups).map(k => +k).sort();
+        const oldKeys = Object.keys(gateway_1.gateway.groups).map(k => +k).sort();
         // get new keys as int array
         const newKeys = newGroups.sort();
         // translate that into added and removed devices
@@ -521,12 +464,12 @@ function coapCb_getAllGroups(response) {
         const removedKeys = array_extensions_1.except(oldKeys, newKeys);
         global_1.Global.log(`removing groups with keys ${JSON.stringify(removedKeys)}`, "debug");
         removedKeys.forEach((id) => __awaiter(this, void 0, void 0, function* () {
-            if (id in groups) {
+            if (id in gateway_1.gateway.groups) {
                 // delete ioBroker group
-                const groupName = calcGroupName(groups[id].group);
+                const groupName = groups_1.calcGroupName(gateway_1.gateway.groups[id].group);
                 yield adapter.$deleteChannel(groupName);
                 // remove group from dictionary
-                delete groups[id];
+                delete gateway_1.gateway.groups[id];
             }
             // remove observer
             stopObservingResource(`${endpoints_1.endpoints.groups}/${id}`);
@@ -547,22 +490,24 @@ function coap_getGroup_cb(instanceId, response) {
             global_1.Global.log(`unexpected response (${response.code.toString()}) to getGroup(${instanceId}).`, "error");
             return;
     }
-    const result = parsePayload(response);
+    const result = coap_payload_1.parsePayload(response);
     // parse group info
     const group = (new group_1.Group()).parse(result).createProxy();
     // remember the group object, so we can later use it as a reference for updates
     let groupInfo;
-    if (!(instanceId in groups)) {
+    if (!(instanceId in gateway_1.gateway.groups)) {
         // if there's none, create one
-        groups[instanceId] = {
+        gateway_1.gateway.groups[instanceId] = {
             group: null,
             scenes: {},
         };
     }
-    groupInfo = groups[instanceId];
+    groupInfo = gateway_1.gateway.groups[instanceId];
     groupInfo.group = group;
     // create ioBroker states
-    extendGroup(group);
+    groups_1.extendGroup(group);
+    // clean up any states that might be incorrectly defined
+    groups_1.updateGroupStates(group);
     // and load scene information
     observeResource(`${endpoints_1.endpoints.scenes}/${instanceId}`, (resp) => coap_getAllScenes_cb(instanceId, resp));
 }
@@ -573,8 +518,8 @@ function coap_getAllScenes_cb(groupId, response) {
             global_1.Global.log(`unexpected response (${response.code.toString()}) to getAllScenes(${groupId}).`, "error");
             return;
         }
-        const groupInfo = groups[groupId];
-        const newScenes = parsePayload(response);
+        const groupInfo = gateway_1.gateway.groups[groupId];
+        const newScenes = coap_payload_1.parsePayload(response);
         global_1.Global.log(`got all scenes in group ${groupId}: ${JSON.stringify(newScenes)}`);
         // get old keys as int array
         const oldKeys = Object.keys(groupInfo.scenes).map(k => +k).sort();
@@ -614,13 +559,13 @@ function coap_getScene_cb(groupId, instanceId, response) {
             global_1.Global.log(`unexpected response (${response.code.toString()}) to getScene(${groupId}, ${instanceId}).`, "error");
             return;
     }
-    const result = parsePayload(response);
+    const result = coap_payload_1.parsePayload(response);
     // parse scene info
     const scene = (new scene_1.Scene()).parse(result).createProxy();
     // remember the scene object, so we can later use it as a reference for updates
-    groups[groupId].scenes[instanceId] = scene;
+    gateway_1.gateway.groups[groupId].scenes[instanceId] = scene;
     // Update the scene dropdown for the group
-    updatePossibleScenes(groups[groupId]);
+    updatePossibleScenes(gateway_1.gateway.groups[groupId]);
 }
 /**
  * Returns the ioBroker id of the root object for the given state
@@ -650,31 +595,20 @@ function calcObjId(accessory) {
  * excluding the adapter namespace
  */
 function calcObjName(accessory) {
-    const prefix = (() => {
-        switch (accessory.type) {
-            case accessory_1.AccessoryTypes.remote:
-                return "RC";
-            case accessory_1.AccessoryTypes.lightbulb:
-                return "L";
-            default:
-                global_1.Global.log(`Unknown accessory type ${accessory.type}. Please send this info to the developer with a short description of the device!`, "warn");
-                return "XYZ";
-        }
-    })();
+    let prefix;
+    switch (accessory.type) {
+        case accessory_1.AccessoryTypes.remote:
+            prefix = "RC";
+            break;
+        case accessory_1.AccessoryTypes.lightbulb:
+            prefix = "L";
+            break;
+        default:
+            global_1.Global.log(`Unknown accessory type ${accessory.type}. Please send this info to the developer with a short description of the device!`, "warn");
+            prefix = "XYZ";
+            break;
+    }
     return `${prefix}-${accessory.instanceId}`;
-}
-/**
- * Determines the object ID under which the given group should be stored
- */
-function calcGroupId(group) {
-    return `${adapter.namespace}.${calcGroupName(group)}`;
-}
-/**
- * Determines the object name under which the given group should be stored,
- * excluding the adapter namespace
- */
-function calcGroupName(group) {
-    return `G-${group.instanceId}`;
 }
 /**
  * Determines the object ID under which the given scene should be stored
@@ -701,8 +635,8 @@ function getTransitionDuration(accessoryOrGroup) {
                     stateId = calcObjId(accessoryOrGroup) + ".lightbulb.transitionDuration";
             }
         }
-        else if (accessoryOrGroup instanceof group_1.Group) {
-            stateId = calcGroupId(accessoryOrGroup) + ".transitionDuration";
+        else if (accessoryOrGroup instanceof group_1.Group || accessoryOrGroup instanceof virtual_group_1.VirtualGroup) {
+            stateId = groups_1.calcGroupId(accessoryOrGroup) + ".transitionDuration";
         }
         const ret = yield adapter.$getState(stateId);
         if (ret != null)
@@ -734,9 +668,9 @@ function accessoryToNative(accessory) {
 /* creates or edits an existing <device>-object for an accessory */
 function extendDevice(accessory) {
     const objId = calcObjId(accessory);
-    if (global_1.Global.isdef(objects[objId])) {
+    if (objId in gateway_1.gateway.objects) {
         // check if we need to edit the existing object
-        const devObj = objects[objId];
+        const devObj = gateway_1.gateway.objects[objId];
         let changed = false;
         // update common part if neccessary
         const newCommon = accessoryToCommon(accessory);
@@ -757,7 +691,7 @@ function extendDevice(accessory) {
         // ====
         // from here we can update the states
         // filter out the ones belonging to this device with a property path
-        const stateObjs = object_polyfill_1.filter(objects, obj => obj._id.startsWith(objId) && obj.native && obj.native.path);
+        const stateObjs = object_polyfill_1.filter(gateway_1.gateway.objects, obj => obj._id.startsWith(objId) && obj.native && obj.native.path);
         // for each property try to update the value
         for (const [id, obj] of object_polyfill_1.entries(stateObjs)) {
             try {
@@ -838,8 +772,8 @@ function extendDevice(accessory) {
                 },
             };
             if (spectrum === "white") {
-                stateObjs["lightbulb.color"] = {
-                    _id: `${objId}.lightbulb.color`,
+                stateObjs["lightbulb.colorTemperature"] = {
+                    _id: `${objId}.lightbulb.colorTemperature`,
                     type: "state",
                     common: {
                         name: "Color temperature",
@@ -877,7 +811,7 @@ function extendDevice(accessory) {
                     _id: `${objId}.lightbulb.hue`,
                     type: "state",
                     common: {
-                        name: "Color hue",
+                        name: "Hue",
                         read: true,
                         write: true,
                         min: 0,
@@ -894,7 +828,7 @@ function extendDevice(accessory) {
                     _id: `${objId}.lightbulb.saturation`,
                     type: "state",
                     common: {
-                        name: "Color saturation",
+                        name: "Saturation",
                         read: true,
                         write: true,
                         min: 0,
@@ -961,162 +895,14 @@ function extendDevice(accessory) {
         }
         const createObjects = Object.keys(stateObjs)
             .map((key) => {
-            const stateId = `${objId}.${key}`;
             const obj = stateObjs[key];
             let initialValue = null;
-            if (global_1.Global.isdef(obj.native.path)) {
+            if (obj.native.path != null) {
                 // Object could have a default value, find it
                 initialValue = object_polyfill_1.dig(accessory, obj.native.path);
             }
             // create object and return the promise, so we can wait
-            return adapter.$createOwnStateEx(stateId, obj, initialValue);
-        });
-        Promise.all(createObjects);
-    }
-}
-/**
- * Returns the common part of the ioBroker object representing the given group
- */
-function groupToCommon(group) {
-    return {
-        name: group.name,
-    };
-}
-/**
- * Returns the native part of the ioBroker object representing the given group
- */
-function groupToNative(group) {
-    return {
-        instanceId: group.instanceId,
-        deviceIDs: group.deviceIDs,
-        type: "group",
-    };
-}
-/* creates or edits an existing <group>-object for a group */
-function extendGroup(group) {
-    const objId = calcGroupId(group);
-    if (global_1.Global.isdef(objects[objId])) {
-        // check if we need to edit the existing object
-        const grpObj = objects[objId];
-        let changed = false;
-        // update common part if neccessary
-        const newCommon = groupToCommon(group);
-        if (JSON.stringify(grpObj.common) !== JSON.stringify(newCommon)) {
-            // merge the common objects
-            Object.assign(grpObj.common, newCommon);
-            changed = true;
-        }
-        const newNative = groupToNative(group);
-        // update native part if neccessary
-        if (JSON.stringify(grpObj.native) !== JSON.stringify(newNative)) {
-            // merge the native objects
-            Object.assign(grpObj.native, newNative);
-            changed = true;
-        }
-        if (changed)
-            adapter.extendObject(objId, grpObj);
-        // ====
-        // from here we can update the states
-        // filter out the ones belonging to this device with a property path
-        const stateObjs = object_polyfill_1.filter(objects, obj => obj._id.startsWith(objId) && obj.native && obj.native.path);
-        // for each property try to update the value
-        for (const [id, obj] of object_polyfill_1.entries(stateObjs)) {
-            try {
-                // Object could have a default value, find it
-                const newValue = object_polyfill_1.dig(group, obj.native.path);
-                adapter.setState(id, newValue, true);
-            }
-            catch (e) { }
-        }
-    }
-    else {
-        // create new object
-        const devObj = {
-            _id: objId,
-            type: "channel",
-            common: groupToCommon(group),
-            native: groupToNative(group),
-        };
-        adapter.setObject(objId, devObj);
-        // also create state objects, depending on the accessory type
-        const stateObjs = {
-            activeScene: {
-                _id: `${objId}.activeScene`,
-                type: "state",
-                common: {
-                    name: "active scene",
-                    read: true,
-                    write: true,
-                    type: "number",
-                    role: "value.id",
-                    desc: "the instance id of the currently active scene",
-                },
-                native: {
-                    path: "sceneId",
-                },
-            },
-            state: {
-                _id: `${objId}.state`,
-                type: "state",
-                common: {
-                    name: "on/off",
-                    read: true,
-                    write: true,
-                    type: "boolean",
-                    role: "switch",
-                },
-                native: {
-                    path: "onOff",
-                },
-            },
-            transitionDuration: {
-                _id: `${objId}.transitionDuration`,
-                type: "state",
-                common: {
-                    name: "Transition duration",
-                    read: false,
-                    write: true,
-                    type: "number",
-                    min: 0,
-                    max: 100,
-                    def: 0,
-                    role: "light.dimmer",
-                    desc: "Duration for brightness changes of this group's lightbulbs",
-                    unit: "s",
-                },
-                native: {
-                    path: "transitionTime",
-                },
-            },
-            brightness: {
-                _id: `${objId}.brightness`,
-                type: "state",
-                common: {
-                    name: "Brightness",
-                    read: false,
-                    write: true,
-                    min: 0,
-                    max: 254,
-                    type: "number",
-                    role: "light.dimmer",
-                    desc: "Brightness of this group's lightbulbs",
-                },
-                native: {
-                    path: "dimmer",
-                },
-            },
-        };
-        const createObjects = Object.keys(stateObjs)
-            .map((key) => {
-            const stateId = `${objId}.${key}`;
-            const obj = stateObjs[key];
-            let initialValue = null;
-            if (global_1.Global.isdef(obj.native.path)) {
-                // Object could have a default value, find it
-                initialValue = object_polyfill_1.dig(group, obj.native.path);
-            }
-            // create object and return the promise, so we can wait
-            return adapter.$createOwnStateEx(stateId, obj, initialValue);
+            return adapter.$createOwnStateEx(obj._id, obj, initialValue);
         });
         Promise.all(createObjects);
     }
@@ -1125,16 +911,15 @@ function updatePossibleScenes(groupInfo) {
     return __awaiter(this, void 0, void 0, function* () {
         const group = groupInfo.group;
         // if this group is not in the dictionary, don't do anything
-        if (!(group.instanceId in groups))
+        if (!(group.instanceId in gateway_1.gateway.groups))
             return;
         // find out which is the root object id
-        const objId = calcGroupId(group);
+        const objId = groups_1.calcGroupId(group);
         // scenes are stored under <objId>.activeScene
         const scenesId = `${objId}.activeScene`;
         // only extend that object if it exists already
-        if (global_1.Global.isdef(objects[scenesId])) {
+        if (scenesId in gateway_1.gateway.objects) {
             global_1.Global.log(`updating possible scenes for group ${group.instanceId}: ${JSON.stringify(Object.keys(groupInfo.scenes))}`);
-            const activeSceneObj = objects[scenesId];
             const scenes = groupInfo.scenes;
             // map scene ids and names to the dropdown
             const states = object_polyfill_1.composeObject(Object.keys(scenes).map(id => [id, scenes[id].name]));
@@ -1145,133 +930,37 @@ function updatePossibleScenes(groupInfo) {
     });
 }
 /**
- * Renames a device
- * @param accessory The device to be renamed
- * @param newName The new name to be given to the device
+ * Loads defined virtual groups from the ioBroker objects DB
  */
-function renameDevice(accessory, newName) {
-    // create a copy to modify
-    const newAccessory = accessory.clone();
-    newAccessory.name = newName;
-    // serialize with the old object as a reference
-    const serializedObj = newAccessory.serialize(accessory);
-    // If the serialized object contains no properties, we don't need to send anything
-    if (!serializedObj || Object.keys(serializedObj).length === 0) {
-        global_1.Global.log("renameDevice > empty object, not sending any payload", "debug");
-        return;
-    }
-    // get the payload
-    let payload = JSON.stringify(serializedObj);
-    global_1.Global.log("renameDevice > sending payload: " + payload, "debug");
-    payload = Buffer.from(payload);
-    node_coap_client_1.CoapClient.request(`${requestBase}${endpoints_1.endpoints.devices}/${accessory.instanceId}`, "put", payload);
-}
-/**
- * Renames a group
- * @param group The group to be renamed
- * @param newName The new name to be given to the group
- */
-function renameGroup(group, newName) {
-    // create a copy to modify
-    const newGroup = group.clone();
-    newGroup.name = newName;
-    // serialize with the old object as a reference
-    const serializedObj = newGroup.serialize(group);
-    // If the serialized object contains no properties, we don't need to send anything
-    if (!serializedObj || Object.keys(serializedObj).length === 0) {
-        global_1.Global.log("renameGroup > empty object, not sending any payload", "debug");
-        return;
-    }
-    // get the payload
-    let payload = JSON.stringify(serializedObj);
-    global_1.Global.log("renameDevice > sending payload: " + payload, "debug");
-    payload = Buffer.from(payload);
-    node_coap_client_1.CoapClient.request(`${requestBase}${endpoints_1.endpoints.groups}/${group.instanceId}`, "put", payload);
-}
-// ==================================
-// Custom subscriptions
-/**
- * Ensures the subscription pattern is valid
- */
-function checkPattern(pattern) {
-    try {
-        if (typeof pattern === "string") {
-            return str2regex_1.str2regex(pattern);
+function loadVirtualGroups() {
+    return __awaiter(this, void 0, void 0, function* () {
+        // find all defined virtual groups
+        const iobObjects = yield global_1.Global.$$(`${adapter.namespace}.VG-*`, "channel");
+        const groupObjects = object_polyfill_1.values(iobObjects).filter(g => {
+            return g.native &&
+                g.native.instanceId != null &&
+                g.native.type === "virtual group";
+        });
+        // load them into the virtualGroups dict
+        Object.assign(gateway_1.gateway.virtualGroups, object_polyfill_1.composeObject(groupObjects.map(g => {
+            const id = g.native.instanceId;
+            const deviceIDs = g.native.deviceIDs.map(d => parseInt(d, 10));
+            const ret = new virtual_group_1.VirtualGroup(id);
+            ret.deviceIDs = deviceIDs;
+            ret.name = g.common.name;
+            return [`${id}`, ret];
+        })));
+        // remember the actual objects
+        for (const obj of object_polyfill_1.values(gateway_1.gateway.virtualGroups)) {
+            const id = groups_1.calcGroupId(obj);
+            gateway_1.gateway.objects[id] = iobObjects[id];
+            // also remember all states
+            const stateObjs = yield global_1.Global.$$(`${id}.*`, "state");
+            for (const [sid, sobj] of object_polyfill_1.entries(stateObjs)) {
+                gateway_1.gateway.objects[sid] = sobj;
+            }
         }
-        else if (pattern instanceof RegExp) {
-            return pattern;
-        }
-        else {
-            // NOPE
-            throw new Error("must be regex or string");
-        }
-    }
-    catch (e) {
-        global_1.Global.log("cannot subscribe with this pattern. reason: " + e);
-        return null;
-    }
-}
-/**
- * Subscribe to some ioBroker states
- * @param pattern
- * @param callback
- * @returns a subscription ID
- */
-function subscribeStates(pattern, callback) {
-    pattern = checkPattern(pattern);
-    if (!pattern)
-        return;
-    const newCounter = (++customStateSubscriptions.counter);
-    const id = "" + newCounter;
-    customStateSubscriptions.subscriptions.set(id, { pattern, callback });
-    return id;
-}
-/**
- * Release the custom subscription with the given id
- * @param id The subscription ID returned by @link{subscribeStates}
- */
-function unsubscribeStates(id) {
-    if (customStateSubscriptions.subscriptions.has(id)) {
-        customStateSubscriptions.subscriptions.delete(id);
-    }
-}
-/**
- * Subscribe to some ioBroker objects
- * @param pattern
- * @param callback
- * @returns a subscription ID
- */
-function subscribeObjects(pattern, callback) {
-    pattern = checkPattern(pattern);
-    if (!pattern)
-        return;
-    const newCounter = (++customObjectSubscriptions.counter);
-    const id = "" + newCounter;
-    customObjectSubscriptions.subscriptions.set(id, { pattern, callback });
-    return id;
-}
-/**
- * Release the custom subscription with the given id
- * @param id The subscription ID returned by @link{subscribeObjects}
- */
-function unsubscribeObjects(id) {
-    if (customObjectSubscriptions.subscriptions.has(id)) {
-        customObjectSubscriptions.subscriptions.delete(id);
-    }
-}
-function parsePayload(response) {
-    switch (response.format) {
-        case 0: // text/plain
-        case null:// assume text/plain
-            return response.payload.toString("utf-8");
-        case 50:// application/json
-            const json = response.payload.toString("utf-8");
-            return JSON.parse(json);
-        default:
-            // dunno how to parse this
-            global_1.Global.log(`unknown CoAP response format ${response.format}`, "warn");
-            return response.payload;
-    }
+    });
 }
 // Connection check
 let pingTimer;
@@ -1282,7 +971,7 @@ let dead = false;
 function pingThread() {
     return __awaiter(this, void 0, void 0, function* () {
         const oldValue = connectionAlive;
-        connectionAlive = yield node_coap_client_1.CoapClient.ping(requestBase);
+        connectionAlive = yield node_coap_client_1.CoapClient.ping(gateway_1.gateway.requestBase);
         global_1.Global.log(`ping ${connectionAlive ? "" : "un"}successful...`, "debug");
         yield adapter.$setStateChanged("info.connection", connectionAlive, true);
         // see if the connection state has changed
@@ -1292,7 +981,7 @@ function pingThread() {
                 // connection is now alive again
                 global_1.Global.log("Connection to gateway reestablished", "info");
                 // restart observing if neccessary
-                if (observers.length === 0)
+                if (gateway_1.gateway.observers.length === 0)
                     observeAll();
                 // TODO: send buffered messages
             }

@@ -3,7 +3,7 @@
 require("reflect-metadata");
 
 import { expect } from "chai";
-import { predefinedColors, whiteSpectrumRange } from "../tradfri/predefined-colors";
+import { predefinedColors, whiteSpectrumRange } from "../modules/predefined-colors";
 import { Accessory } from "./accessory";
 import { Spectrum } from "./light";
 

@@ -68,6 +68,7 @@ class Global {
                 $setStateChanged: promises_1.promisify(adapter.setStateChanged, adapter),
                 $createState: promises_1.promisify(adapter.createState, adapter),
                 $deleteState: promises_1.promisify(adapter.deleteState, adapter),
+                $delState: promises_1.promisify(adapter.delState, adapter),
                 $getForeignState: promises_1.promisify(adapter.getForeignState, adapter),
                 $setForeignState: promises_1.promisify(adapter.setForeignState, adapter),
                 $sendTo: promises_1.promisifyNoError(adapter.sendTo, adapter),
@@ -142,8 +143,6 @@ class Global {
             }
         });
     }
-    // Prüfen auf (un)defined
-    static isdef(value) { return value != undefined; }
     // Workaround für unvollständige Adapter-Upgrades
     static ensureInstanceObjects() {
         return __awaiter(this, void 0, void 0, function* () {

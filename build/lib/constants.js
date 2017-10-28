@@ -1,7 +1,7 @@
 "use strict";
 // tslint:disable:variable-name
 Object.defineProperty(exports, "__esModule", { value: true });
-// Endpunkte, die abgefragt werden k�nnen
+// Endpunkte, die abgefragt werden können
 exports.Endpoints = {
     DEVICES: "15001",
     HS_LINK: "15002",

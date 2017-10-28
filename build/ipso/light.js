@@ -9,12 +9,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const conversions_1 = require("../tradfri/conversions");
-const predefined_colors_1 = require("../tradfri/predefined-colors");
+const conversions_1 = require("../modules/conversions");
+const predefined_colors_1 = require("../modules/predefined-colors");
 const ipsoDevice_1 = require("./ipsoDevice");
 const ipsoObject_1 = require("./ipsoObject");
-// see https://github.com/hreichert/smarthome/blob/master/extensions/binding/org.eclipse.smarthome.binding.tradfri/src/main/java/org/eclipse/smarthome/binding/tradfri/internal/TradfriColor.java
-// for some color conversion
 class Light extends ipsoDevice_1.IPSODevice {
     constructor(accessory) {
         super();
@@ -173,11 +171,17 @@ function createWhiteSpectrumProxy() {
                 default: return me[key];
             }
         },
-        set: (me, key, value, receiver) => {
+        set: (me, key, value) => {
             switch (key) {
                 case "colorTemperature": {
                     me.colorX = conversions_1.conversions.whiteSpectrumToColorX(value);
                     me.colorY = 27000; // magic number, but it works!
+                    break;
+                }
+                case "hue":
+                case "saturation":
+                case "color": {
+                    // don't update these properties, they are not supported in white spectrum lamps
                     break;
                 }
                 default: me[key] = value;
@@ -207,12 +211,12 @@ function createRGBProxy() {
             }
             case "hue": {
                 const { r, g, b } = conversions_1.conversions.rgbFromString(get(me, "color"));
-                const { h, s, v } = conversions_1.conversions.rgbToHSV(r, g, b);
+                const { h } = conversions_1.conversions.rgbToHSV(r, g, b);
                 return h;
             }
             case "saturation": {
                 const { r, g, b } = conversions_1.conversions.rgbFromString(get(me, "color"));
-                const { h, s, v } = conversions_1.conversions.rgbToHSV(r, g, b);
+                const { s } = conversions_1.conversions.rgbToHSV(r, g, b);
                 return Math.round(s * 100);
             }
             default: return me[key];
