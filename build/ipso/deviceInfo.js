@@ -10,6 +10,17 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const ipsoObject_1 = require("./ipsoObject");
+var PowerSources;
+(function (PowerSources) {
+    PowerSources[PowerSources["Unknown"] = 0] = "Unknown";
+    PowerSources[PowerSources["InternalBattery"] = 1] = "InternalBattery";
+    PowerSources[PowerSources["ExternalBattery"] = 2] = "ExternalBattery";
+    PowerSources[PowerSources["Battery"] = 3] = "Battery";
+    PowerSources[PowerSources["PowerOverEthernet"] = 4] = "PowerOverEthernet";
+    PowerSources[PowerSources["USB"] = 5] = "USB";
+    PowerSources[PowerSources["AC_Power"] = 6] = "AC_Power";
+    PowerSources[PowerSources["Solar"] = 7] = "Solar";
+})(PowerSources = exports.PowerSources || (exports.PowerSources = {}));
 // contains information about a specific device
 class DeviceInfo extends ipsoObject_1.IPSOObject {
     constructor() {
@@ -17,7 +28,7 @@ class DeviceInfo extends ipsoObject_1.IPSOObject {
         this.firmwareVersion = "";
         this.manufacturer = "";
         this.modelNumber = "";
-        this.power = 0;
+        this.power = PowerSources.Unknown;
         this.serialNumber = "";
     }
 }
