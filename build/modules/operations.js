@@ -87,7 +87,7 @@ function operateVirtualGroup(group, operation) {
     return __awaiter(this, void 0, void 0, function* () {
         // find all lightbulbs belonging to this group
         const lightbulbAccessories = group.deviceIDs
-            .map(did => gateway_1.gateway.devices[did])
+            .map(id => gateway_1.gateway.devices[id])
             .filter(dev => dev != null && dev.type === accessory_1.AccessoryTypes.lightbulb);
         for (const acc of lightbulbAccessories) {
             yield operateLight(acc, operation);

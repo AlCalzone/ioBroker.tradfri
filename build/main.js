@@ -190,11 +190,11 @@ let adapter = utils_1.default.adapter({
                                 sceneId: val,
                             }));
                         }
-                        else if (id.endsWith(".color")) {
+                        else if (/\.(colorTemperature|color|hue|saturation)$/.test(id)) {
                             // color change is only supported manually, so we operate
                             // the virtual state of this group
                             yield operations_1.operateVirtualGroup(group, {
-                                colorTemperature: val,
+                                [id.substr(id.lastIndexOf(".") + 1)]: val,
                                 transitionTime: yield getTransitionDuration(group),
                             });
                             wasAcked = true;
@@ -223,9 +223,9 @@ let adapter = utils_1.default.adapter({
                                 transitionTime: yield getTransitionDuration(vGroup),
                             };
                         }
-                        else if (id.endsWith(".color")) {
+                        else if (/\.(colorTemperature|color|hue|saturation)$/.test(id)) {
                             operation = {
-                                colorTemperature: val,
+                                [id.substr(id.lastIndexOf(".") + 1)]: val,
                                 transitionTime: yield getTransitionDuration(vGroup),
                             };
                         }
@@ -261,6 +261,9 @@ let adapter = utils_1.default.adapter({
                                 }));
                             }
                             else if (id.endsWith(".color")) {
+                                // we need to differentiate here, because some ppl
+                                // might already have "color" states for white spectrum bulbs
+                                // in the future, we create different states for white and RGB bulbs
                                 if (light.spectrum === "rgb") {
                                     wasAcked = !(yield operations_1.operateLight(accessory, {
                                         color: val,
@@ -274,22 +277,9 @@ let adapter = utils_1.default.adapter({
                                     }));
                                 }
                             }
-                            else if (id.endsWith(".colorTemperature")) {
+                            else if (/\.(colorTemperature|hue|saturation)$/.test(id)) {
                                 wasAcked = !(yield operations_1.operateLight(accessory, {
-                                    colorTemperature: val,
-                                    transitionTime: yield getTransitionDuration(accessory),
-                                }));
-                            }
-                            else if (id.endsWith(".hue")) {
-                                // TODO: transform HSL to RGB
-                                wasAcked = !(yield operations_1.operateLight(accessory, {
-                                    hue: val,
-                                    transitionTime: yield getTransitionDuration(accessory),
-                                }));
-                            }
-                            else if (id.endsWith(".saturation")) {
-                                wasAcked = !(yield operations_1.operateLight(accessory, {
-                                    saturation: val,
+                                    [id.substr(id.lastIndexOf(".") + 1)]: val,
                                     transitionTime: yield getTransitionDuration(accessory),
                                 }));
                             }
@@ -767,8 +757,8 @@ function extendDevice(accessory) {
                 },
             };
             if (spectrum === "white") {
-                stateObjs["lightbulb.color"] = {
-                    _id: `${objId}.lightbulb.color`,
+                stateObjs["lightbulb.colorTemperature"] = {
+                    _id: `${objId}.lightbulb.colorTemperature`,
                     type: "state",
                     common: {
                         name: "Color temperature",
@@ -806,7 +796,7 @@ function extendDevice(accessory) {
                     _id: `${objId}.lightbulb.hue`,
                     type: "state",
                     common: {
-                        name: "Color hue",
+                        name: "Hue",
                         read: true,
                         write: true,
                         min: 0,
@@ -823,7 +813,7 @@ function extendDevice(accessory) {
                     _id: `${objId}.lightbulb.saturation`,
                     type: "state",
                     common: {
-                        name: "Color saturation",
+                        name: "Saturation",
                         read: true,
                         write: true,
                         min: 0,

@@ -9,8 +9,11 @@ export class VirtualGroup {
 	public name: string;
 	public onOff: boolean = false; // <bool>
 	public dimmer: number = 0; // <int> [0..254]
-	public colorX: number = 0; // int
+	public colorTemperature: number = 0; // int
 	public transitionTime: number = 0; // <float>
+	public color: string; // int
+	public hue: number = 0; // int
+	public saturation: number = 0; // int
 
 	/**
 	 * The instance ids of all devices combined in this group

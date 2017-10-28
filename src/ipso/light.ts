@@ -162,6 +162,12 @@ function createWhiteSpectrumProxy<T extends Light>() {
 					me.colorY = 27000; // magic number, but it works!
 					break;
 				}
+				case "hue":
+				case "saturation":
+				case "color": {
+					// don't update these properties, they are not supported in white spectrum lamps
+					break;
+				}
 				default: me[key] = value;
 			}
 			return true;

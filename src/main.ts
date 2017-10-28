@@ -199,11 +199,11 @@ let adapter: ExtendedAdapter = utils.adapter({
 								onOff: true,
 								sceneId: val,
 							});
-						} else if (id.endsWith(".color")) {
+						} else if (/\.(colorTemperature|color|hue|saturation)$/.test(id)) {
 							// color change is only supported manually, so we operate
 							// the virtual state of this group
 							await operateVirtualGroup(group, {
-								colorTemperature: val,
+								[id.substr(id.lastIndexOf(".") + 1)]: val,
 								transitionTime: await getTransitionDuration(group),
 							});
 							wasAcked = true;
@@ -232,9 +232,9 @@ let adapter: ExtendedAdapter = utils.adapter({
 								dimmer: val,
 								transitionTime: await getTransitionDuration(vGroup),
 							};
-						} else if (id.endsWith(".color")) {
+						} else if (/\.(colorTemperature|color|hue|saturation)$/.test(id)) {
 							operation = {
-								colorTemperature: val,
+								[id.substr(id.lastIndexOf(".") + 1)]: val,
 								transitionTime: await getTransitionDuration(vGroup),
 							};
 						} else if (id.endsWith(".transitionDuration")) {
@@ -272,6 +272,9 @@ let adapter: ExtendedAdapter = utils.adapter({
 									transitionTime: await getTransitionDuration(accessory),
 								});
 							} else if (id.endsWith(".color")) {
+								// we need to differentiate here, because some ppl
+								// might already have "color" states for white spectrum bulbs
+								// in the future, we create different states for white and RGB bulbs
 								if (light.spectrum === "rgb") {
 									wasAcked = !await operateLight(accessory, {
 										color: val,
@@ -283,20 +286,9 @@ let adapter: ExtendedAdapter = utils.adapter({
 										transitionTime: await getTransitionDuration(accessory),
 									});
 								}
-							} else if (id.endsWith(".colorTemperature")) {
+							} else if (/\.(colorTemperature|hue|saturation)$/.test(id)) {
 								wasAcked = !await operateLight(accessory, {
-									colorTemperature: val,
-									transitionTime: await getTransitionDuration(accessory),
-								});
-							} else if (id.endsWith(".hue")) {
-								// TODO: transform HSL to RGB
-								wasAcked = !await operateLight(accessory, {
-									hue: val,
-									transitionTime: await getTransitionDuration(accessory),
-								});
-							} else if (id.endsWith(".saturation")) {
-								wasAcked = !await operateLight(accessory, {
-									saturation: val,
+									[id.substr(id.lastIndexOf(".") + 1)]: val,
 									transitionTime: await getTransitionDuration(accessory),
 								});
 							} else if (id.endsWith(".transitionDuration")) {
@@ -826,8 +818,8 @@ function extendDevice(accessory: Accessory) {
 				},
 			};
 			if (spectrum === "white") {
-				stateObjs["lightbulb.color"] = {
-					_id: `${objId}.lightbulb.color`,
+				stateObjs["lightbulb.colorTemperature"] = {
+					_id: `${objId}.lightbulb.colorTemperature`,
 					type: "state",
 					common: {
 						name: "Color temperature",
@@ -864,7 +856,7 @@ function extendDevice(accessory: Accessory) {
 					_id: `${objId}.lightbulb.hue`,
 					type: "state",
 					common: {
-						name: "Color hue",
+						name: "Hue",
 						read: true,
 						write: true,
 						min: 0,
@@ -881,7 +873,7 @@ function extendDevice(accessory: Accessory) {
 					_id: `${objId}.lightbulb.saturation`,
 					type: "state",
 					common: {
-						name: "Color saturation",
+						name: "Saturation",
 						read: true,
 						write: true,
 						min: 0,

@@ -5,8 +5,11 @@ export declare class VirtualGroup {
     name: string;
     onOff: boolean;
     dimmer: number;
-    colorX: number;
+    colorTemperature: number;
     transitionTime: number;
+    color: string;
+    hue: number;
+    saturation: number;
     /**
      * The instance ids of all devices combined in this group
      */

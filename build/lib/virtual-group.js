@@ -6,8 +6,10 @@ class VirtualGroup {
         this.instanceId = instanceId;
         this.onOff = false; // <bool>
         this.dimmer = 0; // <int> [0..254]
-        this.colorX = 0; // int
+        this.colorTemperature = 0; // int
         this.transitionTime = 0; // <float>
+        this.hue = 0; // int
+        this.saturation = 0; // int
     }
     /**
      * Updates this virtual group's state with the changes contained in the given operation

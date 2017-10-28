@@ -97,8 +97,8 @@ export function extendVirtualGroup(group: VirtualGroup) {
 				type: "state",
 				common: {
 					name: "on/off",
-					read: true, // TODO: check
-					write: true, // TODO: check
+					read: true,
+					write: true,
 					type: "boolean",
 					role: "switch",
 				},
@@ -130,8 +130,8 @@ export function extendVirtualGroup(group: VirtualGroup) {
 				type: "state",
 				common: {
 					name: "Brightness",
-					read: false, // TODO: check
-					write: true, // TODO: check
+					read: true,
+					write: true,
 					min: 0,
 					max: 254,
 					type: "number",
@@ -142,22 +142,73 @@ export function extendVirtualGroup(group: VirtualGroup) {
 					path: "dimmer",
 				},
 			},
-			color: {
-				_id: `${objId}.color`,
+			colorTemperature: {
+				_id: `${objId}.colorTemperature`,
 				type: "state",
 				common: {
-					name: "Color temperature",
-					read: true, // TODO: check
-					write: true, // TODO: check
+					name: "White spectrum color temperature",
+					read: true,
+					write: true,
 					min: 0,
 					max: 100,
 					unit: "%",
 					type: "number",
 					role: "level.color.temperature",
-					desc: "Color temperature of this group's lightbulbs. Range: 0% = cold, 100% = warm",
+					desc: "Color temperature of this group's white spectrum lightbulbs. Range: 0% = cold, 100% = warm",
 				},
 				native: {
-					path: "colorX",
+					path: "colorTemperature",
+				},
+			},
+			color: {
+				_id: `${objId}.color`,
+				type: "state",
+				common: {
+					name: "RGB color",
+					read: true,
+					write: true,
+					type: "string",
+					role: "level.color",
+					desc: "Color of this group's RGB lightbulbs as a 6-digit hex string.",
+				},
+				native: {
+					path: "color",
+				},
+			},
+			hue: {
+				_id: `${objId}.hue`,
+				type: "state",
+				common: {
+					name: "Hue",
+					read: true,
+					write: true,
+					min: 0,
+					max: 360,
+					unit: "°",
+					type: "number",
+					role: "level.color.hue",
+					desc: "Hue of this group's RGB lightbulbs.",
+				},
+				native: {
+					path: "hue",
+				},
+			},
+			saturation: {
+				_id: `${objId}.saturation`,
+				type: "state",
+				common: {
+					name: "Saturation",
+					read: true,
+					write: true,
+					min: 0,
+					max: 100,
+					unit: "%",
+					type: "number",
+					role: "level.color.saturation",
+					desc: "Saturation of this group's RGB lightbulbs.",
+				},
+				native: {
+					path: "saturation",
 				},
 			},
 		};
@@ -297,19 +348,76 @@ export function extendGroup(group: Group) {
 					path: "dimmer",
 				},
 			},
-			color: {
-				_id: `${objId}.color`,
+			colorTemperature: {
+				_id: `${objId}.colorTemperature`,
 				type: "state",
 				common: {
-					name: "Color temperature",
-					read: true, // TODO: check
-					write: true, // TODO: check
+					name: "White spectrum color temperature",
+					read: true,
+					write: true,
 					min: 0,
 					max: 100,
 					unit: "%",
 					type: "number",
 					role: "level.color.temperature",
-					desc: "Color temperature of this group's lightbulbs. Range: 0% = cold, 100% = warm",
+					desc: "Color temperature of this group's white spectrum lightbulbs. Range: 0% = cold, 100% = warm",
+				},
+				native: {
+					// virtual state, so no real path to an object exists
+					// we still have to give path a value, because other functions check for its existence
+					path: "__virtual__",
+				},
+			},
+			color: {
+				_id: `${objId}.color`,
+				type: "state",
+				common: {
+					name: "RGB color",
+					read: true,
+					write: true,
+					type: "string",
+					role: "level.color",
+					desc: "Color of this group's RGB lightbulbs as a 6-digit hex string.",
+				},
+				native: {
+					// virtual state, so no real path to an object exists
+					// we still have to give path a value, because other functions check for its existence
+					path: "__virtual__",
+				},
+			},
+			hue: {
+				_id: `${objId}.hue`,
+				type: "state",
+				common: {
+					name: "Hue",
+					read: true,
+					write: true,
+					min: 0,
+					max: 360,
+					unit: "°",
+					type: "number",
+					role: "level.color.hue",
+					desc: "Hue of this group's RGB lightbulbs.",
+				},
+				native: {
+					// virtual state, so no real path to an object exists
+					// we still have to give path a value, because other functions check for its existence
+					path: "__virtual__",
+				},
+			},
+			saturation: {
+				_id: `${objId}.saturation`,
+				type: "state",
+				common: {
+					name: "Saturation",
+					read: true,
+					write: true,
+					min: 0,
+					max: 100,
+					unit: "%",
+					type: "number",
+					role: "level.color.saturation",
+					desc: "Saturation of this group's RGB lightbulbs.",
 				},
 				native: {
 					// virtual state, so no real path to an object exists

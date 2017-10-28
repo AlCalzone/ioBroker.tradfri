@@ -91,7 +91,7 @@ export async function operateVirtualGroup(group: Group | VirtualGroup, operation
 
 	// find all lightbulbs belonging to this group
 	const lightbulbAccessories = group.deviceIDs
-		.map(did => gw.devices[did])
+		.map(id => gw.devices[id])
 		.filter(dev => dev != null && dev.type === AccessoryTypes.lightbulb)
 		;
 
