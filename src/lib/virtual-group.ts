@@ -7,13 +7,13 @@ export class VirtualGroup {
 	}
 
 	public name: string;
-	public onOff: boolean = false; // <bool>
-	public dimmer: number = 0; // <int> [0..254]
-	public colorTemperature: number = 0; // int
-	public transitionTime: number = 0; // <float>
+	public onOff: boolean; // <bool>
+	public dimmer: number; // <int> [0..254]
+	public colorTemperature: number; // int
+	public transitionTime: number; // <float>
 	public color: string; // int
-	public hue: number = 0; // int
-	public saturation: number = 0; // int
+	public hue: number; // int
+	public saturation: number; // int
 
 	/**
 	 * The instance ids of all devices combined in this group

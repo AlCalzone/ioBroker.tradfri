@@ -1,6 +1,7 @@
+import { Accessory, AccessoryTypes } from "../ipso/accessory";
 import { Group } from "../ipso/group";
 import { Global as _ } from "../lib/global";
-import { DictionaryLike, dig, entries, filter } from "../lib/object-polyfill";
+import { DictionaryLike, dig, entries, filter, values } from "../lib/object-polyfill";
 import { padStart } from "../lib/strings";
 import { VirtualGroup } from "../lib/virtual-group";
 import { gateway as gw } from "./gateway";
@@ -303,8 +304,8 @@ export function extendGroup(group: Group) {
 				type: "state",
 				common: {
 					name: "on/off",
-					read: true, // TODO: check
-					write: true, // TODO: check
+					read: true,
+					write: true,
 					type: "boolean",
 					role: "switch",
 				},
@@ -336,8 +337,8 @@ export function extendGroup(group: Group) {
 				type: "state",
 				common: {
 					name: "Brightness",
-					read: false, // TODO: check
-					write: true, // TODO: check
+					read: true,
+					write: true,
 					min: 0,
 					max: 254,
 					type: "number",
@@ -441,5 +442,107 @@ export function extendGroup(group: Group) {
 			;
 		Promise.all(createObjects);
 
+	}
+}
+
+/** Returns the only value in the given array if they are all the same, otherwise null */
+function getCommonValue<T>(arr: T[]): T {
+	for (let i = 1; i < arr.length; i++) {
+		if (arr[i] !== arr[i - 1]) return null;
+	}
+	return arr[0];
+}
+
+const updateTimers: DictionaryLike<NodeJS.Timer> = {};
+function debounce(id: string, action: () => void, timeout: number) {
+	// clear existing timeouts
+	if (id in updateTimers) clearTimeout(updateTimers[id]);
+	// set a new debounce timer
+	updateTimers[id] = setTimeout(() => {
+		delete updateTimers[id];
+		action();
+	}, timeout);
+}
+
+async function updateGroupState(id: string, value: string | number | boolean | ioBroker.State): Promise<void> {
+	const curState = await _.adapter.$getState(id);
+	if (curState != null && value == null) {
+		await _.adapter.$delState(id);
+	} else if (curState !== value) {
+		await _.adapter.$setState(id, value, true);
+	}
+}
+
+/**
+ * Updates all group states that are equal for all its devices
+ * @param changedAccessory If defined, only update the groups this is a part of.
+ * @param changedStateId If defined, only update the corresponding states in the group.
+ */
+export function updateMultipleGroupStates(changedAccessory?: Accessory, changedStateId?: string) {
+	const groupsToUpdate: (Group | VirtualGroup)[] =
+		values(gw.groups).map(g => g.group as (Group | VirtualGroup))
+		.concat(values(gw.virtualGroups))
+		.filter(g => changedAccessory == null || g.deviceIDs.indexOf(changedAccessory.instanceId) > -1)
+		;
+	for (const group of groupsToUpdate) {
+		updateGroupStates(group, changedStateId);
+	}
+}
+
+export function updateGroupStates(group: Group | VirtualGroup, changedStateId?: string) {
+	// only works for lightbulbs right now
+	const groupBulbs = group.deviceIDs.map(id => gw.devices[id])
+		.filter(a => a.type === AccessoryTypes.lightbulb)
+		.map(a => a.lightList[0])
+		;
+	if (groupBulbs.length === 0) return;
+	const objId = calcGroupId(group);
+
+	// Seperate the bulbs into no spectrum/white spectrum/rgb bulbs
+	const noSpectrumBulbs = groupBulbs.filter(b => b.spectrum === "none");
+	const whiteSpectrumBulbs = groupBulbs.filter(b => b.spectrum === "white");
+	const rgbBulbs = groupBulbs.filter(b => b.spectrum === "rgb");
+
+	// we're debouncing the state changes, so group or scene updates don't result in
+	// deleting and recreating states
+	const debounceTimeout = 250;
+
+	// Try to update the on/off state
+	if (changedStateId == null || changedStateId.endsWith("lightbulb.state")) {
+		const commonState = getCommonValue(groupBulbs.map(b => b.onOff));
+		group.onOff = commonState;
+		const stateId = `${objId}.state`;
+		debounce(stateId, () => updateGroupState(stateId, commonState), debounceTimeout);
+	}
+	// Try to update the brightness state
+	if (changedStateId == null || changedStateId.endsWith("lightbulb.brightness")) {
+		const commonState = getCommonValue(groupBulbs.map(b => b.dimmer));
+		group.dimmer = commonState;
+		const stateId = `${objId}.brightness`;
+		debounce(stateId, () => updateGroupState(stateId, commonState), debounceTimeout);
+	}
+	// Try to update the colorTemperature state
+	if (changedStateId == null || changedStateId.endsWith("lightbulb.colorTemperature")) {
+		const commonState = (whiteSpectrumBulbs.length > 0) ? getCommonValue(whiteSpectrumBulbs.map(b => b.colorTemperature)) : null;
+		const stateId = `${objId}.colorTemperature`;
+		debounce(stateId, () => updateGroupState(stateId, commonState), debounceTimeout);
+	}
+	// Try to update the color state
+	if (changedStateId == null || changedStateId.endsWith("lightbulb.color")) {
+		const commonState = (rgbBulbs.length > 0) ? getCommonValue(rgbBulbs.map(b => b.color)) : null;
+		const stateId = `${objId}.color`;
+		debounce(stateId, () => updateGroupState(stateId, commonState), debounceTimeout);
+	}
+	// Try to update the hue state
+	if (changedStateId == null || changedStateId.endsWith("lightbulb.hue")) {
+		const commonState = (rgbBulbs.length > 0) ? getCommonValue(rgbBulbs.map(b => b.hue)) : null;
+		const stateId = `${objId}.hue`;
+		debounce(stateId, () => updateGroupState(stateId, commonState), debounceTimeout);
+	}
+	// Try to update the saturation state
+	if (changedStateId == null || changedStateId.endsWith("lightbulb.saturation")) {
+		const commonState = (rgbBulbs.length > 0) ? getCommonValue(rgbBulbs.map(b => b.saturation)) : null;
+		const stateId = `${objId}.saturation`;
+		debounce(stateId, () => updateGroupState(stateId, commonState), debounceTimeout);
 	}
 }

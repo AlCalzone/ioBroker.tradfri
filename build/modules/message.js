@@ -104,7 +104,7 @@ function onMessage(obj) {
                     const group = gateway_1.gateway.virtualGroups[id];
                     // Update the device ids
                     if (params.deviceIDs != null && params.deviceIDs instanceof Array) {
-                        group.deviceIDs = params.deviceIDs;
+                        group.deviceIDs = params.deviceIDs.map(d => parseInt(d, 10)).filter(d => !isNaN(d));
                     }
                     // Change the name
                     if (typeof params.name === "string" && params.name.length > 0) {
@@ -112,6 +112,7 @@ function onMessage(obj) {
                     }
                     // save the changes
                     groups_1.extendVirtualGroup(group);
+                    groups_1.updateGroupStates(group);
                     respond(responses.OK);
                     return;
                 }

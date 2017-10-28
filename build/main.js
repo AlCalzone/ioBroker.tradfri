@@ -57,9 +57,11 @@ let adapter = utils_1.default.adapter({
         // console.log = (msg) => adapter.log.debug("STDOUT > " + msg);
         // console.error = (msg) => adapter.log.error("STDERR > " + msg);
         global_1.Global.log(`startfile = ${process.argv[1]}`);
-        // Eigene Objekte/States beobachten
-        adapter.subscribeStates("*");
-        adapter.subscribeObjects("*");
+        // watch own states
+        adapter.subscribeStates(`${adapter.namespace}.*`);
+        adapter.subscribeObjects(`${adapter.namespace}.*`);
+        // add special watch for lightbulb states, so we can later sync the group states
+        custom_subscriptions_1.subscribeStates(/L\-\d+\.lightbulb\./, syncGroupsWithState);
         // initialize CoAP client
         const hostname = adapter.config.host.toLowerCase();
         node_coap_client_1.CoapClient.setSecurityParams(hostname, {
@@ -321,6 +323,17 @@ let adapter = utils_1.default.adapter({
 });
 // ==================================
 // manage devices
+// gets called when a lightbulb state gets updated
+// we use this to sync group states because those are not advertised by the gateway
+function syncGroupsWithState(id, state) {
+    if (state && state.ack) {
+        const instanceId = getInstanceId(id);
+        if (instanceId in gateway_1.gateway.devices && gateway_1.gateway.devices[instanceId] != null) {
+            const accessory = gateway_1.gateway.devices[instanceId];
+            groups_1.updateMultipleGroupStates(accessory, id);
+        }
+    }
+}
 /** Normalizes the path to a resource, so it can be used for storing the observer */
 function normalizeResourcePath(path) {
     path = path || "";
@@ -493,6 +506,8 @@ function coap_getGroup_cb(instanceId, response) {
     groupInfo.group = group;
     // create ioBroker states
     groups_1.extendGroup(group);
+    // clean up any states that might be incorrectly defined
+    groups_1.updateGroupStates(group);
     // and load scene information
     observeResource(`${endpoints_1.endpoints.scenes}/${instanceId}`, (resp) => coap_getAllScenes_cb(instanceId, resp));
 }
@@ -929,7 +944,7 @@ function loadVirtualGroups() {
         // load them into the virtualGroups dict
         Object.assign(gateway_1.gateway.virtualGroups, object_polyfill_1.composeObject(groupObjects.map(g => {
             const id = g.native.instanceId;
-            const deviceIDs = g.native.deviceIDs;
+            const deviceIDs = g.native.deviceIDs.map(d => parseInt(d, 10));
             const ret = new virtual_group_1.VirtualGroup(id);
             ret.deviceIDs = deviceIDs;
             ret.name = g.common.name;

@@ -6,7 +6,7 @@ import { DictionaryLike, entries } from "../lib/object-polyfill";
 import { VirtualGroup } from "../lib/virtual-group";
 import { Device as SendToDevice, Group as SendToGroup } from "./communication";
 import { gateway as gw } from "./gateway";
-import { calcGroupName, extendVirtualGroup } from "./groups";
+import { calcGroupName, extendVirtualGroup, updateGroupStates } from "./groups";
 
 export async function onMessage(obj) {
 	// responds to the adapter that sent the original message
@@ -102,7 +102,7 @@ export async function onMessage(obj) {
 				const group = gw.virtualGroups[id];
 				// Update the device ids
 				if (params.deviceIDs != null && params.deviceIDs instanceof Array) {
-					group.deviceIDs = params.deviceIDs;
+					group.deviceIDs = params.deviceIDs.map(d => parseInt(d, 10)).filter(d => !isNaN(d));
 				}
 				// Change the name
 				if (typeof params.name === "string" && params.name.length > 0) {
@@ -110,6 +110,7 @@ export async function onMessage(obj) {
 				}
 				// save the changes
 				extendVirtualGroup(group);
+				updateGroupStates(group);
 
 				respond(responses.OK);
 				return;

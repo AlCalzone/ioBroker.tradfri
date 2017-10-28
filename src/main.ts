@@ -24,9 +24,9 @@ import { VirtualGroup } from "./lib/virtual-group";
 import utils from "./lib/utils";
 
 // Adapter-Module laden
-import { applyCustomObjectSubscriptions, applyCustomStateSubscriptions } from "./modules/custom-subscriptions";
+import { applyCustomObjectSubscriptions, applyCustomStateSubscriptions, subscribeStates } from "./modules/custom-subscriptions";
 import { gateway as gw, GroupInfo } from "./modules/gateway";
-import { calcGroupId, calcGroupName, extendGroup } from "./modules/groups";
+import { calcGroupId, calcGroupName, extendGroup, updateGroupStates, updateMultipleGroupStates } from "./modules/groups";
 import { onMessage } from "./modules/message";
 import { operateGroup, operateLight, operateVirtualGroup, renameDevice, renameGroup } from "./modules/operations";
 
@@ -59,9 +59,11 @@ let adapter: ExtendedAdapter = utils.adapter({
 		// console.error = (msg) => adapter.log.error("STDERR > " + msg);
 		_.log(`startfile = ${process.argv[1]}`);
 
-		// Eigene Objekte/States beobachten
-		adapter.subscribeStates("*");
-		adapter.subscribeObjects("*");
+		// watch own states
+		adapter.subscribeStates(`${adapter.namespace}.*`);
+		adapter.subscribeObjects(`${adapter.namespace}.*`);
+		// add special watch for lightbulb states, so we can later sync the group states
+		subscribeStates(/L\-\d+\.lightbulb\./, syncGroupsWithState);
 
 		// initialize CoAP client
 		const hostname = (adapter.config.host as string).toLowerCase();
@@ -100,6 +102,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 
 	objectChange: (id, obj) => {
 		_.log(`{{blue}} object with id ${id} ${obj ? "updated" : "deleted"}`, "debug");
+
 		if (id.startsWith(adapter.namespace)) {
 			// this is our own object.
 
@@ -331,6 +334,18 @@ let adapter: ExtendedAdapter = utils.adapter({
 // ==================================
 // manage devices
 
+// gets called when a lightbulb state gets updated
+// we use this to sync group states because those are not advertised by the gateway
+function syncGroupsWithState(id: string, state: ioBroker.State) {
+	if (state && state.ack) {
+		const instanceId = getInstanceId(id);
+		if (instanceId in gw.devices && gw.devices[instanceId] != null) {
+			const accessory = gw.devices[instanceId];
+			updateMultipleGroupStates(accessory, id);
+		}
+	}
+}
+
 /** Normalizes the path to a resource, so it can be used for storing the observer */
 function normalizeResourcePath(path: string): string {
 	path = path || "";
@@ -535,6 +550,8 @@ function coap_getGroup_cb(instanceId: number, response: CoapResponse) {
 
 	// create ioBroker states
 	extendGroup(group);
+	// clean up any states that might be incorrectly defined
+	updateGroupStates(group);
 	// and load scene information
 	observeResource(
 		`${coapEndpoints.scenes}/${instanceId}`,
@@ -995,7 +1012,7 @@ async function loadVirtualGroups(): Promise<void> {
 	Object.assign(gw.virtualGroups, composeObject<VirtualGroup>(
 		groupObjects.map(g => {
 			const id: number = g.native.instanceId;
-			const deviceIDs: number[] = g.native.deviceIDs;
+			const deviceIDs: number[] = g.native.deviceIDs.map(d => parseInt(d, 10));
 			const ret = new VirtualGroup(id);
 			ret.deviceIDs = deviceIDs;
 			ret.name = g.common.name;

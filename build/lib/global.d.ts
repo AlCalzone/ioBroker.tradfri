@@ -62,6 +62,8 @@ export interface ExtendedAdapter extends ioBroker.Adapter {
     $deleteState(stateName: string, options?: any): Promise<void>;
     $deleteState(parentChannel: string, stateName: string, options?: any): Promise<void>;
     $deleteState(parentDevice: string, parentChannel: string, stateName: string, options?: any): Promise<void>;
+    /** Deletes a state from the states DB, but not the associated object. Consider using @link{$deleteState} instead */
+    $delState(id: string, options?: any): Promise<void>;
     /** Read a value (which might not belong to this adapter) from the states DB. */
     $getForeignState(id: string, options?: any): Promise<ioBroker.State>;
     /** Writes a value (which might not belong to this adapter) into the states DB. */
