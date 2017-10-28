@@ -48,3 +48,6 @@ coverage
 admin/src/**/*.*
 # no clue why those are generated
 build/admin/**/*.d.ts
+
+# maintenance scripts
+maintenance/**
