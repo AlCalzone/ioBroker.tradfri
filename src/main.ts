@@ -24,6 +24,7 @@ import { VirtualGroup } from "./lib/virtual-group";
 import utils from "./lib/utils";
 
 // Adapter-Module laden
+import { normalizeHexColor } from "./lib/colors";
 import { applyCustomObjectSubscriptions, applyCustomStateSubscriptions, subscribeStates } from "./modules/custom-subscriptions";
 import { gateway as gw, GroupInfo } from "./modules/gateway";
 import { calcGroupId, calcGroupName, extendGroup, updateGroupStates, updateMultipleGroupStates } from "./modules/groups";
@@ -202,7 +203,17 @@ let adapter: ExtendedAdapter = utils.adapter({
 								onOff: true,
 								sceneId: val,
 							});
-						} else if (/\.(colorTemperature|color|hue|saturation)$/.test(id)) {
+						} else if (id.endsWith(".color")) {
+							val = normalizeHexColor(val);
+							if (val != null) {
+								state.val = val;
+								await operateVirtualGroup(group, {
+									color: val,
+									transitionTime: await getTransitionDuration(group),
+								});
+								wasAcked = true;
+							}
+						} else if (/\.(colorTemperature|hue|saturation)$/.test(id)) {
 							// color change is only supported manually, so we operate
 							// the virtual state of this group
 							await operateVirtualGroup(group, {
@@ -225,6 +236,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 						const vGroup = gw.virtualGroups[rootObj.native.instanceId];
 
 						let operation: LightOperation;
+						let wasAcked: boolean = false;
 
 						if (id.endsWith(".state")) {
 							operation = {
@@ -235,22 +247,33 @@ let adapter: ExtendedAdapter = utils.adapter({
 								dimmer: val,
 								transitionTime: await getTransitionDuration(vGroup),
 							};
-						} else if (/\.(colorTemperature|color|hue|saturation)$/.test(id)) {
+						} else if (id.endsWith(".color")) {
+							val = normalizeHexColor(val);
+							if (val != null) {
+								state.val = val;
+								operation = {
+									dimmer: val,
+									transitionTime: await getTransitionDuration(vGroup),
+								};
+							}
+						} else if (/\.(colorTemperature|hue|saturation)$/.test(id)) {
 							operation = {
 								[id.substr(id.lastIndexOf(".") + 1)]: val,
 								transitionTime: await getTransitionDuration(vGroup),
 							};
 						} else if (id.endsWith(".transitionDuration")) {
 							// No operation here, since this is part of another one
+							wasAcked = true;
 						}
 
 						// update all lightbulbs in this group
 						if (operation != null) {
 							operateVirtualGroup(vGroup, operation);
+							wasAcked = true;
 						}
 
 						// and ack the state change
-						adapter.$setState(id, state, true);
+						if (wasAcked) adapter.$setState(id, state, true);
 						return;
 					}
 
@@ -279,10 +302,14 @@ let adapter: ExtendedAdapter = utils.adapter({
 								// might already have "color" states for white spectrum bulbs
 								// in the future, we create different states for white and RGB bulbs
 								if (light.spectrum === "rgb") {
-									wasAcked = !await operateLight(accessory, {
-										color: val,
-										transitionTime: await getTransitionDuration(accessory),
-									});
+									val = normalizeHexColor(val);
+									if (val != null) {
+										state.val = val;
+										wasAcked = !await operateLight(accessory, {
+											color: val,
+											transitionTime: await getTransitionDuration(accessory),
+										});
+									}
 								} else if (light.spectrum === "white") {
 									wasAcked = !await operateLight(accessory, {
 										colorTemperature: val,

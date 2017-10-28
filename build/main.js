@@ -28,6 +28,7 @@ const virtual_group_1 = require("./lib/virtual-group");
 // Adapter-Utils laden
 const utils_1 = require("./lib/utils");
 // Adapter-Module laden
+const colors_1 = require("./lib/colors");
 const custom_subscriptions_1 = require("./modules/custom-subscriptions");
 const gateway_1 = require("./modules/gateway");
 const groups_1 = require("./modules/groups");
@@ -192,7 +193,18 @@ let adapter = utils_1.default.adapter({
                                 sceneId: val,
                             }));
                         }
-                        else if (/\.(colorTemperature|color|hue|saturation)$/.test(id)) {
+                        else if (id.endsWith(".color")) {
+                            val = colors_1.normalizeHexColor(val);
+                            if (val != null) {
+                                state.val = val;
+                                yield operations_1.operateVirtualGroup(group, {
+                                    color: val,
+                                    transitionTime: yield getTransitionDuration(group),
+                                });
+                                wasAcked = true;
+                            }
+                        }
+                        else if (/\.(colorTemperature|hue|saturation)$/.test(id)) {
                             // color change is only supported manually, so we operate
                             // the virtual state of this group
                             yield operations_1.operateVirtualGroup(group, {
@@ -214,6 +226,7 @@ let adapter = utils_1.default.adapter({
                         // find the virtual group instance
                         const vGroup = gateway_1.gateway.virtualGroups[rootObj.native.instanceId];
                         let operation;
+                        let wasAcked = false;
                         if (id.endsWith(".state")) {
                             operation = {
                                 onOff: val,
@@ -225,7 +238,17 @@ let adapter = utils_1.default.adapter({
                                 transitionTime: yield getTransitionDuration(vGroup),
                             };
                         }
-                        else if (/\.(colorTemperature|color|hue|saturation)$/.test(id)) {
+                        else if (id.endsWith(".color")) {
+                            val = colors_1.normalizeHexColor(val);
+                            if (val != null) {
+                                state.val = val;
+                                operation = {
+                                    dimmer: val,
+                                    transitionTime: yield getTransitionDuration(vGroup),
+                                };
+                            }
+                        }
+                        else if (/\.(colorTemperature|hue|saturation)$/.test(id)) {
                             operation = {
                                 [id.substr(id.lastIndexOf(".") + 1)]: val,
                                 transitionTime: yield getTransitionDuration(vGroup),
@@ -233,13 +256,16 @@ let adapter = utils_1.default.adapter({
                         }
                         else if (id.endsWith(".transitionDuration")) {
                             // No operation here, since this is part of another one
+                            wasAcked = true;
                         }
                         // update all lightbulbs in this group
                         if (operation != null) {
                             operations_1.operateVirtualGroup(vGroup, operation);
+                            wasAcked = true;
                         }
                         // and ack the state change
-                        adapter.$setState(id, state, true);
+                        if (wasAcked)
+                            adapter.$setState(id, state, true);
                         return;
                     }
                     default: {
@@ -267,10 +293,14 @@ let adapter = utils_1.default.adapter({
                                 // might already have "color" states for white spectrum bulbs
                                 // in the future, we create different states for white and RGB bulbs
                                 if (light.spectrum === "rgb") {
-                                    wasAcked = !(yield operations_1.operateLight(accessory, {
-                                        color: val,
-                                        transitionTime: yield getTransitionDuration(accessory),
-                                    }));
+                                    val = colors_1.normalizeHexColor(val);
+                                    if (val != null) {
+                                        state.val = val;
+                                        wasAcked = !(yield operations_1.operateLight(accessory, {
+                                            color: val,
+                                            transitionTime: yield getTransitionDuration(accessory),
+                                        }));
+                                    }
                                 }
                                 else if (light.spectrum === "white") {
                                     wasAcked = !(yield operations_1.operateLight(accessory, {
