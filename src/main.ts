@@ -255,7 +255,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 							if (val != null) {
 								state.val = val;
 								operation = {
-									dimmer: val,
+									color: val,
 									transitionTime: await getTransitionDuration(vGroup),
 								};
 							}

@@ -245,7 +245,7 @@ let adapter = utils_1.default.adapter({
                             if (val != null) {
                                 state.val = val;
                                 operation = {
-                                    dimmer: val,
+                                    color: val,
                                     transitionTime: yield getTransitionDuration(vGroup),
                                 };
                             }
