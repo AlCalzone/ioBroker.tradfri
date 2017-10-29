@@ -1,59 +1,11 @@
 import { Accessory, AccessoryTypes } from "../ipso/accessory";
 import { Group } from "../ipso/group";
 import { Global as _ } from "../lib/global";
+import { calcGroupId, getInstanceId, groupToCommon, groupToNative, objectDefinitions } from "../lib/iobroker-objects";
 import { DictionaryLike, dig, entries, filter, values } from "../lib/object-polyfill";
 import { padStart } from "../lib/strings";
 import { VirtualGroup } from "../lib/virtual-group";
 import { gateway as gw } from "./gateway";
-
-/**
- * Returns the common part of the ioBroker object representing the given group
- */
-export function groupToCommon(group: Group | VirtualGroup): ioBroker.ObjectCommon {
-	let name: string;
-	if (group instanceof Group) {
-		name = group.name;
-	} else /* group instanceof VirtualGroup */ {
-		if (typeof group.name === "string" && group.name.length > 0) {
-			name = group.name;
-		} else {
-			name = `virtual group ${group.instanceId}`;
-		}
-	}
-	return { name };
-}
-
-/**
- * Returns the native part of the ioBroker object representing the given group
- */
-export function groupToNative(group: Group | VirtualGroup): DictionaryLike<any> {
-	return {
-		instanceId: group.instanceId,
-		deviceIDs: group.deviceIDs,
-		type: (group instanceof VirtualGroup ? "virtual " : "") + "group",
-	};
-}
-
-/**
- * Determines the object ID under which the given group should be stored
- */
-export function calcGroupId(group: Group | VirtualGroup): string {
-	return `${_.adapter.namespace}.${calcGroupName(group)}`;
-}
-/**
- * Determines the object name under which the given group should be stored,
- * excluding the adapter namespace
- */
-export function calcGroupName(group: Group | VirtualGroup): string {
-	let prefix: string;
-	if (group instanceof Group) {
-		prefix = "G";
-	} else if (group instanceof VirtualGroup) {
-		prefix = "VG";
-	}
-	const postfix: string = group.instanceId.toString();
-	return `${prefix}-${padStart(postfix, 5, "0")}`;
-}
 
 /* creates or edits an existing <group>-object for a virtual group */
 export function extendVirtualGroup(group: VirtualGroup) {
@@ -93,126 +45,13 @@ export function extendVirtualGroup(group: VirtualGroup) {
 
 		// also create state objects, depending on the accessory type
 		const stateObjs: DictionaryLike<ioBroker.Object> = {
-			state: {
-				_id: `${objId}.state`,
-				type: "state",
-				common: {
-					name: "on/off",
-					read: true,
-					write: true,
-					type: "boolean",
-					role: "switch",
-				},
-				native: {
-					path: "onOff",
-				},
-			},
-			transitionDuration: {
-				_id: `${objId}.transitionDuration`,
-				type: "state",
-				common: {
-					name: "Transition duration",
-					read: false,
-					write: true,
-					type: "number",
-					min: 0,
-					max: 100, // TODO: check
-					def: 0,
-					role: "light.dimmer", // TODO: better role?
-					desc: "Duration for brightness changes of this group's lightbulbs",
-					unit: "s",
-				},
-				native: {
-					path: "transitionTime",
-				},
-			},
-			brightness: {
-				_id: `${objId}.brightness`,
-				type: "state",
-				common: {
-					name: "Brightness",
-					read: true,
-					write: true,
-					min: 0,
-					max: 100,
-					unit: "%",
-					type: "number",
-					role: "light.dimmer",
-					desc: "Brightness of this group's lightbulbs",
-				},
-				native: {
-					path: "dimmer",
-				},
-			},
-			colorTemperature: {
-				_id: `${objId}.colorTemperature`,
-				type: "state",
-				common: {
-					name: "White spectrum color temperature",
-					read: true,
-					write: true,
-					min: 0,
-					max: 100,
-					unit: "%",
-					type: "number",
-					role: "level.color.temperature",
-					desc: "Color temperature of this group's white spectrum lightbulbs. Range: 0% = cold, 100% = warm",
-				},
-				native: {
-					path: "colorTemperature",
-				},
-			},
-			color: {
-				_id: `${objId}.color`,
-				type: "state",
-				common: {
-					name: "RGB color",
-					read: true,
-					write: true,
-					type: "string",
-					role: "level.color",
-					desc: "Color of this group's RGB lightbulbs as a 6-digit hex string.",
-				},
-				native: {
-					path: "color",
-				},
-			},
-			hue: {
-				_id: `${objId}.hue`,
-				type: "state",
-				common: {
-					name: "Hue",
-					read: true,
-					write: true,
-					min: 0,
-					max: 360,
-					unit: "°",
-					type: "number",
-					role: "level.color.hue",
-					desc: "Hue of this group's RGB lightbulbs.",
-				},
-				native: {
-					path: "hue",
-				},
-			},
-			saturation: {
-				_id: `${objId}.saturation`,
-				type: "state",
-				common: {
-					name: "Saturation",
-					read: true,
-					write: true,
-					min: 0,
-					max: 100,
-					unit: "%",
-					type: "number",
-					role: "level.color.saturation",
-					desc: "Saturation of this group's RGB lightbulbs.",
-				},
-				native: {
-					path: "saturation",
-				},
-			},
+			state: objectDefinitions.onOff(objId, "virtual group"),
+			transitionDuration: objectDefinitions.transitionDuration(objId, "virtual group"),
+			brightness: objectDefinitions.brightness(objId, "virtual group"),
+			colorTemperature: objectDefinitions.colorTemperature(objId, "virtual group"),
+			color: objectDefinitions.color(objId, "virtual group"),
+			hue: objectDefinitions.hue(objId, "virtual group"),
+			saturation: objectDefinitions.saturation(objId, "virtual group"),
 		};
 
 		const createObjects = Object.keys(stateObjs)
@@ -285,149 +124,14 @@ export function extendGroup(group: Group) {
 
 		// also create state objects, depending on the accessory type
 		const stateObjs: DictionaryLike<ioBroker.Object> = {
-			activeScene: { // currently active scene
-				_id: `${objId}.activeScene`,
-				type: "state",
-				common: {
-					name: "active scene",
-					read: true,
-					write: true,
-					type: "number",
-					role: "value.id",
-					desc: "the instance id of the currently active scene",
-				},
-				native: {
-					path: "sceneId",
-				},
-			},
-			state: {
-				_id: `${objId}.state`,
-				type: "state",
-				common: {
-					name: "on/off",
-					read: true,
-					write: true,
-					type: "boolean",
-					role: "switch",
-				},
-				native: {
-					path: "onOff",
-				},
-			},
-			transitionDuration: {
-				_id: `${objId}.transitionDuration`,
-				type: "state",
-				common: {
-					name: "Transition duration",
-					read: false,
-					write: true,
-					type: "number",
-					min: 0,
-					max: 100, // TODO: check
-					def: 0,
-					role: "light.dimmer", // TODO: better role?
-					desc: "Duration for brightness changes of this group's lightbulbs",
-					unit: "s",
-				},
-				native: {
-					path: "transitionTime",
-				},
-			},
-			brightness: {
-				_id: `${objId}.brightness`,
-				type: "state",
-				common: {
-					name: "Brightness",
-					read: true,
-					write: true,
-					min: 0,
-					max: 100,
-					unit: "%",
-					type: "number",
-					role: "light.dimmer",
-					desc: "Brightness of this group's lightbulbs",
-				},
-				native: {
-					path: "dimmer",
-				},
-			},
-			colorTemperature: {
-				_id: `${objId}.colorTemperature`,
-				type: "state",
-				common: {
-					name: "White spectrum color temperature",
-					read: true,
-					write: true,
-					min: 0,
-					max: 100,
-					unit: "%",
-					type: "number",
-					role: "level.color.temperature",
-					desc: "Color temperature of this group's white spectrum lightbulbs. Range: 0% = cold, 100% = warm",
-				},
-				native: {
-					// virtual state, so no real path to an object exists
-					// we still have to give path a value, because other functions check for its existence
-					path: "__virtual__",
-				},
-			},
-			color: {
-				_id: `${objId}.color`,
-				type: "state",
-				common: {
-					name: "RGB color",
-					read: true,
-					write: true,
-					type: "string",
-					role: "level.color",
-					desc: "Color of this group's RGB lightbulbs as a 6-digit hex string.",
-				},
-				native: {
-					// virtual state, so no real path to an object exists
-					// we still have to give path a value, because other functions check for its existence
-					path: "__virtual__",
-				},
-			},
-			hue: {
-				_id: `${objId}.hue`,
-				type: "state",
-				common: {
-					name: "Hue",
-					read: true,
-					write: true,
-					min: 0,
-					max: 360,
-					unit: "°",
-					type: "number",
-					role: "level.color.hue",
-					desc: "Hue of this group's RGB lightbulbs.",
-				},
-				native: {
-					// virtual state, so no real path to an object exists
-					// we still have to give path a value, because other functions check for its existence
-					path: "__virtual__",
-				},
-			},
-			saturation: {
-				_id: `${objId}.saturation`,
-				type: "state",
-				common: {
-					name: "Saturation",
-					read: true,
-					write: true,
-					min: 0,
-					max: 100,
-					unit: "%",
-					type: "number",
-					role: "level.color.saturation",
-					desc: "Saturation of this group's RGB lightbulbs.",
-				},
-				native: {
-					// virtual state, so no real path to an object exists
-					// we still have to give path a value, because other functions check for its existence
-					path: "__virtual__",
-				},
-			},
+			activeScene: objectDefinitions.activeScene(objId, "group"),
+			state: objectDefinitions.onOff(objId, "group"),
+			transitionDuration: objectDefinitions.transitionDuration(objId, "group"),
+			brightness: objectDefinitions.brightness(objId, "group"),
+			colorTemperature: objectDefinitions.colorTemperature(objId, "group"),
+			color: objectDefinitions.color(objId, "group"),
+			hue: objectDefinitions.hue(objId, "group"),
+			saturation: objectDefinitions.saturation(objId, "group"),
 		};
 
 		const createObjects = Object.keys(stateObjs)
@@ -547,5 +251,17 @@ export function updateGroupStates(group: Group | VirtualGroup, changedStateId?: 
 		const commonState = (rgbBulbs.length > 0) ? getCommonValue(rgbBulbs.map(b => b.saturation)) : null;
 		const stateId = `${objId}.saturation`;
 		debounce(stateId, () => updateGroupState(stateId, commonState), debounceTimeout);
+	}
+}
+
+// gets called when a lightbulb state gets updated
+// we use this to sync group states because those are not advertised by the gateway
+export function syncGroupsWithState(id: string, state: ioBroker.State) {
+	if (state && state.ack) {
+		const instanceId = getInstanceId(id);
+		if (instanceId in gw.devices && gw.devices[instanceId] != null) {
+			const accessory = gw.devices[instanceId];
+			updateMultipleGroupStates(accessory, id);
+		}
 	}
 }

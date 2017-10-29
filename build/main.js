@@ -30,6 +30,7 @@ const utils_1 = require("./lib/utils");
 // Adapter-Module laden
 const colors_1 = require("./lib/colors");
 const fix_objects_1 = require("./lib/fix-objects");
+const iobroker_objects_1 = require("./lib/iobroker-objects");
 const custom_subscriptions_1 = require("./modules/custom-subscriptions");
 const gateway_1 = require("./modules/gateway");
 const groups_1 = require("./modules/groups");
@@ -64,7 +65,7 @@ let adapter = utils_1.default.adapter({
         adapter.subscribeStates(`${adapter.namespace}.*`);
         adapter.subscribeObjects(`${adapter.namespace}.*`);
         // add special watch for lightbulb states, so we can later sync the group states
-        custom_subscriptions_1.subscribeStates(/L\-\d+\.lightbulb\./, syncGroupsWithState);
+        custom_subscriptions_1.subscribeStates(/L\-\d+\.lightbulb\./, groups_1.syncGroupsWithState);
         // initialize CoAP client
         const hostname = adapter.config.host.toLowerCase();
         node_coap_client_1.CoapClient.setSecurityParams(hostname, {
@@ -103,7 +104,7 @@ let adapter = utils_1.default.adapter({
             // this is our own object.
             if (obj) {
                 // first check if we have to modify a device/group/whatever
-                const instanceId = getInstanceId(id);
+                const instanceId = iobroker_objects_1.getInstanceId(id);
                 if (obj.type === "device" && instanceId in gateway_1.gateway.devices && gateway_1.gateway.devices[instanceId] != null) {
                     // if this device is in the device list, check for changed properties
                     const acc = gateway_1.gateway.devices[instanceId];
@@ -156,7 +157,7 @@ let adapter = utils_1.default.adapter({
             if (!(stateObj && stateObj.type === "state" && stateObj.native && stateObj.native.path))
                 return;
             // get "official" value for the parent object
-            const rootId = getRootId(id);
+            const rootId = iobroker_objects_1.getRootId(id);
             if (rootId) {
                 // get the ioBroker object
                 const rootObj = gateway_1.gateway.objects[rootId];
@@ -355,17 +356,6 @@ let adapter = utils_1.default.adapter({
 });
 // ==================================
 // manage devices
-// gets called when a lightbulb state gets updated
-// we use this to sync group states because those are not advertised by the gateway
-function syncGroupsWithState(id, state) {
-    if (state && state.ack) {
-        const instanceId = getInstanceId(id);
-        if (instanceId in gateway_1.gateway.devices && gateway_1.gateway.devices[instanceId] != null) {
-            const accessory = gateway_1.gateway.devices[instanceId];
-            groups_1.updateMultipleGroupStates(accessory, id);
-        }
-    }
-}
 /** Normalizes the path to a resource, so it can be used for storing the observer */
 function normalizeResourcePath(path) {
     path = path || "";
@@ -445,7 +435,7 @@ function coapCb_getAllDevices(response) {
         removedKeys.forEach((id) => __awaiter(this, void 0, void 0, function* () {
             if (id in gateway_1.gateway.devices) {
                 // delete ioBroker device
-                const deviceName = calcObjName(gateway_1.gateway.devices[id]);
+                const deviceName = iobroker_objects_1.calcObjName(gateway_1.gateway.devices[id]);
                 yield adapter.$deleteDevice(deviceName);
                 // remove device from dictionary
                 delete gateway_1.gateway.groups[id];
@@ -467,7 +457,7 @@ function coap_getDevice_cb(instanceId, response) {
     // remember the device object, so we can later use it as a reference for updates
     gateway_1.gateway.devices[instanceId] = accessory;
     // create ioBroker device
-    extendDevice(accessory);
+    iobroker_objects_1.extendDevice(accessory);
 }
 /** Sets up an observer for all groups */
 function observeGroups() {
@@ -498,7 +488,7 @@ function coapCb_getAllGroups(response) {
         removedKeys.forEach((id) => __awaiter(this, void 0, void 0, function* () {
             if (id in gateway_1.gateway.groups) {
                 // delete ioBroker group
-                const groupName = groups_1.calcGroupName(gateway_1.gateway.groups[id].group);
+                const groupName = iobroker_objects_1.calcGroupName(gateway_1.gateway.groups[id].group);
                 yield adapter.$deleteChannel(groupName);
                 // remove group from dictionary
                 delete gateway_1.gateway.groups[id];
@@ -578,7 +568,7 @@ function coap_getAllScenes_cb(groupId, response) {
             stopObservingResource(`${endpoints_1.endpoints.scenes}/${groupId}/${id}`);
         });
         // Update the scene dropdown for the group
-        updatePossibleScenes(groupInfo);
+        iobroker_objects_1.updatePossibleScenes(groupInfo);
     });
 }
 // gets called whenever "get /15005/<groupId>/<instanceId>" updates
@@ -601,63 +591,7 @@ function coap_getScene_cb(groupId, instanceId, response) {
     // remember the scene object, so we can later use it as a reference for updates
     gateway_1.gateway.groups[groupId].scenes[instanceId] = scene;
     // Update the scene dropdown for the group
-    updatePossibleScenes(gateway_1.gateway.groups[groupId]);
-}
-/**
- * Returns the ioBroker id of the root object for the given state
- */
-function getRootId(stateId) {
-    const match = /^tradfri\.\d+\.\w+\-\d+/.exec(stateId);
-    if (match)
-        return match[0];
-}
-/**
- * Extracts the instance id from a given state or object id
- * @param id State or object id whose instance id should be extracted
- */
-function getInstanceId(id) {
-    const match = /^tradfri\.\d+\.\w+\-(\d+)/.exec(id);
-    if (match)
-        return +match[1];
-}
-/**
- * Determines the object ID under which the given accessory should be stored
- */
-function calcObjId(accessory) {
-    return `${adapter.namespace}.${calcObjName(accessory)}`;
-}
-/**
- * Determines the object name under which the given group accessory be stored,
- * excluding the adapter namespace
- */
-function calcObjName(accessory) {
-    let prefix;
-    switch (accessory.type) {
-        case accessory_1.AccessoryTypes.remote:
-            prefix = "RC";
-            break;
-        case accessory_1.AccessoryTypes.lightbulb:
-            prefix = "L";
-            break;
-        default:
-            global_1.Global.log(`Unknown accessory type ${accessory.type}. Please send this info to the developer with a short description of the device!`, "warn");
-            prefix = "XYZ";
-            break;
-    }
-    return `${prefix}-${accessory.instanceId}`;
-}
-/**
- * Determines the object ID under which the given scene should be stored
- */
-function calcSceneId(scene) {
-    return `${adapter.namespace}.${calcSceneName(scene)}`;
-}
-/**
- * Determines the object name under which the given scene should be stored,
- * excluding the adapter namespace
- */
-function calcSceneName(scene) {
-    return `S-${scene.instanceId}`;
+    iobroker_objects_1.updatePossibleScenes(gateway_1.gateway.groups[groupId]);
 }
 /**
  * Returns the configured transition duration for an accessory or a group
@@ -668,343 +602,16 @@ function getTransitionDuration(accessoryOrGroup) {
         if (accessoryOrGroup instanceof accessory_1.Accessory) {
             switch (accessoryOrGroup.type) {
                 case accessory_1.AccessoryTypes.lightbulb:
-                    stateId = calcObjId(accessoryOrGroup) + ".lightbulb.transitionDuration";
+                    stateId = iobroker_objects_1.calcObjId(accessoryOrGroup) + ".lightbulb.transitionDuration";
             }
         }
         else if (accessoryOrGroup instanceof group_1.Group || accessoryOrGroup instanceof virtual_group_1.VirtualGroup) {
-            stateId = groups_1.calcGroupId(accessoryOrGroup) + ".transitionDuration";
+            stateId = iobroker_objects_1.calcGroupId(accessoryOrGroup) + ".transitionDuration";
         }
         const ret = yield adapter.$getState(stateId);
         if (ret != null)
             return ret.val;
         return 0.5; // default
-    });
-}
-function getAccessoryIcon(accessory) {
-    const model = accessory.deviceInfo.modelNumber;
-    switch (model) {
-        case "TRADFRI remote control":
-            return "remote.png";
-        case "TRADFRI motion sensor":
-            return "motion_sensor.png";
-        case "TRADFRI wireless dimmer":
-            return "remote_dimmer.png";
-        case "TRADFRI plug":
-            return "plug.png";
-    }
-    if (accessory.type === accessory_1.AccessoryTypes.lightbulb) {
-        let prefix;
-        if (model.indexOf(" panel ") > -1) {
-            prefix = "panel";
-        }
-        else if (model.indexOf(" door ") > -1) {
-            prefix = "door";
-        }
-        else if (model.indexOf(" GU10 ") > -1) {
-            prefix = "gu10";
-        }
-        else {
-            prefix = "bulb";
-        }
-        let suffix = "";
-        const spectrum = accessory.lightList[0].spectrum;
-        if (spectrum === "white") {
-            suffix = "_ws";
-        }
-        else if (spectrum === "rgb") {
-            suffix = "_rgb";
-        }
-        return prefix + suffix + ".png";
-    }
-}
-/**
- * Returns the common part of the ioBroker object representing the given accessory
- */
-function accessoryToCommon(accessory) {
-    const ret = {
-        name: accessory.name,
-    };
-    const icon = getAccessoryIcon(accessory);
-    if (icon != null)
-        ret.icon = "icons/" + icon;
-    return ret;
-}
-/**
- * Returns the native part of the ioBroker object representing the given accessory
- */
-function accessoryToNative(accessory) {
-    return {
-        instanceId: accessory.instanceId,
-        manufacturer: accessory.deviceInfo.manufacturer,
-        firmwareVersion: accessory.deviceInfo.firmwareVersion,
-        modelNumber: accessory.deviceInfo.modelNumber,
-        type: accessory_1.AccessoryTypes[accessory.type],
-        serialNumber: accessory.deviceInfo.serialNumber,
-    };
-}
-/* creates or edits an existing <device>-object for an accessory */
-function extendDevice(accessory) {
-    const objId = calcObjId(accessory);
-    if (objId in gateway_1.gateway.objects) {
-        // check if we need to edit the existing object
-        const devObj = gateway_1.gateway.objects[objId];
-        let changed = false;
-        // update common part if neccessary
-        const newCommon = accessoryToCommon(accessory);
-        if (JSON.stringify(devObj.common) !== JSON.stringify(newCommon)) {
-            // merge the common objects
-            Object.assign(devObj.common, newCommon);
-            changed = true;
-        }
-        const newNative = accessoryToNative(accessory);
-        // update native part if neccessary
-        if (JSON.stringify(devObj.native) !== JSON.stringify(newNative)) {
-            // merge the native objects
-            Object.assign(devObj.native, newNative);
-            changed = true;
-        }
-        if (changed)
-            adapter.extendObject(objId, devObj);
-        // ====
-        // from here we can update the states
-        // filter out the ones belonging to this device with a property path
-        const stateObjs = object_polyfill_1.filter(gateway_1.gateway.objects, obj => obj._id.startsWith(objId) && obj.native && obj.native.path);
-        // for each property try to update the value
-        for (const [id, obj] of object_polyfill_1.entries(stateObjs)) {
-            try {
-                // Object could have a default value, find it
-                const newValue = object_polyfill_1.dig(accessory, obj.native.path);
-                adapter.setState(id, newValue, true);
-            }
-            catch (e) { }
-        }
-    }
-    else {
-        // create new object
-        const devObj = {
-            _id: objId,
-            type: "device",
-            common: accessoryToCommon(accessory),
-            native: accessoryToNative(accessory),
-        };
-        adapter.setObject(objId, devObj);
-        // also create state objects, depending on the accessory type
-        const stateObjs = {
-            alive: {
-                _id: `${objId}.alive`,
-                type: "state",
-                common: {
-                    name: "device alive",
-                    read: true,
-                    write: false,
-                    type: "boolean",
-                    role: "indicator.alive",
-                    desc: "indicates if the device is currently alive and connected to the gateway",
-                },
-                native: {
-                    path: "alive",
-                },
-            },
-            lastSeen: {
-                _id: `${objId}.lastSeen`,
-                type: "state",
-                common: {
-                    name: "last seen timestamp",
-                    read: true,
-                    write: false,
-                    type: "number",
-                    role: "indicator.lastSeen",
-                    desc: "indicates when the device has last been seen by the gateway",
-                },
-                native: {
-                    path: "lastSeen",
-                },
-            },
-        };
-        if (accessory.type === accessory_1.AccessoryTypes.lightbulb) {
-            let channelName;
-            let spectrum = "none";
-            if (accessory.lightList != null && accessory.lightList.length > 0) {
-                spectrum = accessory.lightList[0].spectrum;
-            }
-            if (spectrum === "none") {
-                channelName = "Lightbulb";
-            }
-            else if (spectrum === "white") {
-                channelName = "Lightbulb (white spectrum)";
-            }
-            else if (spectrum === "rgb") {
-                channelName = "RGB Lightbulb";
-            }
-            // obj.lightbulb should be a channel
-            stateObjs.lightbulb = {
-                _id: `${objId}.lightbulb`,
-                type: "channel",
-                common: {
-                    name: channelName,
-                    role: "light",
-                },
-                native: {
-                    spectrum: spectrum,
-                },
-            };
-            if (spectrum === "white") {
-                stateObjs["lightbulb.colorTemperature"] = {
-                    _id: `${objId}.lightbulb.colorTemperature`,
-                    type: "state",
-                    common: {
-                        name: "Color temperature",
-                        read: true,
-                        write: true,
-                        min: 0,
-                        max: 100,
-                        unit: "%",
-                        type: "number",
-                        role: "level.color.temperature",
-                        desc: "range: 0% = cold, 100% = warm",
-                    },
-                    native: {
-                        path: "lightList.[0].colorTemperature",
-                    },
-                };
-            }
-            else if (spectrum === "rgb") {
-                stateObjs["lightbulb.color"] = {
-                    _id: `${objId}.lightbulb.color`,
-                    type: "state",
-                    common: {
-                        name: "RGB color",
-                        read: true,
-                        write: true,
-                        type: "string",
-                        role: "level.color",
-                        desc: "6-digit RGB hex string",
-                    },
-                    native: {
-                        path: "lightList.[0].color",
-                    },
-                };
-                stateObjs["lightbulb.hue"] = {
-                    _id: `${objId}.lightbulb.hue`,
-                    type: "state",
-                    common: {
-                        name: "Hue",
-                        read: true,
-                        write: true,
-                        min: 0,
-                        max: 360,
-                        unit: "°",
-                        type: "number",
-                        role: "level.color.hue",
-                    },
-                    native: {
-                        path: "lightList.[0].hue",
-                    },
-                };
-                stateObjs["lightbulb.saturation"] = {
-                    _id: `${objId}.lightbulb.saturation`,
-                    type: "state",
-                    common: {
-                        name: "Saturation",
-                        read: true,
-                        write: true,
-                        min: 0,
-                        max: 100,
-                        unit: "%",
-                        type: "number",
-                        role: "level.color.saturation",
-                    },
-                    native: {
-                        path: "lightList.[0].saturation",
-                    },
-                };
-            }
-            stateObjs["lightbulb.brightness"] = {
-                _id: `${objId}.lightbulb.brightness`,
-                type: "state",
-                common: {
-                    name: "Brightness",
-                    read: true,
-                    write: true,
-                    min: 0,
-                    max: 100,
-                    unit: "%",
-                    type: "number",
-                    role: "light.dimmer",
-                    desc: "brightness of the lightbulb",
-                },
-                native: {
-                    path: "lightList.[0].dimmer",
-                },
-            };
-            stateObjs["lightbulb.state"] = {
-                _id: `${objId}.lightbulb.state`,
-                type: "state",
-                common: {
-                    name: "on/off",
-                    read: true,
-                    write: true,
-                    type: "boolean",
-                    role: "switch",
-                },
-                native: {
-                    path: "lightList.[0].onOff",
-                },
-            };
-            stateObjs["lightbulb.transitionDuration"] = {
-                _id: `${objId}.lightbulb.transitionDuration`,
-                type: "state",
-                common: {
-                    name: "Transition duration",
-                    read: true,
-                    write: true,
-                    type: "number",
-                    min: 0,
-                    max: 100,
-                    def: 0.5,
-                    role: "light.dimmer",
-                    desc: "Duration of a state change",
-                    unit: "s",
-                },
-                native: {
-                    path: "lightList.[0].transitionTime",
-                },
-            };
-        }
-        const createObjects = Object.keys(stateObjs)
-            .map((key) => {
-            const obj = stateObjs[key];
-            let initialValue = null;
-            if (obj.native.path != null) {
-                // Object could have a default value, find it
-                initialValue = object_polyfill_1.dig(accessory, obj.native.path);
-            }
-            // create object and return the promise, so we can wait
-            return adapter.$createOwnStateEx(obj._id, obj, initialValue);
-        });
-        Promise.all(createObjects);
-    }
-}
-function updatePossibleScenes(groupInfo) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const group = groupInfo.group;
-        // if this group is not in the dictionary, don't do anything
-        if (!(group.instanceId in gateway_1.gateway.groups))
-            return;
-        // find out which is the root object id
-        const objId = groups_1.calcGroupId(group);
-        // scenes are stored under <objId>.activeScene
-        const scenesId = `${objId}.activeScene`;
-        // only extend that object if it exists already
-        if (scenesId in gateway_1.gateway.objects) {
-            global_1.Global.log(`updating possible scenes for group ${group.instanceId}: ${JSON.stringify(Object.keys(groupInfo.scenes))}`);
-            const scenes = groupInfo.scenes;
-            // map scene ids and names to the dropdown
-            const states = object_polyfill_1.composeObject(Object.keys(scenes).map(id => [id, scenes[id].name]));
-            const obj = yield adapter.$getObject(scenesId);
-            obj.common.states = states;
-            yield adapter.$setObject(scenesId, obj);
-        }
     });
 }
 /**
@@ -1030,7 +637,7 @@ function loadVirtualGroups() {
         })));
         // remember the actual objects
         for (const obj of object_polyfill_1.values(gateway_1.gateway.virtualGroups)) {
-            const id = groups_1.calcGroupId(obj);
+            const id = iobroker_objects_1.calcGroupId(obj);
             gateway_1.gateway.objects[id] = iobObjects[id];
             // also remember all states
             const stateObjs = yield global_1.Global.$$(`${id}.*`, "state");

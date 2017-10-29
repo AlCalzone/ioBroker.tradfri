@@ -12,6 +12,7 @@ const node_coap_client_1 = require("node-coap-client");
 const accessory_1 = require("../ipso/accessory");
 const coap_payload_1 = require("../lib/coap-payload");
 const global_1 = require("../lib/global");
+const iobroker_objects_1 = require("../lib/iobroker-objects");
 const object_polyfill_1 = require("../lib/object-polyfill");
 const virtual_group_1 = require("../lib/virtual-group");
 const gateway_1 = require("./gateway");
@@ -128,7 +129,7 @@ function onMessage(obj) {
                         return;
                     }
                     const group = gateway_1.gateway.virtualGroups[id];
-                    const channel = groups_1.calcGroupName(group);
+                    const channel = iobroker_objects_1.calcGroupName(group);
                     yield global_1.Global.adapter.deleteChannel(channel);
                     delete gateway_1.gateway.virtualGroups[id];
                     respond(responses.OK);
