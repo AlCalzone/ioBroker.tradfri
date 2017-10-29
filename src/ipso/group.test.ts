@@ -30,7 +30,7 @@ describe("ipso/group =>", () => {
 
 	it("should parse correctly", () => {
 		expect(group.onOff).to.equal(template["5850"] === 1);
-		expect(group.dimmer).to.equal(template["5851"]);
+		expect(group.dimmer).to.equal(Math.round(template["5851"] / 254 * 100));
 		expect(group.sceneId).to.equal(template["9039"]);
 		expect(group.deviceIDs).to.equal(template["9018"]["15002"]["9003"]);
 	});
