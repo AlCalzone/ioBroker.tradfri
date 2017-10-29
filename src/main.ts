@@ -25,6 +25,7 @@ import utils from "./lib/utils";
 
 // Adapter-Module laden
 import { normalizeHexColor } from "./lib/colors";
+import { ensureInstanceObjects, fixAdapterObjects } from "./lib/fix-objects";
 import { applyCustomObjectSubscriptions, applyCustomStateSubscriptions, subscribeStates } from "./modules/custom-subscriptions";
 import { gateway as gw, GroupInfo } from "./modules/gateway";
 import { calcGroupId, calcGroupName, extendGroup, updateGroupStates, updateMultipleGroupStates } from "./modules/groups";
@@ -52,13 +53,15 @@ let adapter: ExtendedAdapter = utils.adapter({
 		// Adapter-Instanz global machen
 		adapter = _.extend(adapter);
 		_.adapter = adapter;
-		// Sicherstellen, dass alle Instance-Objects vorhanden sind
-		await _.ensureInstanceObjects();
 
 		// redirect console output
 		// console.log = (msg) => adapter.log.debug("STDOUT > " + msg);
 		// console.error = (msg) => adapter.log.error("STDERR > " + msg);
 		_.log(`startfile = ${process.argv[1]}`);
+
+		// Fix our adapter objects to repair incompatibilities between versions
+		await ensureInstanceObjects();
+		await fixAdapterObjects();
 
 		// watch own states
 		adapter.subscribeStates(`${adapter.namespace}.*`);
@@ -974,11 +977,12 @@ function extendDevice(accessory: Accessory) {
 				_id: `${objId}.lightbulb.brightness`,
 				type: "state",
 				common: {
-					name: "brightness",
+					name: "Brightness",
 					read: true,
 					write: true,
 					min: 0,
-					max: 254,
+					max: 100,
+					unit: "%",
 					type: "number",
 					role: "light.dimmer",
 					desc: "brightness of the lightbulb",

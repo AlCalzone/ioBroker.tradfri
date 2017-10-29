@@ -8,8 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const fs = require("fs");
-const path = require("path");
 const object_polyfill_1 = require("./object-polyfill");
 const promises_1 = require("./promises");
 // ==================================
@@ -141,18 +139,6 @@ class Global {
             else {
                 return objects;
             }
-        });
-    }
-    // Workaround für unvollständige Adapter-Upgrades
-    static ensureInstanceObjects() {
-        return __awaiter(this, void 0, void 0, function* () {
-            // read io-package.json
-            const ioPack = JSON.parse(fs.readFileSync(path.join(__dirname, "../../io-package.json"), "utf8"));
-            if (ioPack.instanceObjects == null || ioPack.instanceObjects.length === 0)
-                return;
-            // wait for all instance objects to be created
-            const setObjects = ioPack.instanceObjects.map(obj => Global._adapter.$setObjectNotExists(obj._id, obj));
-            yield Promise.all(setObjects);
         });
     }
 }

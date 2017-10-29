@@ -9,13 +9,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const conversions_1 = require("../modules/conversions");
 const ipsoDevice_1 = require("./ipsoDevice");
 const ipsoObject_1 = require("./ipsoObject");
 class Plug extends ipsoDevice_1.IPSODevice {
     constructor() {
         super(...arguments);
         this.cumulativeActivePower = 0.0; // <float>
-        this.dimmer = 0; // <int> [0..254]
+        this.dimmer = 0; // <int> [0..100]
         this.onOff = false;
         this.onTime = 0; // <int>
         this.powerFactor = 0.0; // <float>
@@ -30,6 +31,8 @@ __decorate([
 ], Plug.prototype, "cumulativeActivePower", void 0);
 __decorate([
     ipsoObject_1.ipsoKey("5851"),
+    ipsoObject_1.serializeWith(conversions_1.serializers.brightness),
+    ipsoObject_1.deserializeWith(conversions_1.deserializers.brightness),
     __metadata("design:type", Number)
 ], Plug.prototype, "dimmer", void 0);
 __decorate([

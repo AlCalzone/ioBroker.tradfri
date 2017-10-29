@@ -8,7 +8,9 @@ export class Group extends IPSODevice {
 	public onOff: boolean; // <bool>
 
 	@ipsoKey("5851")
-	public dimmer: number; // <int> [0..254]
+	@serializeWith(serializers.brightness)
+	@deserializeWith(deserializers.brightness)
+	public dimmer: number; // <int> [0..100]
 
 	@ipsoKey("9039")
 	public sceneId: number;

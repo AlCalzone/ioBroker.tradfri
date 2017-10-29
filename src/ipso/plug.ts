@@ -8,7 +8,9 @@ export class Plug extends IPSODevice {
 	public cumulativeActivePower: number = 0.0; // <float>
 
 	@ipsoKey("5851")
-	public dimmer: number = 0; // <int> [0..254]
+	@serializeWith(serializers.brightness)
+	@deserializeWith(deserializers.brightness)
+	public dimmer: number = 0; // <int> [0..100]
 
 	@ipsoKey("5850")
 	public onOff: boolean = false;

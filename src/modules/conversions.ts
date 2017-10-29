@@ -202,16 +202,32 @@ const transitionTime_out: PropertyTransform = val => val * 10;
 // the sent value is in 10ths of seconds, we're working with seconds
 const transitionTime_in: PropertyTransform = val => val / 10;
 
+// ===========================
+// BRIGHTNESS conversions
+
+// interpolate from [0..100%] to [0..254]
+const brightness_out: PropertyTransform = (value) => {
+	value = clamp(value, 0, 100);
+	return roundTo(value / 100 * 254, 0);
+};
+// interpolate from [0..254] to [0..100%]
+const brightness_in: PropertyTransform = (value) => {
+	value = clamp(value, 0, 254);
+	return roundTo(value / 254 * 100, 0);
+};
+
 export const serializers = {
 	transitionTime: transitionTime_out,
 	hue: hue_out,
 	saturation: saturation_out,
+	brightness: brightness_out,
 };
 
 export const deserializers = {
 	transitionTime: transitionTime_in,
 	hue: hue_in,
 	saturation: saturation_in,
+	brightness: brightness_in,
 };
 
 export const conversions = {

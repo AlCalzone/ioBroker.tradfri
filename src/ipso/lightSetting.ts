@@ -1,3 +1,4 @@
+import { deserializers, serializers } from "../modules/conversions";
 import { IPSODevice } from "./ipsoDevice";
 import { deserializeWith, ipsoKey, IPSOObject, PropertyTransform, required, serializeWith } from "./ipsoObject";
 
@@ -20,7 +21,9 @@ export class LightSetting extends IPSODevice {
 	public colorTemperature: number = 0; // TODO: range unknown!
 
 	@ipsoKey("5851")
-	public dimmer: number = 0; // <int> [0..254]
+	@serializeWith(serializers.brightness)
+	@deserializeWith(deserializers.brightness)
+	public dimmer: number = 0; // <int> [0..100]
 
 	@ipsoKey("5850")
 	public onOff: boolean = false; // <bool>

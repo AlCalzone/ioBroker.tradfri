@@ -9,6 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const conversions_1 = require("../modules/conversions");
 const ipsoDevice_1 = require("./ipsoDevice");
 const ipsoObject_1 = require("./ipsoObject");
 class LightSetting extends ipsoDevice_1.IPSODevice {
@@ -20,7 +21,7 @@ class LightSetting extends ipsoDevice_1.IPSODevice {
         this.colorX = 0; // int
         this.colorY = 0; // int
         this.colorTemperature = 0; // TODO: range unknown!
-        this.dimmer = 0; // <int> [0..254]
+        this.dimmer = 0; // <int> [0..100]
         this.onOff = false; // <bool>
     }
 }
@@ -50,6 +51,8 @@ __decorate([
 ], LightSetting.prototype, "colorTemperature", void 0);
 __decorate([
     ipsoObject_1.ipsoKey("5851"),
+    ipsoObject_1.serializeWith(conversions_1.serializers.brightness),
+    ipsoObject_1.deserializeWith(conversions_1.deserializers.brightness),
     __metadata("design:type", Number)
 ], LightSetting.prototype, "dimmer", void 0);
 __decorate([

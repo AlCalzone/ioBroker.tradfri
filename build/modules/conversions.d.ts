@@ -3,11 +3,13 @@ export declare const serializers: {
     transitionTime: PropertyTransform;
     hue: PropertyTransform;
     saturation: PropertyTransform;
+    brightness: PropertyTransform;
 };
 export declare const deserializers: {
     transitionTime: PropertyTransform;
     hue: PropertyTransform;
     saturation: PropertyTransform;
+    brightness: PropertyTransform;
 };
 export declare const conversions: {
     whiteSpectrumToColorX: PropertyTransform;

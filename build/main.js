@@ -29,6 +29,7 @@ const virtual_group_1 = require("./lib/virtual-group");
 const utils_1 = require("./lib/utils");
 // Adapter-Module laden
 const colors_1 = require("./lib/colors");
+const fix_objects_1 = require("./lib/fix-objects");
 const custom_subscriptions_1 = require("./modules/custom-subscriptions");
 const gateway_1 = require("./modules/gateway");
 const groups_1 = require("./modules/groups");
@@ -52,12 +53,13 @@ let adapter = utils_1.default.adapter({
         // Adapter-Instanz global machen
         adapter = global_1.Global.extend(adapter);
         global_1.Global.adapter = adapter;
-        // Sicherstellen, dass alle Instance-Objects vorhanden sind
-        yield global_1.Global.ensureInstanceObjects();
         // redirect console output
         // console.log = (msg) => adapter.log.debug("STDOUT > " + msg);
         // console.error = (msg) => adapter.log.error("STDERR > " + msg);
         global_1.Global.log(`startfile = ${process.argv[1]}`);
+        // Fix our adapter objects to repair incompatibilities between versions
+        yield fix_objects_1.ensureInstanceObjects();
+        yield fix_objects_1.fixAdapterObjects();
         // watch own states
         adapter.subscribeStates(`${adapter.namespace}.*`);
         adapter.subscribeObjects(`${adapter.namespace}.*`);
@@ -921,11 +923,12 @@ function extendDevice(accessory) {
                 _id: `${objId}.lightbulb.brightness`,
                 type: "state",
                 common: {
-                    name: "brightness",
+                    name: "Brightness",
                     read: true,
                     write: true,
                     min: 0,
-                    max: 254,
+                    max: 100,
+                    unit: "%",
                     type: "number",
                     role: "light.dimmer",
                     desc: "brightness of the lightbulb",

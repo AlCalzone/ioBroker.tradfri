@@ -64,7 +64,9 @@ export class Light extends IPSODevice {
 	public cumulativeActivePower: number; // <float>
 
 	@ipsoKey("5851")
-	public dimmer: number; // <int> [0..254]
+	@serializeWith(serializers.brightness)
+	@deserializeWith(deserializers.brightness)
+	public dimmer: number; // <int> [0..100]
 
 	@ipsoKey("5850")
 	public onOff: boolean;

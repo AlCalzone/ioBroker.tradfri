@@ -8,7 +8,7 @@ export class VirtualGroup {
 
 	public name: string;
 	public onOff: boolean; // <bool>
-	public dimmer: number; // <int> [0..254]
+	public dimmer: number; // <int> [0..100]
 	public colorTemperature: number; // int
 	public transitionTime: number; // <float>
 	public color: string; // int

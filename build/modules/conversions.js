@@ -193,15 +193,29 @@ const saturation_in = (value /*, light: Light*/) => {
 const transitionTime_out = val => val * 10;
 // the sent value is in 10ths of seconds, we're working with seconds
 const transitionTime_in = val => val / 10;
+// ===========================
+// BRIGHTNESS conversions
+// interpolate from [0..100%] to [0..254]
+const brightness_out = (value) => {
+    value = math_1.clamp(value, 0, 100);
+    return math_1.roundTo(value / 100 * 254, 0);
+};
+// interpolate from [0..254] to [0..100%]
+const brightness_in = (value) => {
+    value = math_1.clamp(value, 0, 254);
+    return math_1.roundTo(value / 254 * 100, 0);
+};
 exports.serializers = {
     transitionTime: transitionTime_out,
     hue: hue_out,
     saturation: saturation_out,
+    brightness: brightness_out,
 };
 exports.deserializers = {
     transitionTime: transitionTime_in,
     hue: hue_in,
     saturation: saturation_in,
+    brightness: brightness_in,
 };
 exports.conversions = {
     whiteSpectrumToColorX,

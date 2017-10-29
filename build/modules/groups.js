@@ -145,7 +145,8 @@ function extendVirtualGroup(group) {
                     read: true,
                     write: true,
                     min: 0,
-                    max: 254,
+                    max: 100,
+                    unit: "%",
                     type: "number",
                     role: "light.dimmer",
                     desc: "Brightness of this group's lightbulbs",
@@ -343,7 +344,8 @@ function extendGroup(group) {
                     read: true,
                     write: true,
                     min: 0,
-                    max: 254,
+                    max: 100,
+                    unit: "%",
                     type: "number",
                     role: "light.dimmer",
                     desc: "Brightness of this group's lightbulbs",
@@ -490,6 +492,8 @@ function updateMultipleGroupStates(changedAccessory, changedStateId) {
 }
 exports.updateMultipleGroupStates = updateMultipleGroupStates;
 function updateGroupStates(group, changedStateId) {
+    if (group.deviceIDs == null)
+        return;
     // only works for lightbulbs right now
     const groupBulbs = group.deviceIDs.map(id => gateway_1.gateway.devices[id])
         .filter(a => a.type === accessory_1.AccessoryTypes.lightbulb)

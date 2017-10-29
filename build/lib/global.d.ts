@@ -96,5 +96,4 @@ export declare class Global {
      * @param id
      */
     static $$(pattern: string, type: ioBroker.ObjectType, role?: string): Promise<DictionaryLike<ioBroker.Object>>;
-    static ensureInstanceObjects(): Promise<void>;
 }

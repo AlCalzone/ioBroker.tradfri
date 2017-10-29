@@ -46,6 +46,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### 0.5.4 (2017-10-29)
+* (AlCalzone) Brightness is now expressed in 0..100%
+
 #### 0.5.3 (2017-10-28)
 * (AlCalzone) Fixed transition duration for groups
 

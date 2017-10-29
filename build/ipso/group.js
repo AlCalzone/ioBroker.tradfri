@@ -20,6 +20,8 @@ __decorate([
 ], Group.prototype, "onOff", void 0);
 __decorate([
     ipsoObject_1.ipsoKey("5851"),
+    ipsoObject_1.serializeWith(conversions_1.serializers.brightness),
+    ipsoObject_1.deserializeWith(conversions_1.deserializers.brightness),
     __metadata("design:type", Number)
 ], Group.prototype, "dimmer", void 0);
 __decorate([
