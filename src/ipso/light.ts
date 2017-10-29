@@ -192,7 +192,7 @@ function createRGBProxy<T extends Light>() {
 					return me.color;
 				} else {
 					// calculate it from colorX/Y
-					const {r, g, b} = conversions.rgbFromCIExyY(me.colorX, me.colorY);
+					const {r, g, b} = conversions.rgbFromCIExyY(me.colorX / MAX_COLOR, me.colorY / MAX_COLOR);
 					return conversions.rgbToString(r, g, b);
 				}
 			}
