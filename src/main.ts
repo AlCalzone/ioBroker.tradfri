@@ -70,28 +70,52 @@ let adapter: ExtendedAdapter = utils.adapter({
 		// add special watch for lightbulb states, so we can later sync the group states
 		subscribeStates(/L\-\d+\.lightbulb\./, syncGroupsWithState);
 
-		// initialize CoAP client
 		const hostname = (adapter.config.host as string).toLowerCase();
-		coap.setSecurityParams(hostname, {
-			psk: { "Client_identity": adapter.config.securityCode },
-		});
 		gw.requestBase = `coaps://${hostname}:5684/`;
 
-		// Try a few times to setup a working connection
-		const maxTries = 3;
-		for (let i = 1; i <= maxTries; i++) {
-			if (await coap.tryToConnect(gw.requestBase)) {
-				break; // it worked
-			} else if (i < maxTries) {
-				_.log(`Could not connect to gateway, try #${i}`, "warn");
-				await wait(1000);
-			} else if (i === maxTries) {
-				// no working connection
-				_.log(`Could not connect to the gateway ${gw.requestBase} after ${maxTries} tries!`, "error");
-				_.log(`Please check your network and adapter settings and restart the adapter!`, "error");
+		// TODO: make this more elegant when I have the time
+		// we're reconnecting a bit too much
+
+		// first, check try to connect with the security code
+		_.log("trying to connect with the security code", "debug");
+		if (!await connect(hostname, "Client_identity", adapter.config.securityCode)) {
+			// that didn't work, so the code is wrong
+			return;
+		}
+		// now, if we have a stored identity, try to connect with that one
+		const identity = await adapter.$getState("info.identity");
+		const identityObj = await adapter.$getObject("info.identity");
+		let needsAuthentication: boolean;
+		if (identity == null || !("psk" in identityObj.native) || typeof identityObj.native.psk !== "string" || identityObj.native.psk.length === 0) {
+			_.log("no identity stored, creating a new one", "debug");
+			needsAuthentication = true;
+		} else if (!await connect(hostname, identity.val, identityObj.native.psk)) {
+			_.log("stored identity has expired, creating a new one", "debug");
+			// either there was no stored identity, or the current one is expired,
+			// so we need to get a new one
+			// delete the old one first
+			await adapter.$setState("info.identity", "", true);
+			if ("psk" in identityObj.native) {
+				delete identityObj.native.psk;
+				await adapter.$setObject("info.identity", identityObj);
+			}
+			needsAuthentication = true;
+			// therefore, reconnect with the working security code
+			await connect(hostname, "Client_identity", adapter.config.securityCode);
+		}
+		if (needsAuthentication) {
+			const authResult = await authenticate();
+			if (authResult == null) {
+				_.log("authentication failed", "error");
+				return;
+			}
+			_.log(`reconnecting with the new identity`, "debug");
+			if (!await connect(hostname, authResult.identity, authResult.psk)) {
+				_.log("connection with fresh identity failed", "error");
 				return;
 			}
 		}
+
 		await adapter.$setState("info.connection", true, true);
 		connectionAlive = true;
 		pingTimer = setInterval(pingThread, 10000);
@@ -362,6 +386,68 @@ let adapter: ExtendedAdapter = utils.adapter({
 	},
 }) as ExtendedAdapter;
 
+async function connect(hostname: string, identity: string, code: string): Promise<boolean> {
+	// initialize CoAP client
+	coap.reset();
+	coap.setSecurityParams(hostname, {
+		psk: { [identity]: code },
+	});
+
+	_.log(`Connecting to gateway ${hostname}, identity = ${identity}, psk = ${code}`, "debug");
+
+	// Try a few times to setup a working connection
+	const maxTries = 3;
+	for (let i = 1; i <= maxTries; i++) {
+		if (await coap.tryToConnect(gw.requestBase)) {
+			break; // it worked
+		} else if (i < maxTries) {
+			_.log(`Could not connect to gateway, try #${i}`, "warn");
+			await wait(1000);
+		} else if (i === maxTries) {
+			// no working connection
+			_.log(`Could not connect to the gateway ${gw.requestBase} after ${maxTries} tries!`, "error");
+			_.log(`Please check your network and adapter settings and restart the adapter!`, "error");
+			return false;
+		}
+	}
+
+	return true;
+}
+
+async function authenticate(): Promise<{identity: string, psk: string}> {
+	// generate a new identity
+	const identity = `tradfri_${Date.now()}`;
+
+	_.log(`authenticating with identity "${identity}"`, "debug");
+
+	// request creation of new PSK
+	let payload: string | Buffer = JSON.stringify({ 9090: identity });
+	payload = Buffer.from(payload);
+	const response = await coap.request(
+		`${gw.requestBase}${coapEndpoints.authentication}`,
+		"post",
+		payload,
+	);
+
+	// check the response
+	if (response.code.toString() !== "2.01") {
+		_.log(`unexpected response (${response.code.toString()}) to getPSK().`, "error");
+		return null;
+	}
+	// the response is a buffer containing a JSON object as a string
+	const pskResponse = JSON.parse(response.payload.toString("utf8"));
+	const psk = pskResponse["9091"];
+
+	// remember the identity/psk
+	await adapter.$setState("info.identity", identity, true);
+	const identityObj = await adapter.$getObject("info.identity");
+	identityObj.native.psk = psk;
+	await adapter.$setObject("info.identity", identityObj);
+
+	// and return it
+	return {identity, psk};
+}
+
 // ==================================
 // manage devices
 
@@ -462,7 +548,7 @@ async function coapCb_getAllDevices(response: CoapResponse) {
 			const deviceName = calcObjName(gw.devices[id]);
 			await adapter.$deleteDevice(deviceName);
 			// remove device from dictionary
-			delete gw.groups[id];
+			delete gw.devices[id];
 		}
 
 		// remove observer

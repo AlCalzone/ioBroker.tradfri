@@ -46,6 +46,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### 0.5.5 (2017-10-31)
+* (AlCalzone) Restored compatibility to Gateway version 1.2.42
+
 #### 0.5.4 (2017-10-29)
 * (AlCalzone) Brightness is now expressed in 0..100%
 * (AlCalzone) Fixed parsing RGB colors

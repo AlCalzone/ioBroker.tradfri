@@ -66,26 +66,47 @@ let adapter = utils_1.default.adapter({
         adapter.subscribeObjects(`${adapter.namespace}.*`);
         // add special watch for lightbulb states, so we can later sync the group states
         custom_subscriptions_1.subscribeStates(/L\-\d+\.lightbulb\./, groups_1.syncGroupsWithState);
-        // initialize CoAP client
         const hostname = adapter.config.host.toLowerCase();
-        node_coap_client_1.CoapClient.setSecurityParams(hostname, {
-            psk: { "Client_identity": adapter.config.securityCode },
-        });
         gateway_1.gateway.requestBase = `coaps://${hostname}:5684/`;
-        // Try a few times to setup a working connection
-        const maxTries = 3;
-        for (let i = 1; i <= maxTries; i++) {
-            if (yield node_coap_client_1.CoapClient.tryToConnect(gateway_1.gateway.requestBase)) {
-                break; // it worked
+        // TODO: make this more elegant when I have the time
+        // we're reconnecting a bit too much
+        // first, check try to connect with the security code
+        global_1.Global.log("trying to connect with the security code", "debug");
+        if (!(yield connect(hostname, "Client_identity", adapter.config.securityCode))) {
+            // that didn't work, so the code is wrong
+            return;
+        }
+        // now, if we have a stored identity, try to connect with that one
+        const identity = yield adapter.$getState("info.identity");
+        const identityObj = yield adapter.$getObject("info.identity");
+        let needsAuthentication;
+        if (identity == null || !("psk" in identityObj.native) || typeof identityObj.native.psk !== "string" || identityObj.native.psk.length === 0) {
+            global_1.Global.log("no identity stored, creating a new one", "debug");
+            needsAuthentication = true;
+        }
+        else if (!(yield connect(hostname, identity.val, identityObj.native.psk))) {
+            global_1.Global.log("stored identity has expired, creating a new one", "debug");
+            // either there was no stored identity, or the current one is expired,
+            // so we need to get a new one
+            // delete the old one first
+            yield adapter.$setState("info.identity", "", true);
+            if ("psk" in identityObj.native) {
+                delete identityObj.native.psk;
+                yield adapter.$setObject("info.identity", identityObj);
             }
-            else if (i < maxTries) {
-                global_1.Global.log(`Could not connect to gateway, try #${i}`, "warn");
-                yield promises_1.wait(1000);
+            needsAuthentication = true;
+            // therefore, reconnect with the working security code
+            yield connect(hostname, "Client_identity", adapter.config.securityCode);
+        }
+        if (needsAuthentication) {
+            const authResult = yield authenticate();
+            if (authResult == null) {
+                global_1.Global.log("authentication failed", "error");
+                return;
             }
-            else if (i === maxTries) {
-                // no working connection
-                global_1.Global.log(`Could not connect to the gateway ${gateway_1.gateway.requestBase} after ${maxTries} tries!`, "error");
-                global_1.Global.log(`Please check your network and adapter settings and restart the adapter!`, "error");
+            global_1.Global.log(`reconnecting with the new identity`, "debug");
+            if (!(yield connect(hostname, authResult.identity, authResult.psk))) {
+                global_1.Global.log("connection with fresh identity failed", "error");
                 return;
             }
         }
@@ -354,6 +375,60 @@ let adapter = utils_1.default.adapter({
         }
     },
 });
+function connect(hostname, identity, code) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // initialize CoAP client
+        node_coap_client_1.CoapClient.reset();
+        node_coap_client_1.CoapClient.setSecurityParams(hostname, {
+            psk: { [identity]: code },
+        });
+        global_1.Global.log(`Connecting to gateway ${hostname}, identity = ${identity}, psk = ${code}`, "debug");
+        // Try a few times to setup a working connection
+        const maxTries = 3;
+        for (let i = 1; i <= maxTries; i++) {
+            if (yield node_coap_client_1.CoapClient.tryToConnect(gateway_1.gateway.requestBase)) {
+                break; // it worked
+            }
+            else if (i < maxTries) {
+                global_1.Global.log(`Could not connect to gateway, try #${i}`, "warn");
+                yield promises_1.wait(1000);
+            }
+            else if (i === maxTries) {
+                // no working connection
+                global_1.Global.log(`Could not connect to the gateway ${gateway_1.gateway.requestBase} after ${maxTries} tries!`, "error");
+                global_1.Global.log(`Please check your network and adapter settings and restart the adapter!`, "error");
+                return false;
+            }
+        }
+        return true;
+    });
+}
+function authenticate() {
+    return __awaiter(this, void 0, void 0, function* () {
+        // generate a new identity
+        const identity = `tradfri_${Date.now()}`;
+        global_1.Global.log(`authenticating with identity "${identity}"`, "debug");
+        // request creation of new PSK
+        let payload = JSON.stringify({ 9090: identity });
+        payload = Buffer.from(payload);
+        const response = yield node_coap_client_1.CoapClient.request(`${gateway_1.gateway.requestBase}${endpoints_1.endpoints.authentication}`, "post", payload);
+        // check the response
+        if (response.code.toString() !== "2.01") {
+            global_1.Global.log(`unexpected response (${response.code.toString()}) to getPSK().`, "error");
+            return null;
+        }
+        // the response is a buffer containing a JSON object as a string
+        const pskResponse = JSON.parse(response.payload.toString("utf8"));
+        const psk = pskResponse["9091"];
+        // remember the identity/psk
+        yield adapter.$setState("info.identity", identity, true);
+        const identityObj = yield adapter.$getObject("info.identity");
+        identityObj.native.psk = psk;
+        yield adapter.$setObject("info.identity", identityObj);
+        // and return it
+        return { identity, psk };
+    });
+}
 // ==================================
 // manage devices
 /** Normalizes the path to a resource, so it can be used for storing the observer */
@@ -438,7 +513,7 @@ function coapCb_getAllDevices(response) {
                 const deviceName = iobroker_objects_1.calcObjName(gateway_1.gateway.devices[id]);
                 yield adapter.$deleteDevice(deviceName);
                 // remove device from dictionary
-                delete gateway_1.gateway.groups[id];
+                delete gateway_1.gateway.devices[id];
             }
             // remove observer
             stopObservingResource(`${endpoints_1.endpoints.devices}/${id}`);
