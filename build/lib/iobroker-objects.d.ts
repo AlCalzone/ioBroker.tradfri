@@ -1,7 +1,4 @@
-import { Accessory } from "../ipso/accessory";
-import { Group } from "../ipso/group";
-import { Scene } from "../ipso/scene";
-import { GroupInfo } from "../modules/gateway";
+import { Accessory, Group, GroupInfo, Scene } from "node-tradfri-client";
 import { DictionaryLike } from "./object-polyfill";
 import { VirtualGroup } from "./virtual-group";
 /**
@@ -12,7 +9,15 @@ export declare function accessoryToCommon(accessory: Accessory): ioBroker.Object
  * Returns the native part of the ioBroker object representing the given accessory
  */
 export declare function accessoryToNative(accessory: Accessory): DictionaryLike<any>;
+/**
+ * Creates or edits an existing <device>-object for an accessory.
+ * @param accessory The accessory to update
+ */
 export declare function extendDevice(accessory: Accessory): void;
+/**
+ * Updates the possible scenes for a group
+ * @param groupInfo The group to update
+ */
 export declare function updatePossibleScenes(groupInfo: GroupInfo): Promise<void>;
 export declare function getAccessoryIcon(accessory: Accessory): string;
 /**

@@ -8,9 +8,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const accessory_1 = require("../ipso/accessory");
-const group_1 = require("../ipso/group");
-const gateway_1 = require("../modules/gateway");
+const node_tradfri_client_1 = require("node-tradfri-client");
+const session_1 = require("../modules/session");
 const global_1 = require("./global");
 const object_polyfill_1 = require("./object-polyfill");
 const strings_1 = require("./strings");
@@ -37,17 +36,20 @@ function accessoryToNative(accessory) {
         manufacturer: accessory.deviceInfo.manufacturer,
         firmwareVersion: accessory.deviceInfo.firmwareVersion,
         modelNumber: accessory.deviceInfo.modelNumber,
-        type: accessory_1.AccessoryTypes[accessory.type],
+        type: node_tradfri_client_1.AccessoryTypes[accessory.type],
         serialNumber: accessory.deviceInfo.serialNumber,
     };
 }
 exports.accessoryToNative = accessoryToNative;
-/* creates or edits an existing <device>-object for an accessory */
+/**
+ * Creates or edits an existing <device>-object for an accessory.
+ * @param accessory The accessory to update
+ */
 function extendDevice(accessory) {
     const objId = calcObjId(accessory);
-    if (objId in gateway_1.gateway.objects) {
+    if (objId in session_1.session.objects) {
         // check if we need to edit the existing object
-        const devObj = gateway_1.gateway.objects[objId];
+        const devObj = session_1.session.objects[objId];
         let changed = false;
         // update common part if neccessary
         const newCommon = accessoryToCommon(accessory);
@@ -68,7 +70,7 @@ function extendDevice(accessory) {
         // ====
         // from here we can update the states
         // filter out the ones belonging to this device with a property path
-        const stateObjs = object_polyfill_1.filter(gateway_1.gateway.objects, obj => obj._id.startsWith(objId) && obj.native && obj.native.path);
+        const stateObjs = object_polyfill_1.filter(session_1.session.objects, obj => obj._id.startsWith(objId) && obj.native && obj.native.path);
         // for each property try to update the value
         for (const [id, obj] of object_polyfill_1.entries(stateObjs)) {
             try {
@@ -121,7 +123,7 @@ function extendDevice(accessory) {
                 },
             },
         };
-        if (accessory.type === accessory_1.AccessoryTypes.lightbulb) {
+        if (accessory.type === node_tradfri_client_1.AccessoryTypes.lightbulb) {
             let channelName;
             let spectrum = "none";
             if (accessory.lightList != null && accessory.lightList.length > 0) {
@@ -175,18 +177,22 @@ function extendDevice(accessory) {
     }
 }
 exports.extendDevice = extendDevice;
+/**
+ * Updates the possible scenes for a group
+ * @param groupInfo The group to update
+ */
 function updatePossibleScenes(groupInfo) {
     return __awaiter(this, void 0, void 0, function* () {
         const group = groupInfo.group;
         // if this group is not in the dictionary, don't do anything
-        if (!(group.instanceId in gateway_1.gateway.groups))
+        if (!(group.instanceId in session_1.session.groups))
             return;
         // find out which is the root object id
         const objId = calcGroupId(group);
         // scenes are stored under <objId>.activeScene
         const scenesId = `${objId}.activeScene`;
         // only extend that object if it exists already
-        if (scenesId in gateway_1.gateway.objects) {
+        if (scenesId in session_1.session.objects) {
             global_1.Global.log(`updating possible scenes for group ${group.instanceId}: ${JSON.stringify(Object.keys(groupInfo.scenes))}`);
             const scenes = groupInfo.scenes;
             // map scene ids and names to the dropdown
@@ -210,7 +216,7 @@ function getAccessoryIcon(accessory) {
         case "TRADFRI plug":
             return "plug.png";
     }
-    if (accessory.type === accessory_1.AccessoryTypes.lightbulb) {
+    if (accessory.type === node_tradfri_client_1.AccessoryTypes.lightbulb) {
         let prefix;
         if (model.indexOf(" panel ") > -1) {
             prefix = "panel";
@@ -269,10 +275,10 @@ exports.calcObjId = calcObjId;
 function calcObjName(accessory) {
     let prefix;
     switch (accessory.type) {
-        case accessory_1.AccessoryTypes.remote:
+        case node_tradfri_client_1.AccessoryTypes.remote:
             prefix = "RC";
             break;
-        case accessory_1.AccessoryTypes.lightbulb:
+        case node_tradfri_client_1.AccessoryTypes.lightbulb:
             prefix = "L";
             break;
         default:
@@ -288,7 +294,7 @@ exports.calcObjName = calcObjName;
  */
 function groupToCommon(group) {
     let name;
-    if (group instanceof group_1.Group) {
+    if (group instanceof node_tradfri_client_1.Group) {
         name = group.name;
     }
     else {
@@ -326,7 +332,7 @@ exports.calcGroupId = calcGroupId;
  */
 function calcGroupName(group) {
     let prefix;
-    if (group instanceof group_1.Group) {
+    if (group instanceof node_tradfri_client_1.Group) {
         prefix = "G";
     }
     else if (group instanceof virtual_group_1.VirtualGroup) {

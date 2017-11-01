@@ -1,9 +1,9 @@
-import { expect } from "chai";
-import { Light } from "./ipso/light";
-import { pointInTriangle } from "./lib/math";
-import { values } from "./lib/object-polyfill";
-import { conversions } from "./modules/conversions";
-import { predefinedColors } from "./modules/predefined-colors";
+// import { expect } from "chai";
+// import { Light } from "node-tradfri-client";
+// import { pointInTriangle } from "./lib/math";
+// import { values } from "./lib/object-polyfill";
+// import { conversions } from "./modules/conversions";
+// import { predefinedColors } from "./modules/predefined-colors";
 // tslint:disable:no-unused-expression
 
 // describe("RGB debug =>", () => {

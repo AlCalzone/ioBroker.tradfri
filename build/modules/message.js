@@ -8,15 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const node_coap_client_1 = require("node-coap-client");
-const accessory_1 = require("../ipso/accessory");
-const coap_payload_1 = require("../lib/coap-payload");
+const node_tradfri_client_1 = require("node-tradfri-client");
 const global_1 = require("../lib/global");
 const iobroker_objects_1 = require("../lib/iobroker-objects");
 const object_polyfill_1 = require("../lib/object-polyfill");
 const virtual_group_1 = require("../lib/virtual-group");
-const gateway_1 = require("./gateway");
 const groups_1 = require("./groups");
+const session_1 = require("./session");
 function onMessage(obj) {
     return __awaiter(this, void 0, void 0, function* () {
         // responds to the adapter that sent the original message
@@ -62,30 +60,20 @@ function onMessage(obj) {
                         respond({ error: `unsupported request method "${params.method}"` });
                         return;
                     }
-                    global_1.Global.log(`custom coap request: ${params.method.toUpperCase()} "${gateway_1.gateway.requestBase}${params.path}"`);
-                    // create payload
-                    let payload;
-                    if (params.payload) {
-                        payload = JSON.stringify(params.payload);
-                        global_1.Global.log("sending custom payload: " + payload);
-                        payload = Buffer.from(payload);
-                    }
+                    global_1.Global.log(`custom coap request: ${params.method.toUpperCase()} "${params.path}"`);
                     // wait for the CoAP response and respond to the message
-                    const resp = yield node_coap_client_1.CoapClient.request(`${gateway_1.gateway.requestBase}${params.path}`, params.method, payload);
-                    respond(responses.RESULT({
-                        code: resp.code.toString(),
-                        payload: coap_payload_1.parsePayload(resp),
-                    }));
+                    const resp = yield session_1.session.tradfri.request(params.path, params.method, params.payload);
+                    respond(responses.RESULT(resp));
                     return;
                 }
                 case "addVirtualGroup": {
                     // calculate the next ID
-                    const nextID = Math.max(0, ...Object.keys(gateway_1.gateway.virtualGroups).map(k => +k)) + 1;
+                    const nextID = Math.max(0, ...Object.keys(session_1.session.virtualGroups).map(k => +k)) + 1;
                     // create the group
                     const newGroup = new virtual_group_1.VirtualGroup(nextID);
                     newGroup.name = `virtual group ${nextID}`;
                     // create the ioBroker objects
-                    gateway_1.gateway.virtualGroups[nextID] = newGroup;
+                    session_1.session.virtualGroups[nextID] = newGroup;
                     groups_1.extendVirtualGroup(newGroup);
                     // and return the id
                     respond(responses.RESULT(nextID));
@@ -98,11 +86,11 @@ function onMessage(obj) {
                     // check the given params
                     const params = obj.message;
                     const id = parseInt(params.id, 10);
-                    if (!(id in gateway_1.gateway.virtualGroups)) {
+                    if (!(id in session_1.session.virtualGroups)) {
                         respond({ error: `no virtual group with ID ${id} found!` });
                         return;
                     }
-                    const group = gateway_1.gateway.virtualGroups[id];
+                    const group = session_1.session.virtualGroups[id];
                     // Update the device ids
                     if (params.deviceIDs != null && params.deviceIDs instanceof Array) {
                         group.deviceIDs = params.deviceIDs.map(d => parseInt(d, 10)).filter(d => !isNaN(d));
@@ -124,14 +112,14 @@ function onMessage(obj) {
                     // check the given params
                     const params = obj.message;
                     const id = parseInt(params.id, 10);
-                    if (!(id in gateway_1.gateway.virtualGroups)) {
+                    if (!(id in session_1.session.virtualGroups)) {
                         respond({ error: `no virtual group with ID ${id} found!` });
                         return;
                     }
-                    const group = gateway_1.gateway.virtualGroups[id];
+                    const group = session_1.session.virtualGroups[id];
                     const channel = iobroker_objects_1.calcGroupName(group);
                     yield global_1.Global.adapter.deleteChannel(channel);
-                    delete gateway_1.gateway.virtualGroups[id];
+                    delete session_1.session.virtualGroups[id];
                     respond(responses.OK);
                     return;
                 }
@@ -146,7 +134,7 @@ function onMessage(obj) {
                     }
                     const ret = {};
                     if (groupType === "real" || groupType === "both") {
-                        for (const [id, group] of object_polyfill_1.entries(gateway_1.gateway.groups)) {
+                        for (const [id, group] of object_polyfill_1.entries(session_1.session.groups)) {
                             ret[id] = {
                                 id,
                                 name: group.group.name,
@@ -156,7 +144,7 @@ function onMessage(obj) {
                         }
                     }
                     if (groupType === "virtual" || groupType === "both") {
-                        for (const [id, group] of object_polyfill_1.entries(gateway_1.gateway.virtualGroups)) {
+                        for (const [id, group] of object_polyfill_1.entries(session_1.session.virtualGroups)) {
                             ret[id] = {
                                 id,
                                 name: group.name,
@@ -179,7 +167,7 @@ function onMessage(obj) {
                     }
                     const ret = {};
                     if (deviceType === "lightbulb") {
-                        const lightbulbs = object_polyfill_1.entries(gateway_1.gateway.devices).filter(([id, device]) => device.type === accessory_1.AccessoryTypes.lightbulb);
+                        const lightbulbs = object_polyfill_1.entries(session_1.session.devices).filter(([id, device]) => device.type === node_tradfri_client_1.AccessoryTypes.lightbulb);
                         for (const [id, bulb] of lightbulbs) {
                             ret[id] = {
                                 id,
@@ -197,15 +185,15 @@ function onMessage(obj) {
                         return;
                     // check the given params
                     const params = obj.message;
-                    if (!(params.id in gateway_1.gateway.devices)) {
+                    if (!(params.id in session_1.session.devices)) {
                         respond(responses.ERROR(`device with id ${params.id} not found`));
                         return;
                     }
-                    const device = gateway_1.gateway.devices[params.id];
+                    const device = session_1.session.devices[params.id];
                     // TODO: Do we need more?
                     const ret = {
                         name: device.name,
-                        type: accessory_1.AccessoryTypes[device.type],
+                        type: node_tradfri_client_1.AccessoryTypes[device.type],
                     };
                     if (ret.type === "lightbulb") {
                         ret.spectrum = device.lightList[0].spectrum;

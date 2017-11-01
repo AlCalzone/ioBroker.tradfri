@@ -1,9 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-class Gateway {
+class Session {
     constructor() {
-        /** dictionary of COAP observers */
-        this.observers = [];
         /** dictionary of known devices */
         this.devices = {};
         /** dictionary of known groups */
@@ -13,9 +11,6 @@ class Gateway {
         // dictionary of ioBroker objects
         this.objects = {};
     }
-    /** Common URL for all requests */
-    get requestBase() { return this._requestBase; }
-    set requestBase(value) { this._requestBase = value; }
 }
-exports.Gateway = Gateway;
-exports.gateway = new Gateway();
+exports.Session = Session;
+exports.session = new Session();

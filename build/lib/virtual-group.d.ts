@@ -1,4 +1,4 @@
-import { LightOperation } from "../ipso/light";
+import { LightOperation } from "node-tradfri-client";
 export declare class VirtualGroup {
     readonly instanceId: number;
     constructor(instanceId: number);

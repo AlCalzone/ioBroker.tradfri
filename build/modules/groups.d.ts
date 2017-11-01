@@ -1,5 +1,4 @@
-import { Accessory } from "../ipso/accessory";
-import { Group } from "../ipso/group";
+import { Accessory, Group } from "node-tradfri-client";
 import { VirtualGroup } from "../lib/virtual-group";
 export declare function extendVirtualGroup(group: VirtualGroup): void;
 export declare function extendGroup(group: Group): void;

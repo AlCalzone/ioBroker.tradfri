@@ -1,19 +1,17 @@
-import { Accessory, AccessoryTypes } from "../ipso/accessory";
-import { Group } from "../ipso/group";
+import { Accessory, AccessoryTypes, Group } from "node-tradfri-client";
 import { Global as _ } from "../lib/global";
 import { calcGroupId, getInstanceId, groupToCommon, groupToNative, objectDefinitions } from "../lib/iobroker-objects";
 import { DictionaryLike, dig, entries, filter, values } from "../lib/object-polyfill";
-import { padStart } from "../lib/strings";
 import { VirtualGroup } from "../lib/virtual-group";
-import { gateway as gw } from "./gateway";
+import { session as $ } from "./session";
 
 /* creates or edits an existing <group>-object for a virtual group */
 export function extendVirtualGroup(group: VirtualGroup) {
 	const objId = calcGroupId(group);
 
-	if (objId in gw.objects) {
+	if (objId in $.objects) {
 		// check if we need to edit the existing object
-		const grpObj = gw.objects[objId];
+		const grpObj = $.objects[objId];
 		let changed = false;
 		// update common part if neccessary
 		const newCommon = groupToCommon(group);
@@ -75,9 +73,9 @@ export function extendVirtualGroup(group: VirtualGroup) {
 export function extendGroup(group: Group) {
 	const objId = calcGroupId(group);
 
-	if (objId in gw.objects) {
+	if (objId in $.objects) {
 		// check if we need to edit the existing object
-		const grpObj = gw.objects[objId];
+		const grpObj = $.objects[objId];
 		let changed = false;
 		// update common part if neccessary
 		const newCommon = groupToCommon(group);
@@ -100,7 +98,7 @@ export function extendGroup(group: Group) {
 		// from here we can update the states
 		// filter out the ones belonging to this device with a property path
 		const stateObjs = filter(
-			gw.objects,
+			$.objects,
 			obj => obj._id.startsWith(objId) && obj.native && obj.native.path,
 		);
 		// for each property try to update the value
@@ -186,8 +184,8 @@ async function updateGroupState(id: string, value: string | number | boolean | i
  */
 export function updateMultipleGroupStates(changedAccessory?: Accessory, changedStateId?: string) {
 	const groupsToUpdate: (Group | VirtualGroup)[] =
-		values(gw.groups).map(g => g.group as (Group | VirtualGroup))
-		.concat(values(gw.virtualGroups))
+		values($.groups).map(g => g.group as (Group | VirtualGroup))
+		.concat(values($.virtualGroups))
 		.filter(g => changedAccessory == null || g.deviceIDs.indexOf(changedAccessory.instanceId) > -1)
 		;
 	for (const group of groupsToUpdate) {
@@ -198,7 +196,7 @@ export function updateMultipleGroupStates(changedAccessory?: Accessory, changedS
 export function updateGroupStates(group: Group | VirtualGroup, changedStateId?: string) {
 	if (group.deviceIDs == null) return;
 	// only works for lightbulbs right now
-	const groupBulbs = group.deviceIDs.map(id => gw.devices[id])
+	const groupBulbs = group.deviceIDs.map(id => $.devices[id])
 		.filter(a => a.type === AccessoryTypes.lightbulb)
 		.map(a => a.lightList[0])
 		;
@@ -206,7 +204,7 @@ export function updateGroupStates(group: Group | VirtualGroup, changedStateId?: 
 	const objId = calcGroupId(group);
 
 	// Seperate the bulbs into no spectrum/white spectrum/rgb bulbs
-	const noSpectrumBulbs = groupBulbs.filter(b => b.spectrum === "none");
+	// const noSpectrumBulbs = groupBulbs.filter(b => b.spectrum === "none");
 	const whiteSpectrumBulbs = groupBulbs.filter(b => b.spectrum === "white");
 	const rgbBulbs = groupBulbs.filter(b => b.spectrum === "rgb");
 
@@ -259,8 +257,8 @@ export function updateGroupStates(group: Group | VirtualGroup, changedStateId?: 
 export function syncGroupsWithState(id: string, state: ioBroker.State) {
 	if (state && state.ack) {
 		const instanceId = getInstanceId(id);
-		if (instanceId in gw.devices && gw.devices[instanceId] != null) {
-			const accessory = gw.devices[instanceId];
+		if (instanceId in $.devices && $.devices[instanceId] != null) {
+			const accessory = $.devices[instanceId];
 			updateMultipleGroupStates(accessory, id);
 		}
 	}

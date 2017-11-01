@@ -1,13 +1,11 @@
-import { CoapClient as coap } from "node-coap-client";
-import { AccessoryTypes } from "../ipso/accessory";
-import { parsePayload } from "../lib/coap-payload";
+import { AccessoryTypes } from "node-tradfri-client";
 import { Global as _ } from "../lib/global";
 import { calcGroupName } from "../lib/iobroker-objects";
 import { DictionaryLike, entries } from "../lib/object-polyfill";
 import { VirtualGroup } from "../lib/virtual-group";
 import { Device as SendToDevice, Group as SendToGroup } from "./communication";
-import { gateway as gw } from "./gateway";
 import { extendVirtualGroup, updateGroupStates } from "./groups";
+import { session as $ } from "./session";
 
 export async function onMessage(obj) {
 	// responds to the adapter that sent the original message
@@ -53,33 +51,26 @@ export async function onMessage(obj) {
 					return;
 				}
 
-				_.log(`custom coap request: ${params.method.toUpperCase()} "${gw.requestBase}${params.path}"`);
-
-				// create payload
-				let payload: string | Buffer;
-				if (params.payload) {
-					payload = JSON.stringify(params.payload);
-					_.log("sending custom payload: " + payload);
-					payload = Buffer.from(payload);
-				}
+				_.log(`custom coap request: ${params.method.toUpperCase()} "${params.path}"`);
 
 				// wait for the CoAP response and respond to the message
-				const resp = await coap.request(`${gw.requestBase}${params.path}`, params.method, payload as Buffer);
-				respond(responses.RESULT({
-					code: resp.code.toString(),
-					payload: parsePayload(resp),
-				}));
+				const resp = await $.tradfri.request(
+					params.path,
+					params.method,
+					params.payload,
+				);
+				respond(responses.RESULT(resp));
 				return;
 			}
 
 			case "addVirtualGroup": {
 				// calculate the next ID
-				const nextID = Math.max(0, ...Object.keys(gw.virtualGroups).map(k => +k)) + 1;
+				const nextID = Math.max(0, ...Object.keys($.virtualGroups).map(k => +k)) + 1;
 				// create the group
 				const newGroup = new VirtualGroup(nextID);
 				newGroup.name = `virtual group ${nextID}`;
 				// create the ioBroker objects
-				gw.virtualGroups[nextID] = newGroup;
+				$.virtualGroups[nextID] = newGroup;
 				extendVirtualGroup(newGroup);
 				// and return the id
 				respond(responses.RESULT(nextID));
@@ -95,12 +86,12 @@ export async function onMessage(obj) {
 				const params = obj.message as any;
 				const id = parseInt(params.id, 10);
 
-				if (!(id in gw.virtualGroups)) {
+				if (!(id in $.virtualGroups)) {
 					respond({ error: `no virtual group with ID ${id} found!` });
 					return;
 				}
 
-				const group = gw.virtualGroups[id];
+				const group = $.virtualGroups[id];
 				// Update the device ids
 				if (params.deviceIDs != null && params.deviceIDs instanceof Array) {
 					group.deviceIDs = params.deviceIDs.map(d => parseInt(d, 10)).filter(d => !isNaN(d));
@@ -125,15 +116,15 @@ export async function onMessage(obj) {
 				const params = obj.message as any;
 				const id = parseInt(params.id, 10);
 
-				if (!(id in gw.virtualGroups)) {
+				if (!(id in $.virtualGroups)) {
 					respond({ error: `no virtual group with ID ${id} found!` });
 					return;
 				}
 
-				const group = gw.virtualGroups[id];
+				const group = $.virtualGroups[id];
 				const channel = calcGroupName(group);
 				await _.adapter.deleteChannel(channel);
-				delete gw.virtualGroups[id];
+				delete $.virtualGroups[id];
 
 				respond(responses.OK);
 				return;
@@ -151,7 +142,7 @@ export async function onMessage(obj) {
 
 				const ret: DictionaryLike<SendToGroup> = {};
 				if (groupType === "real" || groupType === "both") {
-					for (const [id, group] of entries(gw.groups)) {
+					for (const [id, group] of entries($.groups)) {
 						ret[id] = {
 							id,
 							name: group.group.name,
@@ -161,7 +152,7 @@ export async function onMessage(obj) {
 					}
 				}
 				if (groupType === "virtual" || groupType === "both") {
-					for (const [id, group] of entries(gw.virtualGroups)) {
+					for (const [id, group] of entries($.virtualGroups)) {
 						ret[id] = {
 							id,
 							name: group.name,
@@ -187,7 +178,7 @@ export async function onMessage(obj) {
 
 				const ret: DictionaryLike<SendToDevice> = {};
 				if (deviceType === "lightbulb") {
-					const lightbulbs = entries(gw.devices).filter(([id, device]) => device.type === AccessoryTypes.lightbulb);
+					const lightbulbs = entries($.devices).filter(([id, device]) => device.type === AccessoryTypes.lightbulb);
 					for (const [id, bulb] of lightbulbs) {
 						ret[id] = {
 							id,
@@ -207,12 +198,12 @@ export async function onMessage(obj) {
 
 				// check the given params
 				const params = obj.message as any;
-				if (!(params.id in gw.devices)) {
+				if (!(params.id in $.devices)) {
 					respond(responses.ERROR(`device with id ${params.id} not found`));
 					return;
 				}
 
-				const device = gw.devices[params.id];
+				const device = $.devices[params.id];
 				// TODO: Do we need more?
 				const ret = {
 					name: device.name,

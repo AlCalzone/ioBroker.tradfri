@@ -1,21 +1,8 @@
-import { Accessory } from "../ipso/accessory";
-import { Group, GroupOperation } from "../ipso/group";
-import { LightOperation } from "../ipso/light";
+/**
+ * Provides operations for Tradfri devices using the CoAP layer
+ */
+import { Accessory, Group, LightOperation } from "node-tradfri-client";
 import { VirtualGroup } from "../lib/virtual-group";
-/**
- * Sets some properties on a lightbulb
- * @param accessory The parent accessory of the lightbulb
- * @param operation The properties to be set
- * @returns true if a request was sent, false otherwise
- */
-export declare function operateLight(accessory: Accessory, operation: LightOperation): Promise<boolean>;
-/**
- * Sets some properties on a group
- * @param group The group to be updated
- * @param operation The properties to be set
- * @returns true if a request was sent, false otherwise
- */
-export declare function operateGroup(group: Group, operation: GroupOperation): Promise<boolean>;
 /**
  * Sets some properties on virtual group or virtual properties on a real group.
  * Can be used to manually update non-existing endpoints on real groups.

@@ -8,17 +8,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const accessory_1 = require("../ipso/accessory");
+const node_tradfri_client_1 = require("node-tradfri-client");
 const global_1 = require("../lib/global");
 const iobroker_objects_1 = require("../lib/iobroker-objects");
 const object_polyfill_1 = require("../lib/object-polyfill");
-const gateway_1 = require("./gateway");
+const session_1 = require("./session");
 /* creates or edits an existing <group>-object for a virtual group */
 function extendVirtualGroup(group) {
     const objId = iobroker_objects_1.calcGroupId(group);
-    if (objId in gateway_1.gateway.objects) {
+    if (objId in session_1.session.objects) {
         // check if we need to edit the existing object
-        const grpObj = gateway_1.gateway.objects[objId];
+        const grpObj = session_1.session.objects[objId];
         let changed = false;
         // update common part if neccessary
         const newCommon = iobroker_objects_1.groupToCommon(group);
@@ -75,9 +75,9 @@ exports.extendVirtualGroup = extendVirtualGroup;
 /* creates or edits an existing <group>-object for a group */
 function extendGroup(group) {
     const objId = iobroker_objects_1.calcGroupId(group);
-    if (objId in gateway_1.gateway.objects) {
+    if (objId in session_1.session.objects) {
         // check if we need to edit the existing object
-        const grpObj = gateway_1.gateway.objects[objId];
+        const grpObj = session_1.session.objects[objId];
         let changed = false;
         // update common part if neccessary
         const newCommon = iobroker_objects_1.groupToCommon(group);
@@ -98,7 +98,7 @@ function extendGroup(group) {
         // ====
         // from here we can update the states
         // filter out the ones belonging to this device with a property path
-        const stateObjs = object_polyfill_1.filter(gateway_1.gateway.objects, obj => obj._id.startsWith(objId) && obj.native && obj.native.path);
+        const stateObjs = object_polyfill_1.filter(session_1.session.objects, obj => obj._id.startsWith(objId) && obj.native && obj.native.path);
         // for each property try to update the value
         for (const [id, obj] of object_polyfill_1.entries(stateObjs)) {
             try {
@@ -180,8 +180,8 @@ function updateGroupState(id, value) {
  * @param changedStateId If defined, only update the corresponding states in the group.
  */
 function updateMultipleGroupStates(changedAccessory, changedStateId) {
-    const groupsToUpdate = object_polyfill_1.values(gateway_1.gateway.groups).map(g => g.group)
-        .concat(object_polyfill_1.values(gateway_1.gateway.virtualGroups))
+    const groupsToUpdate = object_polyfill_1.values(session_1.session.groups).map(g => g.group)
+        .concat(object_polyfill_1.values(session_1.session.virtualGroups))
         .filter(g => changedAccessory == null || g.deviceIDs.indexOf(changedAccessory.instanceId) > -1);
     for (const group of groupsToUpdate) {
         updateGroupStates(group, changedStateId);
@@ -192,14 +192,14 @@ function updateGroupStates(group, changedStateId) {
     if (group.deviceIDs == null)
         return;
     // only works for lightbulbs right now
-    const groupBulbs = group.deviceIDs.map(id => gateway_1.gateway.devices[id])
-        .filter(a => a.type === accessory_1.AccessoryTypes.lightbulb)
+    const groupBulbs = group.deviceIDs.map(id => session_1.session.devices[id])
+        .filter(a => a.type === node_tradfri_client_1.AccessoryTypes.lightbulb)
         .map(a => a.lightList[0]);
     if (groupBulbs.length === 0)
         return;
     const objId = iobroker_objects_1.calcGroupId(group);
     // Seperate the bulbs into no spectrum/white spectrum/rgb bulbs
-    const noSpectrumBulbs = groupBulbs.filter(b => b.spectrum === "none");
+    // const noSpectrumBulbs = groupBulbs.filter(b => b.spectrum === "none");
     const whiteSpectrumBulbs = groupBulbs.filter(b => b.spectrum === "white");
     const rgbBulbs = groupBulbs.filter(b => b.spectrum === "rgb");
     // we're debouncing the state changes, so group or scene updates don't result in
@@ -250,8 +250,8 @@ exports.updateGroupStates = updateGroupStates;
 function syncGroupsWithState(id, state) {
     if (state && state.ack) {
         const instanceId = iobroker_objects_1.getInstanceId(id);
-        if (instanceId in gateway_1.gateway.devices && gateway_1.gateway.devices[instanceId] != null) {
-            const accessory = gateway_1.gateway.devices[instanceId];
+        if (instanceId in session_1.session.devices && session_1.session.devices[instanceId] != null) {
+            const accessory = session_1.session.devices[instanceId];
             updateMultipleGroupStates(accessory, id);
         }
     }
