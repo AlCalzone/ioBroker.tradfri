@@ -51,22 +51,15 @@ export async function onMessage(obj) {
 					return;
 				}
 
-				_.log(`custom coap request: ${params.method.toUpperCase()} "${$.requestBase}${params.path}"`);
-
-				// create payload
-				let payload: string | Buffer;
-				if (params.payload) {
-					payload = JSON.stringify(params.payload);
-					_.log("sending custom payload: " + payload);
-					payload = Buffer.from(payload);
-				}
+				_.log(`custom coap request: ${params.method.toUpperCase()} "${params.path}"`);
 
 				// wait for the CoAP response and respond to the message
-				const resp = await coap.request(`${$.requestBase}${params.path}`, params.method, payload as Buffer);
-				respond(responses.RESULT({
-					code: resp.code.toString(),
-					payload: parsePayload(resp),
-				}));
+				const resp = await $.tradfri.request(
+					params.path,
+					params.method,
+					params.payload,
+				);
+				respond(responses.RESULT(resp));
 				return;
 			}
 
