@@ -1,5 +1,4 @@
-import { Accessory, AccessoryTypes } from "../ipso/accessory";
-import { Group } from "../ipso/group";
+import { Accessory, AccessoryTypes, Group, TradfriClient } from "node-tradfri-client";
 import { Global as _ } from "../lib/global";
 import { calcGroupId, getInstanceId, groupToCommon, groupToNative, objectDefinitions } from "../lib/iobroker-objects";
 import { DictionaryLike, dig, entries, filter, values } from "../lib/object-polyfill";

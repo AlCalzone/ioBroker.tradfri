@@ -1,23 +1,15 @@
 // tslint:disable:object-literal-key-quotes
 
-// Reflect-polyfill laden
-// tslint:disable-next-line:no-var-requires
-require("reflect-metadata");
+// load tradfri data types
+import { Accessory, AccessoryTypes, Group, Light, Scene, TradfriClient } from "node-tradfri-client";
 
 // Eigene Module laden
-import { CoapClient as coap, CoapResponse } from "node-coap-client";
-import { endpoints as coapEndpoints} from "./ipso/endpoints";
 import { except } from "./lib/array-extensions";
-import { parsePayload } from "./lib/coap-payload";
 import { ExtendedAdapter, Global as _ } from "./lib/global";
 import { composeObject, DictionaryLike, dig, entries, filter, values } from "./lib/object-polyfill";
 import { wait } from "./lib/promises";
 
 // Datentypen laden
-import { Accessory, AccessoryTypes } from "./ipso/accessory";
-import { Group } from "./ipso/group";
-import { LightOperation, Spectrum } from "./ipso/light";
-import { Scene } from "./ipso/scene";
 import { VirtualGroup } from "./lib/virtual-group";
 
 // Adapter-Utils laden

@@ -16,8 +16,7 @@
     }
   ],
   "dependencies": {
-    "node-coap-client": "^0.4.8",
-    "reflect-metadata": "^0.1.10"
+    "node-tradfri-client": "git+https://github.com/AlCalzone/node-tradfri-client.git"
   },
   "devDependencies": {
     "@types/chai": "^4.0.4",

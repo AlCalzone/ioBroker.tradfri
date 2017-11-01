@@ -1,6 +1,4 @@
-import { CoapClient as coap } from "node-coap-client";
 import { AccessoryTypes } from "../ipso/accessory";
-import { parsePayload } from "../lib/coap-payload";
 import { Global as _ } from "../lib/global";
 import { calcGroupName } from "../lib/iobroker-objects";
 import { DictionaryLike, entries } from "../lib/object-polyfill";
