@@ -28,7 +28,7 @@ import { calcGroupId, calcGroupName, calcObjId, calcObjName, extendDevice, getIn
 import { applyCustomObjectSubscriptions, applyCustomStateSubscriptions, subscribeStates } from "./modules/custom-subscriptions";
 import { extendGroup, syncGroupsWithState, updateGroupStates, updateMultipleGroupStates } from "./modules/groups";
 import { onMessage } from "./modules/message";
-import { operateGroup, operateLight, operateVirtualGroup, renameDevice, renameGroup } from "./modules/operations";
+import { operateVirtualGroup, renameDevice, renameGroup } from "./modules/operations";
 
 import { session as $ } from "./modules/session";
 
@@ -219,17 +219,17 @@ let adapter: ExtendedAdapter = utils.adapter({
 						let wasAcked: boolean;
 
 						if (id.endsWith(".state")) {
-							wasAcked = !await operateGroup(group, {
+							wasAcked = !await $.tradfri.operateGroup(group, {
 								onOff: val,
 							});
 						} else if (id.endsWith(".brightness")) {
-							wasAcked = !await operateGroup(group, {
+							wasAcked = !await $.tradfri.operateGroup(group, {
 								dimmer: val,
 								transitionTime: await getTransitionDuration(group),
 							});
 						} else if (id.endsWith(".activeScene")) {
 							// turn on and activate a scene
-							wasAcked = !await operateGroup(group, {
+							wasAcked = !await $.tradfri.operateGroup(group, {
 								onOff: true,
 								sceneId: val,
 							});
@@ -319,11 +319,11 @@ let adapter: ExtendedAdapter = utils.adapter({
 							// operate the lights depending on the set state
 							// if no request was sent, we can ack the state immediately
 							if (id.endsWith(".state")) {
-								wasAcked = !await operateLight(accessory, {
+								wasAcked = !await $.tradfri.operateLight(accessory, {
 									onOff: val,
 								});
 							} else if (id.endsWith(".brightness")) {
-								wasAcked = !await operateLight(accessory, {
+								wasAcked = !await $.tradfri.operateLight(accessory, {
 									dimmer: val,
 									transitionTime: await getTransitionDuration(accessory),
 								});
@@ -335,19 +335,19 @@ let adapter: ExtendedAdapter = utils.adapter({
 									val = normalizeHexColor(val);
 									if (val != null) {
 										state.val = val;
-										wasAcked = !await operateLight(accessory, {
+										wasAcked = !await $.tradfri.operateLight(accessory, {
 											color: val,
 											transitionTime: await getTransitionDuration(accessory),
 										});
 									}
 								} else if (light.spectrum === "white") {
-									wasAcked = !await operateLight(accessory, {
+									wasAcked = !await $.tradfri.operateLight(accessory, {
 										colorTemperature: val,
 										transitionTime: await getTransitionDuration(accessory),
 									});
 								}
 							} else if (/\.(colorTemperature|hue|saturation)$/.test(id)) {
-								wasAcked = !await operateLight(accessory, {
+								wasAcked = !await $.tradfri.operateLight(accessory, {
 									[id.substr(id.lastIndexOf(".") + 1)]: val,
 									transitionTime: await getTransitionDuration(accessory),
 								});
