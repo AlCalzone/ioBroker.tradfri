@@ -1,8 +1,5 @@
-import { Accessory, AccessoryTypes } from "../ipso/accessory";
-import { Group } from "../ipso/group";
-import { Spectrum } from "../ipso/light";
-import { Scene } from "../ipso/scene";
-import { gateway as gw, GroupInfo } from "../modules/gateway";
+import { Accessory, AccessoryTypes, Group, GroupInfo, Scene, Spectrum } from "node-tradfri-client";
+import { session as $ } from "../modules/session";
 import { Global as _ } from "./global";
 import { composeObject, DictionaryLike, dig, entries, filter } from "./object-polyfill";
 import { padStart } from "./strings";
@@ -34,13 +31,16 @@ export function accessoryToNative(accessory: Accessory): DictionaryLike<any> {
 	};
 }
 
-/* creates or edits an existing <device>-object for an accessory */
+/**
+ * Creates or edits an existing <device>-object for an accessory.
+ * @param accessory The accessory to update
+ */
 export function extendDevice(accessory: Accessory) {
 	const objId = calcObjId(accessory);
 
-	if (objId in gw.objects) {
+	if (objId in $.objects) {
 		// check if we need to edit the existing object
-		const devObj = gw.objects[objId];
+		const devObj = $.objects[objId];
 		let changed = false;
 		// update common part if neccessary
 		const newCommon = accessoryToCommon(accessory);
@@ -63,7 +63,7 @@ export function extendDevice(accessory: Accessory) {
 		// from here we can update the states
 		// filter out the ones belonging to this device with a property path
 		const stateObjs = filter(
-			gw.objects,
+			$.objects,
 			obj => obj._id.startsWith(objId) && obj.native && obj.native.path,
 		);
 		// for each property try to update the value
@@ -173,17 +173,21 @@ export function extendDevice(accessory: Accessory) {
 	}
 }
 
+/**
+ * Updates the possible scenes for a group
+ * @param groupInfo The group to update
+ */
 export async function updatePossibleScenes(groupInfo: GroupInfo): Promise<void> {
 	const group = groupInfo.group;
 	// if this group is not in the dictionary, don't do anything
-	if (!(group.instanceId in gw.groups)) return;
+	if (!(group.instanceId in $.groups)) return;
 	// find out which is the root object id
 	const objId = calcGroupId(group);
 	// scenes are stored under <objId>.activeScene
 	const scenesId = `${objId}.activeScene`;
 
 	// only extend that object if it exists already
-	if (scenesId in gw.objects) {
+	if (scenesId in $.objects) {
 		_.log(`updating possible scenes for group ${group.instanceId}: ${JSON.stringify(Object.keys(groupInfo.scenes))}`);
 
 		const scenes = groupInfo.scenes;

@@ -3,10 +3,9 @@
  */
 
 import { Accessory, AccessoryTypes, Group, GroupOperation, LightOperation } from "node-tradfri-client";
-import { endpoints as coapEndpoints} from "../ipso/endpoints";
 import { Global as _ } from "../lib/global";
 import { VirtualGroup } from "../lib/virtual-group";
-import { gateway as gw } from "./gateway";
+import { session as $ } from "./session";
 
 /**
  * Sets some properties on a lightbulb
@@ -20,7 +19,7 @@ export async function operateLight(accessory: Accessory, operation: LightOperati
 	}
 
 	// the url to be requested
-	const url: string = `${gw.requestBase}${coapEndpoints.devices}/${accessory.instanceId}`;
+	const url: string = `${$.requestBase}${coapEndpoints.devices}/${accessory.instanceId}`;
 
 	// create a copy to modify
 	const newAccessory = accessory.clone();
@@ -54,7 +53,7 @@ export async function operateLight(accessory: Accessory, operation: LightOperati
 export async function operateGroup(group: Group, operation: GroupOperation): Promise<boolean> {
 
 	// the url to be requested
-	const url: string = `${gw.requestBase}${coapEndpoints.groups}/${group.instanceId}`;
+	const url: string = `${$.requestBase}${coapEndpoints.groups}/${group.instanceId}`;
 
 	// create a copy to modify
 	const newGroup = group.clone();
@@ -88,7 +87,7 @@ export async function operateVirtualGroup(group: Group | VirtualGroup, operation
 
 	// find all lightbulbs belonging to this group
 	const lightbulbAccessories = group.deviceIDs
-		.map(id => gw.devices[id])
+		.map(id => $.devices[id])
 		.filter(dev => dev != null && dev.type === AccessoryTypes.lightbulb)
 		;
 
@@ -126,7 +125,7 @@ export async function renameDevice(accessory: Accessory, newName: string): Promi
 	payload = Buffer.from(payload);
 
 	await coap.request(
-		`${gw.requestBase}${coapEndpoints.devices}/${accessory.instanceId}`, "put", payload,
+		`${$.requestBase}${coapEndpoints.devices}/${accessory.instanceId}`, "put", payload,
 	);
 	return true;
 
@@ -157,7 +156,7 @@ export async function renameGroup(group: Group, newName: string): Promise<boolea
 	payload = Buffer.from(payload);
 
 	await coap.request(
-		`${gw.requestBase}${coapEndpoints.groups}/${group.instanceId}`, "put", payload,
+		`${$.requestBase}${coapEndpoints.groups}/${group.instanceId}`, "put", payload,
 	);
 	return true;
 

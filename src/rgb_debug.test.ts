@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { Light } from "./ipso/light";
+import { Light } from "node-tradfri-client";
 import { pointInTriangle } from "./lib/math";
 import { values } from "./lib/object-polyfill";
 import { conversions } from "./modules/conversions";

@@ -1,4 +1,4 @@
-import { LightOperation } from "../ipso/light";
+import { LightOperation } from "node-tradfri-client";
 import { entries } from "./object-polyfill";
 
 export class VirtualGroup {
