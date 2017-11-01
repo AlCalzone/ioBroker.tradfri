@@ -1,5 +1,3 @@
-import * as fs from "fs";
-import * as path from "path";
 import { DictionaryLike, entries, filter as objFilter } from "./object-polyfill";
 import { promisify, promisifyNoError } from "./promises";
 

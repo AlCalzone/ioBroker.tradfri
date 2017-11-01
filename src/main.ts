@@ -3,16 +3,15 @@
 // load tradfri data types
 import {
 	Accessory, AccessoryTypes,
-	Group, GroupInfo,
-	Light, LightOperation,
+	Group,
+	LightOperation,
 	Scene,
-	TradfriClient, TradfriObserverAPI,
+	TradfriClient,
 } from "node-tradfri-client";
 
 // Eigene Module laden
-import { except } from "./lib/array-extensions";
 import { ExtendedAdapter, Global as _ } from "./lib/global";
-import { composeObject, DictionaryLike, dig, entries, filter, values } from "./lib/object-polyfill";
+import { composeObject, entries, values } from "./lib/object-polyfill";
 import { wait } from "./lib/promises";
 
 // Datentypen laden
@@ -26,7 +25,7 @@ import { normalizeHexColor } from "./lib/colors";
 import { ensureInstanceObjects, fixAdapterObjects } from "./lib/fix-objects";
 import { calcGroupId, calcGroupName, calcObjId, calcObjName, extendDevice, getInstanceId, getRootId, updatePossibleScenes } from "./lib/iobroker-objects";
 import { applyCustomObjectSubscriptions, applyCustomStateSubscriptions, subscribeStates } from "./modules/custom-subscriptions";
-import { extendGroup, syncGroupsWithState, updateGroupStates, updateMultipleGroupStates } from "./modules/groups";
+import { extendGroup, syncGroupsWithState, updateGroupStates } from "./modules/groups";
 import { onMessage } from "./modules/message";
 import { operateVirtualGroup, renameDevice, renameGroup } from "./modules/operations";
 

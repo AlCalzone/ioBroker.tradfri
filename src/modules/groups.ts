@@ -1,8 +1,7 @@
-import { Accessory, AccessoryTypes, Group, TradfriClient } from "node-tradfri-client";
+import { Accessory, AccessoryTypes, Group } from "node-tradfri-client";
 import { Global as _ } from "../lib/global";
 import { calcGroupId, getInstanceId, groupToCommon, groupToNative, objectDefinitions } from "../lib/iobroker-objects";
 import { DictionaryLike, dig, entries, filter, values } from "../lib/object-polyfill";
-import { padStart } from "../lib/strings";
 import { VirtualGroup } from "../lib/virtual-group";
 import { session as $ } from "./session";
 
@@ -205,7 +204,7 @@ export function updateGroupStates(group: Group | VirtualGroup, changedStateId?: 
 	const objId = calcGroupId(group);
 
 	// Seperate the bulbs into no spectrum/white spectrum/rgb bulbs
-	const noSpectrumBulbs = groupBulbs.filter(b => b.spectrum === "none");
+	// const noSpectrumBulbs = groupBulbs.filter(b => b.spectrum === "none");
 	const whiteSpectrumBulbs = groupBulbs.filter(b => b.spectrum === "white");
 	const rgbBulbs = groupBulbs.filter(b => b.spectrum === "rgb");
 

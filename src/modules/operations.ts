@@ -2,8 +2,7 @@
  * Provides operations for Tradfri devices using the CoAP layer
  */
 
-import { Accessory, AccessoryTypes, Group, GroupOperation, LightOperation } from "node-tradfri-client";
-import { Global as _ } from "../lib/global";
+import { Accessory, AccessoryTypes, Group, LightOperation } from "node-tradfri-client";
 import { VirtualGroup } from "../lib/virtual-group";
 import { session as $ } from "./session";
 
