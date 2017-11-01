@@ -1,6 +1,6 @@
 {
   "name": "iobroker.tradfri",
-  "version": "0.5.5",
+  "version": "0.6.0-beta1",
   "description": "ioBroker tradfri Adapter",
   "author": {
     "name": "AlCalzone",
@@ -16,7 +16,7 @@
     }
   ],
   "dependencies": {
-    "node-tradfri-client": "git+https://github.com/AlCalzone/node-tradfri-client.git"
+    "node-tradfri-client": "^0.1.0"
   },
   "devDependencies": {
     "@types/chai": "^4.0.4",

@@ -1,11 +1,11 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "0.5.5",
+        "version": "0.6.0-beta1",
         "news": {
             "0.5.5": {
                 "en": "Restored compatibility to Gateway version 1.2.42",
-                "de": "Kompatibility zu Gateway-Version 1.2.42 wiederhergestellt"
+                "de": "Kompatibilität zu Gateway-Version 1.2.42 wiederhergestellt"
             },
             "0.5.4": {
                 "en": "Support of virtual groups. Added icons for devices.",
