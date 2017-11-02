@@ -14,6 +14,7 @@ export async function fixAdapterObjects() {
 	// const deviceObjs = values(await _.$$(`${_.adapter.namespace}.*`, "device"));
 
 	await fixBrightnessRange(stateObjs);
+	await fixAuthenticationObjects();
 }
 
 /**
@@ -34,6 +35,19 @@ async function fixBrightnessRange(stateObjs: ioBroker.Object[]) {
 			obj.common = JSON.parse(newCommon);
 			await _.adapter.$setForeignObject(obj._id, obj);
 		}
+	}
+}
+
+/**
+ * In v0.6.0, the authentication procedure was changed to no longer
+ * store the security code.
+ * From v0.6.0-beta2 to -beta3, the info.identity object was removed in favor of config properties.
+ */
+async function fixAuthenticationObjects() {
+	const identityObj = await _.adapter.$getObject("info.identity");
+	if (identityObj != null) {
+		await _.adapter.delState("info.identity");
+		await _.adapter.delObject("info.identity");
 	}
 }
 

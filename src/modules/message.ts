@@ -1,4 +1,4 @@
-import { AccessoryTypes } from "node-tradfri-client";
+import { AccessoryTypes, TradfriError, TradfriErrorCodes } from "node-tradfri-client";
 import { Global as _ } from "../lib/global";
 import { calcGroupName } from "../lib/iobroker-objects";
 import { DictionaryLike, entries } from "../lib/object-polyfill";
@@ -39,7 +39,8 @@ export async function onMessage(obj) {
 	// handle the message
 	if (obj) {
 		switch (obj.command) {
-			case "request": {// custom CoAP request
+
+			case "request": { // custom CoAP request
 				// require the path to be given
 				if (!requireParams("path")) return;
 

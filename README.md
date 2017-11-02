@@ -48,6 +48,7 @@ The result object `ret` looks as follows:
 
 #### 0.6.0 (2017-11-01)
 * (AlCalzone) Moved tradfri-related code into its own library
+* (AlCalzone) Changed authentication procedure to comply with IKEA's request
 
 #### 0.5.5 (2017-10-31)
 * (AlCalzone) Restored compatibility to Gateway version 1.2.42

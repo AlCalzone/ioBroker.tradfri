@@ -60,4 +60,8 @@ systemDictionary = {
 		"de": "Achtung: Alle Änderungen an virtuellen Gruppen greifen sofort!",
 		"en": "Warning: All changes to virtual groups are active immediately!"
 	},
+	"code not stored": {
+		"de": "Auf Wunsch von IKEA wird der Code nicht dauerhaft gespeichert.",
+		"en": "As requested by IKEA, the code will not be stored permanently."
+	},
 };

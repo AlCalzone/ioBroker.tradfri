@@ -93,6 +93,7 @@ export class Settings extends React.Component<SettingsProps, DictionaryLike<any>
 				<Label for="securityCode" text="Security-Code:" />
 				<Tooltip text="security code tooltip" />
 				<input className="value" id="securityCode" value={this.getSetting("securityCode")} onChange={this.handleChange}  />
+				<span>{_("code not stored")}</span>
 			</p>
 		);
 	}

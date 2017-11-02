@@ -43,7 +43,9 @@ let adapter: ExtendedAdapter = utils.adapter({
 		// Sicherstellen, dass die Optionen vollständig ausgefüllt sind.
 		if (adapter.config
 			&& adapter.config.host != null && adapter.config.host !== ""
-			&& adapter.config.securityCode != null && adapter.config.securityCode !== ""
+			&& ((adapter.config.securityCode != null && adapter.config.securityCode !== "")
+				|| (adapter.config.identity != null && adapter.config.identity !== "")
+			)
 		) {
 			// alles gut
 		} else {
@@ -73,44 +75,47 @@ let adapter: ExtendedAdapter = utils.adapter({
 		// Auth-Parameter laden
 		const hostname = (adapter.config.host as string).toLowerCase();
 		const securityCode = (adapter.config.securityCode as string);
-
-		let identity: string;
-		let psk: string;
-		const identityState = await adapter.$getState("info.identity");
-		const identityObj = await adapter.$getObject("info.identity");
-
-		if (
-			identityState != null && identityState.val != null && identityObj.native.psk != null
-		) {
-			identity = identityState.val;
-			psk = identityObj.native.psk;
-		}
+		let identity = (adapter.config.identity as string);
+		let psk = (adapter.config.psk as string);
 
 		$.tradfri = new TradfriClient(hostname, _.log);
-		try {
-			({usedIdentity: identity, usedPSK: psk} = await $.tradfri.connect(securityCode, identity, psk));
-			if (identity != null && psk != null) {
-				// remember the identity/psk
-				await adapter.$setState("info.identity", identity, true);
-				identityObj.native.psk = psk;
-				await adapter.$setObject("info.identity", identityObj);
-			}
-		} catch (e) {
-			if (e instanceof TradfriError) {
-				switch (e.code) {
-					case TradfriErrorCodes.ConnectionFailed: {
-						_.log(`Could not connect to the gateway ${hostname}!`, "error");
-						_.log(`Please check your network and adapter settings and restart the adapter!`, "error");
-						return;
+
+		if (securityCode != null && securityCode.length > 0) {
+			// we temporarily stored the security code to replace it with identity/psk
+			try {
+				({identity, psk} = await $.tradfri.authenticate(securityCode));
+				// store it and restart the adapter
+				const config = Object.assign({}, _.adapter.config);
+				config.identity = identity;
+				config.psk = psk;
+				config.securityCode = "";
+				_.log(`The authentication was successful. The adapter should now restart. If not, please restart it manually.`, "info");
+				_.adapter.config = config;
+			} catch (e) {
+				if (e instanceof TradfriError) {
+					switch (e.code) {
+						case TradfriErrorCodes.ConnectionFailed: {
+							_.log(`Could not connect to the gateway ${hostname}!`, "error");
+							_.log(`Please check your network and adapter settings and restart the adapter!`, "error");
+							return;
+						}
+						case TradfriErrorCodes.AuthenticationFailed: {
+							_.log(`The authentication failed. An update of the adapter might be necessary`, "error");
+							return;
+						}
 					}
-					case TradfriErrorCodes.AuthenticationFailed: {
-						_.log(`The authentication failed. An update of the adapter might be necessary`, "error");
-						return;
-					}
+				} else {
+					_.log(`Could not connect to the gateway ${hostname}!`, "error");
+					_.log(e.message, "error");
+					return;
 				}
-			} else {
+			}
+		} else {
+			// connect with previously negotiated identity and psk
+			if (!await $.tradfri.connect(identity, psk)) {
 				_.log(`Could not connect to the gateway ${hostname}!`, "error");
-				_.log(e.message, "error");
+				_.log(`Please check your network and adapter settings and restart the adapter!`, "error");
+				_.log(`If the settings are correct, consider re-authentication in the adapter config.`, "error");
 				return;
 			}
 		}
