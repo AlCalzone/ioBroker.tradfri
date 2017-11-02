@@ -35,7 +35,8 @@ let adapter = utils_1.default.adapter({
         // Sicherstellen, dass die Optionen vollständig ausgefüllt sind.
         if (adapter.config
             && adapter.config.host != null && adapter.config.host !== ""
-            && adapter.config.securityCode != null && adapter.config.securityCode !== "") {
+            && ((adapter.config.securityCode != null && adapter.config.securityCode !== "")
+                || (adapter.config.identity != null && adapter.config.identity !== ""))) {
             // alles gut
         }
         else {
@@ -60,41 +61,48 @@ let adapter = utils_1.default.adapter({
         // Auth-Parameter laden
         const hostname = adapter.config.host.toLowerCase();
         const securityCode = adapter.config.securityCode;
-        let identity;
-        let psk;
-        const identityState = yield adapter.$getState("info.identity");
-        const identityObj = yield adapter.$getObject("info.identity");
-        if (identityState != null && identityState.val != null && identityObj.native.psk != null) {
-            identity = identityState.val;
-            psk = identityObj.native.psk;
-        }
+        let identity = adapter.config.identity;
+        let psk = adapter.config.psk;
         session_1.session.tradfri = new node_tradfri_client_1.TradfriClient(hostname, global_1.Global.log);
-        try {
-            ({ usedIdentity: identity, usedPSK: psk } = yield session_1.session.tradfri.connect(securityCode, identity, psk));
-            if (identity != null && psk != null) {
-                // remember the identity/psk
-                yield adapter.$setState("info.identity", identity, true);
-                identityObj.native.psk = psk;
-                yield adapter.$setObject("info.identity", identityObj);
+        if (securityCode != null && securityCode.length > 0) {
+            // we temporarily stored the security code to replace it with identity/psk
+            try {
+                ({ identity, psk } = yield session_1.session.tradfri.authenticate(securityCode));
+                // store it and restart the adapter
+                global_1.Global.log(`The authentication was successful. The adapter should now restart. If not, please restart it manually.`, "info");
+                yield updateConfig({
+                    identity,
+                    psk,
+                    securityCode: "",
+                });
             }
-        }
-        catch (e) {
-            if (e instanceof node_tradfri_client_1.TradfriError) {
-                switch (e.code) {
-                    case node_tradfri_client_1.TradfriErrorCodes.ConnectionFailed: {
-                        global_1.Global.log(`Could not connect to the gateway ${hostname}!`, "error");
-                        global_1.Global.log(`Please check your network and adapter settings and restart the adapter!`, "error");
-                        return;
-                    }
-                    case node_tradfri_client_1.TradfriErrorCodes.AuthenticationFailed: {
-                        global_1.Global.log(`The authentication failed. An update of the adapter might be necessary`, "error");
-                        return;
+            catch (e) {
+                if (e instanceof node_tradfri_client_1.TradfriError) {
+                    switch (e.code) {
+                        case node_tradfri_client_1.TradfriErrorCodes.ConnectionFailed: {
+                            global_1.Global.log(`Could not connect to the gateway ${hostname}!`, "error");
+                            global_1.Global.log(`Please check your network and adapter settings and restart the adapter!`, "error");
+                            return;
+                        }
+                        case node_tradfri_client_1.TradfriErrorCodes.AuthenticationFailed: {
+                            global_1.Global.log(`The authentication failed. An update of the adapter might be necessary`, "error");
+                            return;
+                        }
                     }
                 }
+                else {
+                    global_1.Global.log(`Could not connect to the gateway ${hostname}!`, "error");
+                    global_1.Global.log(e.message, "error");
+                    return;
+                }
             }
-            else {
+        }
+        else {
+            // connect with previously negotiated identity and psk
+            if (!(yield session_1.session.tradfri.connect(identity, psk))) {
                 global_1.Global.log(`Could not connect to the gateway ${hostname}!`, "error");
-                global_1.Global.log(e.message, "error");
+                global_1.Global.log(`Please check your network and adapter settings and restart the adapter!`, "error");
+                global_1.Global.log(`If the settings are correct, consider re-authentication in the adapter config.`, "error");
                 return;
             }
         }
@@ -360,6 +368,17 @@ let adapter = utils_1.default.adapter({
         }
     },
 });
+function updateConfig(newConfig) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // Create the config object
+        let config = Object.assign({}, adapter.config);
+        config = Object.assign(config, newConfig);
+        // Update the adapter object
+        const adapterObj = yield adapter.$getForeignObject(`system.adapter.${adapter.namespace}`);
+        adapterObj.native = config;
+        yield adapter.$setForeignObject(`system.adapter.${adapter.namespace}`, adapterObj);
+    });
+}
 // ==================================
 // manage devices
 function setupObserver() {

@@ -3,6 +3,10 @@
         "name": "tradfri",
         "version": "0.6.0-beta3",
         "news": {
+            "0.6.0": {
+                "en": "Moved tradfri-related code into its own library.",
+                "de": "Tradfri-Code in eigene Library ausgelagert."
+            },
             "0.5.5": {
                 "en": "Restored compatibility to Gateway version 1.2.42",
                 "de": "Kompatibilität zu Gateway-Version 1.2.42 wiederhergestellt"

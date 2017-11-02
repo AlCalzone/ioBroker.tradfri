@@ -1,0 +1,2 @@
+cd /opt/iobroker/node_modules/iobroker.tradfri
+node --inspect-brk=0.0.0.0:9229 main.js --force

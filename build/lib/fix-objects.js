@@ -23,6 +23,7 @@ function fixAdapterObjects() {
         // const channelObjs = values(await _.$$(`${_.adapter.namespace}.*`, "channel"));
         // const deviceObjs = values(await _.$$(`${_.adapter.namespace}.*`, "device"));
         yield fixBrightnessRange(stateObjs);
+        yield fixAuthenticationObjects();
     });
 }
 exports.fixAdapterObjects = fixAdapterObjects;
@@ -45,6 +46,20 @@ function fixBrightnessRange(stateObjs) {
                 obj.common = JSON.parse(newCommon);
                 yield global_1.Global.adapter.$setForeignObject(obj._id, obj);
             }
+        }
+    });
+}
+/**
+ * In v0.6.0, the authentication procedure was changed to no longer
+ * store the security code.
+ * From v0.6.0-beta2 to -beta3, the info.identity object was removed in favor of config properties.
+ */
+function fixAuthenticationObjects() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const identityObj = yield global_1.Global.adapter.$getObject("info.identity");
+        if (identityObj != null) {
+            yield global_1.Global.adapter.delState("info.identity");
+            yield global_1.Global.adapter.delObject("info.identity");
         }
     });
 }

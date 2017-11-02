@@ -13,7 +13,7 @@ import {
 
 // Eigene Module laden
 import { ExtendedAdapter, Global as _ } from "./lib/global";
-import { composeObject, entries, values } from "./lib/object-polyfill";
+import { composeObject, DictionaryLike, entries, values } from "./lib/object-polyfill";
 import { wait } from "./lib/promises";
 
 // Datentypen laden
@@ -85,12 +85,12 @@ let adapter: ExtendedAdapter = utils.adapter({
 			try {
 				({identity, psk} = await $.tradfri.authenticate(securityCode));
 				// store it and restart the adapter
-				const config = Object.assign({}, _.adapter.config);
-				config.identity = identity;
-				config.psk = psk;
-				config.securityCode = "";
 				_.log(`The authentication was successful. The adapter should now restart. If not, please restart it manually.`, "info");
-				_.adapter.config = config;
+				await updateConfig({
+					identity,
+					psk,
+					securityCode: "",
+				});
 			} catch (e) {
 				if (e instanceof TradfriError) {
 					switch (e.code) {
@@ -388,6 +388,16 @@ let adapter: ExtendedAdapter = utils.adapter({
 		}
 	},
 }) as ExtendedAdapter;
+
+async function updateConfig(newConfig: DictionaryLike<any>) {
+	// Create the config object
+	let config: DictionaryLike<any> = Object.assign({}, adapter.config);
+	config = Object.assign(config, newConfig);
+	// Update the adapter object
+	const adapterObj = await adapter.$getForeignObject(`system.adapter.${adapter.namespace}`);
+	adapterObj.native = config;
+	await adapter.$setForeignObject(`system.adapter.${adapter.namespace}`, adapterObj);
+}
 
 // ==================================
 // manage devices
