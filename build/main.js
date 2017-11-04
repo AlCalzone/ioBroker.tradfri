@@ -32,6 +32,14 @@ let adapter = utils_1.default.adapter({
     name: "tradfri",
     // Wird aufgerufen, wenn Adapter initialisiert wird
     ready: () => __awaiter(this, void 0, void 0, function* () {
+        // Adapter-Instanz global machen
+        adapter = global_1.Global.extend(adapter);
+        global_1.Global.adapter = adapter;
+        // Fix our adapter objects to repair incompatibilities between versions
+        yield fix_objects_1.ensureInstanceObjects();
+        yield fix_objects_1.fixAdapterObjects();
+        // we're not connected yet!
+        yield adapter.setState("info.connection", false, true);
         // Sicherstellen, dass die Optionen vollständig ausgefüllt sind.
         if (adapter.config
             && adapter.config.host != null && adapter.config.host !== ""
@@ -43,16 +51,10 @@ let adapter = utils_1.default.adapter({
             adapter.log.error("Please set the connection params in the adapter options before starting the adapter!");
             return;
         }
-        // Adapter-Instanz global machen
-        adapter = global_1.Global.extend(adapter);
-        global_1.Global.adapter = adapter;
         // redirect console output
         // console.log = (msg) => adapter.log.debug("STDOUT > " + msg);
         // console.error = (msg) => adapter.log.error("STDERR > " + msg);
         global_1.Global.log(`startfile = ${process.argv[1]}`);
-        // Fix our adapter objects to repair incompatibilities between versions
-        yield fix_objects_1.ensureInstanceObjects();
-        yield fix_objects_1.fixAdapterObjects();
         // watch own states
         adapter.subscribeStates(`${adapter.namespace}.*`);
         adapter.subscribeObjects(`${adapter.namespace}.*`);
@@ -367,6 +369,7 @@ let adapter = utils_1.default.adapter({
                 clearInterval(pingTimer);
             // close the gateway connection
             session_1.session.tradfri.destroy();
+            adapter.setState("info.connection", false, true);
             callback();
         }
         catch (e) {

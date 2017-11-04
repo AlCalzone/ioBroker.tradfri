@@ -40,6 +40,17 @@ let adapter: ExtendedAdapter = utils.adapter({
 	// Wird aufgerufen, wenn Adapter initialisiert wird
 	ready: async () => {
 
+		// Adapter-Instanz global machen
+		adapter = _.extend(adapter);
+		_.adapter = adapter;
+
+		// Fix our adapter objects to repair incompatibilities between versions
+		await ensureInstanceObjects();
+		await fixAdapterObjects();
+
+		// we're not connected yet!
+		await adapter.setState("info.connection", false, true);
+
 		// Sicherstellen, dass die Optionen vollständig ausgefüllt sind.
 		if (adapter.config
 			&& adapter.config.host != null && adapter.config.host !== ""
@@ -53,18 +64,10 @@ let adapter: ExtendedAdapter = utils.adapter({
 			return;
 		}
 
-		// Adapter-Instanz global machen
-		adapter = _.extend(adapter);
-		_.adapter = adapter;
-
 		// redirect console output
 		// console.log = (msg) => adapter.log.debug("STDOUT > " + msg);
 		// console.error = (msg) => adapter.log.error("STDERR > " + msg);
 		_.log(`startfile = ${process.argv[1]}`);
-
-		// Fix our adapter objects to repair incompatibilities between versions
-		await ensureInstanceObjects();
-		await fixAdapterObjects();
 
 		// watch own states
 		adapter.subscribeStates(`${adapter.namespace}.*`);
@@ -387,6 +390,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 
 			// close the gateway connection
 			$.tradfri.destroy();
+			adapter.setState("info.connection", false, true);
 
 			callback();
 		} catch (e) {
