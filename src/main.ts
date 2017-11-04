@@ -120,14 +120,20 @@ let adapter: ExtendedAdapter = utils.adapter({
 			}
 		}
 
-		setupObserver();
-
 		await adapter.$setState("info.connection", true, true);
 		connectionAlive = true;
 		pingTimer = setInterval(pingThread, 10000);
 
 		loadVirtualGroups();
 		// TODO: load known devices from ioBroker into <devices> & <objects>
+		$.tradfri
+			.on("device updated", tradfri_deviceUpdated)
+			.on("device removed", tradfri_deviceRemoved)
+			.on("group updated", tradfri_groupUpdated)
+			.on("group removed", tradfri_groupRemoved)
+			.on("scene updated", tradfri_sceneUpdated)
+			.on("scene removed", tradfri_sceneRemoved)
+			;
 		observeAll();
 
 	},
@@ -401,18 +407,6 @@ async function updateConfig(newConfig: DictionaryLike<any>) {
 
 // ==================================
 // manage devices
-
-function setupObserver(): void {
-	$.observer = $.tradfri
-		.getObserver()
-		.on("device updated", tradfri_deviceUpdated)
-		.on("device removed", tradfri_deviceRemoved)
-		.on("group updated", tradfri_groupUpdated)
-		.on("group removed", tradfri_groupRemoved)
-		.on("scene updated", tradfri_sceneUpdated)
-		.on("scene removed", tradfri_sceneRemoved)
-		;
-}
 
 async function observeAll(): Promise<void> {
 	await $.tradfri.observeDevices();

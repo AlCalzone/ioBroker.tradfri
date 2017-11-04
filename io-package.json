@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "0.6.0-beta3",
+        "version": "0.6.0-beta4",
         "news": {
             "0.6.0": {
                 "en": "Moved tradfri-related code into its own library.",

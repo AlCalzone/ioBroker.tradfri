@@ -1,10 +1,9 @@
-import { Accessory, GroupInfo, TradfriClient, TradfriObserverAPI } from "node-tradfri-client";
+import { Accessory, GroupInfo, TradfriClient } from "node-tradfri-client";
 import { DictionaryLike } from "../lib/object-polyfill";
 import { VirtualGroup } from "../lib/virtual-group";
 
 export class Session {
 	public tradfri: TradfriClient;
-	public observer: TradfriObserverAPI;
 
 	/** dictionary of known devices */
 	public devices: DictionaryLike<Accessory> = {};

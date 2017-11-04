@@ -106,12 +106,18 @@ let adapter = utils_1.default.adapter({
                 return;
             }
         }
-        setupObserver();
         yield adapter.$setState("info.connection", true, true);
         connectionAlive = true;
         pingTimer = setInterval(pingThread, 10000);
         loadVirtualGroups();
         // TODO: load known devices from ioBroker into <devices> & <objects>
+        session_1.session.tradfri
+            .on("device updated", tradfri_deviceUpdated)
+            .on("device removed", tradfri_deviceRemoved)
+            .on("group updated", tradfri_groupUpdated)
+            .on("group removed", tradfri_groupRemoved)
+            .on("scene updated", tradfri_sceneUpdated)
+            .on("scene removed", tradfri_sceneRemoved);
         observeAll();
     }),
     // Handle sendTo-Messages
@@ -381,16 +387,6 @@ function updateConfig(newConfig) {
 }
 // ==================================
 // manage devices
-function setupObserver() {
-    session_1.session.observer = session_1.session.tradfri
-        .getObserver()
-        .on("device updated", tradfri_deviceUpdated)
-        .on("device removed", tradfri_deviceRemoved)
-        .on("group updated", tradfri_groupUpdated)
-        .on("group removed", tradfri_groupRemoved)
-        .on("scene updated", tradfri_sceneUpdated)
-        .on("scene removed", tradfri_sceneRemoved);
-}
 function observeAll() {
     return __awaiter(this, void 0, void 0, function* () {
         yield session_1.session.tradfri.observeDevices();
