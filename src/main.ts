@@ -332,14 +332,12 @@ let adapter: ExtendedAdapter = utils.adapter({
 							// operate the lights depending on the set state
 							// if no request was sent, we can ack the state immediately
 							if (id.endsWith(".state")) {
-								wasAcked = !await $.tradfri.operateLight(accessory, {
-									onOff: val,
-								});
+								wasAcked = !await light.toggle(val);
 							} else if (id.endsWith(".brightness")) {
-								wasAcked = !await $.tradfri.operateLight(accessory, {
-									dimmer: val,
-									transitionTime: await getTransitionDuration(accessory),
-								});
+								wasAcked = !await light.setBrightness(
+									val,
+									await getTransitionDuration(accessory),
+								);
 							} else if (id.endsWith(".color")) {
 								// we need to differentiate here, because some ppl
 								// might already have "color" states for white spectrum bulbs
@@ -348,18 +346,19 @@ let adapter: ExtendedAdapter = utils.adapter({
 									val = normalizeHexColor(val);
 									if (val != null) {
 										state.val = val;
-										wasAcked = !await $.tradfri.operateLight(accessory, {
-											color: val,
-											transitionTime: await getTransitionDuration(accessory),
-										});
+										wasAcked = !await light.setColor(
+											val,
+											await getTransitionDuration(accessory),
+										);
 									}
 								} else if (light.spectrum === "white") {
-									wasAcked = !await $.tradfri.operateLight(accessory, {
-										colorTemperature: val,
-										transitionTime: await getTransitionDuration(accessory),
-									});
+									wasAcked = !await light.setColorTemperature(
+										val,
+										await getTransitionDuration(accessory),
+									);
 								}
 							} else if (/\.(colorTemperature|hue|saturation)$/.test(id)) {
+								// we're not using the simplified API here, since that means we have to repeat the if-clause 3 times.
 								wasAcked = !await $.tradfri.operateLight(accessory, {
 									[id.substr(id.lastIndexOf(".") + 1)]: val,
 									transitionTime: await getTransitionDuration(accessory),

@@ -307,15 +307,10 @@ let adapter = utils_1.default.adapter({
                             // operate the lights depending on the set state
                             // if no request was sent, we can ack the state immediately
                             if (id.endsWith(".state")) {
-                                wasAcked = !(yield session_1.session.tradfri.operateLight(accessory, {
-                                    onOff: val,
-                                }));
+                                wasAcked = !(yield light.toggle(val));
                             }
                             else if (id.endsWith(".brightness")) {
-                                wasAcked = !(yield session_1.session.tradfri.operateLight(accessory, {
-                                    dimmer: val,
-                                    transitionTime: yield getTransitionDuration(accessory),
-                                }));
+                                wasAcked = !(yield light.setBrightness(val, yield getTransitionDuration(accessory)));
                             }
                             else if (id.endsWith(".color")) {
                                 // we need to differentiate here, because some ppl
@@ -325,20 +320,15 @@ let adapter = utils_1.default.adapter({
                                     val = colors_1.normalizeHexColor(val);
                                     if (val != null) {
                                         state.val = val;
-                                        wasAcked = !(yield session_1.session.tradfri.operateLight(accessory, {
-                                            color: val,
-                                            transitionTime: yield getTransitionDuration(accessory),
-                                        }));
+                                        wasAcked = !(yield light.setColor(val, yield getTransitionDuration(accessory)));
                                     }
                                 }
                                 else if (light.spectrum === "white") {
-                                    wasAcked = !(yield session_1.session.tradfri.operateLight(accessory, {
-                                        colorTemperature: val,
-                                        transitionTime: yield getTransitionDuration(accessory),
-                                    }));
+                                    wasAcked = !(yield light.setColorTemperature(val, yield getTransitionDuration(accessory)));
                                 }
                             }
                             else if (/\.(colorTemperature|hue|saturation)$/.test(id)) {
+                                // we're not using the simplified API here, since that means we have to repeat the if-clause 3 times.
                                 wasAcked = !(yield session_1.session.tradfri.operateLight(accessory, {
                                     [id.substr(id.lastIndexOf(".") + 1)]: val,
                                     transitionTime: yield getTransitionDuration(accessory),
