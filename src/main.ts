@@ -232,20 +232,15 @@ let adapter: ExtendedAdapter = utils.adapter({
 						let wasAcked: boolean;
 
 						if (id.endsWith(".state")) {
-							wasAcked = !await $.tradfri.operateGroup(group, {
-								onOff: val,
-							});
+							wasAcked = !await group.toggle(val);
 						} else if (id.endsWith(".brightness")) {
-							wasAcked = !await $.tradfri.operateGroup(group, {
-								dimmer: val,
-								transitionTime: await getTransitionDuration(group),
-							});
+							wasAcked = !await group.setBrightness(
+								val,
+								await getTransitionDuration(group),
+							);
 						} else if (id.endsWith(".activeScene")) {
 							// turn on and activate a scene
-							wasAcked = !await $.tradfri.operateGroup(group, {
-								onOff: true,
-								sceneId: val,
-							});
+							wasAcked = !await group.activateScene(val);
 						} else if (id.endsWith(".color")) {
 							val = normalizeHexColor(val);
 							if (val != null) {

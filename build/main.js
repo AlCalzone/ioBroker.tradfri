@@ -205,22 +205,14 @@ let adapter = utils_1.default.adapter({
                         // if the change was acknowledged, update the state later
                         let wasAcked;
                         if (id.endsWith(".state")) {
-                            wasAcked = !(yield session_1.session.tradfri.operateGroup(group, {
-                                onOff: val,
-                            }));
+                            wasAcked = !(yield group.toggle(val));
                         }
                         else if (id.endsWith(".brightness")) {
-                            wasAcked = !(yield session_1.session.tradfri.operateGroup(group, {
-                                dimmer: val,
-                                transitionTime: yield getTransitionDuration(group),
-                            }));
+                            wasAcked = !(yield group.setBrightness(val, yield getTransitionDuration(group)));
                         }
                         else if (id.endsWith(".activeScene")) {
                             // turn on and activate a scene
-                            wasAcked = !(yield session_1.session.tradfri.operateGroup(group, {
-                                onOff: true,
-                                sceneId: val,
-                            }));
+                            wasAcked = !(yield group.activateScene(val));
                         }
                         else if (id.endsWith(".color")) {
                             val = colors_1.normalizeHexColor(val);
