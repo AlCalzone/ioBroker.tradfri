@@ -46,7 +46,7 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
-#### 0.6.0 (2017-11-01)
+#### 0.6.0 (2017-11-07)
 * (AlCalzone) Moved tradfri-related code into its own library
 * (AlCalzone) Changed authentication procedure to comply with IKEA's request
 
