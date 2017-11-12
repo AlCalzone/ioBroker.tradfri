@@ -17,7 +17,7 @@
         
         "sourceMap": true,
         "sourceRoot": "admin/src/",
-        "target": "es2015"
+        "target": "es5"
         //"watch": true
     },
     "include": [
