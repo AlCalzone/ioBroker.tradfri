@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "0.6.0",
+        "version": "1.0.0",
         "news": {
+            "1.0.0": {
+                "en": "This is stable enough for a 1.x version.",
+                "de": "Der Adapter ist stabil genug für ein 1.x-Version."
+            },
             "0.6.0": {
                 "en": "Moved tradfri-related code into its own library.",
                 "de": "Tradfri-Code in eigene Library ausgelagert."

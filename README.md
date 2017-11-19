@@ -46,7 +46,8 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
-#### upcoming
+#### 1.0.0 (2017-11-19)
+* (AlCalzone) This is stable enough for a 1.x version
 * (AlCalzone) Improved browser compatiblity of the admin UI
 
 #### 0.6.0 (2017-11-07)
