@@ -15,6 +15,7 @@ bin/
 tslint.json
 tsconfig.json
 webpack.config.js
+webpack.tsconfig.json
 *.sln
 *.njsproj*
 iobroker.*.tgz
