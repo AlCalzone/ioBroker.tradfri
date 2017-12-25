@@ -408,7 +408,9 @@ async function updateConfig(newConfig: DictionaryLike<any>) {
 
 async function observeAll(): Promise<void> {
 	await $.tradfri.observeDevices();
+	_.log("received all devices");
 	await $.tradfri.observeGroupsAndScenes();
+	_.log("received all groups and scenes");
 }
 
 function tradfri_deviceUpdated(device: Accessory) {

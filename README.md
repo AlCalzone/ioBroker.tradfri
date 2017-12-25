@@ -46,6 +46,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### 1.0.1 (2017-12-25)
+* (AlCalzone) Update `node-tradfri-client` dependency to support receiving blockwise messages
+
 #### 1.0.0 (2017-11-19)
 * (AlCalzone) This is stable enough for a 1.x version
 * (AlCalzone) Improved browser compatiblity of the admin UI

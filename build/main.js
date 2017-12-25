@@ -375,7 +375,9 @@ function updateConfig(newConfig) {
 function observeAll() {
     return __awaiter(this, void 0, void 0, function* () {
         yield session_1.session.tradfri.observeDevices();
+        global_1.Global.log("received all devices");
         yield session_1.session.tradfri.observeGroupsAndScenes();
+        global_1.Global.log("received all groups and scenes");
     });
 }
 function tradfri_deviceUpdated(device) {
