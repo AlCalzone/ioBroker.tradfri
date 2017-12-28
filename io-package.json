@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "news": {
+            "1.0.2": {
+                "en": "New attempt at automatically restarting the adapter on connection loss",
+                "de": "Neuer Versuch, den Adapter bei Verbindungsverlust neu zu starten"
+            },
             "1.0.0": {
                 "en": "This is stable enough for a 1.x version.",
                 "de": "Der Adapter ist stabil genug für ein 1.x-Version."

@@ -537,9 +537,14 @@ function pingThread() {
                 else {
                     // not sure what to do here, try restarting the adapter
                     global_1.Global.log(`Three consecutive reset attempts failed!`, "error");
-                    global_1.Global.log(`Please restart the adapter manually!`, "error");
+                    global_1.Global.log(`Restarting the adapter in 10 seconds!`, "error");
                     clearTimeout(pingTimer);
                     dead = true;
+                    setTimeout(() => {
+                        // updating the config restarts the adapter
+                        // so we have to provide an empty object to not override anything
+                        updateConfig({});
+                    }, 10000);
                 }
             }
         }

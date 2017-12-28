@@ -46,6 +46,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### 1.0.2 (2017-12-28)
+* (AlCalzone) New attempt at automatically restarting the adapter on connection loss
+
 #### 1.0.1 (2017-12-25)
 * (AlCalzone) Update `node-tradfri-client` dependency to support receiving blockwise messages
 
