@@ -37,7 +37,7 @@
     "jquery-ui": "1.10.4",
     "jquery-ui-multiselect-widget": "1.17.0",
     "jsdom": "^11.5.1",
-    "mocha": "^4.0.1",
+    "mocha": "^4.1.0",
     "node-ssh": "^5.0.0",
     "nyc": "^11.4.1",
     "react": "^16.2.0",
