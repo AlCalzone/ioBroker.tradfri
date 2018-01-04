@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "news": {
+            "1.0.3": {
+                "en": "Updated node-tradfri-client version",
+                "de": "Version von node-tradfri-client aktualisiert"
+            },
             "1.0.2": {
                 "en": "New attempt at automatically restarting the adapter on connection loss",
                 "de": "Neuer Versuch, den Adapter bei Verbindungsverlust neu zu starten"
