@@ -111,8 +111,9 @@ let adapter = utils_1.default.adapter({
         yield adapter.$setState("info.connection", true, true);
         connectionAlive = true;
         pingTimer = setInterval(pingThread, 10000);
-        loadVirtualGroups();
-        // TODO: load known devices from ioBroker into <devices> & <objects>
+        yield loadDevices();
+        yield loadGroups();
+        yield loadVirtualGroups();
         session_1.session.tradfri
             .on("device updated", tradfri_deviceUpdated)
             .on("device removed", tradfri_deviceRemoved)
@@ -490,6 +491,51 @@ function loadVirtualGroups() {
             session_1.session.objects[id] = iobObjects[id];
             // also remember all states
             const stateObjs = yield global_1.Global.$$(`${id}.*`, "state");
+            for (const [sid, sobj] of object_polyfill_1.entries(stateObjs)) {
+                session_1.session.objects[sid] = sobj;
+            }
+        }
+    });
+}
+/**
+ * Loads defined devices from the ioBroker objects DB
+ */
+function loadDevices() {
+    return __awaiter(this, void 0, void 0, function* () {
+        // find all defined devices
+        const iobObjects = yield global_1.Global.$$(`${adapter.namespace}.*`, "device");
+        const deviceObjects = object_polyfill_1.values(iobObjects).filter(d => {
+            return d.native &&
+                d.native.instanceId != null;
+        });
+        // remember the actual objects
+        for (const obj of deviceObjects) {
+            session_1.session.objects[obj._id] = obj;
+            // also remember all states
+            const stateObjs = yield global_1.Global.$$(`${obj._id}.*`, "state");
+            for (const [sid, sobj] of object_polyfill_1.entries(stateObjs)) {
+                session_1.session.objects[sid] = sobj;
+            }
+        }
+    });
+}
+/**
+ * Loads defined devices from the ioBroker objects DB
+ */
+function loadGroups() {
+    return __awaiter(this, void 0, void 0, function* () {
+        // find all defined groups
+        const iobObjects = yield global_1.Global.$$(`${adapter.namespace}.G-*`, "channel");
+        const groupObjects = object_polyfill_1.values(iobObjects).filter(g => {
+            return g.native &&
+                g.native.instanceId != null &&
+                g.native.type === "group";
+        });
+        // remember the actual objects
+        for (const obj of groupObjects) {
+            session_1.session.objects[obj._id] = obj;
+            // also remember all states
+            const stateObjs = yield global_1.Global.$$(`${obj._id}.*`, "state");
             for (const [sid, sobj] of object_polyfill_1.entries(stateObjs)) {
                 session_1.session.objects[sid] = sobj;
             }

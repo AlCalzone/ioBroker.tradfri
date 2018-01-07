@@ -127,8 +127,10 @@ let adapter: ExtendedAdapter = utils.adapter({
 		connectionAlive = true;
 		pingTimer = setInterval(pingThread, 10000);
 
-		loadVirtualGroups();
-		// TODO: load known devices from ioBroker into <devices> & <objects>
+		await loadDevices();
+		await loadGroups();
+		await loadVirtualGroups();
+
 		$.tradfri
 			.on("device updated", tradfri_deviceUpdated)
 			.on("device removed", tradfri_deviceRemoved)
@@ -525,6 +527,49 @@ async function loadVirtualGroups(): Promise<void> {
 		}
 	}
 
+}
+
+/**
+ * Loads defined devices from the ioBroker objects DB
+ */
+async function loadDevices(): Promise<void> {
+	// find all defined devices
+	const iobObjects = await _.$$(`${adapter.namespace}.*`, "device");
+	const deviceObjects: ioBroker.Object[] = values(iobObjects).filter(d => {
+		return d.native &&
+			d.native.instanceId != null;
+	});
+	// remember the actual objects
+	for (const obj of deviceObjects) {
+		$.objects[obj._id] = obj;
+		// also remember all states
+		const stateObjs = await _.$$(`${obj._id}.*`, "state");
+		for (const [sid, sobj] of entries(stateObjs)) {
+			$.objects[sid] = sobj;
+		}
+	}
+}
+
+/**
+ * Loads defined devices from the ioBroker objects DB
+ */
+async function loadGroups(): Promise<void> {
+	// find all defined groups
+	const iobObjects = await _.$$(`${adapter.namespace}.G-*`, "channel");
+	const groupObjects: ioBroker.Object[] = values(iobObjects).filter(g => {
+		return g.native &&
+			g.native.instanceId != null &&
+			g.native.type === "group";
+	});
+	// remember the actual objects
+	for (const obj of groupObjects) {
+		$.objects[obj._id] = obj;
+		// also remember all states
+		const stateObjs = await _.$$(`${obj._id}.*`, "state");
+		for (const [sid, sobj] of entries(stateObjs)) {
+			$.objects[sid] = sobj;
+		}
+	}
 }
 
 // Connection check
