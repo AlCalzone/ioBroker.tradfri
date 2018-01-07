@@ -46,6 +46,10 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### 1.0.3 (2018-01-07)
+* (AlCalzone) Updated `node-tradfri-client` version
+* (AlCalzone) Load objects on adapter start so they don't get overwritten (#35)
+
 #### 1.0.2 (2017-12-28)
 * (AlCalzone) New attempt at automatically restarting the adapter on connection loss
 
