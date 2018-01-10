@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "1.0.3",
+        "version": "1.0.4",
         "news": {
+            "1.0.4": {
+                "en": "Removed warning caused by Gateway v1.3.14",
+                "de": "Warnung entfernt, die durch Gateway v1.3.14 ausgelöst wird"
+            },
             "1.0.3": {
                 "en": "Updated node-tradfri-client version.\r\nBugfixes.",
                 "de": "Version von node-tradfri-client aktualisiert.\r\nBugfixes."

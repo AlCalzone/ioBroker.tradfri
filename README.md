@@ -46,6 +46,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### 1.0.4 (2018-01-10)
+* (AlCalzone) Removed warning caused by Gateway v1.3.14
+
 #### 1.0.3 (2018-01-07)
 * (AlCalzone) Updated `node-tradfri-client` version
 * (AlCalzone) Load objects on adapter start so they don't get overwritten (#35)
