@@ -197,7 +197,7 @@ export function updateGroupStates(group: Group | VirtualGroup, changedStateId?: 
 	if (group.deviceIDs == null) return;
 	// only works for lightbulbs right now
 	const groupBulbs = group.deviceIDs.map(id => $.devices[id])
-		.filter(a => a.type === AccessoryTypes.lightbulb)
+		.filter(a => a != null && a.type === AccessoryTypes.lightbulb)
 		.map(a => a.lightList[0])
 		;
 	if (groupBulbs.length === 0) return;

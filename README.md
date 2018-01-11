@@ -46,6 +46,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### upcoming/next
+* (AlCalzone) Removed error in log on adapter startup
+
 #### 1.0.4 (2018-01-10)
 * (AlCalzone) Removed warning caused by Gateway v1.3.14
 

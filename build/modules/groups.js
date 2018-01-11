@@ -193,7 +193,7 @@ function updateGroupStates(group, changedStateId) {
         return;
     // only works for lightbulbs right now
     const groupBulbs = group.deviceIDs.map(id => session_1.session.devices[id])
-        .filter(a => a.type === node_tradfri_client_1.AccessoryTypes.lightbulb)
+        .filter(a => a != null && a.type === node_tradfri_client_1.AccessoryTypes.lightbulb)
         .map(a => a.lightList[0]);
     if (groupBulbs.length === 0)
         return;
