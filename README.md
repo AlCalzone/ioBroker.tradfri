@@ -46,8 +46,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
-#### upcoming/next
+#### 1.0.5 (2018-01-13)
 * (AlCalzone) Removed error in log on adapter startup
+* (AlCalzone) Change brightness role for better compatibility with the cloud adapter
 
 #### 1.0.4 (2018-01-10)
 * (AlCalzone) Removed warning caused by Gateway v1.3.14
