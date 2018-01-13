@@ -46,6 +46,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### 1.0.6 (2018-01-13)
+* (AlCalzone) Update `node-tradfri-client` version
+
 #### 1.0.5 (2018-01-13)
 * (AlCalzone) Removed error in log on adapter startup
 * (AlCalzone) Change brightness role for better compatibility with the cloud adapter

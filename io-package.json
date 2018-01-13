@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "1.0.5",
+        "version": "1.0.6",
         "news": {
+            "1.0.6": {
+                "en": "Updated node-tradfri-client version.",
+                "de": "Version von node-tradfri-client aktualisiert."
+            },
             "1.0.5": {
                 "en": "Removed error in the log on adapter startup. Changed brightness role for better compatibility with the cloud adapter.",
                 "de": "Fehler im Log beim Start des Adapters wurde entfernt. Geänderte Helligkeitsrolle für bessere Kompatibilität mit dem Cloud-Adapter."
