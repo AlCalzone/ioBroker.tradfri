@@ -24,6 +24,7 @@ function fixAdapterObjects() {
         // const deviceObjs = values(await _.$$(`${_.adapter.namespace}.*`, "device"));
         yield fixBrightnessRange(stateObjs);
         yield fixAuthenticationObjects();
+        yield fixBrightnessRole(stateObjs);
     });
 }
 exports.fixAdapterObjects = fixAdapterObjects;
@@ -60,6 +61,25 @@ function fixAuthenticationObjects() {
         if (identityObj != null) {
             yield global_1.Global.adapter.delState("info.identity");
             yield global_1.Global.adapter.delObject("info.identity");
+        }
+    });
+}
+/**
+ * In v1.0.5, the brightness role was changed from "light.dimmer" to "level.dimmer"
+ */
+function fixBrightnessRole(stateObjs) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const predicate = /(G|VG|L)\-\d+\.(lightbulb\.)?brightness$/;
+        const fixableObjs = stateObjs.filter(o => predicate.test(o._id));
+        for (const obj of fixableObjs) {
+            const oldCommon = JSON.stringify(obj.common);
+            const newCommon = JSON.stringify(Object.assign(Object.assign({}, obj.common), {
+                role: "level.dimmer",
+            }));
+            if (oldCommon !== newCommon) {
+                obj.common = JSON.parse(newCommon);
+                yield global_1.Global.adapter.$setForeignObject(obj._id, obj);
+            }
         }
     });
 }

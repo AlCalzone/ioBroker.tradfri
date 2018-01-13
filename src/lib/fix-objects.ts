@@ -15,6 +15,7 @@ export async function fixAdapterObjects() {
 
 	await fixBrightnessRange(stateObjs);
 	await fixAuthenticationObjects();
+	await fixBrightnessRole(stateObjs);
 }
 
 /**
@@ -48,6 +49,24 @@ async function fixAuthenticationObjects() {
 	if (identityObj != null) {
 		await _.adapter.delState("info.identity");
 		await _.adapter.delObject("info.identity");
+	}
+}
+
+/**
+ * In v1.0.5, the brightness role was changed from "light.dimmer" to "level.dimmer"
+ */
+async function fixBrightnessRole(stateObjs: ioBroker.Object[]) {
+	const predicate = /(G|VG|L)\-\d+\.(lightbulb\.)?brightness$/;
+	const fixableObjs = stateObjs.filter(o => predicate.test(o._id));
+	for (const obj of fixableObjs) {
+		const oldCommon = JSON.stringify(obj.common);
+		const newCommon = JSON.stringify(Object.assign(Object.assign({}, obj.common), {
+			role: "level.dimmer",
+		}));
+		if (oldCommon !== newCommon) {
+			obj.common = JSON.parse(newCommon);
+			await _.adapter.$setForeignObject(obj._id, obj);
+		}
 	}
 }
 

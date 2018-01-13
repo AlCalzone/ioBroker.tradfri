@@ -392,7 +392,7 @@ export const objectDefinitions: DictionaryLike<ioBrokerObjectDefinition> = {
 			max: 100,
 			unit: "%",
 			type: "number",
-			role: "light.dimmer",
+			role: "level.dimmer",
 			desc: rootType === "device" ?
 				"Brightness of the lightbulb" :
 				"Brightness of this group's lightbulbs",
