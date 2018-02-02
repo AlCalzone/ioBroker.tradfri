@@ -5,15 +5,11 @@ import {$$, $window, _, instance} from "../lib/adapter";
 
 import Fragment from "../components/fragment";
 
-export type OnSettingsChangedCallback = (newSettings: DictionaryLike<any>, hasChanges: boolean) => void;
+export type OnSettingsChangedCallback = (newSettings: Record<string, any>, hasChanges: boolean) => void;
 
 interface SettingsProps {
 	onChange: OnSettingsChangedCallback;
-	settings: DictionaryLike<any>;
-}
-
-interface DictionaryLike<T> {
-	[key: string]: T;
+	settings: Record<string, any>;
 }
 
 /** Helper component for a settings label */
@@ -25,7 +21,7 @@ function Tooltip(props) {
 	return <img className="admin-tooltip-icon" src="../../img/info.png" title={_(props.text)} />;
 }
 
-export class Settings extends React.Component<SettingsProps, DictionaryLike<any>> {
+export class Settings extends React.Component<SettingsProps, Record<string, any>> {
 
 	constructor(props: SettingsProps) {
 		super(props);
@@ -41,7 +37,7 @@ export class Settings extends React.Component<SettingsProps, DictionaryLike<any>
 	}
 
 	private onChange: OnSettingsChangedCallback;
-	private originalSettings: DictionaryLike<any>;
+	private originalSettings: Record<string, any>;
 
 	// gets called when the form elements are changed by the user
 	private handleChange(event: React.FormEvent<HTMLElement>) {
