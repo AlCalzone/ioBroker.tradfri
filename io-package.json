@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "1.0.6",
+        "version": "1.0.7",
         "news": {
+            "1.0.7": {
+                "en": "Fixed an error while loading virtual groups.",
+                "de": "Fehler beim Laden virtueller Gruppen behoben."
+            },
             "1.0.6": {
                 "en": "Updated node-tradfri-client version.",
                 "de": "Version von node-tradfri-client aktualisiert."

@@ -46,6 +46,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### 1.0.7 (2018-02-05)
+* (AlCalzone) Fixed an error loading virtual groups
+
 #### 1.0.6 (2018-01-13)
 * (AlCalzone) Update `node-tradfri-client` version
 
