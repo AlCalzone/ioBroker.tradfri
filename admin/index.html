@@ -2,77 +2,47 @@
 
 <head>
 
-<!-- these 4 files always have to be included -->
-<link rel="stylesheet" type="text/css" href="../../lib/css/themes/jquery-ui/redmond/jquery-ui.min.css" />
-<script type="text/javascript" src="../../lib/js/jquery-1.11.1.min.js"></script>
-<script type="text/javascript" src="../../socket.io/socket.io.js"></script>
-<script type="text/javascript" src="../../lib/js/jquery-ui-1.10.3.full.min.js"></script>
+	<!-- these 4 files always have to be included -->
+	<link rel="stylesheet" type="text/css" href="../../lib/css/themes/jquery-ui/redmond/jquery-ui.min.css" />
+	<script type="text/javascript" src="../../lib/js/jquery-1.11.1.min.js"></script>
+	<script type="text/javascript" src="../../socket.io/socket.io.js"></script>
+	<script type="text/javascript" src="../../lib/js/jquery-ui-1.10.3.full.min.js"></script>
 
 
-<!-- optional: use jqGrid
-<link rel="stylesheet" type="text/css" href="../../lib/css/jqGrid/ui.jqgrid-4.5.4.css"/>
-<script type="text/javascript" src="../../lib/js/jqGrid/jquery.jqGrid-4.5.4.min.js"></script>
-<script type="text/javascript" src="../../lib/js/jqGrid/i18n/grid.locale-all.js"></script>
--->
+	<!-- optional: use jqGrid
+	<link rel="stylesheet" type="text/css" href="../../lib/css/jqGrid/ui.jqgrid-4.5.4.css"/>
+	<script type="text/javascript" src="../../lib/js/jqGrid/jquery.jqGrid-4.5.4.min.js"></script>
+	<script type="text/javascript" src="../../lib/js/jqGrid/i18n/grid.locale-all.js"></script>
+	-->
 
-<link rel="stylesheet" type="text/css" href="../../lib/css/jquery.multiselect-1.13.css"/>
-<script type="text/javascript" src="../../lib/js/jquery.multiselect-1.13.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="../../lib/css/jquery.multiselect-1.13.css" />
+	<script type="text/javascript" src="../../lib/js/jquery.multiselect-1.13.min.js"></script>
 
-<!-- these two file always have to be included -->
-<link rel="stylesheet" type="text/css" href="../../css/adapter.css" />
-<script type="text/javascript" src="../../js/translate.js"></script>
-<script type="text/javascript" src="../../js/adapter-settings.js"></script>
-<script type="text/javascript" src="words.js"></script>
-<link rel="stylesheet" type="text/css" href="style.css" />
+	<!-- these two file always have to be included -->
+	<link rel="stylesheet" type="text/css" href="../../css/adapter.css" />
+	<script type="text/javascript" src="../../js/translate.js"></script>
+	<script type="text/javascript" src="../../js/adapter-settings.js"></script>
+	<script type="text/javascript" src="words.js"></script>
+	<link rel="stylesheet" type="text/css" href="style.css" />
 
 </head>
+
 <body>
 
 	<!-- you have to put your config page in a div with id adapter-container -->
 	<div id="adapter-container">
-		
-		<div class="loading"><img src="tradfri.png" /></div>
+
+		<div class="loading">
+			<img src="tradfri.png" />
+		</div>
 		<div class="translate loading">loading...</div>
 
+	</div>
 
-	<!--<table>
-		<tr>
-			<td><img src="tradfri.png" /></td>
-			<td><h3 class="translate">tradfri adapter settings</h3></td>
-		</tr>
-	</table>
-	<table>
-		<tr class="no-if-extend">
-			<td>
-				<label for="host" class="translate">Gateway IP/Hostname: </label>
-			</td>
-			<td class="admin-icon">
-				<img class="admin-tooltip-icon" src="../../img/info.png" title="Der Hostname ist &quot;gw-&quot; gefolgt von der MAC-Adresse bzw. Seriennummer des Gateways, ohne Sonderzeichen, z.B. gw-a0b1c2d3e4f5. Er findet sich auf der Unterseite des Gateways" />
-			</td>
-			<td>
-				<input class="value" id="host" />
-			</td>
-		</tr>
-		<tr class="no-if-extend">
-			<td>
-				<label for="securityCode" class="translate">Security-Code: </label>
-			</td>
-			<td class="admin-icon">
-				<img class="admin-tooltip-icon translate" src="../../img/info.png" title="Der Security-Code findet sich auf der Unterseite des Gateways" />
-			</td>
-			<td>
-				<input class="value" id="securityCode" />
-			</td>
-		</tr>
-
-	</table>-->
-
-</div>
-
-<!-- load webpack sources //-->
-<script type="text/javascript" src="build/runtime.bundle.js"></script>
-<script type="text/javascript" src="build/vendor.bundle.js"></script>
-<script type="text/javascript" src="build/main.bundle.js"></script>
+	<!-- load webpack sources //-->
+	<script type="text/javascript" src="build/runtime.bundle.js"></script>
+	<script type="text/javascript" src="build/vendor.bundle.js"></script>
+	<script type="text/javascript" src="build/main.bundle.js"></script>
 
 </body>
 
