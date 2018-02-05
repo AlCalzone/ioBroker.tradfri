@@ -501,8 +501,9 @@ async function loadVirtualGroups(): Promise<void> {
 	// find all defined virtual groups
 	const iobObjects = await _.$$(`${adapter.namespace}.VG-*`, "channel");
 	const groupObjects: ioBroker.Object[] = values(iobObjects).filter(g => {
-		return g.native &&
+		return g.native != null &&
 			g.native.instanceId != null &&
+			g.native.deviceIDs != null &&
 			g.native.type === "virtual group";
 	});
 	// load them into the virtualGroups dict

@@ -472,8 +472,9 @@ function loadVirtualGroups() {
         // find all defined virtual groups
         const iobObjects = yield global_1.Global.$$(`${adapter.namespace}.VG-*`, "channel");
         const groupObjects = object_polyfill_1.values(iobObjects).filter(g => {
-            return g.native &&
+            return g.native != null &&
                 g.native.instanceId != null &&
+                g.native.deviceIDs != null &&
                 g.native.type === "virtual group";
         });
         // load them into the virtualGroups dict
