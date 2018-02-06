@@ -73,6 +73,10 @@ function extendDevice(accessory) {
         const stateObjs = object_polyfill_1.filter(session_1.session.objects, obj => obj._id.startsWith(objId) && obj.native && obj.native.path);
         // for each property try to update the value
         for (const [id, obj] of object_polyfill_1.entries(stateObjs)) {
+            if (global_1.Global.adapter.config.preserveTransitionTime && id.match(/\.transitionDuration$/g)) {
+                // don't override the transition time
+                continue;
+            }
             try {
                 // Object could have a default value, find it
                 const newValue = object_polyfill_1.dig(accessory, obj.native.path);

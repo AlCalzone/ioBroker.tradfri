@@ -564,7 +564,11 @@ var Settings = /** @class */ (function (_super) {
             React.createElement(Label, { for: "securityCode", text: "Security-Code:" }),
             React.createElement(Tooltip, { text: "security code tooltip" }),
             React.createElement("input", { className: "value", id: "securityCode", value: this.getSetting("securityCode"), onChange: this.handleChange }),
-            React.createElement("span", null, adapter_1._("code not stored"))));
+            React.createElement("span", null, adapter_1._("code not stored")),
+            React.createElement("br", null),
+            React.createElement(Label, { for: "preserveTransitionTime", text: "Preserve transition time:" }),
+            React.createElement(Tooltip, { text: "transition time tooltip" }),
+            React.createElement("input", { className: "value", id: "preserveTransitionTime", value: this.getSetting("preserveTransitionTime"), onChange: this.handleChange })));
     };
     return Settings;
 }(React.Component));

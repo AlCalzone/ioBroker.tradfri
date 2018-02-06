@@ -98,7 +98,8 @@
         "host": "",
         "securityCode": "",
         "identity": "",
-        "psk": ""
+        "psk": "",
+        "preserveTransitionTime": false
     },
     "objects": [],
     "instanceObjects": [

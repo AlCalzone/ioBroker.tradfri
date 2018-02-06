@@ -64,4 +64,11 @@ systemDictionary = {
 		"de": "Auf Wunsch von IKEA wird der Code nicht dauerhaft gespeichert.",
 		"en": "As requested by IKEA, the code will not be stored permanently."
 	},
+	"transition time tooltip": {
+		"de": "Standardmäßig überschreibt das Gateway die Übergangsdauer jedes Mal mit dem Standardwert von 0,5s. Diese Option verhindert das.",
+		"en": "By default the gateway overrides the transition duration with the default value of 0.5s. Setting this option prevents it."
+	},
+	"Preserve transition time:": {
+		"de": "Übergangsdauer beibehalten:",
+	}
 };

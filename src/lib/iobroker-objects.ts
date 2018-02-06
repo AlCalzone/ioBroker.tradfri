@@ -68,6 +68,10 @@ export function extendDevice(accessory: Accessory) {
 		);
 		// for each property try to update the value
 		for (const [id, obj] of entries(stateObjs)) {
+			if (_.adapter.config.preserveTransitionTime && id.match(/\.transitionDuration$/g)) {
+				// don't override the transition time
+				continue;
+			}
 			try {
 				// Object could have a default value, find it
 				const newValue = dig<any>(accessory, obj.native.path);

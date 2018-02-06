@@ -89,7 +89,11 @@ export class Settings extends React.Component<SettingsProps, Record<string, any>
 				<Label for="securityCode" text="Security-Code:" />
 				<Tooltip text="security code tooltip" />
 				<input className="value" id="securityCode" value={this.getSetting("securityCode")} onChange={this.handleChange}  />
-				<span>{_("code not stored")}</span>
+				<span>{_("code not stored")}</span><br />
+
+				<Label for="preserveTransitionTime" text="Preserve transition time:" />
+				<Tooltip text="transition time tooltip" />
+				<input className="value" id="preserveTransitionTime" value={this.getSetting("preserveTransitionTime")} onChange={this.handleChange}  />
 			</p>
 		);
 	}
