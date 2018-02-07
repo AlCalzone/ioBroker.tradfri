@@ -80,20 +80,6 @@ exports.EditableLabel = EditableLabel;
 
 /***/ }),
 
-/***/ "./admin/src/components/fragment.tsx":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-function Fragment(props) {
-    return props.children;
-}
-exports.default = Fragment;
-
-
-/***/ }),
-
 /***/ "./admin/src/components/multi-dropdown.tsx":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -247,7 +233,6 @@ var React = __webpack_require__("./node_modules/react/index.js");
 var ReactDOM = __webpack_require__("./node_modules/react-dom/index.js");
 var adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
 // components
-var fragment_1 = __webpack_require__("./admin/src/components/fragment.tsx");
 var tabs_1 = __webpack_require__("./admin/src/components/tabs.tsx");
 var groups_1 = __webpack_require__("./admin/src/pages/groups.tsx");
 var settings_1 = __webpack_require__("./admin/src/pages/settings.tsx");
@@ -307,7 +292,7 @@ var Root = /** @class */ (function (_super) {
         });
     };
     Root.prototype.render = function () {
-        return (React.createElement(fragment_1.default, null,
+        return (React.createElement(React.Fragment, null,
             React.createElement(Header, null),
             React.createElement(tabs_1.Tabs, { labels: ["Settings", "Groups"] },
                 React.createElement(settings_1.Settings, { settings: this.props.settings, onChange: this.props.onSettingsChanged }),
@@ -317,11 +302,24 @@ var Root = /** @class */ (function (_super) {
 }(React.Component));
 exports.Root = Root;
 var curSettings;
+var originalSettings;
+/**
+ * Checks if any setting was changed
+ */
+function hasChanges() {
+    for (var _i = 0, _a = Object.keys(originalSettings); _i < _a.length; _i++) {
+        var key = _a[_i];
+        if (originalSettings[key] !== curSettings[key])
+            return true;
+    }
+    return false;
+}
 // the function loadSettings has to exist ...
 adapter_1.$window.load = function (settings, onChange) {
-    var settingsChanged = function (newSettings, hasChanges) {
+    originalSettings = settings;
+    var settingsChanged = function (newSettings) {
         curSettings = newSettings;
-        onChange(hasChanges);
+        onChange(hasChanges());
     };
     ReactDOM.render(React.createElement(Root, { settings: settings, onSettingsChanged: settingsChanged }), document.getElementById("adapter-container"));
     // Signal to admin, that no changes yet
@@ -332,6 +330,7 @@ adapter_1.$window.load = function (settings, onChange) {
 adapter_1.$window.save = function (callback) {
     // save the settings
     callback(curSettings);
+    originalSettings = curSettings;
 };
 
 
@@ -372,7 +371,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__("./node_modules/react/index.js");
 var adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
 var editable_label_1 = __webpack_require__("./admin/src/components/editable-label.tsx");
-var fragment_1 = __webpack_require__("./admin/src/components/fragment.tsx");
 var multi_dropdown_1 = __webpack_require__("./admin/src/components/multi-dropdown.tsx");
 var ADD_GROUP_BUTTON_ID = "btnAddGroup";
 var Groups = /** @class */ (function (_super) {
@@ -439,7 +437,7 @@ var Groups = /** @class */ (function (_super) {
     };
     Groups.prototype.render = function () {
         var _this = this;
-        return (React.createElement(fragment_1.default, null,
+        return (React.createElement(React.Fragment, null,
             React.createElement("p", { className: "actions-panel" },
                 React.createElement("button", { id: ADD_GROUP_BUTTON_ID, onClick: this.addGroup }, adapter_1._("add group"))),
             React.createElement("table", { id: "virtual-groups" },
@@ -520,10 +518,11 @@ var Settings = /** @class */ (function (_super) {
     Settings.prototype.handleChange = function (event) {
         var _this = this;
         var target = event.target; // TODO: more types
+        var value = target.type === "checkbox" ? target.checked : target.value;
         // store the setting
-        this.putSetting(target.id, target.value, function () {
+        this.putSetting(target.id, value, function () {
             // and notify the admin UI about changes
-            _this.props.onChange(_this.state, _this.hasChanges());
+            _this.props.onChange(_this.state);
         });
     };
     /**
@@ -541,20 +540,6 @@ var Settings = /** @class */ (function (_super) {
         this.setState((_a = {}, _a[key] = value, _a), callback);
         var _a;
     };
-    /**
-     * Checks if any setting was changed
-     */
-    Settings.prototype.hasChanges = function () {
-        for (var _i = 0, _a = Object.keys(this.originalSettings); _i < _a.length; _i++) {
-            var key = _a[_i];
-            if (this.originalSettings[key] !== this.state[key])
-                return true;
-        }
-        return false;
-    };
-    Settings.prototype.onSave = function () {
-        return this.state;
-    };
     Settings.prototype.render = function () {
         return (React.createElement("p", { key: "content", className: "settings-table" },
             React.createElement(Label, { for: "host", text: "Gateway IP/Hostname:" }),
@@ -564,7 +549,11 @@ var Settings = /** @class */ (function (_super) {
             React.createElement(Label, { for: "securityCode", text: "Security-Code:" }),
             React.createElement(Tooltip, { text: "security code tooltip" }),
             React.createElement("input", { className: "value", id: "securityCode", value: this.getSetting("securityCode"), onChange: this.handleChange }),
-            React.createElement("span", null, adapter_1._("code not stored"))));
+            React.createElement("span", null, adapter_1._("code not stored")),
+            React.createElement("br", null),
+            React.createElement(Label, { for: "preserveTransitionTime", text: "Preserve transition time:" }),
+            React.createElement(Tooltip, { text: "transition time tooltip" }),
+            React.createElement("input", { type: "checkbox", className: "value", id: "preserveTransitionTime", defaultChecked: this.getSetting("preserveTransitionTime"), onChange: this.handleChange })));
     };
     return Settings;
 }(React.Component));

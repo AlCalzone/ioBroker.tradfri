@@ -6,7 +6,6 @@ import * as ReactDOM from "react-dom";
 import {$$, $window, _, instance, sendTo, socket} from "./lib/adapter";
 
 // components
-import Fragment from "./components/fragment";
 import { Tabs } from "./components/tabs";
 import { GroupDictionary, Groups } from "./pages/groups";
 import { OnSettingsChangedCallback, Settings } from "./pages/settings";
@@ -68,26 +67,39 @@ export class Root extends React.Component<any, any> {
 
 	public render() {
 		return (
-			<Fragment>
+			<>
 				<Header />
 				<Tabs labels={["Settings", "Groups"]}>
 					<Settings settings={this.props.settings} onChange={this.props.onSettingsChanged} />
 					<Groups groups={this.state.groups} devices={this.state.devices} />
 				</Tabs>
-			</Fragment>
+			</>
 		);
 	}
 
 }
 
-let curSettings: any;
+let curSettings: Record<string, any>;
+let originalSettings: Record<string, any>;
+
+/**
+ * Checks if any setting was changed
+ */
+function hasChanges(): boolean {
+	for (const key of Object.keys(originalSettings)) {
+		if (originalSettings[key] !== curSettings[key]) return true;
+	}
+	return false;
+}
 
 // the function loadSettings has to exist ...
 $window.load = (settings, onChange) => {
 
-	const settingsChanged: OnSettingsChangedCallback = (newSettings, hasChanges: boolean) => {
+	originalSettings = settings;
+
+	const settingsChanged: OnSettingsChangedCallback = (newSettings) => {
 		curSettings = newSettings;
-		onChange(hasChanges);
+		onChange(hasChanges());
 	};
 
 	ReactDOM.render(
@@ -104,4 +116,5 @@ $window.load = (settings, onChange) => {
 $window.save = (callback) => {
 	// save the settings
 	callback(curSettings);
+	originalSettings = curSettings;
 };

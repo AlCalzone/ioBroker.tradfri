@@ -4,7 +4,6 @@ import * as ReactDOM from "react-dom";
 import {$$, $window, _, instance, sendTo, socket} from "../lib/adapter";
 
 import { EditableLabel } from "../components/editable-label";
-import Fragment from "../components/fragment";
 import { MultiDropdown } from "../components/multi-dropdown";
 
 // Load communication objects as defined in the message module
@@ -94,7 +93,7 @@ export class Groups extends React.Component<GroupsProps, any> {
 
 	public render() {
 		return (
-			<Fragment>
+			<>
 				<p className="actions-panel">
 					<button id={ADD_GROUP_BUTTON_ID} onClick={this.addGroup}>{_("add group")}</button>
 				</p>
@@ -143,7 +142,7 @@ export class Groups extends React.Component<GroupsProps, any> {
 					</tbody>
 				</table>
 				<p>{_("changes are live")}</p>
-			</Fragment>
+			</>
 		);
 	}
 
