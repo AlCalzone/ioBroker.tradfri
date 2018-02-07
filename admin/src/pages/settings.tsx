@@ -3,9 +3,7 @@ import * as ReactDOM from "react-dom";
 
 import {$$, $window, _, instance} from "../lib/adapter";
 
-import Fragment from "../components/fragment";
-
-export type OnSettingsChangedCallback = (newSettings: Record<string, any>, hasChanges: boolean) => void;
+export type OnSettingsChangedCallback = (newSettings: Record<string, any>) => void;
 
 interface SettingsProps {
 	onChange: OnSettingsChangedCallback;
@@ -46,7 +44,7 @@ export class Settings extends React.Component<SettingsProps, Record<string, any>
 		// store the setting
 		this.putSetting(target.id, target.value, () => {
 			// and notify the admin UI about changes
-			this.props.onChange(this.state, this.hasChanges());
+			this.props.onChange(this.state);
 		});
 	}
 
@@ -65,20 +63,6 @@ export class Settings extends React.Component<SettingsProps, Record<string, any>
 		this.setState({[key]: value as any}, callback);
 	}
 
-	/**
-	 * Checks if any setting was changed
-	 */
-	private hasChanges(): boolean {
-		for (const key of Object.keys(this.originalSettings)) {
-			if (this.originalSettings[key] !== this.state[key]) return true;
-		}
-		return false;
-	}
-
-	public onSave(): any {
-		return this.state;
-	}
-
 	public render() {
 		return (
 			<p key="content" className="settings-table">
@@ -93,7 +77,7 @@ export class Settings extends React.Component<SettingsProps, Record<string, any>
 
 				<Label for="preserveTransitionTime" text="Preserve transition time:" />
 				<Tooltip text="transition time tooltip" />
-				<input className="value" id="preserveTransitionTime" value={this.getSetting("preserveTransitionTime")} onChange={this.handleChange}  />
+				<input type="checkbox" className="value" id="preserveTransitionTime" value={this.getSetting("preserveTransitionTime")} onChange={this.handleChange}  />
 			</p>
 		);
 	}
