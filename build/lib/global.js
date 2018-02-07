@@ -46,8 +46,8 @@ class Global {
         if (!ret.__isExtended) {
             // ret.objects.$getObjectList = promisify(adapter.objects.getObjectList, adapter.objects);
             ret = Object.assign(ret, {
-                $getObject: promises_1.promisify(adapter.getObject, adapter),
-                $setObject: promises_1.promisify(adapter.setObject, adapter),
+                $getObject: adapter.getObjectAsync,
+                $setObject: adapter.setObjectAsync,
                 $setObjectNotExists: promises_1.promisify(adapter.setObjectNotExists, adapter),
                 $extendObject: promises_1.promisify(adapter.extendObject, adapter),
                 $getAdapterObjects: promises_1.promisify(adapter.getAdapterObjects, adapter),
@@ -60,9 +60,9 @@ class Global {
                 $deleteDevice: promises_1.promisify(adapter.deleteDevice, adapter),
                 $createChannel: promises_1.promisify(adapter.createChannel, adapter),
                 $deleteChannel: promises_1.promisify(adapter.deleteChannel, adapter),
-                $getState: promises_1.promisify(adapter.getState, adapter),
+                $getState: adapter.getStateAsync,
                 $getStates: promises_1.promisify(adapter.getStates, adapter),
-                $setState: promises_1.promisify(adapter.setState, adapter),
+                $setState: adapter.setStateAsync,
                 $setStateChanged: promises_1.promisify(adapter.setStateChanged, adapter),
                 $createState: promises_1.promisify(adapter.createState, adapter),
                 $deleteState: promises_1.promisify(adapter.deleteState, adapter),

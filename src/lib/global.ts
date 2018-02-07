@@ -118,8 +118,8 @@ export class Global {
 		if (!ret.__isExtended) {
 			// ret.objects.$getObjectList = promisify(adapter.objects.getObjectList, adapter.objects);
 			ret = Object.assign(ret, {
-				$getObject: promisify<ioBroker.Object>(adapter.getObject, adapter),
-				$setObject: promisify<{ id: string }>(adapter.setObject, adapter),
+				$getObject: (adapter as any).getObjectAsync as ((id: string) => Promise<ioBroker.Object>), // promisify<ioBroker.Object>(adapter.getObject, adapter),
+				$setObject: (adapter as any).setObjectAsync as ((id: string, obj: ioBroker.Object, options?: any) => Promise<{id: string}>), // promisify<{ id: string }>(adapter.setObject, adapter),
 				$setObjectNotExists: promisify<{ id: string }>(adapter.setObjectNotExists, adapter),
 				$extendObject: promisify<{ id: string }>(adapter.extendObject, adapter),
 				$getAdapterObjects: promisify<{ [id: string]: ioBroker.Object }>(adapter.getAdapterObjects, adapter),
@@ -135,9 +135,9 @@ export class Global {
 				$createChannel: promisify<{ id: string }>(adapter.createChannel, adapter),
 				$deleteChannel: promisify<void>(adapter.deleteChannel, adapter),
 
-				$getState: promisify<ioBroker.State>(adapter.getState, adapter),
+				$getState: (adapter as any).getStateAsync as ((id: string) => Promise<ioBroker.State>), // promisify<ioBroker.State>(adapter.getState, adapter),
 				$getStates: promisify<{ [id: string]: ioBroker.State }>(adapter.getStates, adapter),
-				$setState: promisify<string>(adapter.setState, adapter),
+				$setState: (adapter as any).setStateAsync as ((id: string, state: string | number | boolean | ioBroker.State | Partial<ioBroker.State>, ack?: boolean, options?: any) => Promise<string>), // promisify<string>(adapter.setState, adapter),
 				$setStateChanged: promisify<string>(adapter.setStateChanged, adapter),
 				$createState: promisify<{ id: string }>(adapter.createState, adapter),
 				$deleteState: promisify<void>(adapter.deleteState, adapter),
