@@ -518,8 +518,9 @@ var Settings = /** @class */ (function (_super) {
     Settings.prototype.handleChange = function (event) {
         var _this = this;
         var target = event.target; // TODO: more types
+        var value = target.type === "checkbox" ? target.checked : target.value;
         // store the setting
-        this.putSetting(target.id, target.value, function () {
+        this.putSetting(target.id, value, function () {
             // and notify the admin UI about changes
             _this.props.onChange(_this.state);
         });
@@ -552,7 +553,7 @@ var Settings = /** @class */ (function (_super) {
             React.createElement("br", null),
             React.createElement(Label, { for: "preserveTransitionTime", text: "Preserve transition time:" }),
             React.createElement(Tooltip, { text: "transition time tooltip" }),
-            React.createElement("input", { type: "checkbox", className: "value", id: "preserveTransitionTime", value: this.getSetting("preserveTransitionTime"), onChange: this.handleChange })));
+            React.createElement("input", { type: "checkbox", className: "value", id: "preserveTransitionTime", defaultChecked: this.getSetting("preserveTransitionTime"), onChange: this.handleChange })));
     };
     return Settings;
 }(React.Component));
