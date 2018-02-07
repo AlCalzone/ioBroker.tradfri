@@ -198,8 +198,8 @@ export class Global {
 	 * Kurzschreibweise für die Ermittlung eines Objekts
 	 * @param id
 	 */
-	public static async $(id: string) {
-		return await Global._adapter.$getForeignObject(id);
+	public static $(id: string): Promise<ioBroker.Object> {
+		return Global._adapter.$getForeignObject(id);
 	}
 
 	/**

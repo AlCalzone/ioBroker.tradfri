@@ -122,9 +122,7 @@ class Global {
      * @param id
      */
     static $(id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield Global._adapter.$getForeignObject(id);
-        });
+        return Global._adapter.$getForeignObject(id);
     }
     /**
      * Kurzschreibweise für die Ermittlung mehrerer Objekte

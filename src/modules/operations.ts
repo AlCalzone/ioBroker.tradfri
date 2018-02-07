@@ -36,7 +36,7 @@ export async function operateVirtualGroup(group: Group | VirtualGroup, operation
  * @param newName The new name to be given to the device
  * @returns true if a request was sent, false otherwise
  */
-export async function renameDevice(accessory: Accessory, newName: string): Promise<boolean> {
+export function renameDevice(accessory: Accessory, newName: string): Promise<boolean> {
 	// create a copy to modify
 	const newAccessory = accessory.clone();
 	newAccessory.name = newName;
@@ -50,7 +50,7 @@ export async function renameDevice(accessory: Accessory, newName: string): Promi
  * @param newName The new name to be given to the group
  * @returns true if a request was sent, false otherwise
  */
-export async function renameGroup(group: Group, newName: string): Promise<boolean> {
+export function renameGroup(group: Group, newName: string): Promise<boolean> {
 	// create a copy to modify
 	const newGroup = group.clone();
 	newGroup.name = newName;

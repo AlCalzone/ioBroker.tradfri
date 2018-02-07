@@ -44,12 +44,10 @@ exports.operateVirtualGroup = operateVirtualGroup;
  * @returns true if a request was sent, false otherwise
  */
 function renameDevice(accessory, newName) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // create a copy to modify
-        const newAccessory = accessory.clone();
-        newAccessory.name = newName;
-        return session_1.session.tradfri.updateDevice(newAccessory);
-    });
+    // create a copy to modify
+    const newAccessory = accessory.clone();
+    newAccessory.name = newName;
+    return session_1.session.tradfri.updateDevice(newAccessory);
 }
 exports.renameDevice = renameDevice;
 /**
@@ -59,11 +57,9 @@ exports.renameDevice = renameDevice;
  * @returns true if a request was sent, false otherwise
  */
 function renameGroup(group, newName) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // create a copy to modify
-        const newGroup = group.clone();
-        newGroup.name = newName;
-        return session_1.session.tradfri.updateGroup(newGroup);
-    });
+    // create a copy to modify
+    const newGroup = group.clone();
+    newGroup.name = newName;
+    return session_1.session.tradfri.updateGroup(newGroup);
 }
 exports.renameGroup = renameGroup;
