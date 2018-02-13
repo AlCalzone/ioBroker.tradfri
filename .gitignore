@@ -263,9 +263,6 @@ __pycache__/
 # Visual Studio NodeJS Typings
 typings/
 
-# VSCode files
-.vscode/
-
 # Sourcemaps
 maps/
 
