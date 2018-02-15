@@ -46,8 +46,8 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
-#### 1.1.2 (2018-02-15)
-* (AlCalzone) Update `node-tradfri-client` version
+#### 1.1.3 (2018-02-15)
+* (AlCalzone) Update `node-tradfri-client` version for better RGB support and floating point values
 
 #### 1.1.1 (2018-02-07)
 * (AlCalzone) Attempt to fix `TypeError: generator already running`
