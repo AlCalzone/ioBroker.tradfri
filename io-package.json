@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "1.1.1",
+        "version": "1.1.2",
         "news": {
+            "1.1.2": {
+                "en": "Updated node-tradfri-client version.",
+                "de": "Version von node-tradfri-client aktualisiert."
+            },
             "1.1.0": {
                 "en": "Added an option to preserve the transition duration for single lightbulbs.",
                 "de": "Option hinzugefügt, um die Übergangsdauer für einzelne Lampen beizubehalten."
