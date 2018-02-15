@@ -31,6 +31,7 @@ import { extendGroup, syncGroupsWithState, updateGroupStates } from "./modules/g
 import { onMessage } from "./modules/message";
 import { operateVirtualGroup, renameDevice, renameGroup } from "./modules/operations";
 
+import { roundTo } from "./lib/math";
 import { session as $ } from "./modules/session";
 
 // Adapter-Objekt erstellen
@@ -219,9 +220,10 @@ let adapter: ExtendedAdapter = utils.adapter({
 				// for now: handle changes on a case by case basis
 				// everything else is too complicated for now
 				let val = state.val;
-				// make sure we have whole numbers
 				if (stateObj.common.type === "number") {
-					val = Math.round(val); // TODO: check if there are situations where decimal numbers are allowed
+					// node-tradfri-client handles floating point numbers,
+					// but we'll round to 2 digits for clarity
+					val = roundTo(val, 2);
 					if (stateObj.common.min != null) val = Math.max(stateObj.common.min, val);
 					if (stateObj.common.max != null) val = Math.min(stateObj.common.max, val);
 				}

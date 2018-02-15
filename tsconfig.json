@@ -21,8 +21,8 @@
         "sourceMap": false,
         "inlineSourceMap": false,
         //"sourceRoot": "src/",
-        "target": "es2015"
-        //"watch": true
+        "target": "es2015",
+        "watch": true,
     },
     "include": [
         "src/**/*.ts"

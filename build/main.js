@@ -26,6 +26,7 @@ const custom_subscriptions_1 = require("./modules/custom-subscriptions");
 const groups_1 = require("./modules/groups");
 const message_1 = require("./modules/message");
 const operations_1 = require("./modules/operations");
+const math_1 = require("./lib/math");
 const session_1 = require("./modules/session");
 // Adapter-Objekt erstellen
 let adapter = utils_1.default.adapter({
@@ -191,9 +192,10 @@ let adapter = utils_1.default.adapter({
                 // for now: handle changes on a case by case basis
                 // everything else is too complicated for now
                 let val = state.val;
-                // make sure we have whole numbers
                 if (stateObj.common.type === "number") {
-                    val = Math.round(val); // TODO: check if there are situations where decimal numbers are allowed
+                    // node-tradfri-client handles floating point numbers,
+                    // but we'll round to 2 digits for clarity
+                    val = math_1.roundTo(val, 2);
                     if (stateObj.common.min != null)
                         val = Math.max(stateObj.common.min, val);
                     if (stateObj.common.max != null)
