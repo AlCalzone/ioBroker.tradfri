@@ -22,7 +22,7 @@
         "inlineSourceMap": false,
         //"sourceRoot": "src/",
         "target": "es2015",
-        "watch": true,
+        "watch": true
     },
     "include": [
         "src/**/*.ts"
