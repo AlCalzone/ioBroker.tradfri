@@ -46,6 +46,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### 1.1.4 (2018-02-19)
+* (AlCalzone) Update `node-tradfri-client` version to fix an issue with RGB support
+
 #### 1.1.3 (2018-02-15)
 * (AlCalzone) Update `node-tradfri-client` version for better RGB support and floating point values
 
