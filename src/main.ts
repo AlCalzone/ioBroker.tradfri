@@ -87,7 +87,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 		if (securityCode != null && securityCode.length > 0) {
 			// we temporarily stored the security code to replace it with identity/psk
 			try {
-				({identity, psk} = await $.tradfri.authenticate(securityCode));
+				({ identity, psk } = await $.tradfri.authenticate(securityCode));
 				// store it and restart the adapter
 				_.log(`The authentication was successful. The adapter should now restart. If not, please restart it manually.`, "info");
 				await updateConfig({
@@ -246,6 +246,8 @@ let adapter: ExtendedAdapter = utils.adapter({
 							// turn on and activate a scene
 							wasAcked = !await group.activateScene(val);
 						} else if (id.endsWith(".color")) {
+							// color change is only supported manually, so we operate
+							// the virtual state of this group
 							val = normalizeHexColor(val);
 							if (val != null) {
 								state.val = val;
@@ -255,11 +257,24 @@ let adapter: ExtendedAdapter = utils.adapter({
 								});
 								wasAcked = true;
 							}
-						} else if (/\.(colorTemperature|hue|saturation)$/.test(id)) {
+						} else if (id.endsWith(".colorTemperature")) {
 							// color change is only supported manually, so we operate
 							// the virtual state of this group
 							await operateVirtualGroup(group, {
-								[id.substr(id.lastIndexOf(".") + 1)]: val,
+								colorTemperature: val,
+								transitionTime: await getTransitionDuration(group),
+							});
+							wasAcked = true;
+						} else if (/\.(hue|saturation)$/.test(id)) {
+							// hue and saturation have to be set together
+							const prefix = id.substr(0, id.lastIndexOf(".") + 1);
+							const hue = (await _.adapter.$getState(prefix + "hue")).val;
+							const saturation = (await _.adapter.$getState(prefix + "saturation")).val;
+							// color change is only supported manually, so we operate
+							// the virtual state of this group
+							await operateVirtualGroup(group, {
+								hue,
+								saturation,
 								transitionTime: await getTransitionDuration(group),
 							});
 							wasAcked = true;
@@ -298,9 +313,19 @@ let adapter: ExtendedAdapter = utils.adapter({
 									transitionTime: await getTransitionDuration(vGroup),
 								};
 							}
-						} else if (/\.(colorTemperature|hue|saturation)$/.test(id)) {
+						} else if (id.endsWith(".colorTemperature")) {
 							operation = {
-								[id.substr(id.lastIndexOf(".") + 1)]: val,
+								colorTemperature: val,
+								transitionTime: await getTransitionDuration(vGroup),
+							};
+						} else if (/\.(hue|saturation)$/.test(id)) {
+							// hue and saturation have to be set together
+							const prefix = id.substr(0, id.lastIndexOf(".") + 1);
+							const hue = (await _.adapter.$getState(prefix + "hue")).val;
+							const saturation = (await _.adapter.$getState(prefix + "saturation")).val;
+							operation = {
+								hue,
+								saturation,
 								transitionTime: await getTransitionDuration(vGroup),
 							};
 						} else if (id.endsWith(".transitionDuration")) {
@@ -356,10 +381,19 @@ let adapter: ExtendedAdapter = utils.adapter({
 										await getTransitionDuration(accessory),
 									);
 								}
-							} else if (/\.(colorTemperature|hue|saturation)$/.test(id)) {
-								// we're not using the simplified API here, since that means we have to repeat the if-clause 3 times.
+							} else if (id.endsWith(".colorTemperature")) {
+								wasAcked = !await light.setColorTemperature(
+									val,
+									await getTransitionDuration(accessory),
+								);
+							} else if (/\.(hue|saturation)$/.test(id)) {
+								// hue and saturation have to be set together
+								const prefix = id.substr(0, id.lastIndexOf(".") + 1);
+								const hue = (await _.adapter.$getState(prefix + "hue")).val;
+								const saturation = (await _.adapter.$getState(prefix + "saturation")).val;
 								wasAcked = !await $.tradfri.operateLight(accessory, {
-									[id.substr(id.lastIndexOf(".") + 1)]: val,
+									hue,
+									saturation,
 									transitionTime: await getTransitionDuration(accessory),
 								});
 							} else if (id.endsWith(".transitionDuration")) {
