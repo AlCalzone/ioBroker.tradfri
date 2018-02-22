@@ -1,9 +1,9 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "1.1.5",
+        "version": "1.1.6",
         "news": {
-            "1.1.5": {
+            "1.1.6": {
                 "en": "Updated node-tradfri-client version.",
                 "de": "Version von node-tradfri-client aktualisiert."
             },

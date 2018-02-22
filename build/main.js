@@ -218,6 +218,8 @@ let adapter = utils_1.default.adapter({
                             wasAcked = !(yield group.activateScene(val));
                         }
                         else if (id.endsWith(".color")) {
+                            // color change is only supported manually, so we operate
+                            // the virtual state of this group
                             val = colors_1.normalizeHexColor(val);
                             if (val != null) {
                                 state.val = val;
@@ -228,11 +230,25 @@ let adapter = utils_1.default.adapter({
                                 wasAcked = true;
                             }
                         }
-                        else if (/\.(colorTemperature|hue|saturation)$/.test(id)) {
+                        else if (id.endsWith(".colorTemperature")) {
                             // color change is only supported manually, so we operate
                             // the virtual state of this group
                             yield operations_1.operateVirtualGroup(group, {
-                                [id.substr(id.lastIndexOf(".") + 1)]: val,
+                                colorTemperature: val,
+                                transitionTime: yield getTransitionDuration(group),
+                            });
+                            wasAcked = true;
+                        }
+                        else if (/\.(hue|saturation)$/.test(id)) {
+                            // hue and saturation have to be set together
+                            const prefix = id.substr(0, id.lastIndexOf(".") + 1);
+                            const hue = (yield global_1.Global.adapter.$getState(prefix + "hue")).val;
+                            const saturation = (yield global_1.Global.adapter.$getState(prefix + "saturation")).val;
+                            // color change is only supported manually, so we operate
+                            // the virtual state of this group
+                            yield operations_1.operateVirtualGroup(group, {
+                                hue,
+                                saturation,
                                 transitionTime: yield getTransitionDuration(group),
                             });
                             wasAcked = true;
@@ -272,9 +288,20 @@ let adapter = utils_1.default.adapter({
                                 };
                             }
                         }
-                        else if (/\.(colorTemperature|hue|saturation)$/.test(id)) {
+                        else if (id.endsWith(".colorTemperature")) {
                             operation = {
-                                [id.substr(id.lastIndexOf(".") + 1)]: val,
+                                colorTemperature: val,
+                                transitionTime: yield getTransitionDuration(vGroup),
+                            };
+                        }
+                        else if (/\.(hue|saturation)$/.test(id)) {
+                            // hue and saturation have to be set together
+                            const prefix = id.substr(0, id.lastIndexOf(".") + 1);
+                            const hue = (yield global_1.Global.adapter.$getState(prefix + "hue")).val;
+                            const saturation = (yield global_1.Global.adapter.$getState(prefix + "saturation")).val;
+                            operation = {
+                                hue,
+                                saturation,
                                 transitionTime: yield getTransitionDuration(vGroup),
                             };
                         }
@@ -322,10 +349,17 @@ let adapter = utils_1.default.adapter({
                                     wasAcked = !(yield light.setColorTemperature(val, yield getTransitionDuration(accessory)));
                                 }
                             }
-                            else if (/\.(colorTemperature|hue|saturation)$/.test(id)) {
-                                // we're not using the simplified API here, since that means we have to repeat the if-clause 3 times.
+                            else if (id.endsWith(".colorTemperature")) {
+                                wasAcked = !(yield light.setColorTemperature(val, yield getTransitionDuration(accessory)));
+                            }
+                            else if (/\.(hue|saturation)$/.test(id)) {
+                                // hue and saturation have to be set together
+                                const prefix = id.substr(0, id.lastIndexOf(".") + 1);
+                                const hue = (yield global_1.Global.adapter.$getState(prefix + "hue")).val;
+                                const saturation = (yield global_1.Global.adapter.$getState(prefix + "saturation")).val;
                                 wasAcked = !(yield session_1.session.tradfri.operateLight(accessory, {
-                                    [id.substr(id.lastIndexOf(".") + 1)]: val,
+                                    hue,
+                                    saturation,
                                     transitionTime: yield getTransitionDuration(accessory),
                                 }));
                             }
