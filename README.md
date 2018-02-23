@@ -46,6 +46,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### 1.1.7 (2018-02-23)
+* (AlCalzone) Fixed activation of scenes when the scene is already selected
+
 #### 1.1.6 (2018-02-22)
 * (AlCalzone) Fixes for RGB support
 * (AlCalzone) Support for floating point values
