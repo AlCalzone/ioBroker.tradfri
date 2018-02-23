@@ -553,7 +553,12 @@ var Settings = /** @class */ (function (_super) {
             React.createElement("br", null),
             React.createElement(Label, { for: "preserveTransitionTime", text: "Preserve transition time:" }),
             React.createElement(Tooltip, { text: "transition time tooltip" }),
-            React.createElement("input", { type: "checkbox", className: "value", id: "preserveTransitionTime", defaultChecked: this.getSetting("preserveTransitionTime"), onChange: this.handleChange })));
+            React.createElement("input", { type: "checkbox", className: "value", id: "preserveTransitionTime", defaultChecked: this.getSetting("preserveTransitionTime"), onChange: this.handleChange }),
+            React.createElement("br", null),
+            React.createElement(Label, { for: "reduceTraffic", text: "Reduce traffic:" }),
+            React.createElement(Tooltip, { text: "reduce traffic tooltip" }),
+            React.createElement("input", { type: "number", min: "0", max: "250", step: "10", className: "value", id: "reduceTraffic", defaultChecked: this.getSetting("reduceTraffic"), onChange: this.handleChange }),
+            React.createElement("span", null, adapter_1._("send delay"))));
     };
     return Settings;
 }(React.Component));
