@@ -1,7 +1,7 @@
 import { AccessoryTypes, TradfriError, TradfriErrorCodes } from "node-tradfri-client";
 import { Global as _ } from "../lib/global";
 import { calcGroupName } from "../lib/iobroker-objects";
-import { DictionaryLike, entries } from "../lib/object-polyfill";
+import { entries } from "../lib/object-polyfill";
 import { VirtualGroup } from "../lib/virtual-group";
 import { Device as SendToDevice, Group as SendToGroup } from "./communication";
 import { extendVirtualGroup, updateGroupStates } from "./groups";
@@ -141,7 +141,7 @@ export async function onMessage(obj) {
 					return;
 				}
 
-				const ret: DictionaryLike<SendToGroup> = {};
+				const ret: Record<string, SendToGroup> = {};
 				if (groupType === "real" || groupType === "both") {
 					for (const [id, group] of entries($.groups)) {
 						ret[id] = {
@@ -177,7 +177,7 @@ export async function onMessage(obj) {
 					return;
 				}
 
-				const ret: DictionaryLike<SendToDevice> = {};
+				const ret: Record<string, SendToDevice> = {};
 				if (deviceType === "lightbulb") {
 					const lightbulbs = entries($.devices).filter(([id, device]) => device.type === AccessoryTypes.lightbulb);
 					for (const [id, bulb] of lightbulbs) {
