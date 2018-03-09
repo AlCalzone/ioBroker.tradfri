@@ -47,7 +47,7 @@ The result object `ret` looks as follows:
 ## Changelog
 
 #### 1.1.8 (2018-03-09)
-* (AlCalzone) Ignore minimum brightness reports when lights are turned off.
+* (AlCalzone) Ignore minimum brightness reports when lights are turned off
 
 #### 1.1.7 (2018-02-23)
 * (AlCalzone) Fixed activation of scenes when the scene is already selected
