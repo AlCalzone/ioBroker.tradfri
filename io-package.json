@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "1.1.7",
+        "version": "1.1.8",
         "news": {
+            "1.1.8": {
+                "en": "Ignore minimum brightness reports when lights are turned off",
+                "de": "Lampen werden nicht mehr auf minimale Helligkeit gesetzt, wenn sie bereits ausgeschaltet sind."
+            },
             "1.1.7": {
                 "en": "Fixed activation of scenes when the scene is already selected",
                 "de": "Szenen werden jetzt korrekt aktiviert, selbst wenn sie bereits ausgewählt waren."
