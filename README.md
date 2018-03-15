@@ -46,6 +46,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### 1.1.9 (2018-03-15)
+* (AlCalzone) Fixed group states not always updating the lightbulbs when changed
+
 #### 1.1.8 (2018-03-09)
 * (AlCalzone) Ignore minimum brightness reports when lights are turned off
 
