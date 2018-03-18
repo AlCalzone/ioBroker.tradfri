@@ -46,6 +46,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### 1.1.10 (2018-03-18)
+* (AlCalzone) Improved automatic reconnection
+
 #### 1.1.9 (2018-03-15)
 * (AlCalzone) Fixed group states not always updating the lightbulbs when changed
 

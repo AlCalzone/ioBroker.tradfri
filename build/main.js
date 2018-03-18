@@ -28,6 +28,7 @@ const message_1 = require("./modules/message");
 const operations_1 = require("./modules/operations");
 const math_1 = require("./lib/math");
 const session_1 = require("./modules/session");
+let connectionAlive;
 // Adapter-Objekt erstellen
 let adapter = utils_1.default.adapter({
     name: "tradfri",
@@ -66,7 +67,10 @@ let adapter = utils_1.default.adapter({
         const securityCode = adapter.config.securityCode;
         let identity = adapter.config.identity;
         let psk = adapter.config.psk;
-        session_1.session.tradfri = new node_tradfri_client_1.TradfriClient(hostname, global_1.Global.log);
+        session_1.session.tradfri = new node_tradfri_client_1.TradfriClient(hostname, {
+            customLogger: global_1.Global.log,
+            watchConnection: true,
+        });
         if (securityCode != null && securityCode.length > 0) {
             // we temporarily stored the security code to replace it with identity/psk
             try {
@@ -82,13 +86,49 @@ let adapter = utils_1.default.adapter({
             catch (e) {
                 if (e instanceof node_tradfri_client_1.TradfriError) {
                     switch (e.code) {
-                        case node_tradfri_client_1.TradfriErrorCodes.ConnectionFailed: {
-                            global_1.Global.log(`Could not connect to the gateway ${hostname}!`, "error");
+                        case node_tradfri_client_1.TradfriErrorCodes.ConnectionTimedOut: {
+                            global_1.Global.log(`The gateway ${hostname} is unreachable or did not respond in time!`, "error");
                             global_1.Global.log(`Please check your network and adapter settings and restart the adapter!`, "error");
-                            return;
                         }
                         case node_tradfri_client_1.TradfriErrorCodes.AuthenticationFailed: {
-                            global_1.Global.log(`The authentication failed. An update of the adapter might be necessary`, "error");
+                            global_1.Global.log(`The security code is incorrect or something else went wrong with the authentication.`, "error");
+                            global_1.Global.log(`Please check your adapter settings and restart the adapter!`, "error");
+                            return;
+                        }
+                        case node_tradfri_client_1.TradfriErrorCodes.ConnectionFailed: {
+                            global_1.Global.log(`Could not authenticate with the gateway ${hostname}!`, "error");
+                            global_1.Global.log(e.message, "error");
+                            return;
+                        }
+                    }
+                }
+                else {
+                    global_1.Global.log(`Could not authenticate with the gateway ${hostname}!`, "error");
+                    global_1.Global.log(e.message, "error");
+                    return;
+                }
+            }
+        }
+        else {
+            // connect with previously negotiated identity and psk
+            try {
+                yield session_1.session.tradfri.connect(identity, psk);
+            }
+            catch (e) {
+                if (e instanceof node_tradfri_client_1.TradfriError) {
+                    switch (e.code) {
+                        case node_tradfri_client_1.TradfriErrorCodes.ConnectionTimedOut: {
+                            global_1.Global.log(`The gateway ${hostname} is unreachable or did not respond in time!`, "error");
+                            global_1.Global.log(`Please check your network and adapter settings and restart the adapter!`, "error");
+                        }
+                        case node_tradfri_client_1.TradfriErrorCodes.AuthenticationFailed: {
+                            global_1.Global.log(`The stored credentials are no longer valid!`, "error");
+                            global_1.Global.log(`Please re-enter your security code in the adapter settings!`, "error");
+                            return;
+                        }
+                        case node_tradfri_client_1.TradfriErrorCodes.ConnectionFailed: {
+                            global_1.Global.log(`Could not connect to the gateway ${hostname}!`, "error");
+                            global_1.Global.log(e.message, "error");
                             return;
                         }
                     }
@@ -100,18 +140,20 @@ let adapter = utils_1.default.adapter({
                 }
             }
         }
-        else {
-            // connect with previously negotiated identity and psk
-            if (!(yield session_1.session.tradfri.connect(identity, psk))) {
-                global_1.Global.log(`Could not connect to the gateway ${hostname}!`, "error");
-                global_1.Global.log(`Please check your network and adapter settings and restart the adapter!`, "error");
-                global_1.Global.log(`If the settings are correct, consider re-authentication in the adapter config.`, "error");
-                return;
-            }
-        }
+        // watch the connection
         yield adapter.$setState("info.connection", true, true);
         connectionAlive = true;
-        pingTimer = setInterval(pingThread, 10000);
+        session_1.session.tradfri
+            .on("connection alive", () => {
+            global_1.Global.log("Connection to gateway reestablished", "info");
+            adapter.setState("info.connection", true, true);
+            connectionAlive = true;
+        })
+            .on("connection lost", () => {
+            global_1.Global.log("Lost connection to gateway", "warn");
+            adapter.setState("info.connection", false, true);
+            connectionAlive = false;
+        });
         yield loadDevices();
         yield loadGroups();
         yield loadVirtualGroups();
@@ -121,7 +163,8 @@ let adapter = utils_1.default.adapter({
             .on("group updated", tradfri_groupUpdated)
             .on("group removed", tradfri_groupRemoved)
             .on("scene updated", tradfri_sceneUpdated)
-            .on("scene removed", tradfri_sceneRemoved);
+            .on("scene removed", tradfri_sceneRemoved)
+            .on("error", tradfri_error);
         observeAll();
     }),
     // Handle sendTo-Messages
@@ -170,10 +213,8 @@ let adapter = utils_1.default.adapter({
         else {
             global_1.Global.log(`{{blue}} state with id ${id} deleted`, "debug");
         }
-        if (dead) {
-            global_1.Global.log("The connection to the gateway is dead.", "error");
-            global_1.Global.log("Cannot send changes.", "error");
-            global_1.Global.log("Please restart the adapter!", "error");
+        if (!connectionAlive && state && !state.ack && id.startsWith(adapter.namespace)) {
+            global_1.Global.log("Not connected to the gateway. Cannot send changes!", "warn");
             return;
         }
         // apply additional subscriptions we've defined
@@ -383,9 +424,6 @@ let adapter = utils_1.default.adapter({
     unload: (callback) => {
         // is called when adapter shuts down - callback has to be called under any circumstances!
         try {
-            // stop pinging
-            if (pingTimer != null)
-                clearInterval(pingTimer);
             // close the gateway connection
             session_1.session.tradfri.destroy();
             adapter.setState("info.connection", false, true);
@@ -478,6 +516,15 @@ function tradfri_sceneRemoved(groupId, instanceId) {
         if (instanceId in groupInfo.scenes)
             delete groupInfo.scenes[instanceId];
     }
+}
+function tradfri_error(error) {
+    if (error instanceof node_tradfri_client_1.TradfriError) {
+        if (error.code === node_tradfri_client_1.TradfriErrorCodes.NetworkReset ||
+            error.code === node_tradfri_client_1.TradfriErrorCodes.ConnectionTimedOut) {
+            return;
+        } // it's okay, just swallow the error
+    }
+    global_1.Global.log(error.toString(), "error");
 }
 /**
  * Returns the configured transition duration for an accessory or a group
@@ -575,60 +622,6 @@ function loadGroups() {
             const stateObjs = yield global_1.Global.$$(`${obj._id}.*`, "state");
             for (const [sid, sobj] of object_polyfill_1.entries(stateObjs)) {
                 session_1.session.objects[sid] = sobj;
-            }
-        }
-    });
-}
-// Connection check
-let pingTimer;
-let connectionAlive = false;
-let pingFails = 0;
-let resetAttempts = 0;
-let dead = false;
-function pingThread() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const oldValue = connectionAlive;
-        connectionAlive = yield session_1.session.tradfri.ping();
-        global_1.Global.log(`ping ${connectionAlive ? "" : "un"}successful...`, "debug");
-        yield adapter.$setStateChanged("info.connection", connectionAlive, true);
-        // see if the connection state has changed
-        if (connectionAlive) {
-            pingFails = 0;
-            if (!oldValue) {
-                // connection is now alive again
-                global_1.Global.log("Connection to gateway reestablished", "info");
-                // restart observing if neccessary
-                observeAll();
-                // TODO: send buffered messages
-            }
-        }
-        else {
-            if (oldValue) {
-                // connection is now dead
-                global_1.Global.log("Lost connection to gateway", "warn");
-                // TODO: buffer messages
-            }
-            // Try to fix stuff by resetting the connection after a few failed pings
-            pingFails++;
-            if (pingFails >= 3) {
-                if (resetAttempts < 3) {
-                    resetAttempts++;
-                    global_1.Global.log(`3 consecutive pings failed, resetting connection (attempt #${resetAttempts})...`, "warn");
-                    pingFails = 0;
-                    session_1.session.tradfri.reset();
-                }
-                else {
-                    // not sure what to do here, try restarting the adapter
-                    global_1.Global.log(`Three consecutive reset attempts failed!`, "error");
-                    global_1.Global.log(`Restarting the adapter in 10 seconds!`, "error");
-                    clearTimeout(pingTimer);
-                    dead = true;
-                    setTimeout(() => {
-                        // updating the config restarts the adapter
-                        // so we have to provide an empty object to not override anything
-                        updateConfig({});
-                    }, 10000);
-                }
             }
         }
     });

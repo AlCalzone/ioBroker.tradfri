@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "1.1.9",
+        "version": "1.1.10",
         "news": {
+            "1.1.10": {
+                "en": "Improved automatic reconnection",
+                "de": "Automatische Verbindungswiederherstellung verbessert"
+            },
             "1.1.9": {
                 "en": "Fixed group states not always updating the lightbulbs when changed",
                 "de": "Fehler behoben, dass Gruppen-States bei Änderungen nicht immer die Lampen schalten"

@@ -31,8 +31,11 @@ import { extendGroup, syncGroupsWithState, updateGroupStates } from "./modules/g
 import { onMessage } from "./modules/message";
 import { operateVirtualGroup, renameDevice, renameGroup } from "./modules/operations";
 
+import { TradfriOptions } from "node-tradfri-client/build/tradfri-client";
 import { roundTo } from "./lib/math";
 import { session as $ } from "./modules/session";
+
+let connectionAlive: boolean;
 
 // Adapter-Objekt erstellen
 let adapter: ExtendedAdapter = utils.adapter({
@@ -82,7 +85,10 @@ let adapter: ExtendedAdapter = utils.adapter({
 		let identity = (adapter.config.identity as string);
 		let psk = (adapter.config.psk as string);
 
-		$.tradfri = new TradfriClient(hostname, _.log);
+		$.tradfri = new TradfriClient(hostname, {
+			customLogger: _.log,
+			watchConnection: true,
+		});
 
 		if (securityCode != null && securityCode.length > 0) {
 			// we temporarily stored the security code to replace it with identity/psk
@@ -98,13 +104,46 @@ let adapter: ExtendedAdapter = utils.adapter({
 			} catch (e) {
 				if (e instanceof TradfriError) {
 					switch (e.code) {
-						case TradfriErrorCodes.ConnectionFailed: {
-							_.log(`Could not connect to the gateway ${hostname}!`, "error");
+						case TradfriErrorCodes.ConnectionTimedOut: {
+							_.log(`The gateway ${hostname} is unreachable or did not respond in time!`, "error");
 							_.log(`Please check your network and adapter settings and restart the adapter!`, "error");
-							return;
 						}
 						case TradfriErrorCodes.AuthenticationFailed: {
-							_.log(`The authentication failed. An update of the adapter might be necessary`, "error");
+							_.log(`The security code is incorrect or something else went wrong with the authentication.`, "error");
+							_.log(`Please check your adapter settings and restart the adapter!`, "error");
+							return;
+						}
+						case TradfriErrorCodes.ConnectionFailed: {
+							_.log(`Could not authenticate with the gateway ${hostname}!`, "error");
+							_.log(e.message, "error");
+							return;
+						}
+					}
+				} else {
+					_.log(`Could not authenticate with the gateway ${hostname}!`, "error");
+					_.log(e.message, "error");
+					return;
+				}
+			}
+		} else {
+			// connect with previously negotiated identity and psk
+			try {
+				await $.tradfri.connect(identity, psk);
+			} catch (e) {
+				if (e instanceof TradfriError) {
+					switch (e.code) {
+						case TradfriErrorCodes.ConnectionTimedOut: {
+							_.log(`The gateway ${hostname} is unreachable or did not respond in time!`, "error");
+							_.log(`Please check your network and adapter settings and restart the adapter!`, "error");
+						}
+						case TradfriErrorCodes.AuthenticationFailed: {
+							_.log(`The stored credentials are no longer valid!`, "error");
+							_.log(`Please re-enter your security code in the adapter settings!`, "error");
+							return;
+						}
+						case TradfriErrorCodes.ConnectionFailed: {
+							_.log(`Could not connect to the gateway ${hostname}!`, "error");
+							_.log(e.message, "error");
 							return;
 						}
 					}
@@ -114,19 +153,23 @@ let adapter: ExtendedAdapter = utils.adapter({
 					return;
 				}
 			}
-		} else {
-			// connect with previously negotiated identity and psk
-			if (!await $.tradfri.connect(identity, psk)) {
-				_.log(`Could not connect to the gateway ${hostname}!`, "error");
-				_.log(`Please check your network and adapter settings and restart the adapter!`, "error");
-				_.log(`If the settings are correct, consider re-authentication in the adapter config.`, "error");
-				return;
-			}
 		}
 
+		// watch the connection
 		await adapter.$setState("info.connection", true, true);
 		connectionAlive = true;
-		pingTimer = setInterval(pingThread, 10000);
+		$.tradfri
+			.on("connection alive", () => {
+				_.log("Connection to gateway reestablished", "info");
+				adapter.setState("info.connection", true, true);
+				connectionAlive = true;
+			})
+			.on("connection lost", () => {
+				_.log("Lost connection to gateway", "warn");
+				adapter.setState("info.connection", false, true);
+				connectionAlive = false;
+			})
+		;
 
 		await loadDevices();
 		await loadGroups();
@@ -139,6 +182,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 			.on("group removed", tradfri_groupRemoved)
 			.on("scene updated", tradfri_sceneUpdated)
 			.on("scene removed", tradfri_sceneRemoved)
+			.on("error", tradfri_error)
 			;
 		observeAll();
 
@@ -194,10 +238,8 @@ let adapter: ExtendedAdapter = utils.adapter({
 			_.log(`{{blue}} state with id ${id} deleted`, "debug");
 		}
 
-		if (dead) {
-			_.log("The connection to the gateway is dead.", "error");
-			_.log("Cannot send changes.", "error");
-			_.log("Please restart the adapter!", "error");
+		if (!connectionAlive && state && !state.ack && id.startsWith(adapter.namespace)) {
+			_.log("Not connected to the gateway. Cannot send changes!", "warn");
 			return;
 		}
 
@@ -417,9 +459,6 @@ let adapter: ExtendedAdapter = utils.adapter({
 	unload: (callback) => {
 		// is called when adapter shuts down - callback has to be called under any circumstances!
 		try {
-			// stop pinging
-			if (pingTimer != null) clearInterval(pingTimer);
-
 			// close the gateway connection
 			$.tradfri.destroy();
 			adapter.setState("info.connection", false, true);
@@ -510,6 +549,16 @@ function tradfri_sceneRemoved(groupId: number, instanceId: number) {
 		// remove scene from dictionary
 		if (instanceId in groupInfo.scenes) delete groupInfo.scenes[instanceId];
 	}
+}
+
+function tradfri_error(error: Error) {
+	if (error instanceof TradfriError) {
+		if (
+			error.code === TradfriErrorCodes.NetworkReset ||
+			error.code === TradfriErrorCodes.ConnectionTimedOut
+		) { return; } // it's okay, just swallow the error
+	}
+	_.log(error.toString(), "error");
 }
 
 /**
@@ -605,60 +654,6 @@ async function loadGroups(): Promise<void> {
 		const stateObjs = await _.$$(`${obj._id}.*`, "state");
 		for (const [sid, sobj] of entries(stateObjs)) {
 			$.objects[sid] = sobj;
-		}
-	}
-}
-
-// Connection check
-let pingTimer: NodeJS.Timer;
-let connectionAlive: boolean = false;
-let pingFails: number = 0;
-let resetAttempts: number = 0;
-let dead: boolean = false;
-async function pingThread() {
-	const oldValue = connectionAlive;
-	connectionAlive = await $.tradfri.ping();
-	_.log(`ping ${connectionAlive ? "" : "un"}successful...`, "debug");
-	await adapter.$setStateChanged("info.connection", connectionAlive, true);
-
-	// see if the connection state has changed
-	if (connectionAlive) {
-		pingFails = 0;
-		if (!oldValue) {
-			// connection is now alive again
-			_.log("Connection to gateway reestablished", "info");
-			// restart observing if neccessary
-			observeAll();
-			// TODO: send buffered messages
-		}
-	} else {
-		if (oldValue) {
-			// connection is now dead
-			_.log("Lost connection to gateway", "warn");
-			// TODO: buffer messages
-		}
-
-		// Try to fix stuff by resetting the connection after a few failed pings
-		pingFails++;
-		if (pingFails >= 3) {
-			if (resetAttempts < 3) {
-				resetAttempts++;
-				_.log(`3 consecutive pings failed, resetting connection (attempt #${resetAttempts})...`, "warn");
-				pingFails = 0;
-
-				$.tradfri.reset();
-			} else {
-				// not sure what to do here, try restarting the adapter
-				_.log(`Three consecutive reset attempts failed!`, "error");
-				_.log(`Restarting the adapter in 10 seconds!`, "error");
-				clearTimeout(pingTimer);
-				dead = true;
-				setTimeout(() => {
-					// updating the config restarts the adapter
-					// so we have to provide an empty object to not override anything
-					updateConfig({});
-				}, 10000);
-			}
 		}
 	}
 }
