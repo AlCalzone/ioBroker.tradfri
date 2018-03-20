@@ -20,13 +20,13 @@ Windows: [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/AlCalzo
 
 ## Sending custom CoAP packets
 You can send custom CoAP packets from other adapters by using `sendTo`. Example from JavaScript:
-```
+```js
 sendTo("tradfri.0", "request", options, (ret) => {
 	// do something with the result
 });
 ```
 The `options` object looks as follows:
-```
+```js
 {
 	path: string,
 	method?: "get" | "post" | "put" | "delete", // optional, default = "get"
@@ -34,7 +34,7 @@ The `options` object looks as follows:
 }
 ```
 The result object `ret` looks as follows:
-```
+```js
 {
 	error: string | null,
 	result: {
