@@ -13,7 +13,7 @@ import {
 
 // Eigene Module laden
 import { ExtendedAdapter, Global as _ } from "./lib/global";
-import { composeObject, DictionaryLike, entries, values } from "./lib/object-polyfill";
+import { composeObject, entries, values } from "./lib/object-polyfill";
 import { wait } from "./lib/promises";
 
 // Datentypen laden
@@ -470,9 +470,9 @@ let adapter: ExtendedAdapter = utils.adapter({
 	},
 }) as ExtendedAdapter;
 
-async function updateConfig(newConfig: DictionaryLike<any>) {
+async function updateConfig(newConfig: Record<string, any>) {
 	// Create the config object
-	let config: DictionaryLike<any> = Object.assign({}, adapter.config);
+	let config: Record<string, any> = Object.assign({}, adapter.config);
 	config = Object.assign(config, newConfig);
 	// Update the adapter object
 	const adapterObj = await adapter.$getForeignObject(`system.adapter.${adapter.namespace}`);

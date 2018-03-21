@@ -70,5 +70,17 @@ systemDictionary = {
 	},
 	"Preserve transition time:": {
 		"de": "Übergangsdauer beibehalten:",
+	},
+
+	"Reduce traffic:": {
+		"de": "Traffic reduzieren:",
+	},
+	"reduce traffic tooltip": {
+		"de": "Reduziert die übertragene Datenmenge, indem aufeinanderfolgende Änderungen kurz zurückgehalten und zusammengefasst werden. Kann Probleme beheben, wenn in kurzer Abfolge mehrere States geändert werden.",
+		"en": "Reduces the amount of data transferred by delaying and merging successive changes. Can fix problems when changing several states in a quick succession."
+	},
+	"send delay": {
+		"de": "ms Verzögerung",
+		"en": "ms delay"
 	}
 };

@@ -78,7 +78,12 @@ export class Settings extends React.Component<SettingsProps, Record<string, any>
 
 				<Label for="preserveTransitionTime" text="Preserve transition time:" />
 				<Tooltip text="transition time tooltip" />
-				<input type="checkbox" className="value" id="preserveTransitionTime" defaultChecked={this.getSetting("preserveTransitionTime")} onChange={this.handleChange}  />
+				<input type="checkbox" className="value" id="preserveTransitionTime" defaultChecked={this.getSetting("preserveTransitionTime")} onChange={this.handleChange} /><br />
+
+				<Label for="reduceTraffic" text="Reduce traffic:" />
+				<Tooltip text="reduce traffic tooltip" />
+				<input type="number" min="0" max="250" step="10" className="value" id="reduceTraffic" defaultChecked={this.getSetting("reduceTraffic")} onChange={this.handleChange} />
+				<span>{_("send delay")}</span>
 			</p>
 		);
 	}

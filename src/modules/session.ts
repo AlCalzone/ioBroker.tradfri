@@ -1,18 +1,17 @@
 import { Accessory, GroupInfo, TradfriClient } from "node-tradfri-client";
-import { DictionaryLike } from "../lib/object-polyfill";
 import { VirtualGroup } from "../lib/virtual-group";
 
 export class Session {
 	public tradfri: TradfriClient;
 
 	/** dictionary of known devices */
-	public devices: DictionaryLike<Accessory> = {};
+	public devices: Record<string, Accessory> = {};
 	/** dictionary of known groups */
-	public groups: DictionaryLike<GroupInfo> = {};
+	public groups: Record<string, GroupInfo> = {};
 	/** dictionary of known virtual groups */
-	public virtualGroups: DictionaryLike<VirtualGroup> = {};
+	public virtualGroups: Record<string, VirtualGroup> = {};
 	// dictionary of ioBroker objects
-	public objects: DictionaryLike<ioBroker.Object> = {};
+	public objects: Record<string, ioBroker.Object> = {};
 }
 
 export const session = new Session();

@@ -123,7 +123,8 @@
         "securityCode": "",
         "identity": "",
         "psk": "",
-        "preserveTransitionTime": false
+        "preserveTransitionTime": false,
+        "reduceTraffic": 50
     },
     "objects": [],
     "instanceObjects": [

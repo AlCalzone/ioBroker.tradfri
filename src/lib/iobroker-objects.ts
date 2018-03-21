@@ -1,7 +1,7 @@
 import { Accessory, AccessoryTypes, Group, GroupInfo, Scene, Spectrum } from "node-tradfri-client";
 import { session as $ } from "../modules/session";
 import { Global as _ } from "./global";
-import { composeObject, DictionaryLike, dig, entries, filter } from "./object-polyfill";
+import { composeObject, dig, entries, filter } from "./object-polyfill";
 import { padStart } from "./strings";
 import { VirtualGroup } from "./virtual-group";
 
@@ -20,7 +20,7 @@ export function accessoryToCommon(accessory: Accessory): ioBroker.ObjectCommon {
 /**
  * Returns the native part of the ioBroker object representing the given accessory
  */
-export function accessoryToNative(accessory: Accessory): DictionaryLike<any> {
+export function accessoryToNative(accessory: Accessory): Record<string, any> {
 	return {
 		instanceId: accessory.instanceId,
 		manufacturer: accessory.deviceInfo.manufacturer,
@@ -90,7 +90,7 @@ export function extendDevice(accessory: Accessory) {
 		_.adapter.setObject(objId, devObj);
 
 		// also create state objects, depending on the accessory type
-		const stateObjs: DictionaryLike<ioBroker.Object> = {
+		const stateObjs: Record<string, ioBroker.Object> = {
 			alive: { // alive state
 				_id: `${objId}.alive`,
 				type: "state",
@@ -302,7 +302,7 @@ export function groupToCommon(group: Group | VirtualGroup): ioBroker.ObjectCommo
 /**
  * Returns the native part of the ioBroker object representing the given group
  */
-export function groupToNative(group: Group | VirtualGroup): DictionaryLike<any> {
+export function groupToNative(group: Group | VirtualGroup): Record<string, any> {
 	return {
 		instanceId: group.instanceId,
 		deviceIDs: group.deviceIDs,
@@ -353,7 +353,7 @@ export type ioBrokerObjectDefinition = (
 /**
  * Contains definitions for all kinds of states we're going to create
  */
-export const objectDefinitions: DictionaryLike<ioBrokerObjectDefinition> = {
+export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 	activeScene: (rootId, rootType) => ({
 		_id: `${rootId}.activeScene`,
 		type: "state",
