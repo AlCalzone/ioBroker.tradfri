@@ -46,6 +46,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### 1.1.11 (2018-04-27)
+* (AlCalzone) Add support for NodeJS 10
+
 #### 1.1.10 (2018-03-18)
 * (AlCalzone) Improved automatic reconnection
 
