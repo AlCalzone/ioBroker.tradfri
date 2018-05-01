@@ -1,9 +1,9 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "1.2.0",
+        "version": "1.2.1",
         "news": {
-            "1.2.0": {
+            "1.2.1": {
                 "en": "Use the native encryption methods of NodeJS 10 instead of `node-aead-crypto`",
                 "de": "Die nativen Verschlüsselungsmethoden von NodeJS 10 werden anstatt `node-aead-crypto` verwendet"
             },

@@ -46,7 +46,7 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
-#### 1.2.0 (2018-05-01)
+#### 1.2.1 (2018-05-01)
 * (AlCalzone) Use the native encryption methods of NodeJS 10 instead of `node-aead-crypto`
 
 #### 1.1.11 (2018-04-27)
