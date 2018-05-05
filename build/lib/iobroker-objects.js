@@ -197,13 +197,18 @@ function updatePossibleScenes(groupInfo) {
         const scenesId = `${objId}.activeScene`;
         // only extend that object if it exists already
         if (scenesId in session_1.session.objects) {
-            global_1.Global.log(`updating possible scenes for group ${group.instanceId}: ${JSON.stringify(Object.keys(groupInfo.scenes))}`);
-            const scenes = groupInfo.scenes;
             // map scene ids and names to the dropdown
-            const states = object_polyfill_1.composeObject(Object.keys(scenes).map(id => [id, scenes[id].name]));
+            const scenes = groupInfo.scenes;
+            const newDropdownStates = object_polyfill_1.composeObject(Object.keys(scenes).map(id => [id, scenes[id].name]));
+            // compare with the old dropdown states
             const obj = yield global_1.Global.adapter.$getObject(scenesId);
-            obj.common.states = states;
-            yield global_1.Global.adapter.$setObject(scenesId, obj);
+            const oldDropdownStates = obj.common.states;
+            if (JSON.stringify(newDropdownStates) !== JSON.stringify(oldDropdownStates)) {
+                // and only log and update if something changed
+                global_1.Global.log(`updating possible scenes for group ${group.instanceId}: ${JSON.stringify(Object.keys(groupInfo.scenes))}`);
+                obj.common.states = newDropdownStates;
+                yield global_1.Global.adapter.$setObject(scenesId, obj);
+            }
         }
     });
 }

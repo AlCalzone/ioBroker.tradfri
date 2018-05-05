@@ -48,6 +48,7 @@ The result object `ret` looks as follows:
 
 #### WORK IN PROGRESS
 * (AlCalzone) Fixed a null reference when no groups are defined
+* (AlCalzone) Reduce logging of "updated scenes for group..."
 
 #### 1.2.1 (2018-05-01)
 * (AlCalzone) Use the native encryption methods of NodeJS 10 instead of `node-aead-crypto`
