@@ -49,7 +49,7 @@ function onMessage(obj) {
         // handle the message
         if (obj) {
             switch (obj.command) {
-                case "request": {
+                case "request": { // custom CoAP request
                     // require the path to be given
                     if (!requireParams("path"))
                         return;
@@ -123,7 +123,7 @@ function onMessage(obj) {
                     respond(responses.OK);
                     return;
                 }
-                case "getGroups": {
+                case "getGroups": { // get all groups defined on the gateway
                     // check the given params
                     const params = obj.message;
                     // group type must be "real", "virtual" or "both"
@@ -156,7 +156,7 @@ function onMessage(obj) {
                     respond(responses.RESULT(ret));
                     return;
                 }
-                case "getDevices": {
+                case "getDevices": { // get all devices defined on the gateway
                     // check the given params
                     const params = obj.message;
                     // group type must be "real", "virtual" or "both"
@@ -179,7 +179,7 @@ function onMessage(obj) {
                     respond(responses.RESULT(ret));
                     return;
                 }
-                case "getDevice": {
+                case "getDevice": { // get preprocessed information about a device
                     // require the id to be given
                     if (!requireParams("id"))
                         return;

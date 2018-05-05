@@ -245,6 +245,10 @@ let adapter = utils_1.default.adapter({
                 switch (rootObj.native.type) {
                     case "group": {
                         // read the instanceId and get a reference value
+                        if (!(rootObj.native.instanceId in session_1.session.groups)) {
+                            global_1.Global.log(`The group with ID ${rootObj.native.instanceId} was not found!`, "warn");
+                            return;
+                        }
                         const group = session_1.session.groups[rootObj.native.instanceId].group;
                         // if the change was acknowledged, update the state later
                         let wasAcked;
@@ -305,6 +309,10 @@ let adapter = utils_1.default.adapter({
                     }
                     case "virtual group": {
                         // find the virtual group instance
+                        if (!(rootObj.native.instanceId in session_1.session.virtualGroups)) {
+                            global_1.Global.log(`The virtual group with ID ${rootObj.native.instanceId} was not found!`, "warn");
+                            return;
+                        }
                         const vGroup = session_1.session.virtualGroups[rootObj.native.instanceId];
                         let operation;
                         let wasAcked = false;
@@ -360,9 +368,13 @@ let adapter = utils_1.default.adapter({
                             adapter.$setState(id, state, true);
                         return;
                     }
-                    default: {
+                    default: { // accessory
                         if (id.indexOf(".lightbulb.") > -1) {
                             // read the instanceId and get a reference value
+                            if (!(rootObj.native.instanceId in session_1.session.devices)) {
+                                global_1.Global.log(`The device with ID ${rootObj.native.instanceId} was not found!`, "warn");
+                                return;
+                            }
                             const accessory = session_1.session.devices[rootObj.native.instanceId];
                             const light = accessory.lightList[0];
                             // if the change was acknowledged, update the state later

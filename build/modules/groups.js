@@ -106,7 +106,7 @@ function extendGroup(group) {
                 const newValue = object_polyfill_1.dig(group, obj.native.path);
                 global_1.Global.adapter.setState(id, newValue, true);
             }
-            catch (e) { }
+            catch (e) { /* skip this value */ }
         }
     }
     else {

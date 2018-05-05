@@ -273,6 +273,10 @@ let adapter: ExtendedAdapter = utils.adapter({
 				switch (rootObj.native.type) {
 					case "group": {
 						// read the instanceId and get a reference value
+						if (!(rootObj.native.instanceId in $.groups)) {
+							_.log(`The group with ID ${rootObj.native.instanceId} was not found!`, "warn");
+							return;
+						}
 						const group = $.groups[rootObj.native.instanceId].group;
 						// if the change was acknowledged, update the state later
 						let wasAcked: boolean;
@@ -332,6 +336,10 @@ let adapter: ExtendedAdapter = utils.adapter({
 
 					case "virtual group": {
 						// find the virtual group instance
+						if (!(rootObj.native.instanceId in $.virtualGroups)) {
+							_.log(`The virtual group with ID ${rootObj.native.instanceId} was not found!`, "warn");
+							return;
+						}
 						const vGroup = $.virtualGroups[rootObj.native.instanceId];
 
 						let operation: LightOperation;
@@ -390,6 +398,10 @@ let adapter: ExtendedAdapter = utils.adapter({
 
 						if (id.indexOf(".lightbulb.") > -1) {
 							// read the instanceId and get a reference value
+							if (!(rootObj.native.instanceId in $.devices)) {
+								_.log(`The device with ID ${rootObj.native.instanceId} was not found!`, "warn");
+								return;
+							}
 							const accessory = $.devices[rootObj.native.instanceId];
 							const light = accessory.lightList[0];
 							// if the change was acknowledged, update the state later

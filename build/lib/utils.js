@@ -20,7 +20,7 @@ function getControllerDir(isInstall) {
                 break;
             }
         }
-        catch (_a) { }
+        catch ( /* not found */_a) { /* not found */ }
     }
     if (controllerPath == null) {
         if (!isInstall) {

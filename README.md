@@ -46,6 +46,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### WORK IN PROGRESS
+* (AlCalzone) Fixed a null reference when no groups are defined
+
 #### 1.2.1 (2018-05-01)
 * (AlCalzone) Use the native encryption methods of NodeJS 10 instead of `node-aead-crypto`
 

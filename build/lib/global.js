@@ -108,7 +108,7 @@ class Global {
                 if (typeof repl === "string") {
                     message = message.replace(regex, repl);
                 }
-                else {
+                else { // a bit verbose, but TS doesn't get the overload thingy here
                     message = message.replace(regex, repl);
                 }
             }

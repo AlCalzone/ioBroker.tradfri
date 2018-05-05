@@ -82,7 +82,7 @@ function extendDevice(accessory) {
                 const newValue = object_polyfill_1.dig(accessory, obj.native.path);
                 global_1.Global.adapter.setState(id, newValue, true);
             }
-            catch (e) { }
+            catch (e) { /* skip this value */ }
         }
     }
     else {
@@ -301,7 +301,7 @@ function groupToCommon(group) {
     if (group instanceof node_tradfri_client_1.Group) {
         name = group.name;
     }
-    else {
+    else /* group instanceof VirtualGroup */ {
         if (typeof group.name === "string" && group.name.length > 0) {
             name = group.name;
         }
