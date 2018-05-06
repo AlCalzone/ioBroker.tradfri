@@ -78,7 +78,11 @@ export class Settings extends React.Component<SettingsProps, Record<string, any>
 
 				<Label for="preserveTransitionTime" text="Preserve transition time:" />
 				<Tooltip text="transition time tooltip" />
-				<input type="checkbox" className="value" id="preserveTransitionTime" defaultChecked={this.getSetting("preserveTransitionTime")} onChange={this.handleChange}  />
+				<input type="checkbox" className="value" id="preserveTransitionTime" defaultChecked={this.getSetting("preserveTransitionTime")} onChange={this.handleChange} /><br />
+
+				<Label for="roundToDigits" text="Decimal places:" />
+				<Tooltip text="roundto tooltip" />
+				<input type="number" min="0" max="2" className="value" id="roundToDigits" value={this.getSetting("roundToDigits") || 2} onChange={this.handleChange}  />
 			</p>
 		);
 	}

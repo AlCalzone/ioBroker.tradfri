@@ -307,6 +307,8 @@ var originalSettings;
  * Checks if any setting was changed
  */
 function hasChanges() {
+    if (Object.keys(originalSettings).length !== Object.keys(curSettings).length)
+        return true;
     for (var _i = 0, _a = Object.keys(originalSettings); _i < _a.length; _i++) {
         var key = _a[_i];
         if (originalSettings[key] !== curSettings[key])
@@ -553,7 +555,11 @@ var Settings = /** @class */ (function (_super) {
             React.createElement("br", null),
             React.createElement(Label, { for: "preserveTransitionTime", text: "Preserve transition time:" }),
             React.createElement(Tooltip, { text: "transition time tooltip" }),
-            React.createElement("input", { type: "checkbox", className: "value", id: "preserveTransitionTime", defaultChecked: this.getSetting("preserveTransitionTime"), onChange: this.handleChange })));
+            React.createElement("input", { type: "checkbox", className: "value", id: "preserveTransitionTime", defaultChecked: this.getSetting("preserveTransitionTime"), onChange: this.handleChange }),
+            React.createElement("br", null),
+            React.createElement(Label, { for: "roundToDigits", text: "Decimal places:" }),
+            React.createElement(Tooltip, { text: "roundto tooltip" }),
+            React.createElement("input", { type: "number", min: "0", max: "2", className: "value", id: "roundToDigits", value: this.getSetting("roundToDigits") || 2, onChange: this.handleChange })));
     };
     return Settings;
 }(React.Component));

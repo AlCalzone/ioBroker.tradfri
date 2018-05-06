@@ -1,6 +1,9 @@
 import { Accessory, Group, GroupInfo, Scene } from "node-tradfri-client";
 import { DictionaryLike } from "./object-polyfill";
 import { VirtualGroup } from "./virtual-group";
+export interface ExtendObjectOptions {
+    roundToDigits?: number;
+}
 /**
  * Returns the common part of the ioBroker object representing the given accessory
  */
@@ -13,7 +16,7 @@ export declare function accessoryToNative(accessory: Accessory): DictionaryLike<
  * Creates or edits an existing <device>-object for an accessory.
  * @param accessory The accessory to update
  */
-export declare function extendDevice(accessory: Accessory): void;
+export declare function extendDevice(accessory: Accessory, options?: ExtendObjectOptions): void;
 /**
  * Updates the possible scenes for a group
  * @param groupInfo The group to update

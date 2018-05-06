@@ -11,6 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_tradfri_client_1 = require("node-tradfri-client");
 const global_1 = require("../lib/global");
 const iobroker_objects_1 = require("../lib/iobroker-objects");
+const math_1 = require("../lib/math");
 const object_polyfill_1 = require("../lib/object-polyfill");
 const session_1 = require("./session");
 /* creates or edits an existing <group>-object for a virtual group */
@@ -73,8 +74,9 @@ function extendVirtualGroup(group) {
 }
 exports.extendVirtualGroup = extendVirtualGroup;
 /* creates or edits an existing <group>-object for a group */
-function extendGroup(group) {
+function extendGroup(group, options) {
     const objId = iobroker_objects_1.calcGroupId(group);
+    const roundToDigits = options != null && options.roundToDigits;
     if (objId in session_1.session.objects) {
         // check if we need to edit the existing object
         const grpObj = session_1.session.objects[objId];
@@ -103,7 +105,10 @@ function extendGroup(group) {
         for (const [id, obj] of object_polyfill_1.entries(stateObjs)) {
             try {
                 // Object could have a default value, find it
-                const newValue = object_polyfill_1.dig(group, obj.native.path);
+                let newValue = object_polyfill_1.dig(group, obj.native.path);
+                if (roundToDigits != null && typeof newValue === "number") {
+                    newValue = math_1.roundTo(newValue, roundToDigits);
+                }
                 global_1.Global.adapter.setState(id, newValue, true);
             }
             catch (e) { /* skip this value */ }

@@ -1,9 +1,14 @@
 import { Accessory, AccessoryTypes, Group, GroupInfo, Scene, Spectrum } from "node-tradfri-client";
 import { session as $ } from "../modules/session";
 import { Global as _ } from "./global";
+import { roundTo } from "./math";
 import { composeObject, DictionaryLike, dig, entries, filter } from "./object-polyfill";
 import { padStart } from "./strings";
 import { VirtualGroup } from "./virtual-group";
+
+export interface ExtendObjectOptions {
+	roundToDigits?: number;
+}
 
 /**
  * Returns the common part of the ioBroker object representing the given accessory
@@ -35,8 +40,10 @@ export function accessoryToNative(accessory: Accessory): DictionaryLike<any> {
  * Creates or edits an existing <device>-object for an accessory.
  * @param accessory The accessory to update
  */
-export function extendDevice(accessory: Accessory) {
+export function extendDevice(accessory: Accessory, options?: ExtendObjectOptions) {
 	const objId = calcObjId(accessory);
+
+	const roundToDigits: number = options != null && options.roundToDigits;
 
 	if (objId in $.objects) {
 		// check if we need to edit the existing object
@@ -74,7 +81,10 @@ export function extendDevice(accessory: Accessory) {
 			}
 			try {
 				// Object could have a default value, find it
-				const newValue = dig<any>(accessory, obj.native.path);
+				let newValue = dig<any>(accessory, obj.native.path);
+				if (roundToDigits != null && typeof newValue === "number") {
+					newValue = roundTo(newValue, roundToDigits);
+				}
 				_.adapter.setState(id, newValue, true);
 			} catch (e) { /* skip this value */ }
 		}
