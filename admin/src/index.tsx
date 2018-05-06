@@ -86,6 +86,7 @@ let originalSettings: Record<string, any>;
  * Checks if any setting was changed
  */
 function hasChanges(): boolean {
+	if (Object.keys(originalSettings).length !== Object.keys(curSettings).length) return true;
 	for (const key of Object.keys(originalSettings)) {
 		if (originalSettings[key] !== curSettings[key]) return true;
 	}

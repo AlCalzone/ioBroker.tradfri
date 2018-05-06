@@ -131,7 +131,8 @@
         "securityCode": "",
         "identity": "",
         "psk": "",
-        "preserveTransitionTime": false
+        "preserveTransitionTime": false,
+        "roundToDigits": 2
     },
     "objects": [],
     "instanceObjects": [

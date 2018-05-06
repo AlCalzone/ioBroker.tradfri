@@ -11,6 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_tradfri_client_1 = require("node-tradfri-client");
 const session_1 = require("../modules/session");
 const global_1 = require("./global");
+const math_1 = require("./math");
 const object_polyfill_1 = require("./object-polyfill");
 const strings_1 = require("./strings");
 const virtual_group_1 = require("./virtual-group");
@@ -45,8 +46,9 @@ exports.accessoryToNative = accessoryToNative;
  * Creates or edits an existing <device>-object for an accessory.
  * @param accessory The accessory to update
  */
-function extendDevice(accessory) {
+function extendDevice(accessory, options) {
     const objId = calcObjId(accessory);
+    const roundToDigits = options != null && options.roundToDigits;
     if (objId in session_1.session.objects) {
         // check if we need to edit the existing object
         const devObj = session_1.session.objects[objId];
@@ -79,7 +81,10 @@ function extendDevice(accessory) {
             }
             try {
                 // Object could have a default value, find it
-                const newValue = object_polyfill_1.dig(accessory, obj.native.path);
+                let newValue = object_polyfill_1.dig(accessory, obj.native.path);
+                if (roundToDigits != null && typeof newValue === "number") {
+                    newValue = math_1.roundTo(newValue, roundToDigits);
+                }
                 global_1.Global.adapter.setState(id, newValue, true);
             }
             catch (e) { /* skip this value */ }

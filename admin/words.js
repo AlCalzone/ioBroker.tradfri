@@ -70,5 +70,12 @@ systemDictionary = {
 	},
 	"Preserve transition time:": {
 		"de": "Übergangsdauer beibehalten:",
+	},
+	"roundto tooltip": {
+		"de": "Das Trådfri-Protokoll hat teils eigenartige Schrittweiten für Zahlen, sodass oft andere Werte eingestellt werden als gewünscht. Durch Runden kann die Weiterverarbeitung in Skripten verbessert werden.",
+		"en": "The Trådfri protocol has some strange increments for numbers, which means that often different values than desired are achieved. Rounding can improve subsequent processing by scripts."
+	},
+	"Decimal places:": {
+		"de": "Nachkommastellen:",
 	}
 };

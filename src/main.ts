@@ -264,8 +264,11 @@ let adapter: ExtendedAdapter = utils.adapter({
 				let val = state.val;
 				if (stateObj.common.type === "number") {
 					// node-tradfri-client handles floating point numbers,
-					// but we'll round to 2 digits for clarity
-					val = roundTo(val, 2);
+					// but we'll round to 2 digits for clarity (or the configured value)
+					let roundToDigits = adapter.config.roundToDigits || 2;
+					// don't round the transition duration!
+					if (id.endsWith("transitionDuration")) roundToDigits = 2;
+					val = roundTo(val, roundToDigits);
 					if (stateObj.common.min != null) val = Math.max(stateObj.common.min, val);
 					if (stateObj.common.max != null) val = Math.min(stateObj.common.max, val);
 				}
@@ -506,7 +509,7 @@ function tradfri_deviceUpdated(device: Accessory) {
 	// remember it
 	$.devices[device.instanceId] = device;
 	// create ioBroker device
-	extendDevice(device);
+	extendDevice(device, {roundToDigits: adapter.config.roundToDigits});
 }
 
 async function tradfri_deviceRemoved(instanceId: number) {
@@ -529,7 +532,7 @@ async function tradfri_groupUpdated(group: Group) {
 	}
 	$.groups[group.instanceId].group = group;
 	// create ioBroker device
-	extendGroup(group);
+	extendGroup(group, {roundToDigits: adapter.config.roundToDigits});
 	// clean up any states that might be incorrectly defined
 	updateGroupStates(group);
 	// read the transition duration, because the gateway won't report it

@@ -1,6 +1,7 @@
 import { Accessory, AccessoryTypes, Group } from "node-tradfri-client";
 import { Global as _ } from "../lib/global";
-import { calcGroupId, getInstanceId, groupToCommon, groupToNative, objectDefinitions } from "../lib/iobroker-objects";
+import { calcGroupId, ExtendObjectOptions, getInstanceId, groupToCommon, groupToNative, objectDefinitions } from "../lib/iobroker-objects";
+import { roundTo } from "../lib/math";
 import { DictionaryLike, dig, entries, filter, values } from "../lib/object-polyfill";
 import { VirtualGroup } from "../lib/virtual-group";
 import { session as $ } from "./session";
@@ -70,8 +71,10 @@ export function extendVirtualGroup(group: VirtualGroup) {
 }
 
 /* creates or edits an existing <group>-object for a group */
-export function extendGroup(group: Group) {
+export function extendGroup(group: Group, options?: ExtendObjectOptions) {
 	const objId = calcGroupId(group);
+
+	const roundToDigits: number = options != null && options.roundToDigits;
 
 	if (objId in $.objects) {
 		// check if we need to edit the existing object
@@ -105,7 +108,10 @@ export function extendGroup(group: Group) {
 		for (const [id, obj] of entries(stateObjs)) {
 			try {
 				// Object could have a default value, find it
-				const newValue = dig<any>(group, obj.native.path);
+				let newValue = dig<any>(group, obj.native.path);
+				if (roundToDigits != null && typeof newValue === "number") {
+					newValue = roundTo(newValue, roundToDigits);
+				}
 				_.adapter.setState(id, newValue, true);
 			} catch (e) {/* skip this value */ }
 		}
