@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "1.2.1",
+        "version": "1.3.0",
         "news": {
+            "1.3.0": {
+                "en": "Made rounding of numeric values configurable. Reduce logging of \"updated scenes for group...\"",
+                "de": "Runden von Zahlen ist jetzt einstellbar. Log-Ausgabe \"updated scenes for group...\" reduziert"
+            },
             "1.2.1": {
                 "en": "Use the native encryption methods of NodeJS 10 instead of `node-aead-crypto`",
                 "de": "Die nativen Verschlüsselungsmethoden von NodeJS 10 werden anstatt `node-aead-crypto` verwendet"
