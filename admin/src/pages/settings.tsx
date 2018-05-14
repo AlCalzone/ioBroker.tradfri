@@ -103,12 +103,7 @@ export class Settings extends React.Component<SettingsProps, Record<string, any>
 	 * @param key The setting key to store at
 	 */
 	private putSetting(key: string, value: string | number | string[] | boolean, callback?: () => void): void {
-		const update = { [key]: value as any };
-		console.log(`updating state with ${JSON.stringify(update)}...`);
-		this.setState(update, () => {
-			console.log(`updated state = ${JSON.stringify(this.state)}`);
-			callback();
-		});
+		this.setState({ [key]: value as any }, callback);
 	}
 
 	public componentWillUnmount() {

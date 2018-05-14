@@ -5,6 +5,9 @@ import * as ReactDOM from "react-dom";
 
 import { /*$$,*/ $window, _, instance} from "../lib/adapter";
 
+// tslint:disable-next-line:variable-name
+const M_Select = (M.FormSelect || (M as any).Select as typeof M.FormSelect);
+
 interface MultiDropdownProps {
 	options: {[key: string]: string};
 	checkedOptions: string[];
@@ -22,9 +25,12 @@ export class MultiDropdown extends React.Component<MultiDropdownProps, MultiDrop
 		this.state = {
 			checkedOptions: props.checkedOptions,
 		};
+
+		this.readStateFromUI = this.readStateFromUI.bind(this);
 	}
 
-	private dropdown: any;
+	private dropdown: HTMLSelectElement;
+	private mcssSelect: M.FormSelect;
 
 	public componentDidMount() {
 		// $$(this.dropdown).multiselect({
@@ -36,14 +42,26 @@ export class MultiDropdown extends React.Component<MultiDropdownProps, MultiDrop
 		// 	click: this.optionClicked,
 		// 	close: this.dropdownClosed,
 		// });
-		this.updateChecked();
+		this.updateUI();
+
+		if (this.dropdown != null) {
+			$(this.dropdown).on("change", this.readStateFromUI as any);
+
+			this.mcssSelect = M_Select.init(this.dropdown);
+		}
+	}
+
+	public componentWillUnmount() {
+		if (this.dropdown != null) {
+			$(this.dropdown).off("change", this.readStateFromUI as any);
+		}
 	}
 
 	public componentDidUpdate() {
-		this.updateChecked();
+		this.updateUI();
 	}
 
-	private updateChecked() {
+	private updateUI() {
 		const $dropdown = $(this.dropdown);
 		$dropdown.find("option:selected").prop("selected", false);
 		this.state.checkedOptions.forEach(val => {
@@ -52,27 +70,37 @@ export class MultiDropdown extends React.Component<MultiDropdownProps, MultiDrop
 		// $dropdown.multiselect("refresh");
 	}
 
-	private optionClicked = (event, ui) => {
-		const index = this.state.checkedOptions.indexOf(ui.value);
-		const checked = [...this.state.checkedOptions];
-		if (ui.checked) {
-			if (index === -1) checked.push(ui.value);
-		} else {
-			if (index !== -1) checked.splice(index, 1);
-		}
-		this.setState({checkedOptions: checked});
+	private readStateFromUI() {
+		// read data from UI
+		this.setState({checkedOptions: this.mcssSelect.getSelectedValues()}, () => {
+			// update the adapter settings
+			this.props.checkedChanged(this.state.checkedOptions);
+		});
 	}
 
-	private dropdownClosed = () => {
-		this.props.checkedChanged(this.state.checkedOptions);
-	}
+	// private optionClicked = (event, ui) => {
+	// 	const index = this.state.checkedOptions.indexOf(ui.value);
+	// 	const checked = [...this.state.checkedOptions];
+	// 	if (ui.checked) {
+	// 		if (index === -1) checked.push(ui.value);
+	// 	} else {
+	// 		if (index !== -1) checked.splice(index, 1);
+	// 	}
+	// 	this.setState({checkedOptions: checked});
+	// }
+
+	// private dropdownClosed = () => {
+	// 	this.props.checkedChanged(this.state.checkedOptions);
+	// }
 
 	public render() {
 		return (
 			<select
 				multiple={true}
 				ref={(me) => this.dropdown = me}
+				defaultValue={[""]}
 			>
+			<option value="" disabled>{_("select devices")}</option>
 			{Object.keys(this.props.options).map(k => (
 				<option key={k} value={k}>
 					{this.props.options[k]}

@@ -99,29 +99,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // Renders some components in jQuery UI tabs
 var $ = __webpack_require__("jquery");
 var React = __webpack_require__("./node_modules/react/index.js");
+var adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
+// tslint:disable-next-line:variable-name
+var M_Select = (M.FormSelect || M.Select);
 var MultiDropdown = /** @class */ (function (_super) {
     __extends(MultiDropdown, _super);
     function MultiDropdown(props) {
         var _this = _super.call(this, props) || this;
-        _this.optionClicked = function (event, ui) {
-            var index = _this.state.checkedOptions.indexOf(ui.value);
-            var checked = _this.state.checkedOptions.slice();
-            if (ui.checked) {
-                if (index === -1)
-                    checked.push(ui.value);
-            }
-            else {
-                if (index !== -1)
-                    checked.splice(index, 1);
-            }
-            _this.setState({ checkedOptions: checked });
-        };
-        _this.dropdownClosed = function () {
-            _this.props.checkedChanged(_this.state.checkedOptions);
-        };
         _this.state = {
             checkedOptions: props.checkedOptions,
         };
+        _this.readStateFromUI = _this.readStateFromUI.bind(_this);
         return _this;
     }
     MultiDropdown.prototype.componentDidMount = function () {
@@ -134,12 +122,21 @@ var MultiDropdown = /** @class */ (function (_super) {
         // 	click: this.optionClicked,
         // 	close: this.dropdownClosed,
         // });
-        this.updateChecked();
+        this.updateUI();
+        if (this.dropdown != null) {
+            $(this.dropdown).on("change", this.readStateFromUI);
+            this.mcssSelect = M_Select.init(this.dropdown);
+        }
+    };
+    MultiDropdown.prototype.componentWillUnmount = function () {
+        if (this.dropdown != null) {
+            $(this.dropdown).off("change", this.readStateFromUI);
+        }
     };
     MultiDropdown.prototype.componentDidUpdate = function () {
-        this.updateChecked();
+        this.updateUI();
     };
-    MultiDropdown.prototype.updateChecked = function () {
+    MultiDropdown.prototype.updateUI = function () {
         var $dropdown = $(this.dropdown);
         $dropdown.find("option:selected").prop("selected", false);
         this.state.checkedOptions.forEach(function (val) {
@@ -147,9 +144,32 @@ var MultiDropdown = /** @class */ (function (_super) {
         });
         // $dropdown.multiselect("refresh");
     };
+    MultiDropdown.prototype.readStateFromUI = function () {
+        var _this = this;
+        // read data from UI
+        this.setState({ checkedOptions: this.mcssSelect.getSelectedValues() }, function () {
+            // update the adapter settings
+            _this.props.checkedChanged(_this.state.checkedOptions);
+        });
+    };
+    // private optionClicked = (event, ui) => {
+    // 	const index = this.state.checkedOptions.indexOf(ui.value);
+    // 	const checked = [...this.state.checkedOptions];
+    // 	if (ui.checked) {
+    // 		if (index === -1) checked.push(ui.value);
+    // 	} else {
+    // 		if (index !== -1) checked.splice(index, 1);
+    // 	}
+    // 	this.setState({checkedOptions: checked});
+    // }
+    // private dropdownClosed = () => {
+    // 	this.props.checkedChanged(this.state.checkedOptions);
+    // }
     MultiDropdown.prototype.render = function () {
         var _this = this;
-        return (React.createElement("select", { multiple: true, ref: function (me) { return _this.dropdown = me; } }, Object.keys(this.props.options).map(function (k) { return (React.createElement("option", { key: k, value: k }, _this.props.options[k])); })));
+        return (React.createElement("select", { multiple: true, ref: function (me) { return _this.dropdown = me; }, defaultValue: [""] },
+            React.createElement("option", { value: "", disabled: true }, adapter_1._("select devices")),
+            Object.keys(this.props.options).map(function (k) { return (React.createElement("option", { key: k, value: k }, _this.props.options[k])); })));
     };
     return MultiDropdown;
 }(React.Component));
@@ -180,15 +200,9 @@ var Tabs = /** @class */ (function (_super) {
     __extends(Tabs, _super);
     function Tabs(props) {
         var _this = _super.call(this, props) || this;
-        // this.state = {
-        // 	tabs: props.tabs,
-        // };
         _this.containerId = _this.props.id || "tabs";
         return _this;
     }
-    // public componentDidMount() {
-    // 	$$(`#${this.containerId}`).tabs();
-    // }
     Tabs.prototype.render = function () {
         var _this = this;
         return (React.createElement("div", { className: "row", id: this.containerId },
@@ -422,6 +436,7 @@ var Groups = /** @class */ (function (_super) {
     };
     Groups.prototype.changeGroupDevices = function (id, deviceIDs) {
         // update it on the server
+        console.log("updating virtual group (" + id + "): devices = " + JSON.stringify(deviceIDs));
         adapter_1.sendTo(null, "editVirtualGroup", { id: id, deviceIDs: deviceIDs }, function (result) {
             if (result && result.error) {
                 console.error(result.error);
@@ -438,12 +453,15 @@ var Groups = /** @class */ (function (_super) {
     };
     Groups.prototype.render = function () {
         var _this = this;
+        console.log("render: this.props.devices = " + JSON.stringify(this.props.devices));
         return (React.createElement(React.Fragment, null,
             React.createElement("p", { className: "actions-panel" },
-                React.createElement("button", { id: ADD_GROUP_BUTTON_ID, onClick: this.addGroup }, adapter_1._("add group"))),
+                React.createElement("button", { id: ADD_GROUP_BUTTON_ID, onClick: this.addGroup, className: "btn" },
+                    React.createElement("i", { className: "material-icons left" }, "library_add"),
+                    adapter_1._("add group"))),
             React.createElement("table", { id: "virtual-groups" },
                 React.createElement("thead", null,
-                    React.createElement("tr", { className: "ui-widget-header" },
+                    React.createElement("tr", null,
                         React.createElement("td", { className: "id" }, adapter_1._("ID")),
                         React.createElement("td", { className: "name" }, adapter_1._("Name")),
                         React.createElement("td", { className: "devices" }, adapter_1._("Devices")),
@@ -456,7 +474,8 @@ var Groups = /** @class */ (function (_super) {
                         React.createElement(editable_label_1.EditableLabel, { text: group.name, maxLength: 100, textChanged: function (newText) { return _this.renameGroup(group.id, newText); } })),
                     React.createElement("td", null, (_this.props.devices && Object.keys(_this.props.devices).length > 0) ? (React.createElement(multi_dropdown_1.MultiDropdown, { options: _this.devicesToDropdownSource(_this.props.devices), checkedOptions: (group.deviceIDs || []).map(function (id) { return "" + id; }), checkedChanged: function (checked) { return _this.changeGroupDevices(group.id, checked); } })) : adapter_1._("no devices")),
                     React.createElement("td", null,
-                        React.createElement("button", { title: adapter_1._("delete group"), className: "delete-group", onClick: function () { return _this.deleteGroup(group.id); } })))); })) : (React.createElement("tr", null,
+                        React.createElement("button", { title: adapter_1._("delete group"), className: "btn-small red", onClick: function () { return _this.deleteGroup(group.id); } },
+                            React.createElement("i", { className: "material-icons" }, "delete"))))); })) : (React.createElement("tr", null,
                     React.createElement("td", { className: "empty", colSpan: 4 }, adapter_1._("No virtual groups defined"))))))),
             React.createElement("p", null, adapter_1._("changes are live"))));
     };
@@ -550,13 +569,7 @@ var Settings = /** @class */ (function (_super) {
      * @param key The setting key to store at
      */
     Settings.prototype.putSetting = function (key, value, callback) {
-        var _this = this;
-        var update = (_a = {}, _a[key] = value, _a);
-        console.log("updating state with " + JSON.stringify(update) + "...");
-        this.setState(update, function () {
-            console.log("updated state = " + JSON.stringify(_this.state));
-            callback();
-        });
+        this.setState((_a = {}, _a[key] = value, _a), callback);
         var _a;
     };
     Settings.prototype.componentWillUnmount = function () {

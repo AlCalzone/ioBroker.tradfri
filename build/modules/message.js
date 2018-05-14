@@ -86,6 +86,7 @@ function onMessage(obj) {
                     // check the given params
                     const params = obj.message;
                     const id = parseInt(params.id, 10);
+                    global_1.Global.log(`editVirtualGroup: ${JSON.stringify(params)}`);
                     if (!(id in session_1.session.virtualGroups)) {
                         respond({ error: `no virtual group with ID ${id} found!` });
                         return;
@@ -99,6 +100,7 @@ function onMessage(obj) {
                     if (typeof params.name === "string" && params.name.length > 0) {
                         group.name = params.name;
                     }
+                    global_1.Global.log(`  group = ${JSON.stringify(group)}`);
                     // save the changes
                     groups_1.extendVirtualGroup(group);
                     groups_1.updateGroupStates(group);

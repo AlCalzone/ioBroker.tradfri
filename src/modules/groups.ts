@@ -12,25 +12,26 @@ export function extendVirtualGroup(group: VirtualGroup) {
 
 	if (objId in $.objects) {
 		// check if we need to edit the existing object
+		_.log(`extending virtual group ${group.instanceId}`);
 		const grpObj = $.objects[objId];
 		let changed = false;
 		// update common part if neccessary
 		const newCommon = groupToCommon(group);
-		// but preserve the name
-		if (grpObj.common.name != null) newCommon.name = grpObj.common.name;
 		if (JSON.stringify(grpObj.common) !== JSON.stringify(newCommon)) {
 			// merge the common objects
 			Object.assign(grpObj.common, newCommon);
 			changed = true;
 		}
 		const newNative = groupToNative(group);
+		_.log(`  oldNative = ${JSON.stringify(grpObj.native)}`);
+		_.log(`  newNative = ${JSON.stringify(newNative)}`);
 		// update native part if neccessary
 		if (JSON.stringify(grpObj.native) !== JSON.stringify(newNative)) {
 			// merge the native objects
 			Object.assign(grpObj.native, newNative);
 			changed = true;
 		}
-		if (changed) _.adapter.extendObject(objId, grpObj);
+		if (changed) _.adapter.setObject(objId, grpObj);
 
 		// TODO: Update group states where applicable. See extendGroup for the code
 
@@ -84,8 +85,6 @@ export function extendGroup(group: Group, options?: ExtendObjectOptions) {
 		let changed = false;
 		// update common part if neccessary
 		const newCommon = groupToCommon(group);
-		// but preserve the name
-		if (grpObj.common.name != null) newCommon.name = grpObj.common.name;
 		if (JSON.stringify(grpObj.common) !== JSON.stringify(newCommon)) {
 			// merge the common objects
 			Object.assign(grpObj.common, newCommon);
@@ -98,7 +97,7 @@ export function extendGroup(group: Group, options?: ExtendObjectOptions) {
 			Object.assign(grpObj.native, newNative);
 			changed = true;
 		}
-		if (changed) _.adapter.extendObject(objId, grpObj);
+		if (changed) _.adapter.setObject(objId, grpObj);
 
 		// ====
 

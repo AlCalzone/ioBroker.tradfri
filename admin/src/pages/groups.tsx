@@ -76,6 +76,7 @@ export class Groups extends React.Component<GroupsProps, any> {
 
 	private changeGroupDevices(id: string, deviceIDs: string[]) {
 		// update it on the server
+		console.log(`updating virtual group (${id}): devices = ${JSON.stringify(deviceIDs)}`);
 		sendTo(null, "editVirtualGroup", {id, deviceIDs}, (result) => {
 			if (result && result.error) {
 				console.error(result.error);
@@ -92,14 +93,17 @@ export class Groups extends React.Component<GroupsProps, any> {
 	}
 
 	public render() {
+		console.log(`render: this.props.devices = ${JSON.stringify(this.props.devices)}`);
 		return (
 			<>
 				<p className="actions-panel">
-					<button id={ADD_GROUP_BUTTON_ID} onClick={this.addGroup}>{_("add group")}</button>
+					<button id={ADD_GROUP_BUTTON_ID} onClick={this.addGroup} className="btn">
+						<i className="material-icons left">library_add</i>{_("add group")}
+					</button>
 				</p>
 				<table id="virtual-groups">
 					<thead>
-						<tr className="ui-widget-header">
+						<tr>
 							<td className="id">{_("ID")}</td>
 							<td className="name">{_("Name")}</td>
 							<td className="devices">{_("Devices")}</td>
@@ -130,7 +134,9 @@ export class Groups extends React.Component<GroupsProps, any> {
 									) : _("no devices")
 								}</td>
 								<td>
-									<button title={_("delete group")} className="delete-group" onClick={() => this.deleteGroup(group.id)}></button>
+									<button title={_("delete group")} className="btn-small red" onClick={() => this.deleteGroup(group.id)}>
+										<i className="material-icons">delete</i>
+									</button>
 								</td>
 							</tr>
 							))

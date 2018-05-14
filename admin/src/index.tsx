@@ -7,7 +7,7 @@ import { /*$$,*/ $window, _, instance, sendTo, socket} from "./lib/adapter";
 
 // components
 import { Tabs } from "./components/tabs";
-import { GroupDictionary, Groups } from "./pages/groups";
+import { DeviceDictionary, GroupDictionary, Groups } from "./pages/groups";
 import { OnSettingsChangedCallback, Settings } from "./pages/settings";
 
 const namespace = `tradfri.${instance}`;
@@ -60,7 +60,7 @@ export class Root extends React.Component<any, any> {
 			if (result && result.error) {
 				console.error(result.error);
 			} else {
-				this.setState({devices: result.result as GroupDictionary});
+				this.setState({devices: result.result as DeviceDictionary});
 			}
 		});
 	}

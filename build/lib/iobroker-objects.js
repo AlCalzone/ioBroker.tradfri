@@ -55,9 +55,6 @@ function extendDevice(accessory, options) {
         let changed = false;
         // update common part if neccessary
         const newCommon = accessoryToCommon(accessory);
-        // but preserve the name
-        if (devObj.common.name != null)
-            newCommon.name = devObj.common.name;
         if (JSON.stringify(devObj.common) !== JSON.stringify(newCommon)) {
             // merge the common objects
             Object.assign(devObj.common, newCommon);

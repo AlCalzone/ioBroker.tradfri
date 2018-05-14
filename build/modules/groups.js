@@ -19,19 +19,19 @@ function extendVirtualGroup(group) {
     const objId = iobroker_objects_1.calcGroupId(group);
     if (objId in session_1.session.objects) {
         // check if we need to edit the existing object
+        global_1.Global.log(`extending virtual group ${group.instanceId}`);
         const grpObj = session_1.session.objects[objId];
         let changed = false;
         // update common part if neccessary
         const newCommon = iobroker_objects_1.groupToCommon(group);
-        // but preserve the name
-        if (grpObj.common.name != null)
-            newCommon.name = grpObj.common.name;
         if (JSON.stringify(grpObj.common) !== JSON.stringify(newCommon)) {
             // merge the common objects
             Object.assign(grpObj.common, newCommon);
             changed = true;
         }
         const newNative = iobroker_objects_1.groupToNative(group);
+        global_1.Global.log(`  oldNative = ${JSON.stringify(grpObj.native)}`);
+        global_1.Global.log(`  newNative = ${JSON.stringify(newNative)}`);
         // update native part if neccessary
         if (JSON.stringify(grpObj.native) !== JSON.stringify(newNative)) {
             // merge the native objects
@@ -39,7 +39,7 @@ function extendVirtualGroup(group) {
             changed = true;
         }
         if (changed)
-            global_1.Global.adapter.extendObject(objId, grpObj);
+            global_1.Global.adapter.setObject(objId, grpObj);
         // TODO: Update group states where applicable. See extendGroup for the code
     }
     else {
@@ -86,9 +86,6 @@ function extendGroup(group, options) {
         let changed = false;
         // update common part if neccessary
         const newCommon = iobroker_objects_1.groupToCommon(group);
-        // but preserve the name
-        if (grpObj.common.name != null)
-            newCommon.name = grpObj.common.name;
         if (JSON.stringify(grpObj.common) !== JSON.stringify(newCommon)) {
             // merge the common objects
             Object.assign(grpObj.common, newCommon);
@@ -102,7 +99,7 @@ function extendGroup(group, options) {
             changed = true;
         }
         if (changed)
-            global_1.Global.adapter.extendObject(objId, grpObj);
+            global_1.Global.adapter.setObject(objId, grpObj);
         // ====
         // from here we can update the states
         // filter out the ones belonging to this device with a property path

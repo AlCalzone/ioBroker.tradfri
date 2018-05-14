@@ -1,6 +1,11 @@
 * {
 	box-sizing: border-box
 }
+.m {
+	/* Don't cut off dropdowns! */
+	overflow: initial;
+}
+
 div.loading:first-child {
 	margin-top: 2em;
 }
@@ -21,14 +26,14 @@ div.loading {
 	padding: 0.2em 0.4em;
 }
 #virtual-groups thead .id {
-	width: 100px;
+	width: 60px;
 }
-#virtual-groups thead .name {
-	width: auto;
+/* #virtual-groups thead .name {
+	width: calc((100% - 60px - 30px) / 3 * 2);
 }
 #virtual-groups thead .devices {
-	width: 200px;
-}
+	width: calc((100% - 60px - 30px) / 3);
+} */
 #virtual-groups thead .delete {
 	width: 30px;
 }
@@ -54,12 +59,12 @@ div.loading {
 	text-align: center;
 }
 
-#virtual-groups .delete-group {
+/* #virtual-groups .delete-group {
 	margin-top: -0.25em;
 	margin-bottom: -0.25em;
 	width: 24px;
 	height: 20px;
-}
+} */
 
 .admin-tooltip-icon {
 	margin-left: 0.25em;
