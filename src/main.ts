@@ -1,6 +1,21 @@
 // tslint:disable:object-literal-key-quotes
+import * as path from "path";
 
-// load tradfri data types
+// try loading tradfri module to catch potential errors
+try {
+	// tslint:disable-next-line:no-var-requires
+	require("node-tradfri-client");
+} catch (e) {
+	console.error(`The module "node-aead-crypto" was not installed correctly!`);
+	console.error(`To try reinstalling it, goto "${path.join(__dirname, "..")}" and run`);
+	console.error(`npm install --production`);
+	console.error(`If that fails due to missing access rights, run`);
+	console.error(`${process.platform !== "win32" ? "sudo " : ""}npm install --production --unsafe-perm`);
+	console.error(`instead. Afterwards, restart this adapter.`);
+	process.exit(1);
+}
+
+// actually load them now
 import {
 	Accessory, AccessoryTypes,
 	Group,
@@ -169,7 +184,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 				adapter.setState("info.connection", false, true);
 				connectionAlive = false;
 			})
-		;
+			;
 
 		await loadDevices();
 		await loadGroups();
@@ -509,7 +524,7 @@ function tradfri_deviceUpdated(device: Accessory) {
 	// remember it
 	$.devices[device.instanceId] = device;
 	// create ioBroker device
-	extendDevice(device, {roundToDigits: adapter.config.roundToDigits});
+	extendDevice(device, { roundToDigits: adapter.config.roundToDigits });
 }
 
 async function tradfri_deviceRemoved(instanceId: number) {
@@ -532,7 +547,7 @@ async function tradfri_groupUpdated(group: Group) {
 	}
 	$.groups[group.instanceId].group = group;
 	// create ioBroker device
-	extendGroup(group, {roundToDigits: adapter.config.roundToDigits});
+	extendGroup(group, { roundToDigits: adapter.config.roundToDigits });
 	// clean up any states that might be incorrectly defined
 	updateGroupStates(group);
 	// read the transition duration, because the gateway won't report it
@@ -673,7 +688,6 @@ async function loadGroups(): Promise<void> {
 	}
 }
 
-// Unbehandelte Fehler tracen
 function getMessage(err: Error | string): string {
 	// Irgendwo gibt es wohl einen Fehler ohne Message
 	if (err == null) return "undefined";
@@ -682,12 +696,19 @@ function getMessage(err: Error | string): string {
 	if (err.name != null) return err.name;
 	return err.toString();
 }
-process.on("unhandledRejection", (err: Error) => {
+
+function onUnhandledRejection(err: Error) {
 	adapter.log.error("unhandled promise rejection: " + getMessage(err));
 	if (err.stack != null) adapter.log.error("> stack: " + err.stack);
-});
-process.on("uncaughtException", (err: Error) => {
+}
+
+function onUnhandledError(err: Error) {
+	const msg = getMessage(err);
 	adapter.log.error("unhandled exception:" + getMessage(err));
 	if (err.stack != null) adapter.log.error("> stack: " + err.stack);
 	process.exit(1);
-});
+}
+
+// Trace unhandled errors
+process.on("unhandledRejection", onUnhandledRejection);
+process.on("uncaughtException", onUnhandledError);

@@ -1,5 +1,4 @@
 "use strict";
-// tslint:disable:object-literal-key-quotes
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -9,7 +8,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-// load tradfri data types
+// tslint:disable:object-literal-key-quotes
+const path = require("path");
+// try loading tradfri module to catch potential errors
+try {
+    // tslint:disable-next-line:no-var-requires
+    require("node-tradfri-client");
+}
+catch (e) {
+    console.error(`The module "node-aead-crypto" was not installed correctly!`);
+    console.error(`To try reinstalling it, goto "${path.join(__dirname, "..")}" and run`);
+    console.error(`npm install --production`);
+    console.error(`If that fails due to missing access rights, run`);
+    console.error(`${process.platform !== "win32" ? "sudo " : ""}npm install --production --unsafe-perm`);
+    console.error(`instead. Afterwards, restart this adapter.`);
+    process.exit(1);
+}
+// actually load them now
 const node_tradfri_client_1 = require("node-tradfri-client");
 // Eigene Module laden
 const global_1 = require("./lib/global");
@@ -642,7 +657,6 @@ function loadGroups() {
         }
     });
 }
-// Unbehandelte Fehler tracen
 function getMessage(err) {
     // Irgendwo gibt es wohl einen Fehler ohne Message
     if (err == null)
@@ -655,14 +669,18 @@ function getMessage(err) {
         return err.name;
     return err.toString();
 }
-process.on("unhandledRejection", (err) => {
+function onUnhandledRejection(err) {
     adapter.log.error("unhandled promise rejection: " + getMessage(err));
     if (err.stack != null)
         adapter.log.error("> stack: " + err.stack);
-});
-process.on("uncaughtException", (err) => {
+}
+function onUnhandledError(err) {
+    const msg = getMessage(err);
     adapter.log.error("unhandled exception:" + getMessage(err));
     if (err.stack != null)
         adapter.log.error("> stack: " + err.stack);
     process.exit(1);
-});
+}
+// Trace unhandled errors
+process.on("unhandledRejection", onUnhandledRejection);
+process.on("uncaughtException", onUnhandledError);
