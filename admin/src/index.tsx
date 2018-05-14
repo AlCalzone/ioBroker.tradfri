@@ -3,7 +3,7 @@ import * as $ from "jquery";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
-import { /*$$,*/ $window, _, instance, sendTo, socket} from "./lib/adapter";
+import { $window, _, instance, sendTo, socket} from "./lib/adapter";
 
 // components
 import { Tabs } from "./components/tabs";

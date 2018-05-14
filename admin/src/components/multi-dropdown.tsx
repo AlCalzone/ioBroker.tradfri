@@ -3,7 +3,7 @@ import * as $ from "jquery";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
-import { /*$$,*/ $window, _, instance} from "../lib/adapter";
+import { $window, _, instance} from "../lib/adapter";
 
 // tslint:disable-next-line:variable-name
 const M_Select = (M.FormSelect || (M as any).Select as typeof M.FormSelect);
@@ -33,15 +33,6 @@ export class MultiDropdown extends React.Component<MultiDropdownProps, MultiDrop
 	private mcssSelect: M.FormSelect;
 
 	public componentDidMount() {
-		// $$(this.dropdown).multiselect({
-		// 	minWidth: 250,
-		// 	header: false,
-		// 	classes: "ui-selectmenu-button",
-		// 	noneSelectedText: _("select devices"),
-		// 	selectedText: _("# devices selected"),
-		// 	click: this.optionClicked,
-		// 	close: this.dropdownClosed,
-		// });
 		this.updateUI();
 
 		if (this.dropdown != null) {
@@ -67,7 +58,6 @@ export class MultiDropdown extends React.Component<MultiDropdownProps, MultiDrop
 		this.state.checkedOptions.forEach(val => {
 			$dropdown.find(`option[value=${val}]`).prop("selected", true);
 		});
-		// $dropdown.multiselect("refresh");
 	}
 
 	private readStateFromUI() {
@@ -77,21 +67,6 @@ export class MultiDropdown extends React.Component<MultiDropdownProps, MultiDrop
 			this.props.checkedChanged(this.state.checkedOptions);
 		});
 	}
-
-	// private optionClicked = (event, ui) => {
-	// 	const index = this.state.checkedOptions.indexOf(ui.value);
-	// 	const checked = [...this.state.checkedOptions];
-	// 	if (ui.checked) {
-	// 		if (index === -1) checked.push(ui.value);
-	// 	} else {
-	// 		if (index !== -1) checked.splice(index, 1);
-	// 	}
-	// 	this.setState({checkedOptions: checked});
-	// }
-
-	// private dropdownClosed = () => {
-	// 	this.props.checkedChanged(this.state.checkedOptions);
-	// }
 
 	public render() {
 		return (

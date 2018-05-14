@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
-import { /*$$,*/ $window, _, instance } from "../lib/adapter";
+import { $window, _, instance } from "../lib/adapter";
 
 export type OnSettingsChangedCallback = (newSettings: Record<string, any>) => void;
 

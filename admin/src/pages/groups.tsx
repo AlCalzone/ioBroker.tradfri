@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
-import { /*$$,*/ $window, _, instance, sendTo, socket} from "../lib/adapter";
+import { $window, _, instance, sendTo, socket} from "../lib/adapter";
 
 import { EditableLabel } from "../components/editable-label";
 import { MultiDropdown } from "../components/multi-dropdown";
@@ -27,23 +27,6 @@ export class Groups extends React.Component<GroupsProps, any> {
 	constructor(props) {
 		super(props);
 	}
-
-	// public componentDidMount() {
-	// 	$$(`#${ADD_GROUP_BUTTON_ID}`).button({
-	// 		icons: { primary: "ui-icon-plusthick" },
-	// 	});
-	// 	$$(`#virtual-groups .delete-group`).button({
-	// 		icons: { primary: "ui-icon-trash" },
-	// 		text: false,
-	// 	});
-	// }
-
-	// public componentDidUpdate() {
-	// 	$$(`#virtual-groups .delete-group`).button({
-	// 		icons: { primary: "ui-icon-trash" },
-	// 		text: false,
-	// 	});
-	// }
 
 	private addGroup() {
 		sendTo(null, "addVirtualGroup", null, (result) => {
