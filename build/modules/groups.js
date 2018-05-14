@@ -19,7 +19,6 @@ function extendVirtualGroup(group) {
     const objId = iobroker_objects_1.calcGroupId(group);
     if (objId in session_1.session.objects) {
         // check if we need to edit the existing object
-        global_1.Global.log(`extending virtual group ${group.instanceId}`);
         const grpObj = session_1.session.objects[objId];
         let changed = false;
         // update common part if neccessary
@@ -30,8 +29,6 @@ function extendVirtualGroup(group) {
             changed = true;
         }
         const newNative = iobroker_objects_1.groupToNative(group);
-        global_1.Global.log(`  oldNative = ${JSON.stringify(grpObj.native)}`);
-        global_1.Global.log(`  newNative = ${JSON.stringify(newNative)}`);
         // update native part if neccessary
         if (JSON.stringify(grpObj.native) !== JSON.stringify(newNative)) {
             // merge the native objects

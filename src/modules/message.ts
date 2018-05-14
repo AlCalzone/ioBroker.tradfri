@@ -87,8 +87,6 @@ export async function onMessage(obj) {
 				const params = obj.message as any;
 				const id = parseInt(params.id, 10);
 
-				_.log(`editVirtualGroup: ${JSON.stringify(params)}`);
-
 				if (!(id in $.virtualGroups)) {
 					respond({ error: `no virtual group with ID ${id} found!` });
 					return;
@@ -103,7 +101,6 @@ export async function onMessage(obj) {
 				if (typeof params.name === "string" && params.name.length > 0) {
 					group.name = params.name;
 				}
-				_.log(`  group = ${JSON.stringify(group)}`);
 
 				// save the changes
 				extendVirtualGroup(group);

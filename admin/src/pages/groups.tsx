@@ -76,7 +76,6 @@ export class Groups extends React.Component<GroupsProps, any> {
 
 	private changeGroupDevices(id: string, deviceIDs: string[]) {
 		// update it on the server
-		console.log(`updating virtual group (${id}): devices = ${JSON.stringify(deviceIDs)}`);
 		sendTo(null, "editVirtualGroup", {id, deviceIDs}, (result) => {
 			if (result && result.error) {
 				console.error(result.error);
@@ -93,7 +92,6 @@ export class Groups extends React.Component<GroupsProps, any> {
 	}
 
 	public render() {
-		console.log(`render: this.props.devices = ${JSON.stringify(this.props.devices)}`);
 		return (
 			<>
 				<p className="actions-panel">

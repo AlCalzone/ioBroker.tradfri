@@ -12,7 +12,6 @@ export function extendVirtualGroup(group: VirtualGroup) {
 
 	if (objId in $.objects) {
 		// check if we need to edit the existing object
-		_.log(`extending virtual group ${group.instanceId}`);
 		const grpObj = $.objects[objId];
 		let changed = false;
 		// update common part if neccessary
@@ -23,8 +22,6 @@ export function extendVirtualGroup(group: VirtualGroup) {
 			changed = true;
 		}
 		const newNative = groupToNative(group);
-		_.log(`  oldNative = ${JSON.stringify(grpObj.native)}`);
-		_.log(`  newNative = ${JSON.stringify(newNative)}`);
 		// update native part if neccessary
 		if (JSON.stringify(grpObj.native) !== JSON.stringify(newNative)) {
 			// merge the native objects
