@@ -46,6 +46,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### _WORK IN PROGRESS_
+* (AlCalzone) When `node-aead-crypto` is not installed, display instructions on how to fix it
+
 #### 2.0.0 (2018-05-14)
 * (AlCalzone) Support for Admin v3 and material design
 * (AlCalzone) **BREAKING:** Dropped support for Admin v2
