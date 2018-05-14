@@ -101,6 +101,7 @@ export async function onMessage(obj) {
 				if (typeof params.name === "string" && params.name.length > 0) {
 					group.name = params.name;
 				}
+
 				// save the changes
 				extendVirtualGroup(group);
 				updateGroupStates(group);

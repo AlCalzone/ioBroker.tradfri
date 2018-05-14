@@ -16,8 +16,6 @@ export function extendVirtualGroup(group: VirtualGroup) {
 		let changed = false;
 		// update common part if neccessary
 		const newCommon = groupToCommon(group);
-		// but preserve the name
-		if (grpObj.common.name != null) newCommon.name = grpObj.common.name;
 		if (JSON.stringify(grpObj.common) !== JSON.stringify(newCommon)) {
 			// merge the common objects
 			Object.assign(grpObj.common, newCommon);
@@ -30,7 +28,7 @@ export function extendVirtualGroup(group: VirtualGroup) {
 			Object.assign(grpObj.native, newNative);
 			changed = true;
 		}
-		if (changed) _.adapter.extendObject(objId, grpObj);
+		if (changed) _.adapter.setObject(objId, grpObj);
 
 		// TODO: Update group states where applicable. See extendGroup for the code
 
@@ -84,8 +82,6 @@ export function extendGroup(group: Group, options?: ExtendObjectOptions) {
 		let changed = false;
 		// update common part if neccessary
 		const newCommon = groupToCommon(group);
-		// but preserve the name
-		if (grpObj.common.name != null) newCommon.name = grpObj.common.name;
 		if (JSON.stringify(grpObj.common) !== JSON.stringify(newCommon)) {
 			// merge the common objects
 			Object.assign(grpObj.common, newCommon);
@@ -98,7 +94,7 @@ export function extendGroup(group: Group, options?: ExtendObjectOptions) {
 			Object.assign(grpObj.native, newNative);
 			changed = true;
 		}
-		if (changed) _.adapter.extendObject(objId, grpObj);
+		if (changed) _.adapter.setObject(objId, grpObj);
 
 		// ====
 

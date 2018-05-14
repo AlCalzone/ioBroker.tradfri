@@ -23,9 +23,6 @@ function extendVirtualGroup(group) {
         let changed = false;
         // update common part if neccessary
         const newCommon = iobroker_objects_1.groupToCommon(group);
-        // but preserve the name
-        if (grpObj.common.name != null)
-            newCommon.name = grpObj.common.name;
         if (JSON.stringify(grpObj.common) !== JSON.stringify(newCommon)) {
             // merge the common objects
             Object.assign(grpObj.common, newCommon);
@@ -39,7 +36,7 @@ function extendVirtualGroup(group) {
             changed = true;
         }
         if (changed)
-            global_1.Global.adapter.extendObject(objId, grpObj);
+            global_1.Global.adapter.setObject(objId, grpObj);
         // TODO: Update group states where applicable. See extendGroup for the code
     }
     else {
@@ -86,9 +83,6 @@ function extendGroup(group, options) {
         let changed = false;
         // update common part if neccessary
         const newCommon = iobroker_objects_1.groupToCommon(group);
-        // but preserve the name
-        if (grpObj.common.name != null)
-            newCommon.name = grpObj.common.name;
         if (JSON.stringify(grpObj.common) !== JSON.stringify(newCommon)) {
             // merge the common objects
             Object.assign(grpObj.common, newCommon);
@@ -102,7 +96,7 @@ function extendGroup(group, options) {
             changed = true;
         }
         if (changed)
-            global_1.Global.adapter.extendObject(objId, grpObj);
+            global_1.Global.adapter.setObject(objId, grpObj);
         // ====
         // from here we can update the states
         // filter out the ones belonging to this device with a property path

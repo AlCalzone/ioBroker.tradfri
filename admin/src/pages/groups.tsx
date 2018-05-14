@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
-import {$$, $window, _, instance, sendTo, socket} from "../lib/adapter";
+import { $window, _, instance, sendTo, socket} from "../lib/adapter";
 
 import { EditableLabel } from "../components/editable-label";
 import { MultiDropdown } from "../components/multi-dropdown";
@@ -26,23 +26,6 @@ export class Groups extends React.Component<GroupsProps, any> {
 
 	constructor(props) {
 		super(props);
-	}
-
-	public componentDidMount() {
-		$$(`#${ADD_GROUP_BUTTON_ID}`).button({
-			icons: { primary: "ui-icon-plusthick" },
-		});
-		$$(`#virtual-groups .delete-group`).button({
-			icons: { primary: "ui-icon-trash" },
-			text: false,
-		});
-	}
-
-	public componentDidUpdate() {
-		$$(`#virtual-groups .delete-group`).button({
-			icons: { primary: "ui-icon-trash" },
-			text: false,
-		});
 	}
 
 	private addGroup() {
@@ -95,11 +78,13 @@ export class Groups extends React.Component<GroupsProps, any> {
 		return (
 			<>
 				<p className="actions-panel">
-					<button id={ADD_GROUP_BUTTON_ID} onClick={this.addGroup}>{_("add group")}</button>
+					<button id={ADD_GROUP_BUTTON_ID} onClick={this.addGroup} className="btn">
+						<i className="material-icons left">library_add</i>{_("add group")}
+					</button>
 				</p>
 				<table id="virtual-groups">
 					<thead>
-						<tr className="ui-widget-header">
+						<tr>
 							<td className="id">{_("ID")}</td>
 							<td className="name">{_("Name")}</td>
 							<td className="devices">{_("Devices")}</td>
@@ -130,7 +115,9 @@ export class Groups extends React.Component<GroupsProps, any> {
 									) : _("no devices")
 								}</td>
 								<td>
-									<button title={_("delete group")} className="delete-group" onClick={() => this.deleteGroup(group.id)}></button>
+									<button title={_("delete group")} className="btn-small red" onClick={() => this.deleteGroup(group.id)}>
+										<i className="material-icons">delete</i>
+									</button>
 								</td>
 							</tr>
 							))

@@ -96,74 +96,84 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+// Renders some components in jQuery UI tabs
+var $ = __webpack_require__("jquery");
 var React = __webpack_require__("./node_modules/react/index.js");
 var adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
+// tslint:disable-next-line:variable-name
+var M_Select = (M.FormSelect || M.Select);
 var MultiDropdown = /** @class */ (function (_super) {
     __extends(MultiDropdown, _super);
     function MultiDropdown(props) {
         var _this = _super.call(this, props) || this;
-        _this.optionClicked = function (event, ui) {
-            var index = _this.state.checkedOptions.indexOf(ui.value);
-            var checked = _this.state.checkedOptions.slice();
-            if (ui.checked) {
-                if (index === -1)
-                    checked.push(ui.value);
-            }
-            else {
-                if (index !== -1)
-                    checked.splice(index, 1);
-            }
-            _this.setState({ checkedOptions: checked });
-        };
-        _this.dropdownClosed = function () {
-            _this.props.checkedChanged(_this.state.checkedOptions);
-        };
         _this.state = {
             checkedOptions: props.checkedOptions,
         };
+        _this.readStateFromUI = _this.readStateFromUI.bind(_this);
         return _this;
     }
     MultiDropdown.prototype.componentDidMount = function () {
-        adapter_1.$$(this.dropdown).multiselect({
-            minWidth: 250,
-            header: false,
-            classes: "ui-selectmenu-button",
-            noneSelectedText: adapter_1._("select devices"),
-            selectedText: adapter_1._("# devices selected"),
-            click: this.optionClicked,
-            close: this.dropdownClosed,
-        });
-        this.updateChecked();
+        // $$(this.dropdown).multiselect({
+        // 	minWidth: 250,
+        // 	header: false,
+        // 	classes: "ui-selectmenu-button",
+        // 	noneSelectedText: _("select devices"),
+        // 	selectedText: _("# devices selected"),
+        // 	click: this.optionClicked,
+        // 	close: this.dropdownClosed,
+        // });
+        this.updateUI();
+        if (this.dropdown != null) {
+            $(this.dropdown).on("change", this.readStateFromUI);
+            this.mcssSelect = M_Select.init(this.dropdown);
+        }
+    };
+    MultiDropdown.prototype.componentWillUnmount = function () {
+        if (this.dropdown != null) {
+            $(this.dropdown).off("change", this.readStateFromUI);
+        }
     };
     MultiDropdown.prototype.componentDidUpdate = function () {
-        this.updateChecked();
+        this.updateUI();
     };
-    MultiDropdown.prototype.updateChecked = function () {
-        var $dropdown = adapter_1.$$(this.dropdown);
+    MultiDropdown.prototype.updateUI = function () {
+        var $dropdown = $(this.dropdown);
         $dropdown.find("option:selected").prop("selected", false);
         this.state.checkedOptions.forEach(function (val) {
             $dropdown.find("option[value=" + val + "]").prop("selected", true);
         });
-        $dropdown.multiselect("refresh");
+        // $dropdown.multiselect("refresh");
     };
+    MultiDropdown.prototype.readStateFromUI = function () {
+        var _this = this;
+        // read data from UI
+        this.setState({ checkedOptions: this.mcssSelect.getSelectedValues() }, function () {
+            // update the adapter settings
+            _this.props.checkedChanged(_this.state.checkedOptions);
+        });
+    };
+    // private optionClicked = (event, ui) => {
+    // 	const index = this.state.checkedOptions.indexOf(ui.value);
+    // 	const checked = [...this.state.checkedOptions];
+    // 	if (ui.checked) {
+    // 		if (index === -1) checked.push(ui.value);
+    // 	} else {
+    // 		if (index !== -1) checked.splice(index, 1);
+    // 	}
+    // 	this.setState({checkedOptions: checked});
+    // }
+    // private dropdownClosed = () => {
+    // 	this.props.checkedChanged(this.state.checkedOptions);
+    // }
     MultiDropdown.prototype.render = function () {
         var _this = this;
-        return (React.createElement("select", { multiple: true, ref: function (me) { return _this.dropdown = me; } }, Object.keys(this.props.options).map(function (k) { return (React.createElement("option", { key: k, value: k }, _this.props.options[k])); })));
+        return (React.createElement("select", { multiple: true, ref: function (me) { return _this.dropdown = me; }, defaultValue: [""] },
+            React.createElement("option", { value: "", disabled: true }, adapter_1._("select devices")),
+            Object.keys(this.props.options).map(function (k) { return (React.createElement("option", { key: k, value: k }, _this.props.options[k])); })));
     };
     return MultiDropdown;
 }(React.Component));
 exports.MultiDropdown = MultiDropdown;
-// $('#assAssNodes').multiselect({
-// 	header: false,
-// 	minWidth: 250,
-// 	noneSelectedText: '<span class="ui-selectmenu-text">select nodes</span>',
-// 	selectedText: '<span class="ui-selectmenu-text"># nodes selected</span>',
-// 	classes: 'ui-selectmenu-button',
-// 	click: function(event, ui){
-// 		if (ui.checked) {
-// 		}
-// 	}
-// })
 
 
 /***/ }),
@@ -190,21 +200,16 @@ var Tabs = /** @class */ (function (_super) {
     __extends(Tabs, _super);
     function Tabs(props) {
         var _this = _super.call(this, props) || this;
-        // this.state = {
-        // 	tabs: props.tabs,
-        // };
         _this.containerId = _this.props.id || "tabs";
         return _this;
     }
-    Tabs.prototype.componentDidMount = function () {
-        adapter_1.$$("#" + this.containerId).tabs();
-    };
     Tabs.prototype.render = function () {
         var _this = this;
-        return (React.createElement("div", { id: this.containerId },
-            React.createElement("ul", null, this.props.labels.map(function (k, i) { return React.createElement("li", { key: i },
-                React.createElement("a", { href: "#" + _this.containerId + "-" + i }, adapter_1._(k))); })),
-            this.props.labels.map(function (k, i) { return React.createElement("div", { key: i, id: _this.containerId + "-" + i }, _this.props.children[i]); })));
+        return (React.createElement("div", { className: "row", id: this.containerId },
+            React.createElement("div", { className: "tabs-header col s12" },
+                React.createElement("ul", { className: "tabs" }, this.props.labels.map(function (k, i) { return React.createElement("li", { className: "tab col s3", key: i },
+                    React.createElement("a", { href: "#" + _this.containerId + "-" + i }, adapter_1._(k))); }))),
+            this.props.labels.map(function (k, i) { return React.createElement("div", { className: "col s12", key: i, id: _this.containerId + "-" + i }, _this.props.children[i]); })));
     };
     return Tabs;
 }(React.Component));
@@ -292,11 +297,14 @@ var Root = /** @class */ (function (_super) {
         });
     };
     Root.prototype.render = function () {
-        return (React.createElement(React.Fragment, null,
-            React.createElement(Header, null),
-            React.createElement(tabs_1.Tabs, { labels: ["Settings", "Groups"] },
-                React.createElement(settings_1.Settings, { settings: this.props.settings, onChange: this.props.onSettingsChanged }),
-                React.createElement(groups_1.Groups, { groups: this.state.groups, devices: this.state.devices }))));
+        return (
+        // <>
+        // 	<Header />
+        React.createElement(tabs_1.Tabs, { labels: ["Settings", "Groups"] },
+            React.createElement(settings_1.Settings, { settings: this.props.settings, onChange: this.props.onSettingsChanged }),
+            React.createElement(groups_1.Groups, { groups: this.state.groups, devices: this.state.devices }))
+        // </>
+        );
     };
     return Root;
 }(React.Component));
@@ -323,7 +331,7 @@ adapter_1.$window.load = function (settings, onChange) {
         curSettings = newSettings;
         onChange(hasChanges());
     };
-    ReactDOM.render(React.createElement(Root, { settings: settings, onSettingsChanged: settingsChanged }), document.getElementById("adapter-container"));
+    ReactDOM.render(React.createElement(Root, { settings: settings, onSettingsChanged: settingsChanged }), document.getElementById("adapter-container") || document.getElementsByClassName("adapter-container")[0]);
     // Signal to admin, that no changes yet
     onChange(false);
 };
@@ -345,7 +353,12 @@ adapter_1.$window.save = function (callback) {
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.$window = window;
-exports.$$ = exports.$window.jQuery;
+// export interface JQueryUI {
+// 	tabs: (selector?: any) => JQuery & JQueryUI;
+// 	button: (selector?: any) => JQuery & JQueryUI;
+// 	multiselect: (selector?: any) => JQuery & JQueryUI;
+// }
+// export const $$ = $window.jQuery as any as (...args: any[]) => JQuery /* & JQueryUI */;
 exports.instance = exports.$window.instance || 0;
 exports._ = exports.$window._ || (function (text) { return text; });
 exports.socket = exports.$window.socket;
@@ -380,21 +393,21 @@ var Groups = /** @class */ (function (_super) {
     function Groups(props) {
         return _super.call(this, props) || this;
     }
-    Groups.prototype.componentDidMount = function () {
-        adapter_1.$$("#" + ADD_GROUP_BUTTON_ID).button({
-            icons: { primary: "ui-icon-plusthick" },
-        });
-        adapter_1.$$("#virtual-groups .delete-group").button({
-            icons: { primary: "ui-icon-trash" },
-            text: false,
-        });
-    };
-    Groups.prototype.componentDidUpdate = function () {
-        adapter_1.$$("#virtual-groups .delete-group").button({
-            icons: { primary: "ui-icon-trash" },
-            text: false,
-        });
-    };
+    // public componentDidMount() {
+    // 	$$(`#${ADD_GROUP_BUTTON_ID}`).button({
+    // 		icons: { primary: "ui-icon-plusthick" },
+    // 	});
+    // 	$$(`#virtual-groups .delete-group`).button({
+    // 		icons: { primary: "ui-icon-trash" },
+    // 		text: false,
+    // 	});
+    // }
+    // public componentDidUpdate() {
+    // 	$$(`#virtual-groups .delete-group`).button({
+    // 		icons: { primary: "ui-icon-trash" },
+    // 		text: false,
+    // 	});
+    // }
     Groups.prototype.addGroup = function () {
         adapter_1.sendTo(null, "addVirtualGroup", null, function (result) {
             if (result && result.error) {
@@ -423,6 +436,7 @@ var Groups = /** @class */ (function (_super) {
     };
     Groups.prototype.changeGroupDevices = function (id, deviceIDs) {
         // update it on the server
+        console.log("updating virtual group (" + id + "): devices = " + JSON.stringify(deviceIDs));
         adapter_1.sendTo(null, "editVirtualGroup", { id: id, deviceIDs: deviceIDs }, function (result) {
             if (result && result.error) {
                 console.error(result.error);
@@ -439,12 +453,15 @@ var Groups = /** @class */ (function (_super) {
     };
     Groups.prototype.render = function () {
         var _this = this;
+        console.log("render: this.props.devices = " + JSON.stringify(this.props.devices));
         return (React.createElement(React.Fragment, null,
             React.createElement("p", { className: "actions-panel" },
-                React.createElement("button", { id: ADD_GROUP_BUTTON_ID, onClick: this.addGroup }, adapter_1._("add group"))),
+                React.createElement("button", { id: ADD_GROUP_BUTTON_ID, onClick: this.addGroup, className: "btn" },
+                    React.createElement("i", { className: "material-icons left" }, "library_add"),
+                    adapter_1._("add group"))),
             React.createElement("table", { id: "virtual-groups" },
                 React.createElement("thead", null,
-                    React.createElement("tr", { className: "ui-widget-header" },
+                    React.createElement("tr", null,
                         React.createElement("td", { className: "id" }, adapter_1._("ID")),
                         React.createElement("td", { className: "name" }, adapter_1._("Name")),
                         React.createElement("td", { className: "devices" }, adapter_1._("Devices")),
@@ -457,7 +474,8 @@ var Groups = /** @class */ (function (_super) {
                         React.createElement(editable_label_1.EditableLabel, { text: group.name, maxLength: 100, textChanged: function (newText) { return _this.renameGroup(group.id, newText); } })),
                     React.createElement("td", null, (_this.props.devices && Object.keys(_this.props.devices).length > 0) ? (React.createElement(multi_dropdown_1.MultiDropdown, { options: _this.devicesToDropdownSource(_this.props.devices), checkedOptions: (group.deviceIDs || []).map(function (id) { return "" + id; }), checkedChanged: function (checked) { return _this.changeGroupDevices(group.id, checked); } })) : adapter_1._("no devices")),
                     React.createElement("td", null,
-                        React.createElement("button", { title: adapter_1._("delete group"), className: "delete-group", onClick: function () { return _this.deleteGroup(group.id); } })))); })) : (React.createElement("tr", null,
+                        React.createElement("button", { title: adapter_1._("delete group"), className: "btn-small red", onClick: function () { return _this.deleteGroup(group.id); } },
+                            React.createElement("i", { className: "material-icons" }, "delete"))))); })) : (React.createElement("tr", null,
                     React.createElement("td", { className: "empty", colSpan: 4 }, adapter_1._("No virtual groups defined"))))))),
             React.createElement("p", null, adapter_1._("changes are live"))));
     };
@@ -496,9 +514,17 @@ var React = __webpack_require__("./node_modules/react/index.js");
 var adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
 /** Helper component for a settings label */
 function Label(props) {
-    return React.createElement("label", { htmlFor: props.for, className: (props.class || []).join(" ") },
+    var classNames = (props.class || []);
+    return (React.createElement("label", { htmlFor: props.for, className: classNames.join(" ") },
         adapter_1._(props.text),
-        " ");
+        props.tooltip != null && React.createElement(Tooltip, { text: props.tooltip })));
+}
+/** Inner label for a Materializes CSS checkbox (span, no for property) */
+function CheckboxLabel(props) {
+    var classNames = (props.class || []);
+    return (React.createElement("span", { className: classNames.join(" ") },
+        adapter_1._(props.text),
+        props.tooltip != null && React.createElement(Tooltip, { text: props.tooltip })));
 }
 /** Helper component for a tooltip */
 function Tooltip(props) {
@@ -520,12 +546,16 @@ var Settings = /** @class */ (function (_super) {
     Settings.prototype.handleChange = function (event) {
         var _this = this;
         var target = event.target; // TODO: more types
-        var value = target.type === "checkbox" ? target.checked : target.value;
+        // Checkboxes in MaterializeCSS are messed up, so we attach our own handler
+        // However that one gets called before the underlying checkbox is actually updated,
+        // so we need to invert the checked value here
+        var value = target.type === "checkbox" ? !target.checked : target.value;
         // store the setting
         this.putSetting(target.id, value, function () {
             // and notify the admin UI about changes
             _this.props.onChange(_this.state);
         });
+        return false;
     };
     /**
      * Reads a setting from the state object and transforms the value into the correct format
@@ -542,12 +572,41 @@ var Settings = /** @class */ (function (_super) {
         this.setState((_a = {}, _a[key] = value, _a), callback);
         var _a;
     };
+    Settings.prototype.componentWillUnmount = function () {
+        if (this.chkPreserveTransitionTime != null) {
+            $(this.chkPreserveTransitionTime).off("click", this.handleChange);
+        }
+    };
+    Settings.prototype.componentDidMount = function () {
+        // update floating labels in materialize design
+        M.updateTextFields();
+        // Fix materialize checkboxes
+        if (this.chkPreserveTransitionTime != null) {
+            $(this.chkPreserveTransitionTime).on("click", this.handleChange);
+        }
+    };
     Settings.prototype.render = function () {
+        var _this = this;
+        return (React.createElement(React.Fragment, null,
+            React.createElement("div", { className: "row" },
+                React.createElement("div", { className: "col s4 input-field" },
+                    React.createElement("input", { type: "text", className: "value", id: "host", value: this.getSetting("host"), onChange: this.handleChange }),
+                    React.createElement(Label, { for: "host", text: "Gateway IP/Hostname:", tooltip: "hostname tooltip" })),
+                React.createElement("div", { className: "col s4 input-field" },
+                    React.createElement("input", { type: "text", className: "value", id: "securityCode", value: this.getSetting("securityCode"), onChange: this.handleChange }),
+                    React.createElement(Label, { for: "securityCode", text: "Security-Code:", tooltip: "security code tooltip" }),
+                    React.createElement("span", null, adapter_1._("code not stored")))),
+            React.createElement("div", { className: "row" },
+                React.createElement("div", { className: "col s4" },
+                    React.createElement("label", { htmlFor: "preserveTransitionTime" },
+                        React.createElement("input", { type: "checkbox", className: "value", id: "preserveTransitionTime", defaultChecked: this.getSetting("preserveTransitionTime"), ref: function (me) { return _this.chkPreserveTransitionTime = me; } }),
+                        React.createElement(CheckboxLabel, { text: "Preserve transition time", tooltip: "transition time tooltip" }))),
+                React.createElement("div", { className: "col s4 input-field" },
+                    React.createElement("input", { type: "number", min: "0", max: "2", className: "value", id: "roundToDigits", value: this.getSetting("roundToDigits") || 2, onChange: this.handleChange }),
+                    React.createElement(Label, { for: "roundToDigits", text: "Decimal places:", tooltip: "roundto tooltip" })))));
+    };
+    Settings.prototype.oldrender = function () {
         return (React.createElement("p", { key: "content", className: "settings-table" },
-            React.createElement(Label, { for: "host", text: "Gateway IP/Hostname:" }),
-            React.createElement(Tooltip, { text: "hostname tooltip" }),
-            React.createElement("input", { className: "value", id: "host", value: this.getSetting("host"), onChange: this.handleChange }),
-            React.createElement("br", null),
             React.createElement(Label, { for: "securityCode", text: "Security-Code:" }),
             React.createElement(Tooltip, { text: "security code tooltip" }),
             React.createElement("input", { className: "value", id: "securityCode", value: this.getSetting("securityCode"), onChange: this.handleChange }),
@@ -565,6 +624,13 @@ var Settings = /** @class */ (function (_super) {
 }(React.Component));
 exports.Settings = Settings;
 
+
+/***/ }),
+
+/***/ "jquery":
+/***/ (function(module, exports) {
+
+module.exports = jQuery;
 
 /***/ })
 

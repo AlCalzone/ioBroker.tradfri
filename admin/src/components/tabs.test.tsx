@@ -14,7 +14,7 @@ import * as sinon from "sinon";
 // import components
 import { Tabs } from "./tabs";
 
-describe("jQuery-UI tabs", () => {
+describe.skip("jQuery-UI tabs", () => {
 
 	const definition = {
 		"Tab 1": "Hallo",
@@ -31,7 +31,7 @@ describe("jQuery-UI tabs", () => {
 		expect(shallow(tab).find("li")).to.have.length(tabCount);
 	});
 	it(`renders the correct amount (${tabCount}) of tab divs`, () => {
-		expect(shallow(tab).find("div#tabs > div")).to.have.length(tabCount);
+		expect(shallow(tab).find("div#tabs > div[id^=tabs]")).to.have.length(tabCount);
 	});
 	it(`renders the defined tabs`, () => {
 		expect(shallow(tab).find("div#test")).to.have.length(1);
