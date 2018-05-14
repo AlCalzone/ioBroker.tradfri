@@ -2,7 +2,7 @@ import { Accessory, AccessoryTypes, Group } from "node-tradfri-client";
 import { Global as _ } from "../lib/global";
 import { calcGroupId, ExtendObjectOptions, getInstanceId, groupToCommon, groupToNative, objectDefinitions } from "../lib/iobroker-objects";
 import { roundTo } from "../lib/math";
-import { DictionaryLike, dig, entries, filter, values } from "../lib/object-polyfill";
+import { dig, entries, filter, values } from "../lib/object-polyfill";
 import { VirtualGroup } from "../lib/virtual-group";
 import { session as $ } from "./session";
 
@@ -16,6 +16,8 @@ export function extendVirtualGroup(group: VirtualGroup) {
 		let changed = false;
 		// update common part if neccessary
 		const newCommon = groupToCommon(group);
+		// but preserve the name
+		if (grpObj.common.name != null) newCommon.name = grpObj.common.name;
 		if (JSON.stringify(grpObj.common) !== JSON.stringify(newCommon)) {
 			// merge the common objects
 			Object.assign(grpObj.common, newCommon);
@@ -43,7 +45,7 @@ export function extendVirtualGroup(group: VirtualGroup) {
 		_.adapter.setObject(objId, devObj);
 
 		// also create state objects, depending on the accessory type
-		const stateObjs: DictionaryLike<ioBroker.Object> = {
+		const stateObjs: Record<string, ioBroker.Object> = {
 			state: objectDefinitions.onOff(objId, "virtual group"),
 			transitionDuration: objectDefinitions.transitionDuration(objId, "virtual group"),
 			brightness: objectDefinitions.brightness(objId, "virtual group"),
@@ -82,6 +84,8 @@ export function extendGroup(group: Group, options?: ExtendObjectOptions) {
 		let changed = false;
 		// update common part if neccessary
 		const newCommon = groupToCommon(group);
+		// but preserve the name
+		if (grpObj.common.name != null) newCommon.name = grpObj.common.name;
 		if (JSON.stringify(grpObj.common) !== JSON.stringify(newCommon)) {
 			// merge the common objects
 			Object.assign(grpObj.common, newCommon);
@@ -127,7 +131,7 @@ export function extendGroup(group: Group, options?: ExtendObjectOptions) {
 		_.adapter.setObject(objId, devObj);
 
 		// also create state objects, depending on the accessory type
-		const stateObjs: DictionaryLike<ioBroker.Object> = {
+		const stateObjs: Record<string, ioBroker.Object> = {
 			activeScene: objectDefinitions.activeScene(objId, "group"),
 			state: objectDefinitions.onOff(objId, "group"),
 			transitionDuration: objectDefinitions.transitionDuration(objId, "group"),
@@ -163,7 +167,7 @@ function getCommonValue<T>(arr: T[]): T {
 	return arr[0];
 }
 
-const updateTimers: DictionaryLike<NodeJS.Timer> = {};
+const updateTimers: Record<string, NodeJS.Timer> = {};
 function debounce(id: string, action: () => void, timeout: number) {
 	// clear existing timeouts
 	if (id in updateTimers) clearTimeout(updateTimers[id]);

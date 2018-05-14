@@ -1,5 +1,4 @@
 import { Accessory, Group, GroupInfo, Scene } from "node-tradfri-client";
-import { DictionaryLike } from "./object-polyfill";
 import { VirtualGroup } from "./virtual-group";
 export interface ExtendObjectOptions {
     roundToDigits?: number;
@@ -11,7 +10,7 @@ export declare function accessoryToCommon(accessory: Accessory): ioBroker.Object
 /**
  * Returns the native part of the ioBroker object representing the given accessory
  */
-export declare function accessoryToNative(accessory: Accessory): DictionaryLike<any>;
+export declare function accessoryToNative(accessory: Accessory): Record<string, any>;
 /**
  * Creates or edits an existing <device>-object for an accessory.
  * @param accessory The accessory to update
@@ -48,7 +47,7 @@ export declare function groupToCommon(group: Group | VirtualGroup): ioBroker.Obj
 /**
  * Returns the native part of the ioBroker object representing the given group
  */
-export declare function groupToNative(group: Group | VirtualGroup): DictionaryLike<any>;
+export declare function groupToNative(group: Group | VirtualGroup): Record<string, any>;
 /**
  * Determines the object ID under which the given group should be stored
  */
@@ -71,4 +70,4 @@ export declare type ioBrokerObjectDefinition = (rootId: string, rootType: "devic
 /**
  * Contains definitions for all kinds of states we're going to create
  */
-export declare const objectDefinitions: DictionaryLike<ioBrokerObjectDefinition>;
+export declare const objectDefinitions: Record<string, ioBrokerObjectDefinition>;
