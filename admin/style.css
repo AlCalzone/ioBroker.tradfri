@@ -1,23 +1,6 @@
 * {
 	box-sizing: border-box
 }
-#adapter-container {
-	padding: 0 0.5em;
-}
-#adapter-container .ui-tabs-panel {
-	padding: 0;
-}
-#adapter-container, #adapter-container .ui-tabs {
-	font-size: initial;
-}
-#adapter-container .ui-tabs-nav {
-	margin: 0 -0.5em;
-}
-#adapter-container > *, 
-.ui-tabs > *, 
-.ui-tabs-panel > * {
-	width: auto;
-}
 div.loading:first-child {
 	margin-top: 2em;
 }
@@ -25,36 +8,10 @@ div.loading {
 	text-align: center;
 }
 
-[data-role="adapter-name"] {
-	min-height: 64px;
-	padding-left: 80px;
-	vertical-align: middle;
-	background-image: url(tradfri.png);
-	background-size: 64px auto;
-	background-position: left center;
-	background-repeat: no-repeat;
-	margin: 0.5em auto;
+.tabs-header {
+	margin-bottom: 0.5rem;
+	margin-top: 0.5rem;
 }
-[data-role="adapter-name"]::before {
-	content: "";
-	display: inline-block;
-	height: 64px;
-	vertical-align: middle;
-}
-.settings-table > * {
-	display: inline-block;
-}
-.settings-table > label {
-	min-width: 25%;
-	white-space: nowrap;
-}
-.settings-table > .admin-tooltip-icon {
-	margin-right: 0.25em;
-}
-.settings-table > label ~ span {
-	font-size: 80%;
-	padding-left: 1em;
-}	
 
 #virtual-groups {
 	margin-top: 0.5em;
@@ -104,6 +61,10 @@ div.loading {
 	height: 20px;
 }
 
-label[for^="ui-multiselect"].ui-state-hover {
-	font-weight: normal;
+.admin-tooltip-icon {
+	margin-left: 0.25em;
+}
+.active > .admin-tooltip-icon {
+	/* Offset the downscaling in active labels */
+	transform: scale(1.25);
 }

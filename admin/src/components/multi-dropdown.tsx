@@ -3,7 +3,7 @@ import * as $ from "jquery";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
-import {$$, $window, _, instance} from "../lib/adapter";
+import { /*$$,*/ $window, _, instance} from "../lib/adapter";
 
 interface MultiDropdownProps {
 	options: {[key: string]: string};
@@ -27,15 +27,15 @@ export class MultiDropdown extends React.Component<MultiDropdownProps, MultiDrop
 	private dropdown: any;
 
 	public componentDidMount() {
-		$$(this.dropdown).multiselect({
-			minWidth: 250,
-			header: false,
-			classes: "ui-selectmenu-button",
-			noneSelectedText: _("select devices"),
-			selectedText: _("# devices selected"),
-			click: this.optionClicked,
-			close: this.dropdownClosed,
-		});
+		// $$(this.dropdown).multiselect({
+		// 	minWidth: 250,
+		// 	header: false,
+		// 	classes: "ui-selectmenu-button",
+		// 	noneSelectedText: _("select devices"),
+		// 	selectedText: _("# devices selected"),
+		// 	click: this.optionClicked,
+		// 	close: this.dropdownClosed,
+		// });
 		this.updateChecked();
 	}
 
@@ -44,12 +44,12 @@ export class MultiDropdown extends React.Component<MultiDropdownProps, MultiDrop
 	}
 
 	private updateChecked() {
-		const $dropdown = $$(this.dropdown);
+		const $dropdown = $(this.dropdown);
 		$dropdown.find("option:selected").prop("selected", false);
 		this.state.checkedOptions.forEach(val => {
 			$dropdown.find(`option[value=${val}]`).prop("selected", true);
 		});
-		$dropdown.multiselect("refresh");
+		// $dropdown.multiselect("refresh");
 	}
 
 	private optionClicked = (event, ui) => {
@@ -82,14 +82,3 @@ export class MultiDropdown extends React.Component<MultiDropdownProps, MultiDrop
 		);
 	}
 }
-// $('#assAssNodes').multiselect({
-// 	header: false,
-// 	minWidth: 250,
-// 	noneSelectedText: '<span class="ui-selectmenu-text">select nodes</span>',
-// 	selectedText: '<span class="ui-selectmenu-text"># nodes selected</span>',
-// 	classes: 'ui-selectmenu-button',
-// 	click: function(event, ui){
-// 		if (ui.checked) {
-// 		}
-// 	}
-// })

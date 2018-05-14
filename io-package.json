@@ -113,9 +113,27 @@
             }
         },
         "title": "IKEA Trådfri",
+        "titleLang": {
+            "de": "IKEA Trådfri",
+            "en": "IKEA Trådfri",
+            "es": "IKEA Trådfri",
+            "fr": "IKEA Trådfri",
+            "it": "IKEA Trådfri",
+            "nl": "IKEA Trådfri",
+            "pl": "IKEA Trådfri",
+            "pt": "IKEA Trådfri",
+            "ru": "IKEA Trådfri"
+        },
         "desc": {
             "en": "Communicates with IKEA Trådfri Gateway to control devices",
-            "de": "Kommuniziert mit IKEA Trådfri Gateway um Geräte zu steuern"
+            "de": "Kommuniziert mit IKEA Trådfri Gateway, um Geräte zu steuern",
+            "ru": "Общается с IKEA Trådfri Gateway для управления устройствами",
+            "pt": "Comunica com o IKEA Trådfri Gateway para controlar dispositivos",
+            "nl": "Communiceert met IKEA Trådfri Gateway om apparaten te bedienen",
+            "fr": "Communique avec IKEA Trådfri Gateway pour contrôler les appareils",
+            "it": "Comunica con IKEA Trådfri Gateway per controllare i dispositivi",
+            "es": "Se comunica con IKEA Trådfri Gateway para controlar dispositivos",
+            "pl": "Komunikuje się z Bramą IKEA Trårdri do sterowania urządzeniami"
         },
         "authors": [
             "AlCalzone <d.griesel@gmx.net>"
@@ -132,7 +150,8 @@
         "readme": "https://github.com/AlCalzone/ioBroker.tradfri/blob/master/README.md",
         "loglevel": "info",
         "type": "lighting",
-        "messagebox": true
+        "messagebox": true,
+        "materialize": true
     },
     "native": {
         "host": "",

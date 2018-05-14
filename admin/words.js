@@ -1,81 +1,25 @@
-// Dictionary (systemDictionary is global variable from adapter-settings.js)
+/*global systemDictionary:true */
+'use strict';
+
 systemDictionary = {
-	"loading...": {
-		"de": "Lade Einstellungen...",
-		"en": "loading settings..."
-	},
-	"Tradfri adapter settings": {
-		"de": "Einstellungen für Trådfri-Adapter",
-		"en": "Trådfri adapter settings"
-	},
-	"hostname tooltip": {
-		"de": "Der Hostname ist &quot;gw-&quot; gefolgt von der MAC-Adresse bzw. Seriennummer des Gateways, ohne Sonderzeichen, z.B. gw-a0b1c2d3e4f5. Er findet sich auf der Unterseite des Gateways",
-		"en": "The host name is &quot;gw-&quot; followed by the MAC address or serial number of the gateway, without any special chars, e.g.gw-a0b1c2d3e4f5. It can be found on the bottom of the gateway"
-	},
-	"security code tooltip": {
-		"de": "Der Security-Code findet sich auf der Unterseite des Gateways",
-		"en": "The security code can be found on the bottom of the gateway"
-	},
-	"Settings": {
-		"de": "Einstellungen",
-		"en": "Settings"
-	},
-	"Groups": {
-		"de": "Virtuelle Gruppen",
-		"en": "Virtual groups"
-	},
-	"ID": {
-		"de": "ID",
-		"en": "ID"
-	},
-	"Name": {
-		"de": "Name",
-		"en": "Name"
-	},
-	"Devices": {
-		"de": "Geräte",
-		"en": "Devices"
-	},
-	"add group": {
-		"de": "Neue Gruppe",
-		"en": "Add group"
-	},
-	"delete group": {
-		"de": "Gruppe löschen",
-		"en": "delete group"
-	},
-	"select devices": {
-		"de": "Geräte auswählen",
-		"en": "select devices"
-	},
-	"No virtual groups defined": {
-		"de": "Noch keine virtuellen Gruppen definiert",
-		"en": "No virtual groups defined"
-	},
-	"# devices selected": {
-		"de": "# Geräte ausgewählt",
-		"en": "# devices selected"
-	},
-	"changes are live": {
-		"de": "Achtung: Alle Änderungen an virtuellen Gruppen greifen sofort!",
-		"en": "Warning: All changes to virtual groups are active immediately!"
-	},
-	"code not stored": {
-		"de": "Auf Wunsch von IKEA wird der Code nicht dauerhaft gespeichert.",
-		"en": "As requested by IKEA, the code will not be stored permanently."
-	},
-	"transition time tooltip": {
-		"de": "Standardmäßig überschreibt das Gateway die Übergangsdauer jedes Mal mit dem Standardwert von 0,5s. Diese Option verhindert das.",
-		"en": "By default the gateway overrides the transition duration with the default value of 0.5s. Setting this option prevents it."
-	},
-	"Preserve transition time:": {
-		"de": "Übergangsdauer beibehalten:",
-	},
-	"roundto tooltip": {
-		"de": "Das Trådfri-Protokoll hat teils eigenartige Schrittweiten für Zahlen, sodass oft andere Werte eingestellt werden als gewünscht. Durch Runden kann die Weiterverarbeitung in Skripten verbessert werden.",
-		"en": "The Trådfri protocol has some strange increments for numbers, which means that often different values than desired are achieved. Rounding can improve subsequent processing by scripts."
-	},
-	"Decimal places:": {
-		"de": "Nachkommastellen:",
-	}
+    "# devices selected": {                          "en": "# devices selected",                              "de": "# Geräte ausgewählt",                             "ru": "# устройств выбрано",                             "pt": "# dispositivos selecionados",                     "nl": "# apparaten geselecteerd",                        "fr": "# appareils sélectionnés",                        "it": "# dispositivi selezionati",                       "es": "# dispositivos seleccionados",                    "pl": "# wybrane urządzenia"},
+    "Decimal places:": {                             "en": "Decimal places:",                                 "de": "Nachkommastellen:",                               "ru": "Десятичные числа:",                               "pt": "Casas decimais:",                                 "nl": "Plaatsen achter de komma:",                       "fr": "Décimales:",                                      "it": "Decimali:",                                       "es": "Lugares decimales:",                              "pl": "Miejsca dziesiętne:"},
+    "Devices": {                                     "en": "Devices",                                         "de": "Geräte",                                          "ru": "приборы",                                         "pt": "Devices",                                         "nl": "apparaten",                                       "fr": "Dispositifs",                                     "it": "dispositivi",                                     "es": "Dispositivos",                                    "pl": "Pomysłowość"},
+    "Groups": {                                      "en": "Virtual groups",                                  "de": "Virtuelle Gruppen",                               "ru": "Виртуальные группы",                              "pt": "Grupos virtuais",                                 "nl": "Virtuele groepen",                                "fr": "Groupes virtuels",                                "it": "Gruppi virtuali",                                 "es": "Grupos virtuales",                                "pl": "Grupy wirtualne"},
+    "ID": {                                          "en": "ID",                                              "de": "ID",                                              "ru": "Я БЫ",                                            "pt": "identidade",                                      "nl": "ID kaart",                                        "fr": "ID",                                              "it": "ID",                                              "es": "CARNÉ DE IDENTIDAD",                              "pl": "ID"},
+    "Name": {                                        "en": "Name",                                            "de": "Name",                                            "ru": "имя",                                             "pt": "Nome",                                            "nl": "Naam",                                            "fr": "prénom",                                          "it": "Nome",                                            "es": "Nombre",                                          "pl": "Nazwa"},
+    "No virtual groups defined": {                   "en": "No virtual groups defined",                       "de": "Noch keine virtuellen Gruppen definiert",         "ru": "Не определены виртуальные группы",                "pt": "Nenhum grupo virtual definido",                   "nl": "Geen virtuele groepen gedefinieerd",              "fr": "Aucun groupe virtuel défini",                     "it": "Nessun gruppo virtuale definito",                 "es": "No se definieron grupos virtuales",               "pl": "Nie zdefiniowano żadnych grup wirtualnych"},
+    "Preserve transition time": {                    "en": "Preserve transition time",                        "de": "Übergangsdauer beibehalten",                      "ru": "Сохранять время перехода",                        "pt": "Preserve o tempo de transição",                   "nl": "Overgangstijd behouden",                          "fr": "Préserver le temps de transition",                "it": "Mantieni il tempo di transizione",                "es": "Preservar el tiempo de transición",               "pl": "Zachowaj czas przejścia"},
+    "Settings": {                                    "en": "Settings",                                        "de": "Einstellungen",                                   "ru": "настройки",                                       "pt": "Configurações",                                   "nl": "instellingen",                                    "fr": "Paramètres",                                      "it": "impostazioni",                                    "es": "Configuraciones",                                 "pl": "Ustawienia"},
+    "Tradfri adapter settings": {                    "en": "Trådfri adapter settings",                        "de": "Einstellungen für Trådfri-Adapter",               "ru": "Настройки адаптера Trådfri",                      "pt": "Configurações do adaptador Trådfri",              "nl": "Trådfri-adapterinstellingen",                     "fr": "Paramètres de l'adaptateur Trådfri",              "it": "Impostazioni dell'adattatore Trådfri",            "es": "Configuración del adaptador Trådfri",             "pl": "Ustawienia adaptera Trådfri"},
+    "add group": {                                   "en": "Add group",                                       "de": "Neue Gruppe",                                     "ru": "Добавить группу",                                 "pt": "Adicionar grupo",                                 "nl": "Groep toevoegen",                                 "fr": "Ajouter un groupe",                               "it": "Aggiungere gruppo",                               "es": "Añadir grupo",                                    "pl": "Dodaj grupę"},
+    "changes are live": {                            "en": "Warning: All changes to virtual groups are active immediately!", "de": "Achtung: Alle Änderungen an virtuellen Gruppen greifen sofort!", "ru": "Внимание! Все изменения в виртуальных группах немедленно активируются!", "pt": "Aviso: Todas as alterações nos grupos virtuais estão ativas imediatamente!", "nl": "Waarschuwing: alle wijzigingen aan virtuele groepen zijn onmiddellijk actief!", "fr": "Attention: Toutes les modifications apportées aux groupes virtuels sont actives immédiatement!", "it": "Attenzione: tutte le modifiche ai gruppi virtuali sono attive immediatamente!", "es": "Advertencia: todos los cambios a grupos virtuales están activos inmediatamente.", "pl": "Ostrzeżenie: Wszystkie zmiany w grupach wirtualnych są natychmiast aktywne!"},
+    "code not stored": {                             "en": "As requested by IKEA, the code will not be stored permanently.", "de": "Auf Wunsch von IKEA wird der Code nicht dauerhaft gespeichert.", "ru": "По просьбе IKEA код не будет храниться постоянно.", "pt": "Conforme solicitado pela IKEA, o código não será armazenado permanentemente.", "nl": "Op verzoek van IKEA wordt de code niet permanent opgeslagen.", "fr": "Comme demandé par IKEA, le code ne sera pas stocké de façon permanente.", "it": "Come richiesto da IKEA, il codice non verrà memorizzato in modo permanente.", "es": "Según lo solicitado por IKEA, el código no se almacenará de forma permanente.", "pl": "Zgodnie z prośbą IKEA, kod nie zostanie zapisany na stałe."},
+    "delete group": {                                "en": "delete group",                                    "de": "Gruppe löschen",                                  "ru": "удалить группу",                                  "pt": "excluir grupo",                                   "nl": "verwijder groep",                                 "fr": "supprimer le groupe",                             "it": "cancella il gruppo",                              "es": "eliminar grupo",                                  "pl": "usuń grupę"},
+    "hostname tooltip": {                            "en": "The host name is &quot;gw-&quot; followed by the MAC address or serial number of the gateway, without any special chars, e.g.gw-a0b1c2d3e4f5. It can be found on the bottom of the gateway", "de": "Der Hostname ist &quot;gw-&quot; gefolgt von der MAC-Adresse bzw. Seriennummer des Gateways, ohne Sonderzeichen, z.B. gw-a0b1c2d3e4f5. Er findet sich auf der Unterseite des Gateways", "ru": "Имя хоста &quot;gw-&quot; за которым следует MAC-адрес или серийный номер шлюза без каких-либо специальных символов, например gw-a0b1c2d3e4f5. Его можно найти в нижней части шлюза", "pt": "O nome do host é &quot;gw-&quot; seguido pelo endereço MAC ou pelo número de série do gateway, sem nenhum caractere especial, por exemplo, gw-a0b1c2d3e4f5. Pode ser encontrado na parte inferior do gateway", "nl": "De hostnaam is &quot;gw-&quot; gevolgd door het MAC-adres of serienummer van de gateway, zonder speciale tekens, bijvoorbeeld gw-a0b1c2d3e4f5. Deze bevindt zich aan de onderkant van de gateway", "fr": "Le nom d'hôte est &quot;gw-&quot; suivi par l'adresse MAC ou le numéro de série de la passerelle, sans aucun caractère spécial, par exemple, gw-a0b1c2d3e4f5. Il peut être trouvé sur le bas de la passerelle", "it": "Il nome host è &quot;gw-&quot; seguito dall'indirizzo MAC o dal numero seriale del gateway, senza caratteri speciali, ad esempio gw-a0b1c2d3e4f5. Può essere trovato sul fondo del gateway", "es": "El nombre de host es &quot;gw-&quot; seguido de la dirección MAC o el número de serie de la puerta de enlace, sin ningún carácter especial, por ejemplo, gw-a0b1c2d3e4f5. Se puede encontrar en la parte inferior de la puerta de enlace", "pl": "Nazwa hosta to &quot;gw-&quot; po którym następuje adres MAC lub numer seryjny bramy, bez znaków specjalnych, np. gw-a0b1c2d3e4f5. Można go znaleźć na dole bramy"},
+    "loading...": {                                  "en": "loading settings...",                             "de": "Lade Einstellungen...",                           "ru": "параметры загрузки ...",                          "pt": "carregando configurações ...",                    "nl": "instellingen laden ...",                          "fr": "paramètres de chargement ...",                    "it": "caricamento delle impostazioni ...",              "es": "cargando configuraciones ...",                    "pl": "ładuję ustawienia ..."},
+    "roundto tooltip": {                             "en": "The Trådfri protocol has some strange increments for numbers, which means that often different values than desired are achieved. Rounding can improve subsequent processing by scripts.", "de": "Das Trådfri-Protokoll hat teils eigenartige Schrittweiten für Zahlen, sodass oft andere Werte eingestellt werden als gewünscht. Durch Runden kann die Weiterverarbeitung in Skripten verbessert werden.", "ru": "Протокол Trådfri имеет некоторые странные приращения для чисел, что означает, что достигаются часто разные значения, чем это желательно. Округление может улучшить последующую обработку скриптами.", "pt": "O protocolo Trådfri tem alguns incrementos estranhos para números, o que significa que, muitas vezes, valores diferentes do desejado são alcançados. O arredondamento pode melhorar o processamento subsequente por scripts.", "nl": "Het Trådfri-protocol heeft een aantal vreemde toenamen voor getallen, wat betekent dat vaak verschillende waarden dan gewenst worden bereikt. Afronding kan latere verwerking door scripts verbeteren.", "fr": "Le protocole Trådfri comporte des incréments étranges pour les nombres, ce qui signifie que des valeurs souvent différentes de celles souhaitées sont atteintes. L'arrondissement peut améliorer le traitement ultérieur par des scripts.", "it": "Il protocollo Trådfri ha alcuni strani incrementi per i numeri, il che significa che spesso si ottengono valori diversi da quelli desiderati. L'arrotondamento può migliorare l'elaborazione successiva tramite script.", "es": "El protocolo Trådfri tiene algunos incrementos extraños para los números, lo que significa que a menudo se alcanzan valores diferentes a los deseados. El redondeo puede mejorar el procesamiento posterior mediante scripts.", "pl": "Protokół Trådfri ma pewne dziwne przyrosty dla liczb, co oznacza, że osiąga się często inne wartości niż pożądane. Zaokrąglanie może poprawić późniejsze przetwarzanie przez skrypty."},
+    "security code tooltip": {                       "en": "The security code can be found on the bottom of the gateway", "de": "Der Security-Code findet sich auf der Unterseite des Gateways", "ru": "Код безопасности можно найти в нижней части шлюза", "pt": "O código de segurança pode ser encontrado na parte inferior do gateway", "nl": "De beveiligingscode bevindt zich aan de onderkant van de gateway", "fr": "Le code de sécurité peut être trouvé sur le bas de la passerelle", "it": "Il codice di sicurezza può essere trovato nella parte inferiore del gateway", "es": "El código de seguridad se puede encontrar en la parte inferior de la puerta de enlace", "pl": "Kod zabezpieczający znajduje się na dole bramy"},
+    "select devices": {                              "en": "select devices",                                  "de": "Geräte auswählen",                                "ru": "выбрать устройства",                              "pt": "selecione dispositivos",                          "nl": "selecteer apparaten",                             "fr": "sélectionner des appareils",                      "it": "selezionare i dispositivi",                       "es": "seleccionar dispositivos",                        "pl": "wybierz urządzenia"},
+    "transition time tooltip": {                     "en": "By default the gateway overrides the transition duration with the default value of 0.5s. Setting this option prevents it.", "de": "Standardmäßig überschreibt das Gateway die Übergangsdauer jedes Mal mit dem Standardwert von 0,5s. Diese Option verhindert das.", "ru": "По умолчанию шлюз переопределяет продолжительность перехода со значением по умолчанию 0,5 с. Установка этого параметра предотвращает его.", "pt": "Por padrão, o gateway substitui a duração da transição pelo valor padrão de 0,5s. Definir essa opção impede isso.", "nl": "Standaard overschrijft de gateway de overgangsduur met de standaardwaarde van 0,5s. Als u deze optie instelt, wordt dit voorkomen.", "fr": "Par défaut, la passerelle remplace la durée de la transition par la valeur par défaut de 0.5s. La définition de cette option l'empêche.", "it": "Per impostazione predefinita, il gateway sovrascrive la durata della transizione con il valore predefinito di 0,5 s. L'impostazione di questa opzione lo impedisce.", "es": "De forma predeterminada, la puerta de enlace anula la duración de transición con el valor predeterminado de 0,5 s. Establecer esta opción lo impide.", "pl": "Domyślnie brama zastępuje czas przejścia z domyślną wartością 0,5s. Ustawienie tej opcji zapobiega temu."},
 };

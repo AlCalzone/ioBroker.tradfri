@@ -3,7 +3,7 @@ import * as $ from "jquery";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
-import {$$, $window, _, instance, sendTo, socket} from "./lib/adapter";
+import { /*$$,*/ $window, _, instance, sendTo, socket} from "./lib/adapter";
 
 // components
 import { Tabs } from "./components/tabs";
@@ -67,13 +67,13 @@ export class Root extends React.Component<any, any> {
 
 	public render() {
 		return (
-			<>
-				<Header />
+			// <>
+			// 	<Header />
 				<Tabs labels={["Settings", "Groups"]}>
 					<Settings settings={this.props.settings} onChange={this.props.onSettingsChanged} />
 					<Groups groups={this.state.groups} devices={this.state.devices} />
 				</Tabs>
-			</>
+			// </>
 		);
 	}
 
@@ -105,7 +105,7 @@ $window.load = (settings, onChange) => {
 
 	ReactDOM.render(
 		<Root settings={settings} onSettingsChanged={settingsChanged} />,
-		document.getElementById("adapter-container"),
+		document.getElementById("adapter-container") || document.getElementsByClassName("adapter-container")[0],
 	);
 
 	// Signal to admin, that no changes yet
