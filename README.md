@@ -46,8 +46,8 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
-#### 1.4.0 (2018-05-14)
-* (AlCalzone) The names of state objects no longer get overwritten
+#### 1.4.1 (2018-05-14)
+* (AlCalzone) The names of the brightness state no longer get overwritten
 
 #### 1.3.0 (2018-05-06)
 * (AlCalzone) Reduce logging of "updated scenes for group..."
