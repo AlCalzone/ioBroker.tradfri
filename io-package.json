@@ -1,11 +1,11 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "1.4.0",
+        "version": "1.4.1",
         "news": {
-            "1.4.0": {
-                "en": "The names of state objects no longer get overwritten",
-                "de": "Die Namen von State-Objekten werden nicht mehr überschrieben."
+            "1.4.1": {
+                "en": "The name of brightness states no longer get overwritten",
+                "de": "Die Namen von Helligkeits-States werden nicht mehr überschrieben."
             },
             "1.3.0": {
                 "en": "Made rounding of numeric values configurable. Reduce logging of \"updated scenes for group...\"",
