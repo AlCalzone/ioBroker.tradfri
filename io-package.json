@@ -155,7 +155,12 @@
         "loglevel": "info",
         "type": "lighting",
         "messagebox": true,
-        "materialize": true
+        "materialize": true,
+        "dependencies": [
+            {
+                "admin": ">=3.0.0"
+            }
+        ]
     },
     "native": {
         "host": "",
