@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "1.3.0",
+        "version": "1.4.0",
         "news": {
+            "1.4.0": {
+                "en": "The names of state objects no longer get overwritten",
+                "de": "Die Namen von State-Objekten werden nicht mehr überschrieben."
+            },
             "1.3.0": {
                 "en": "Made rounding of numeric values configurable. Reduce logging of \"updated scenes for group...\"",
                 "de": "Runden von Zahlen ist jetzt einstellbar. Log-Ausgabe \"updated scenes for group...\" reduziert"
