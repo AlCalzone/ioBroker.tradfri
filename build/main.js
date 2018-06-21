@@ -468,8 +468,7 @@ let adapter = utils_1.default.adapter({
 function updateConfig(newConfig) {
     return __awaiter(this, void 0, void 0, function* () {
         // Create the config object
-        let config = Object.assign({}, adapter.config);
-        config = Object.assign(config, newConfig);
+        const config = Object.assign({}, adapter.config, newConfig);
         // Update the adapter object
         const adapterObj = yield adapter.$getForeignObject(`system.adapter.${adapter.namespace}`);
         adapterObj.native = config;

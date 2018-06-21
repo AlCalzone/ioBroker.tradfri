@@ -502,8 +502,10 @@ let adapter: ExtendedAdapter = utils.adapter({
 
 async function updateConfig(newConfig: Record<string, any>) {
 	// Create the config object
-	let config: Record<string, any> = Object.assign({}, adapter.config);
-	config = Object.assign(config, newConfig);
+	const config: Record<string, any> = {
+		...adapter.config,
+		...newConfig,
+	};
 	// Update the adapter object
 	const adapterObj = await adapter.$getForeignObject(`system.adapter.${adapter.namespace}`);
 	adapterObj.native = config;

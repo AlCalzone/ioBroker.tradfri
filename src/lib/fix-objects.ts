@@ -26,12 +26,13 @@ async function fixBrightnessRange(stateObjs: ioBroker.Object[]) {
 	const fixableObjs = stateObjs.filter(o => predicate.test(o._id));
 	for (const obj of fixableObjs) {
 		const oldCommon = JSON.stringify(obj.common);
-		const newCommon = JSON.stringify(Object.assign(Object.assign({}, obj.common), {
+		const newCommon = JSON.stringify({
+			...obj.common,
 			name: "Brightness",
 			min: 0,
 			max: 100,
 			unit: "%",
-		}));
+		});
 		if (oldCommon !== newCommon) {
 			obj.common = JSON.parse(newCommon);
 			await _.adapter.$setForeignObject(obj._id, obj);
@@ -60,9 +61,10 @@ async function fixBrightnessRole(stateObjs: ioBroker.Object[]) {
 	const fixableObjs = stateObjs.filter(o => predicate.test(o._id));
 	for (const obj of fixableObjs) {
 		const oldCommon = JSON.stringify(obj.common);
-		const newCommon = JSON.stringify(Object.assign(Object.assign({}, obj.common), {
+		const newCommon = JSON.stringify({
+			...obj.common,
 			role: "level.dimmer",
-		}));
+		});
 		if (oldCommon !== newCommon) {
 			obj.common = JSON.parse(newCommon);
 			await _.adapter.$setForeignObject(obj._id, obj);
