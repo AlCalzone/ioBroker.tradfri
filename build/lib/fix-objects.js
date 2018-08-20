@@ -37,7 +37,7 @@ function fixBrightnessRange(stateObjs) {
         const fixableObjs = stateObjs.filter(o => predicate.test(o._id));
         for (const obj of fixableObjs) {
             const oldCommon = JSON.stringify(obj.common);
-            const newCommon = JSON.stringify(Object.assign({}, obj.common, { name: "Brightness", min: 0, max: 100, unit: "%" }));
+            const newCommon = JSON.stringify(Object.assign({ name: "Brightness" }, obj.common, { min: 0, max: 100, unit: "%" }));
             if (oldCommon !== newCommon) {
                 obj.common = JSON.parse(newCommon);
                 yield global_1.Global.adapter.$setForeignObject(obj._id, obj);
