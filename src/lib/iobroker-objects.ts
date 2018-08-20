@@ -288,8 +288,12 @@ export function calcObjName(accessory: Accessory): string {
 		case AccessoryTypes.lightbulb:
 			prefix = "L";
 			break;
+		case AccessoryTypes.motionSensor:
+			prefix = "MS";
+			break;
 		default:
 			_.log(`Unknown accessory type ${accessory.type}. Please send this info to the developer with a short description of the device!`, "warn");
+			_.log(JSON.stringify(accessory), "warn");
 			prefix = "XYZ";
 			break;
 	}
