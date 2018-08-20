@@ -295,8 +295,12 @@ function calcObjName(accessory) {
         case node_tradfri_client_1.AccessoryTypes.lightbulb:
             prefix = "L";
             break;
+        case node_tradfri_client_1.AccessoryTypes.motionSensor:
+            prefix = "MS";
+            break;
         default:
             global_1.Global.log(`Unknown accessory type ${accessory.type}. Please send this info to the developer with a short description of the device!`, "warn");
+            global_1.Global.log(JSON.stringify(accessory), "warn");
             prefix = "XYZ";
             break;
     }
