@@ -1,9 +1,9 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "1.5.0",
+        "version": "1.5.1",
         "news": {
-            "1.5.0": {
+            "1.5.1": {
                 "en": "Added experimental support for smart plugs",
                 "de": "Experimentelle Unterstützung für Steckdosen hinzugefügt"
             },

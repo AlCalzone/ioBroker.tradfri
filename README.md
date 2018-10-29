@@ -46,7 +46,7 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
-#### 1.5.0 (2018-10-29)
+#### 1.5.1 (2018-10-29)
 * (AlCalzone) Added experimental support for smart plugs
 
 #### 1.4.1 (2018-05-14)

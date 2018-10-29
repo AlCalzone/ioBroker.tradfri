@@ -380,8 +380,8 @@ let adapter = utils_1.default.adapter({
                                 return;
                             }
                             const accessory = session_1.session.devices[rootObj.native.instanceId];
-                            const light = accessory.lightList[0];
-                            const plug = accessory.plugList[0];
+                            const light = accessory.lightList && accessory.lightList[0];
+                            const plug = accessory.plugList && accessory.plugList[0];
                             const lightOrPlug = light || plug;
                             if (lightOrPlug == undefined) {
                                 global_1.Global.log(`Cannot switch an accessory that is neither a lightbulb or a plug`, "warn");
