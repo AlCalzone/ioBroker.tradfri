@@ -135,41 +135,64 @@ export function extendDevice(accessory: Accessory, options?: ExtendObjectOptions
 			},
 		};
 
-		if (accessory.type === AccessoryTypes.lightbulb) {
-			let channelName;
-			let spectrum: Spectrum = "none";
-			if (accessory.lightList != null && accessory.lightList.length > 0) {
-				spectrum = accessory.lightList[0].spectrum;
+		if (
+			accessory.type === AccessoryTypes.lightbulb
+			|| accessory.type === AccessoryTypes.plug
+		) {
+			let channelName: string;
+			let channelID: string;
+			if (accessory.type === AccessoryTypes.lightbulb) {
+				let spectrum: Spectrum = "none";
+				if (accessory.lightList != null && accessory.lightList.length > 0) {
+					spectrum = accessory.lightList[0].spectrum;
+				}
+				if (spectrum === "none") {
+					channelName = "Lightbulb";
+				} else if (spectrum === "white") {
+					channelName = "Lightbulb (white spectrum)";
+				} else if (spectrum === "rgb") {
+					channelName = "RGB Lightbulb";
+				}
+
+				// obj.lightbulb should be a channel
+				channelID = "lightbulb";
+				stateObjs[channelID] = {
+					_id: `${objId}.${channelID}`,
+					type: "channel",
+					common: {
+						name: channelName,
+						role: "light",
+					},
+					native: {
+						spectrum: spectrum, // remember the spectrum, so we can update different properties later
+					},
+				};
+				if (spectrum === "white") {
+					stateObjs[`${channelID}.colorTemperature`] = objectDefinitions.colorTemperature(objId, "device");
+				} else if (spectrum === "rgb") {
+					stateObjs[`${channelID}.color`] = objectDefinitions.color(objId, "device");
+					stateObjs[`${channelID}.hue`] = objectDefinitions.hue(objId, "device");
+					stateObjs[`${channelID}.saturation`] = objectDefinitions.saturation(objId, "device");
+				}
+				stateObjs[`${channelID}.transitionDuration`] = objectDefinitions.transitionDuration(objId, "device", accessory.type);
+
+			} else if (accessory.type === AccessoryTypes.plug) {
+				// obj.plug should be a channel
+				channelID = "plug";
+				stateObjs[channelID] = {
+					_id: `${objId}.${channelID}`,
+					type: "channel",
+					common: {
+						name: channelName,
+						role: "switch",
+					},
+					native: {},
+				};
 			}
-			if (spectrum === "none") {
-				channelName = "Lightbulb";
-			} else if (spectrum === "white") {
-				channelName = "Lightbulb (white spectrum)";
-			} else if (spectrum === "rgb") {
-				channelName = "RGB Lightbulb";
-			}
-			// obj.lightbulb should be a channel
-			stateObjs.lightbulb = {
-				_id: `${objId}.lightbulb`,
-				type: "channel",
-				common: {
-					name: channelName,
-					role: "light",
-				},
-				native: {
-					spectrum: spectrum, // remember the spectrum, so we can update different properties later
-				},
-			};
-			if (spectrum === "white") {
-				stateObjs["lightbulb.colorTemperature"] = objectDefinitions.colorTemperature(objId, "device");
-			} else if (spectrum === "rgb") {
-				stateObjs["lightbulb.color"] = objectDefinitions.color(objId, "device");
-				stateObjs["lightbulb.hue"] = objectDefinitions.hue(objId, "device");
-				stateObjs["lightbulb.saturation"] = objectDefinitions.saturation(objId, "device");
-			}
-			stateObjs["lightbulb.brightness"] = objectDefinitions.brightness(objId, "device");
-			stateObjs["lightbulb.state"] = objectDefinitions.onOff(objId, "device");
-			stateObjs["lightbulb.transitionDuration"] = objectDefinitions.transitionDuration(objId, "device");
+			// Common properties for both plugs and lights
+			// We keep brightness for now, so groups of plugs and lights can use dimmer commands
+			stateObjs[`${channelID}.brightness`] = objectDefinitions.brightness(objId, "device", accessory.type);
+			stateObjs[`${channelID}.state`] = objectDefinitions.onOff(objId, "device", accessory.type);
 		}
 
 		const createObjects = Object.keys(stateObjs)
@@ -290,6 +313,9 @@ export function calcObjName(accessory: Accessory): string {
 		case AccessoryTypes.lightbulb:
 			prefix = "L";
 			break;
+		case AccessoryTypes.plug:
+			prefix = "P";
+			break;
 		default:
 			_.log(`Unknown accessory type ${accessory.type}. Please send this info to the developer with a short description of the device!`, "warn");
 			prefix = "XYZ";
@@ -364,13 +390,27 @@ export function calcSceneName(scene: Scene): string {
 export type ioBrokerObjectDefinition = (
 	rootId: string,
 	rootType: "device" | "group" | "virtual group",
+	deviceType?: AccessoryTypes | undefined,
 ) => ioBroker.Object;
+
+/** Returns a string representation of a member of the `AccessoryTypes` enum */
+function accessoryTypeToString(type: AccessoryTypes) {
+	return AccessoryTypes[type];
+}
+
+function getCoapAccessoryPropertyPathPrefix(deviceType: AccessoryTypes | undefined) {
+	switch (deviceType) {
+		case AccessoryTypes.lightbulb: return "lightList.[0].";
+		case AccessoryTypes.plug: return "plugList.[0].";
+		default: return "";
+	}
+}
 
 /**
  * Contains definitions for all kinds of states we're going to create
  */
 export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
-	activeScene: (rootId, rootType) => ({
+	activeScene: (rootId, rootType, deviceType) => ({
 		_id: `${rootId}.activeScene`,
 		type: "state",
 		common: {
@@ -386,8 +426,9 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 		},
 	}),
 
-	onOff: (rootId, rootType) => ({
-		_id: rootType === "device" ? `${rootId}.lightbulb.state` : `${rootId}.state`,
+	// Lights and plugs
+	onOff: (rootId, rootType, deviceType) => ({
+		_id: rootType === "device" ? `${rootId}.${accessoryTypeToString(deviceType)}.state` : `${rootId}.state`,
 		type: "state",
 		common: {
 			name: "on/off",
@@ -397,32 +438,38 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 			role: "switch",
 		},
 		native: {
-			path: rootType === "device" ? "lightList.[0].onOff" : "onOff",
+			path: getCoapAccessoryPropertyPathPrefix(deviceType) + "onOff",
 		},
 	}),
 
-	brightness: (rootId, rootType) => ({
-		_id: rootType === "device" ? `${rootId}.lightbulb.brightness` : `${rootId}.brightness`,
-		type: "state",
-		common: {
-			name: "Brightness",
-			read: true,
-			write: true,
-			min: 0,
-			max: 100,
-			unit: "%",
-			type: "number",
-			role: "level.dimmer",
-			desc: rootType === "device" ?
-				"Brightness of the lightbulb" :
-				"Brightness of this group's lightbulbs",
-		},
-		native: {
-			path: rootType === "device" ? "lightList.[0].dimmer" : "dimmer",
-		},
-	}),
+	// Lights and plugs for compatibility reasons
+	// Anything > 0% should be "on"
+	brightness: (rootId, rootType, deviceType) => {
+		const deviceName = accessoryTypeToString(deviceType);
+		return {
+			_id: rootType === "device" ? `${rootId}.${deviceName}.brightness` : `${rootId}.brightness`,
+			type: "state",
+			common: {
+				name: "Brightness",
+				read: true,
+				write: true,
+				min: 0,
+				max: 100,
+				unit: "%",
+				type: "number",
+				role: "level.dimmer",
+				desc: rootType === "device" ?
+					`Brightness of the ${deviceName}` :
+					`Brightness of this group's ${deviceName}s`,
+			},
+			native: {
+				path: getCoapAccessoryPropertyPathPrefix(deviceType) + "dimmer",
+			},
+		};
+	},
 
-	transitionDuration: (rootId, rootType) => ({
+	// Lights only?
+	transitionDuration: (rootId, rootType, deviceType) => ({
 		_id: rootType === "device" ? `${rootId}.lightbulb.transitionDuration` : `${rootId}.transitionDuration`,
 		type: "state",
 		common: {
@@ -436,14 +483,15 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 			role: "light.dimmer", // TODO: better role?
 			desc: rootType === "device" ?
 				"Duration of a state change" :
-				"Duration for state changes of this group's lightbulbs",
+				`Duration for state changes of this group's lightbulbs`,
 			unit: "s",
 		},
 		native: {
-			path: rootType === "device" ? "lightList.[0].transitionTime" : "transitionTime",
+			path: getCoapAccessoryPropertyPathPrefix(deviceType) + "transitionTime",
 		},
 	}),
 
+	// Lights only
 	colorTemperature: (rootId, rootType) => {
 		const ret: ioBroker.Object = {
 			_id: rootType === "device" ? `${rootId}.lightbulb.colorTemperature` : `${rootId}.colorTemperature`,
@@ -461,7 +509,7 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 					"Range: 0% = cold, 100% = warm" :
 					"Color temperature of this group's white spectrum lightbulbs. Range: 0% = cold, 100% = warm",
 			},
-			native: { },
+			native: {},
 		};
 		if (rootType === "device") {
 			ret.native.path = "lightList.[0].colorTemperature";
@@ -475,6 +523,7 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 		return ret;
 	},
 
+	// Lights only
 	color: (rootId, rootType) => {
 		const ret: ioBroker.Object = {
 			_id: rootType === "device" ? `${rootId}.lightbulb.color` : `${rootId}.color`,
@@ -489,7 +538,7 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 					"6-digit RGB hex string" :
 					"Color of this group's RGB lightbulbs as a 6-digit hex string.",
 			},
-			native: { },
+			native: {},
 		};
 		if (rootType === "device") {
 			ret.native.path = "lightList.[0].color";
@@ -503,6 +552,7 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 		return ret;
 	},
 
+	// Lights only
 	hue: (rootId, rootType) => {
 		const ret: ioBroker.Object = {
 			_id: rootType === "device" ? `${rootId}.lightbulb.hue` : `${rootId}.hue`,
@@ -520,7 +570,7 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 					"Hue of this RGB lightbulb" :
 					"Hue of this group's RGB lightbulbs",
 			},
-			native: { },
+			native: {},
 		};
 		if (rootType === "device") {
 			ret.native.path = "lightList.[0].hue";
@@ -534,6 +584,7 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 		return ret;
 	},
 
+	// Lights only
 	saturation: (rootId, rootType) => {
 		const ret: ioBroker.Object = {
 			_id: rootType === "device" ? `${rootId}.lightbulb.saturation` : `${rootId}.saturation`,
@@ -551,7 +602,7 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 					"Saturation of this RGB lightbulb" :
 					"Saturation of this group's RGB lightbulbs",
 			},
-			native: { },
+			native: {},
 		};
 		if (rootType === "device") {
 			ret.native.path = "lightList.[0].saturation";

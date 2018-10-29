@@ -4,7 +4,9 @@
 import {
 	Accessory, AccessoryTypes,
 	Group,
+	Light,
 	LightOperation,
+	Plug,
 	Scene,
 	TradfriClient,
 	TradfriError,
@@ -14,7 +16,6 @@ import {
 // Eigene Module laden
 import { ExtendedAdapter, Global as _ } from "./lib/global";
 import { composeObject, entries, values } from "./lib/object-polyfill";
-import { wait } from "./lib/promises";
 
 // Datentypen laden
 import { VirtualGroup } from "./lib/virtual-group";
@@ -31,7 +32,6 @@ import { extendGroup, syncGroupsWithState, updateGroupStates } from "./modules/g
 import { onMessage } from "./modules/message";
 import { operateVirtualGroup, renameDevice, renameGroup } from "./modules/operations";
 
-import { TradfriOptions } from "node-tradfri-client/build/tradfri-client";
 import { roundTo } from "./lib/math";
 import { session as $ } from "./modules/session";
 
@@ -169,7 +169,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 				adapter.setState("info.connection", false, true);
 				connectionAlive = false;
 			})
-		;
+			;
 
 		await loadDevices();
 		await loadGroups();
@@ -399,21 +399,30 @@ let adapter: ExtendedAdapter = utils.adapter({
 
 					default: { // accessory
 
-						if (id.indexOf(".lightbulb.") > -1) {
+						if (id.indexOf(".lightbulb.") > -1 || id.indexOf(".plug.") > -1) {
 							// read the instanceId and get a reference value
 							if (!(rootObj.native.instanceId in $.devices)) {
 								_.log(`The device with ID ${rootObj.native.instanceId} was not found!`, "warn");
 								return;
 							}
 							const accessory = $.devices[rootObj.native.instanceId];
-							const light = accessory.lightList[0];
+							const light: Light | undefined = accessory.lightList[0];
+							const plug: Plug | undefined = accessory.plugList[0];
+							const lightOrPlug = light || plug;
+							if (lightOrPlug == undefined) {
+								_.log(`Cannot switch an accessory that is neither a lightbulb or a plug`, "warn");
+								return;
+							}
+
+							// TODO: change calls depending on the accessory type
+
 							// if the change was acknowledged, update the state later
 							let wasAcked: boolean;
 
 							// operate the lights depending on the set state
 							// if no request was sent, we can ack the state immediately
 							if (id.endsWith(".state")) {
-								wasAcked = !await light.toggle(val);
+								wasAcked = !await lightOrPlug.toggle(val);
 							} else if (id.endsWith(".brightness")) {
 								wasAcked = !await light.setBrightness(
 									val,
@@ -509,7 +518,7 @@ function tradfri_deviceUpdated(device: Accessory) {
 	// remember it
 	$.devices[device.instanceId] = device;
 	// create ioBroker device
-	extendDevice(device, {roundToDigits: adapter.config.roundToDigits});
+	extendDevice(device, { roundToDigits: adapter.config.roundToDigits });
 }
 
 async function tradfri_deviceRemoved(instanceId: number) {
@@ -532,7 +541,7 @@ async function tradfri_groupUpdated(group: Group) {
 	}
 	$.groups[group.instanceId].group = group;
 	// create ioBroker device
-	extendGroup(group, {roundToDigits: adapter.config.roundToDigits});
+	extendGroup(group, { roundToDigits: adapter.config.roundToDigits });
 	// clean up any states that might be incorrectly defined
 	updateGroupStates(group);
 	// read the transition duration, because the gateway won't report it
