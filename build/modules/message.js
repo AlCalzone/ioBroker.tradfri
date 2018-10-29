@@ -159,22 +159,24 @@ function onMessage(obj) {
                 case "getDevices": { // get all devices defined on the gateway
                     // check the given params
                     const params = obj.message;
-                    // group type must be "real", "virtual" or "both"
-                    const deviceType = params.type || "lightbulb";
-                    if (["lightbulb"].indexOf(deviceType) === -1) {
-                        respond(responses.ERROR(`device type must be "lightbulb"`));
+                    // device type must be "lightbulb", "plug" or "all"
+                    const deviceType = params.type || "all";
+                    const allowedDeviceTypes = ["lightbulb", "plug", "all"];
+                    if (allowedDeviceTypes.indexOf(deviceType) === -1) {
+                        respond(responses.ERROR(`device type must be one of ${allowedDeviceTypes.map(t => `"${t}"`).join(", ")}`));
                         return;
                     }
                     const ret = {};
-                    if (deviceType === "lightbulb") {
-                        const lightbulbs = object_polyfill_1.entries(session_1.session.devices).filter(([id, device]) => device.type === node_tradfri_client_1.AccessoryTypes.lightbulb);
-                        for (const [id, bulb] of lightbulbs) {
-                            ret[id] = {
-                                id,
-                                name: bulb.name,
-                                type: deviceType,
-                            };
-                        }
+                    const predicate = ([, device]) => deviceType === "all"
+                        ? allowedDeviceTypes.indexOf(node_tradfri_client_1.AccessoryTypes[device.type]) > -1
+                        : deviceType === node_tradfri_client_1.AccessoryTypes[device.type];
+                    const lightbulbs = object_polyfill_1.entries(session_1.session.devices).filter(predicate);
+                    for (const [id, bulb] of lightbulbs) {
+                        ret[id] = {
+                            id,
+                            name: bulb.name,
+                            type: deviceType,
+                        };
                     }
                     respond(responses.RESULT(ret));
                     return;
