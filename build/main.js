@@ -388,7 +388,7 @@ let adapter = utils_1.default.adapter({
                         return;
                     }
                     default: { // accessory
-                        if (id.indexOf(".lightbulb.") > -1) {
+                        if (id.indexOf(".lightbulb.") > -1 || id.indexOf(".plug.") > -1) {
                             // read the instanceId and get a reference value
                             if (!(rootObj.native.instanceId in session_1.session.devices)) {
                                 global_1.Global.log(`The device with ID ${rootObj.native.instanceId} was not found!`, "warn");
@@ -396,15 +396,26 @@ let adapter = utils_1.default.adapter({
                             }
                             const accessory = session_1.session.devices[rootObj.native.instanceId];
                             const light = accessory.lightList[0];
+                            const plug = accessory.plugList[0];
+                            const lightOrPlug = light || plug;
+                            if (lightOrPlug == undefined) {
+                                global_1.Global.log(`Cannot switch an accessory that is neither a lightbulb or a plug`, "warn");
+                                return;
+                            }
                             // if the change was acknowledged, update the state later
                             let wasAcked;
                             // operate the lights depending on the set state
                             // if no request was sent, we can ack the state immediately
                             if (id.endsWith(".state")) {
-                                wasAcked = !(yield light.toggle(val));
+                                wasAcked = !(yield lightOrPlug.toggle(val));
                             }
                             else if (id.endsWith(".brightness")) {
-                                wasAcked = !(yield light.setBrightness(val, yield getTransitionDuration(accessory)));
+                                if (light != undefined) {
+                                    wasAcked = !(yield light.setBrightness(val, yield getTransitionDuration(accessory)));
+                                }
+                                else if (plug != undefined) {
+                                    wasAcked = !(yield plug.setBrightness(val));
+                                }
                             }
                             else if (id.endsWith(".color")) {
                                 // we need to differentiate here, because some ppl

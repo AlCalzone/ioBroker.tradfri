@@ -1,11 +1,19 @@
+import { Spectrum } from "node-tradfri-client";
 export interface Group {
     id: string;
     name: string;
     deviceIDs: number[];
     type: "real" | "virtual";
 }
-export interface Device {
+export interface DeviceBase {
     id: string;
     name: string;
-    type: "lightbulb";
 }
+export interface LightbulbDevice extends DeviceBase {
+    type: "lightbulb";
+    spectrum?: Spectrum;
+}
+export interface PlugDevice extends DeviceBase {
+    type: "plug";
+}
+export declare type Device = LightbulbDevice | PlugDevice;

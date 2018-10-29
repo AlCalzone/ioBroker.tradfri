@@ -1,4 +1,4 @@
-import { Accessory, Group, GroupInfo, Scene } from "node-tradfri-client";
+import { Accessory, AccessoryTypes, Group, GroupInfo, Scene } from "node-tradfri-client";
 import { VirtualGroup } from "./virtual-group";
 export interface ExtendObjectOptions {
     roundToDigits?: number;
@@ -66,7 +66,7 @@ export declare function calcSceneId(scene: Scene): string;
  * excluding the adapter namespace
  */
 export declare function calcSceneName(scene: Scene): string;
-export declare type ioBrokerObjectDefinition = (rootId: string, rootType: "device" | "group" | "virtual group") => ioBroker.Object;
+export declare type ioBrokerObjectDefinition = (rootId: string, rootType: "device" | "group" | "virtual group", deviceType?: AccessoryTypes | undefined) => ioBroker.Object;
 /**
  * Contains definitions for all kinds of states we're going to create
  */
