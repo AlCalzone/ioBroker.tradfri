@@ -8,5 +8,5 @@ export interface Group {
 export interface Device {
 	id: string;
 	name: string;
-	type: "lightbulb";
+	type: "lightbulb" | "plug";
 }
