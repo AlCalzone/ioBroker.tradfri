@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "1.4.1",
+        "version": "1.5.0",
         "news": {
+            "1.5.0": {
+                "en": "Added experimental support for smart plugs",
+                "de": "Experimentelle Unterstützung für Steckdosen hinzugefügt"
+            },
             "1.4.1": {
                 "en": "The name of brightness states no longer get overwritten",
                 "de": "Die Namen von Helligkeits-States werden nicht mehr überschrieben."
