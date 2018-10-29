@@ -170,23 +170,27 @@ export async function onMessage(obj) {
 			case "getDevices": { // get all devices defined on the gateway
 				// check the given params
 				const params = obj.message as any;
-				// group type must be "real", "virtual" or "both"
-				const deviceType = params.type || "lightbulb";
-				if (["lightbulb"].indexOf(deviceType) === -1) {
-					respond(responses.ERROR(`device type must be "lightbulb"`));
+				// device type must be "lightbulb", "plug" or "all"
+				const deviceType = params.type || "all";
+				const allowedDeviceTypes = ["lightbulb", "plug", "all"];
+				if (allowedDeviceTypes.indexOf(deviceType) === -1) {
+					respond(responses.ERROR(`device type must be one of ${allowedDeviceTypes.map(t => `"${t}"`).join(", ")}`));
 					return;
 				}
 
 				const ret: Record<string, SendToDevice> = {};
-				if (deviceType === "lightbulb") {
-					const lightbulbs = entries($.devices).filter(([id, device]) => device.type === AccessoryTypes.lightbulb);
-					for (const [id, bulb] of lightbulbs) {
-						ret[id] = {
-							id,
-							name: bulb.name,
-							type: deviceType,
-						};
-					}
+				const predicate = ([, device]) =>
+					deviceType === "all"
+						? allowedDeviceTypes.indexOf(AccessoryTypes[device.type]) > -1
+						: deviceType === AccessoryTypes[device.type];
+
+				const lightbulbs = entries($.devices).filter(predicate);
+				for (const [id, bulb] of lightbulbs) {
+					ret[id] = {
+						id,
+						name: bulb.name,
+						type: deviceType,
+					};
 				}
 
 				respond(responses.RESULT(ret));
@@ -206,7 +210,7 @@ export async function onMessage(obj) {
 
 				const device = $.devices[params.id];
 				// TODO: Do we need more?
-				const ret = {
+				const ret: SendToDevice = {
 					name: device.name,
 					type: AccessoryTypes[device.type], // type as string
 				} as any;

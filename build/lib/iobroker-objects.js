@@ -135,44 +135,64 @@ function extendDevice(accessory, options) {
                 },
             },
         };
-        if (accessory.type === node_tradfri_client_1.AccessoryTypes.lightbulb) {
+        if (accessory.type === node_tradfri_client_1.AccessoryTypes.lightbulb
+            || accessory.type === node_tradfri_client_1.AccessoryTypes.plug) {
             let channelName;
-            let spectrum = "none";
-            if (accessory.lightList != null && accessory.lightList.length > 0) {
-                spectrum = accessory.lightList[0].spectrum;
+            let channelID;
+            if (accessory.type === node_tradfri_client_1.AccessoryTypes.lightbulb) {
+                let spectrum = "none";
+                if (accessory.lightList != null && accessory.lightList.length > 0) {
+                    spectrum = accessory.lightList[0].spectrum;
+                }
+                if (spectrum === "none") {
+                    channelName = "Lightbulb";
+                }
+                else if (spectrum === "white") {
+                    channelName = "Lightbulb (white spectrum)";
+                }
+                else if (spectrum === "rgb") {
+                    channelName = "RGB Lightbulb";
+                }
+                // obj.lightbulb should be a channel
+                channelID = "lightbulb";
+                stateObjs[channelID] = {
+                    _id: `${objId}.${channelID}`,
+                    type: "channel",
+                    common: {
+                        name: channelName,
+                        role: "light",
+                    },
+                    native: {
+                        spectrum: spectrum,
+                    },
+                };
+                if (spectrum === "white") {
+                    stateObjs[`${channelID}.colorTemperature`] = exports.objectDefinitions.colorTemperature(objId, "device");
+                }
+                else if (spectrum === "rgb") {
+                    stateObjs[`${channelID}.color`] = exports.objectDefinitions.color(objId, "device");
+                    stateObjs[`${channelID}.hue`] = exports.objectDefinitions.hue(objId, "device");
+                    stateObjs[`${channelID}.saturation`] = exports.objectDefinitions.saturation(objId, "device");
+                }
+                stateObjs[`${channelID}.transitionDuration`] = exports.objectDefinitions.transitionDuration(objId, "device", accessory.type);
             }
-            if (spectrum === "none") {
-                channelName = "Lightbulb";
+            else if (accessory.type === node_tradfri_client_1.AccessoryTypes.plug) {
+                // obj.plug should be a channel
+                channelID = "plug";
+                stateObjs[channelID] = {
+                    _id: `${objId}.${channelID}`,
+                    type: "channel",
+                    common: {
+                        name: channelName,
+                        role: "switch",
+                    },
+                    native: {},
+                };
             }
-            else if (spectrum === "white") {
-                channelName = "Lightbulb (white spectrum)";
-            }
-            else if (spectrum === "rgb") {
-                channelName = "RGB Lightbulb";
-            }
-            // obj.lightbulb should be a channel
-            stateObjs.lightbulb = {
-                _id: `${objId}.lightbulb`,
-                type: "channel",
-                common: {
-                    name: channelName,
-                    role: "light",
-                },
-                native: {
-                    spectrum: spectrum,
-                },
-            };
-            if (spectrum === "white") {
-                stateObjs["lightbulb.colorTemperature"] = exports.objectDefinitions.colorTemperature(objId, "device");
-            }
-            else if (spectrum === "rgb") {
-                stateObjs["lightbulb.color"] = exports.objectDefinitions.color(objId, "device");
-                stateObjs["lightbulb.hue"] = exports.objectDefinitions.hue(objId, "device");
-                stateObjs["lightbulb.saturation"] = exports.objectDefinitions.saturation(objId, "device");
-            }
-            stateObjs["lightbulb.brightness"] = exports.objectDefinitions.brightness(objId, "device");
-            stateObjs["lightbulb.state"] = exports.objectDefinitions.onOff(objId, "device");
-            stateObjs["lightbulb.transitionDuration"] = exports.objectDefinitions.transitionDuration(objId, "device");
+            // Common properties for both plugs and lights
+            // We keep brightness for now, so groups of plugs and lights can use dimmer commands
+            stateObjs[`${channelID}.brightness`] = exports.objectDefinitions.brightness(objId, "device", accessory.type);
+            stateObjs[`${channelID}.state`] = exports.objectDefinitions.onOff(objId, "device", accessory.type);
         }
         const createObjects = Object.keys(stateObjs)
             .map((key) => {
@@ -298,6 +318,9 @@ function calcObjName(accessory) {
         case node_tradfri_client_1.AccessoryTypes.lightbulb:
             prefix = "L";
             break;
+        case node_tradfri_client_1.AccessoryTypes.plug:
+            prefix = "P";
+            break;
         default:
             global_1.Global.log(`Unknown accessory type ${accessory.type}. Please send this info to the developer with a short description of the device!`, "warn");
             prefix = "XYZ";
@@ -374,11 +397,22 @@ function calcSceneName(scene) {
     return `S-${scene.instanceId}`;
 }
 exports.calcSceneName = calcSceneName;
+/** Returns a string representation of a member of the `AccessoryTypes` enum */
+function accessoryTypeToString(type) {
+    return node_tradfri_client_1.AccessoryTypes[type];
+}
+function getCoapAccessoryPropertyPathPrefix(deviceType) {
+    switch (deviceType) {
+        case node_tradfri_client_1.AccessoryTypes.lightbulb: return "lightList.[0].";
+        case node_tradfri_client_1.AccessoryTypes.plug: return "plugList.[0].";
+        default: return "";
+    }
+}
 /**
  * Contains definitions for all kinds of states we're going to create
  */
 exports.objectDefinitions = {
-    activeScene: (rootId, rootType) => ({
+    activeScene: (rootId, rootType, deviceType) => ({
         _id: `${rootId}.activeScene`,
         type: "state",
         common: {
@@ -393,8 +427,9 @@ exports.objectDefinitions = {
             path: "sceneId",
         },
     }),
-    onOff: (rootId, rootType) => ({
-        _id: rootType === "device" ? `${rootId}.lightbulb.state` : `${rootId}.state`,
+    // Lights and plugs
+    onOff: (rootId, rootType, deviceType) => ({
+        _id: rootType === "device" ? `${rootId}.${accessoryTypeToString(deviceType)}.state` : `${rootId}.state`,
         type: "state",
         common: {
             name: "on/off",
@@ -404,30 +439,36 @@ exports.objectDefinitions = {
             role: "switch",
         },
         native: {
-            path: rootType === "device" ? "lightList.[0].onOff" : "onOff",
+            path: getCoapAccessoryPropertyPathPrefix(deviceType) + "onOff",
         },
     }),
-    brightness: (rootId, rootType) => ({
-        _id: rootType === "device" ? `${rootId}.lightbulb.brightness` : `${rootId}.brightness`,
-        type: "state",
-        common: {
-            name: "Brightness",
-            read: true,
-            write: true,
-            min: 0,
-            max: 100,
-            unit: "%",
-            type: "number",
-            role: "level.dimmer",
-            desc: rootType === "device" ?
-                "Brightness of the lightbulb" :
-                "Brightness of this group's lightbulbs",
-        },
-        native: {
-            path: rootType === "device" ? "lightList.[0].dimmer" : "dimmer",
-        },
-    }),
-    transitionDuration: (rootId, rootType) => ({
+    // Lights and plugs for compatibility reasons
+    // Anything > 0% should be "on"
+    brightness: (rootId, rootType, deviceType) => {
+        const deviceName = accessoryTypeToString(deviceType);
+        return {
+            _id: rootType === "device" ? `${rootId}.${deviceName}.brightness` : `${rootId}.brightness`,
+            type: "state",
+            common: {
+                name: "Brightness",
+                read: true,
+                write: true,
+                min: 0,
+                max: 100,
+                unit: "%",
+                type: "number",
+                role: "level.dimmer",
+                desc: rootType === "device" ?
+                    `Brightness of the ${deviceName}` :
+                    `Brightness of this group's ${deviceName}s`,
+            },
+            native: {
+                path: getCoapAccessoryPropertyPathPrefix(deviceType) + "dimmer",
+            },
+        };
+    },
+    // Lights only?
+    transitionDuration: (rootId, rootType, deviceType) => ({
         _id: rootType === "device" ? `${rootId}.lightbulb.transitionDuration` : `${rootId}.transitionDuration`,
         type: "state",
         common: {
@@ -441,13 +482,14 @@ exports.objectDefinitions = {
             role: "light.dimmer",
             desc: rootType === "device" ?
                 "Duration of a state change" :
-                "Duration for state changes of this group's lightbulbs",
+                `Duration for state changes of this group's lightbulbs`,
             unit: "s",
         },
         native: {
-            path: rootType === "device" ? "lightList.[0].transitionTime" : "transitionTime",
+            path: getCoapAccessoryPropertyPathPrefix(deviceType) + "transitionTime",
         },
     }),
+    // Lights only
     colorTemperature: (rootId, rootType) => {
         const ret = {
             _id: rootType === "device" ? `${rootId}.lightbulb.colorTemperature` : `${rootId}.colorTemperature`,
@@ -480,6 +522,7 @@ exports.objectDefinitions = {
         }
         return ret;
     },
+    // Lights only
     color: (rootId, rootType) => {
         const ret = {
             _id: rootType === "device" ? `${rootId}.lightbulb.color` : `${rootId}.color`,
@@ -509,6 +552,7 @@ exports.objectDefinitions = {
         }
         return ret;
     },
+    // Lights only
     hue: (rootId, rootType) => {
         const ret = {
             _id: rootType === "device" ? `${rootId}.lightbulb.hue` : `${rootId}.hue`,
@@ -541,6 +585,7 @@ exports.objectDefinitions = {
         }
         return ret;
     },
+    // Lights only
     saturation: (rootId, rootType) => {
         const ret = {
             _id: rootType === "device" ? `${rootId}.lightbulb.saturation` : `${rootId}.saturation`,

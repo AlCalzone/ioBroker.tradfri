@@ -414,8 +414,6 @@ let adapter: ExtendedAdapter = utils.adapter({
 								return;
 							}
 
-							// TODO: change calls depending on the accessory type
-
 							// if the change was acknowledged, update the state later
 							let wasAcked: boolean;
 
@@ -424,10 +422,14 @@ let adapter: ExtendedAdapter = utils.adapter({
 							if (id.endsWith(".state")) {
 								wasAcked = !await lightOrPlug.toggle(val);
 							} else if (id.endsWith(".brightness")) {
-								wasAcked = !await light.setBrightness(
-									val,
-									await getTransitionDuration(accessory),
-								);
+								if (light != undefined) {
+									wasAcked = !await light.setBrightness(
+										val,
+										await getTransitionDuration(accessory),
+									);
+								} else if (plug != undefined) {
+									wasAcked = !await plug.setBrightness(val);
+								}
 							} else if (id.endsWith(".color")) {
 								// we need to differentiate here, because some ppl
 								// might already have "color" states for white spectrum bulbs
