@@ -7,6 +7,10 @@
                 "en": "Switched to material design, dropped Admin v2 support.",
                 "de": "Zu material design gewechselt und Admin v2 Unterstützung gestrichen."
             },
+            "1.5.1": {
+                "en": "Added experimental support for smart plugs",
+                "de": "Experimentelle Unterstützung für Steckdosen hinzugefügt"
+            },
             "1.4.0": {
                 "en": "The names of state objects no longer get overwritten",
                 "de": "Die Namen von State-Objekten werden nicht mehr überschrieben."

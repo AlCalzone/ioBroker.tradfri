@@ -49,6 +49,9 @@ The result object `ret` looks as follows:
 #### _WORK IN PROGRESS_
 * (AlCalzone) When `node-aead-crypto` is not installed, display instructions on how to fix it
 
+#### 1.5.1 (2018-10-29)
+* (AlCalzone) Added experimental support for smart plugs
+
 #### 2.0.0 (2018-05-14)
 * (AlCalzone) Support for Admin v3 and material design
 * (AlCalzone) **BREAKING:** Dropped support for Admin v2

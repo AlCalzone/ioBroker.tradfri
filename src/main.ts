@@ -421,8 +421,8 @@ let adapter: ExtendedAdapter = utils.adapter({
 								return;
 							}
 							const accessory = $.devices[rootObj.native.instanceId];
-							const light: Light | undefined = accessory.lightList[0];
-							const plug: Plug | undefined = accessory.plugList[0];
+							const light: Light | undefined = accessory.lightList && accessory.lightList[0];
+							const plug: Plug | undefined = accessory.plugList && accessory.plugList[0];
 							const lightOrPlug = light || plug;
 							if (lightOrPlug == undefined) {
 								_.log(`Cannot switch an accessory that is neither a lightbulb or a plug`, "warn");
