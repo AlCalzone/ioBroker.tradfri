@@ -16,7 +16,7 @@
     }
   ],
   "dependencies": {
-    "node-tradfri-client": "^1.4.1"
+    "node-tradfri-client": "^1.4.3"
   },
   "devDependencies": {
     "@types/chai": "^4.1.3",
