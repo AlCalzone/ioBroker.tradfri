@@ -332,8 +332,15 @@ let adapter: ExtendedAdapter = utils.adapter({
 						} else if (/\.(hue|saturation)$/.test(id)) {
 							// hue and saturation have to be set together
 							const prefix = id.substr(0, id.lastIndexOf(".") + 1);
-							const hue = (await _.adapter.$getState(prefix + "hue")).val;
-							const saturation = (await _.adapter.$getState(prefix + "saturation")).val;
+							// Try to read the hue and saturation states. If one of them doesn't exist,
+							// we cannot issue a command
+							const hueState = await _.adapter.$getState(prefix + "hue");
+							if (hueState == undefined) return;
+							const saturationState = await _.adapter.$getState(prefix + "saturation");
+							if (saturationState == undefined) return;
+
+							const hue = hueState.val;
+							const saturation = saturationState.val;
 							// color change is only supported manually, so we operate
 							// the virtual state of this group
 							await operateVirtualGroup(group, {
@@ -389,8 +396,16 @@ let adapter: ExtendedAdapter = utils.adapter({
 						} else if (/\.(hue|saturation)$/.test(id)) {
 							// hue and saturation have to be set together
 							const prefix = id.substr(0, id.lastIndexOf(".") + 1);
-							const hue = (await _.adapter.$getState(prefix + "hue")).val;
-							const saturation = (await _.adapter.$getState(prefix + "saturation")).val;
+							// Try to read the hue and saturation states. If one of them doesn't exist,
+							// we cannot issue a command
+							const hueState = await _.adapter.$getState(prefix + "hue");
+							if (hueState == undefined) return;
+							const saturationState = await _.adapter.$getState(prefix + "saturation");
+							if (saturationState == undefined) return;
+
+							const hue = hueState.val;
+							const saturation = saturationState.val;
+
 							operation = {
 								hue,
 								saturation,
@@ -472,8 +487,15 @@ let adapter: ExtendedAdapter = utils.adapter({
 							} else if (/\.(hue|saturation)$/.test(id)) {
 								// hue and saturation have to be set together
 								const prefix = id.substr(0, id.lastIndexOf(".") + 1);
-								const hue = (await _.adapter.$getState(prefix + "hue")).val;
-								const saturation = (await _.adapter.$getState(prefix + "saturation")).val;
+								// Try to read the hue and saturation states. If one of them doesn't exist,
+								// we cannot issue a command
+								const hueState = await _.adapter.$getState(prefix + "hue");
+								if (hueState == undefined) return;
+								const saturationState = await _.adapter.$getState(prefix + "saturation");
+								if (saturationState == undefined) return;
+
+								const hue = hueState.val;
+								const saturation = saturationState.val;
 								wasAcked = !await $.tradfri.operateLight(accessory, {
 									hue,
 									saturation,
