@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "1.5.1",
+        "version": "1.5.2",
         "news": {
+            "1.5.2": {
+                "en": "Reworked installation procedure to fix problems with `node-aead-crypto`",
+                "de": "Installationsroutine überarbeitet um Probleme mit `node-aead-crypto` zu beheben"
+            },
             "1.5.1": {
                 "en": "Added experimental support for smart plugs",
                 "de": "Experimentelle Unterstützung für Steckdosen hinzugefügt"

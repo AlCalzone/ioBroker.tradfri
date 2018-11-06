@@ -46,6 +46,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### 1.5.2 (2018-11-06)
+* (AlCalzone) Reworked installation procedure to fix problems with `node-aead-crypto`
+
 #### 1.5.1 (2018-10-29)
 * (AlCalzone) Added experimental support for smart plugs
 
