@@ -1,6 +1,6 @@
 import { Accessory, AccessoryTypes, Group } from "node-tradfri-client";
 import { Global as _ } from "../lib/global";
-import { calcGroupId, ExtendObjectOptions, getInstanceId, groupToCommon, groupToNative, objectDefinitions } from "../lib/iobroker-objects";
+import { calcGroupId, getInstanceId, groupToCommon, groupToNative, objectDefinitions } from "../lib/iobroker-objects";
 import { roundTo } from "../lib/math";
 import { dig, entries, filter, values } from "../lib/object-polyfill";
 import { VirtualGroup } from "../lib/virtual-group";
@@ -73,10 +73,8 @@ export function extendVirtualGroup(group: VirtualGroup) {
 }
 
 /* creates or edits an existing <group>-object for a group */
-export function extendGroup(group: Group, options?: ExtendObjectOptions) {
+export function extendGroup(group: Group) {
 	const objId = calcGroupId(group);
-
-	const roundToDigits: number = options != null && options.roundToDigits;
 
 	if (objId in $.objects) {
 		// check if we need to edit the existing object
@@ -113,7 +111,8 @@ export function extendGroup(group: Group, options?: ExtendObjectOptions) {
 			try {
 				// Object could have a default value, find it
 				let newValue = dig<any>(group, obj.native.path);
-				if (roundToDigits != null && typeof newValue === "number") {
+				const roundToDigits = _.adapter.config.roundToDigits;
+				if (typeof roundToDigits === "number" && typeof newValue === "number") {
 					newValue = roundTo(newValue, roundToDigits);
 				}
 				_.adapter.setState(id, newValue, true);
@@ -183,6 +182,10 @@ async function updateGroupState(id: string, value: string | number | boolean | i
 	if (curState != null && value == null) {
 		await _.adapter.$delState(id);
 	} else if (curState !== value) {
+		const roundToDigits = _.adapter.config.roundToDigits;
+		if (typeof roundToDigits === "number" && typeof value === "number") {
+			value = roundTo(value, roundToDigits);
+		}
 		await _.adapter.$setState(id, value, true);
 	}
 }

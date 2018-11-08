@@ -46,9 +46,8 @@ exports.accessoryToNative = accessoryToNative;
  * Creates or edits an existing <device>-object for an accessory.
  * @param accessory The accessory to update
  */
-function extendDevice(accessory, options) {
+function extendDevice(accessory) {
     const objId = calcObjId(accessory);
-    const roundToDigits = options != null && options.roundToDigits;
     if (objId in session_1.session.objects) {
         // check if we need to edit the existing object
         const devObj = session_1.session.objects[objId];
@@ -85,7 +84,8 @@ function extendDevice(accessory, options) {
             try {
                 // Object could have a default value, find it
                 let newValue = object_polyfill_1.dig(accessory, obj.native.path);
-                if (roundToDigits != null && typeof newValue === "number") {
+                const roundToDigits = global_1.Global.adapter.config.roundToDigits;
+                if (typeof roundToDigits === "number" && typeof newValue === "number") {
                     newValue = math_1.roundTo(newValue, roundToDigits);
                 }
                 global_1.Global.adapter.setState(id, newValue, true);

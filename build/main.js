@@ -510,7 +510,7 @@ function tradfri_deviceUpdated(device) {
     // remember it
     session_1.session.devices[device.instanceId] = device;
     // create ioBroker device
-    iobroker_objects_1.extendDevice(device, { roundToDigits: adapter.config.roundToDigits });
+    iobroker_objects_1.extendDevice(device);
 }
 function tradfri_deviceRemoved(instanceId) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -534,7 +534,7 @@ function tradfri_groupUpdated(group) {
         }
         session_1.session.groups[group.instanceId].group = group;
         // create ioBroker device
-        groups_1.extendGroup(group, { roundToDigits: adapter.config.roundToDigits });
+        groups_1.extendGroup(group);
         // clean up any states that might be incorrectly defined
         groups_1.updateGroupStates(group);
         // read the transition duration, because the gateway won't report it
