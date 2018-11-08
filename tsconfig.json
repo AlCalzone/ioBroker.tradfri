@@ -23,9 +23,7 @@
         //"sourceRoot": "src/",
         "target": "es2015",
         "watch": true,
-        "skipLibCheck": true,
-
-        "resolveJsonModule": true
+        "skipLibCheck": true
     },
     "include": [
         "src/**/*.ts"

@@ -1,4 +1,4 @@
-import { native as AdapterConfig } from "../../io-package.json";
+import fs = require("fs");
 
 // tslint:disable:no-namespace
 declare global {
@@ -921,7 +921,7 @@ declare global {
 			/** Namespace of adapter objects: "<name>.<instance>" */
 			readonly namespace: string;
 			/** native part of the adapter settings */
-			config: typeof AdapterConfig;
+			config: any;
 			/** common part of the adapter settings */
 			common: any;
 			/** system part of the adapter settings */
