@@ -74,9 +74,8 @@ function extendVirtualGroup(group) {
 }
 exports.extendVirtualGroup = extendVirtualGroup;
 /* creates or edits an existing <group>-object for a group */
-function extendGroup(group, options) {
+function extendGroup(group) {
     const objId = iobroker_objects_1.calcGroupId(group);
-    const roundToDigits = options != null && options.roundToDigits;
     if (objId in session_1.session.objects) {
         // check if we need to edit the existing object
         const grpObj = session_1.session.objects[objId];
@@ -106,7 +105,8 @@ function extendGroup(group, options) {
             try {
                 // Object could have a default value, find it
                 let newValue = object_polyfill_1.dig(group, obj.native.path);
-                if (roundToDigits != null && typeof newValue === "number") {
+                const roundToDigits = global_1.Global.adapter.config.roundToDigits;
+                if (typeof roundToDigits === "number" && typeof newValue === "number") {
                     newValue = math_1.roundTo(newValue, roundToDigits);
                 }
                 global_1.Global.adapter.setState(id, newValue, true);
@@ -175,6 +175,10 @@ function updateGroupState(id, value) {
             yield global_1.Global.adapter.$delState(id);
         }
         else if (curState !== value) {
+            const roundToDigits = global_1.Global.adapter.config.roundToDigits;
+            if (typeof roundToDigits === "number" && typeof value === "number") {
+                value = math_1.roundTo(value, roundToDigits);
+            }
             yield global_1.Global.adapter.$setState(id, value, true);
         }
     });

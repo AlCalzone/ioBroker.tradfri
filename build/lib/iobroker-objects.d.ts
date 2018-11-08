@@ -1,8 +1,5 @@
 import { Accessory, AccessoryTypes, Group, GroupInfo, Scene } from "node-tradfri-client";
 import { VirtualGroup } from "./virtual-group";
-export interface ExtendObjectOptions {
-    roundToDigits?: number;
-}
 /**
  * Returns the common part of the ioBroker object representing the given accessory
  */
@@ -15,7 +12,7 @@ export declare function accessoryToNative(accessory: Accessory): Record<string, 
  * Creates or edits an existing <device>-object for an accessory.
  * @param accessory The accessory to update
  */
-export declare function extendDevice(accessory: Accessory, options?: ExtendObjectOptions): void;
+export declare function extendDevice(accessory: Accessory): void;
 /**
  * Updates the possible scenes for a group
  * @param groupInfo The group to update
