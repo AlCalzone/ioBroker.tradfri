@@ -559,7 +559,7 @@ function tradfri_deviceUpdated(device: Accessory) {
 	// remember it
 	$.devices[device.instanceId] = device;
 	// create ioBroker device
-	extendDevice(device, { roundToDigits: adapter.config.roundToDigits });
+	extendDevice(device);
 }
 
 async function tradfri_deviceRemoved(instanceId: number) {
@@ -582,7 +582,7 @@ async function tradfri_groupUpdated(group: Group) {
 	}
 	$.groups[group.instanceId].group = group;
 	// create ioBroker device
-	extendGroup(group, { roundToDigits: adapter.config.roundToDigits });
+	extendGroup(group);
 	// clean up any states that might be incorrectly defined
 	updateGroupStates(group);
 	// read the transition duration, because the gateway won't report it

@@ -6,10 +6,6 @@ import { composeObject, dig, entries, filter } from "./object-polyfill";
 import { padStart } from "./strings";
 import { VirtualGroup } from "./virtual-group";
 
-export interface ExtendObjectOptions {
-	roundToDigits?: number;
-}
-
 /**
  * Returns the common part of the ioBroker object representing the given accessory
  */
@@ -40,10 +36,8 @@ export function accessoryToNative(accessory: Accessory): Record<string, any> {
  * Creates or edits an existing <device>-object for an accessory.
  * @param accessory The accessory to update
  */
-export function extendDevice(accessory: Accessory, options?: ExtendObjectOptions) {
+export function extendDevice(accessory: Accessory) {
 	const objId = calcObjId(accessory);
-
-	const roundToDigits: number = options != null && options.roundToDigits;
 
 	if (objId in $.objects) {
 		// check if we need to edit the existing object
@@ -82,7 +76,8 @@ export function extendDevice(accessory: Accessory, options?: ExtendObjectOptions
 			try {
 				// Object could have a default value, find it
 				let newValue = dig<any>(accessory, obj.native.path);
-				if (roundToDigits != null && typeof newValue === "number") {
+				const roundToDigits = _.adapter.config.roundToDigits;
+				if (typeof roundToDigits === "number" && typeof newValue === "number") {
 					newValue = roundTo(newValue, roundToDigits);
 				}
 				_.adapter.setState(id, newValue, true);
