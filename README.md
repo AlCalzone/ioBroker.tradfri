@@ -46,6 +46,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+#### 1.5.3 (2018-11-09)
+* (AlCalzone) Also apply rounding to group states
+
 #### 1.5.2 (2018-11-06)
 * (AlCalzone) Reworked installation procedure to fix problems with `node-aead-crypto`
 

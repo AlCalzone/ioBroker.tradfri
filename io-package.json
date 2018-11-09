@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "1.5.2",
+        "version": "1.5.3",
         "news": {
+            "1.5.3": {
+                "en": "Fix: Also apply rounding to group states",
+                "de": "Fix: Runden von Werten auch auf Gruppen-States anwenden"
+            },
             "1.5.2": {
                 "en": "Reworked installation procedure to fix problems with `node-aead-crypto`",
                 "de": "Installationsroutine überarbeitet um Probleme mit `node-aead-crypto` zu beheben"
