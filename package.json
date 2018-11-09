@@ -67,9 +67,11 @@
     "url": "https://github.com/AlCalzone/ioBroker.tradfri"
   },
   "scripts": {
+    "build:ts": "tsc -p src/tsconfig.json",
     "build:webpack": "webpack --config webpack.config.js",
-    "build": "npm run build:webpack",
-    "watch": "webpack --config webpack.config.js --watch --progress",
+    "build": "npm run build:ts && npm run build:webpack",
+    "watch:webpack": "webpack --config webpack.config.js --watch --progress",
+    "watch": "tsc -p src/tsconfig.json --watch",
     "test:js": "node node_modules/mocha/bin/mocha test/test*.js",
     "test:ts": "node node_modules/mocha/bin/mocha --require ts-node/register --require source-map-support/register src/**/*.test.ts",
     "test:tsx": "node node_modules/mocha/bin/mocha --require test/setupJSDom.js --require ts-node/register --require source-map-support/register **/src/**/*.test.tsx",

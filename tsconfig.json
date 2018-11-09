@@ -1,11 +1,12 @@
 {
-    "compileOnSave": true,          // Automatically build files in Visual Studio (Code), in combination with the watch option
+    "compileOnSave": true,
     "compilerOptions": {
-        "declaration": true,        // emit d.ts files
+        "noEmit": true,
+        "noEmitOnError": true,
+
         "module": "commonjs",
         "moduleResolution": "node",
-        "noEmitOnError": true,     // dont compile faulty code
-        "noImplicitAny": false,     // set to true for stricter type checking
+        "noImplicitAny": false,
         "outDir": "build/",
         "removeComments": false,
 
@@ -20,15 +21,15 @@
         
         "sourceMap": false,
         "inlineSourceMap": false,
-        //"sourceRoot": "src/",
         "target": "es2015",
-        "watch": true,
         "skipLibCheck": true
     },
     "include": [
-        "src/**/*.ts"
+        "**/*.ts"
     ],
     "exclude": [
-        "admin/**/*.ts"
+        "admin/**",
+        "build/**",
+        "node_modules/**"
     ]
 }
