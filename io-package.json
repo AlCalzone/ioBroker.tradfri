@@ -1,11 +1,11 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "1.5.3",
+        "version": "1.5.4",
         "news": {
-            "1.5.3": {
-                "en": "Fix: Also apply rounding to group states",
-                "de": "Fix: Runden von Werten auch auf Gruppen-States anwenden"
+            "1.5.4": {
+                "en": "Fix handling of decimal digits in the adapter settings. This fixes rounding of group states.",
+                "de": "Die Behandlung von Dezimalstellen in den Adapter-Einstellungen wurde korrigiert. Dies behebt die fehlerhafte Rundung von Gruppenzuständen."
             },
             "1.5.2": {
                 "en": "Reworked installation procedure to fix problems with `node-aead-crypto`",

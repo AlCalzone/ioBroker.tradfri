@@ -46,8 +46,8 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
-#### 1.5.3 (2018-11-09)
-* (AlCalzone) Also apply rounding to group states
+#### 1.5.4 (2018-11-11)
+* (AlCalzone) Fix handling of decimal digits in the adapter settings. This fixes rounding of group states.
 
 #### 1.5.2 (2018-11-06)
 * (AlCalzone) Reworked installation procedure to fix problems with `node-aead-crypto`
