@@ -37,10 +37,17 @@ export class Settings extends React.Component<SettingsProps, Record<string, any>
 	private onChange: OnSettingsChangedCallback;
 	private originalSettings: Record<string, any>;
 
+	private parseChangedSetting(target: HTMLInputElement | HTMLSelectElement): number | string | string[] {
+		return target.type === "checkbox" ? (target as any).checked
+			: target.type === "number" ? parseInt(target.value, 10)
+			: target.value
+		;
+	}
+
 	// gets called when the form elements are changed by the user
 	private handleChange(event: React.FormEvent<HTMLElement>) {
 		const target = event.target as (HTMLInputElement | HTMLSelectElement); // TODO: more types
-		const value = target.type === "checkbox" ? (target as any).checked : target.value;
+		const value = this.parseChangedSetting(target);
 
 		// store the setting
 		this.putSetting(target.id, value, () => {
@@ -53,8 +60,9 @@ export class Settings extends React.Component<SettingsProps, Record<string, any>
 	 * Reads a setting from the state object and transforms the value into the correct format
 	 * @param key The setting key to lookup
 	 */
-	private getSetting<T = string | number | string[]>(key: string): T {
-		return this.state[key] as T;
+	private getSetting<T = string | number | string[]>(key: string, defaultValue?: T): T {
+		const ret = this.state[key] as T | undefined;
+		return ret != undefined ? ret : defaultValue;
 	}
 	/**
 	 * Saves a setting in the state object and transforms the value into the correct format
@@ -82,7 +90,7 @@ export class Settings extends React.Component<SettingsProps, Record<string, any>
 
 				<Label for="roundToDigits" text="Decimal places:" />
 				<Tooltip text="roundto tooltip" />
-				<input type="number" min="0" max="2" className="value" id="roundToDigits" value={this.getSetting("roundToDigits") || 2} onChange={this.handleChange}  />
+				<input type="number" min="0" max="2" className="value" id="roundToDigits" value={this.getSetting("roundToDigits", 2)} onChange={this.handleChange}  />
 			</p>
 		);
 	}

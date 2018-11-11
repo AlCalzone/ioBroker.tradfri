@@ -6,12 +6,9 @@ webpackJsonp(["main"],{
 "use strict";
 
 var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    }
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -89,12 +86,9 @@ exports.EditableLabel = EditableLabel;
 "use strict";
 
 var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    }
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -180,12 +174,9 @@ exports.MultiDropdown = MultiDropdown;
 "use strict";
 
 var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    }
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -228,12 +219,9 @@ exports.Tabs = Tabs;
 "use strict";
 
 var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    }
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -372,12 +360,9 @@ exports.sendTo = exports.$window.sendTo;
 "use strict";
 
 var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    }
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -489,28 +474,22 @@ exports.Groups = Groups;
 "use strict";
 
 var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    }
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
+var __assign = (this && this.__assign) || Object.assign || function(t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+        s = arguments[i];
+        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+            t[p] = s[p];
+    }
+    return t;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__("./node_modules/react/index.js");
@@ -537,11 +516,16 @@ var Settings = /** @class */ (function (_super) {
         _this.handleChange = _this.handleChange.bind(_this);
         return _this;
     }
+    Settings.prototype.parseChangedSetting = function (target) {
+        return target.type === "checkbox" ? target.checked
+            : target.type === "number" ? parseInt(target.value, 10)
+                : target.value;
+    };
     // gets called when the form elements are changed by the user
     Settings.prototype.handleChange = function (event) {
         var _this = this;
         var target = event.target; // TODO: more types
-        var value = target.type === "checkbox" ? target.checked : target.value;
+        var value = this.parseChangedSetting(target);
         // store the setting
         this.putSetting(target.id, value, function () {
             // and notify the admin UI about changes
@@ -552,16 +536,17 @@ var Settings = /** @class */ (function (_super) {
      * Reads a setting from the state object and transforms the value into the correct format
      * @param key The setting key to lookup
      */
-    Settings.prototype.getSetting = function (key) {
-        return this.state[key];
+    Settings.prototype.getSetting = function (key, defaultValue) {
+        var ret = this.state[key];
+        return ret != undefined ? ret : defaultValue;
     };
     /**
      * Saves a setting in the state object and transforms the value into the correct format
      * @param key The setting key to store at
      */
     Settings.prototype.putSetting = function (key, value, callback) {
-        var _a;
         this.setState((_a = {}, _a[key] = value, _a), callback);
+        var _a;
     };
     Settings.prototype.render = function () {
         return (React.createElement("p", { key: "content", className: "settings-table" },
@@ -580,7 +565,7 @@ var Settings = /** @class */ (function (_super) {
             React.createElement("br", null),
             React.createElement(Label, { for: "roundToDigits", text: "Decimal places:" }),
             React.createElement(Tooltip, { text: "roundto tooltip" }),
-            React.createElement("input", { type: "number", min: "0", max: "2", className: "value", id: "roundToDigits", value: this.getSetting("roundToDigits") || 2, onChange: this.handleChange })));
+            React.createElement("input", { type: "number", min: "0", max: "2", className: "value", id: "roundToDigits", value: this.getSetting("roundToDigits", 2), onChange: this.handleChange })));
     };
     return Settings;
 }(React.Component));

@@ -53,6 +53,12 @@ let adapter = utils_1.default.adapter({
             adapter.log.error("Please set the connection params in the adapter options before starting the adapter!");
             return;
         }
+        // Sicherstellen, dass die Anzahl der Nachkommastellen eine Zahl ist
+        if (typeof adapter.config.roundToDigits === "string") {
+            yield updateConfig({
+                roundToDigits: parseInt(adapter.config.roundToDigits, 10),
+            });
+        }
         // redirect console output
         // console.log = (msg) => adapter.log.debug("STDOUT > " + msg);
         // console.error = (msg) => adapter.log.error("STDERR > " + msg);

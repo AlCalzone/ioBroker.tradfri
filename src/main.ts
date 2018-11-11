@@ -68,6 +68,13 @@ let adapter: ExtendedAdapter = utils.adapter({
 			return;
 		}
 
+		// Sicherstellen, dass die Anzahl der Nachkommastellen eine Zahl ist
+		if (typeof adapter.config.roundToDigits === "string") {
+			await updateConfig({
+				roundToDigits: parseInt(adapter.config.roundToDigits, 10),
+			});
+		}
+
 		// redirect console output
 		// console.log = (msg) => adapter.log.debug("STDOUT > " + msg);
 		// console.error = (msg) => adapter.log.error("STDERR > " + msg);
