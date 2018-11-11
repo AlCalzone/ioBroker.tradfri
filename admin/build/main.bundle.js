@@ -113,15 +113,6 @@ var MultiDropdown = /** @class */ (function (_super) {
         return _this;
     }
     MultiDropdown.prototype.componentDidMount = function () {
-        // $$(this.dropdown).multiselect({
-        // 	minWidth: 250,
-        // 	header: false,
-        // 	classes: "ui-selectmenu-button",
-        // 	noneSelectedText: _("select devices"),
-        // 	selectedText: _("# devices selected"),
-        // 	click: this.optionClicked,
-        // 	close: this.dropdownClosed,
-        // });
         this.updateUI();
         if (this.dropdown != null) {
             $(this.dropdown).on("change", this.readStateFromUI);
@@ -142,7 +133,6 @@ var MultiDropdown = /** @class */ (function (_super) {
         this.state.checkedOptions.forEach(function (val) {
             $dropdown.find("option[value=" + val + "]").prop("selected", true);
         });
-        // $dropdown.multiselect("refresh");
     };
     MultiDropdown.prototype.readStateFromUI = function () {
         var _this = this;
@@ -152,19 +142,6 @@ var MultiDropdown = /** @class */ (function (_super) {
             _this.props.checkedChanged(_this.state.checkedOptions);
         });
     };
-    // private optionClicked = (event, ui) => {
-    // 	const index = this.state.checkedOptions.indexOf(ui.value);
-    // 	const checked = [...this.state.checkedOptions];
-    // 	if (ui.checked) {
-    // 		if (index === -1) checked.push(ui.value);
-    // 	} else {
-    // 		if (index !== -1) checked.splice(index, 1);
-    // 	}
-    // 	this.setState({checkedOptions: checked});
-    // }
-    // private dropdownClosed = () => {
-    // 	this.props.checkedChanged(this.state.checkedOptions);
-    // }
     MultiDropdown.prototype.render = function () {
         var _this = this;
         return (React.createElement("select", { multiple: true, ref: function (me) { return _this.dropdown = me; }, defaultValue: [""] },
@@ -393,21 +370,6 @@ var Groups = /** @class */ (function (_super) {
     function Groups(props) {
         return _super.call(this, props) || this;
     }
-    // public componentDidMount() {
-    // 	$$(`#${ADD_GROUP_BUTTON_ID}`).button({
-    // 		icons: { primary: "ui-icon-plusthick" },
-    // 	});
-    // 	$$(`#virtual-groups .delete-group`).button({
-    // 		icons: { primary: "ui-icon-trash" },
-    // 		text: false,
-    // 	});
-    // }
-    // public componentDidUpdate() {
-    // 	$$(`#virtual-groups .delete-group`).button({
-    // 		icons: { primary: "ui-icon-trash" },
-    // 		text: false,
-    // 	});
-    // }
     Groups.prototype.addGroup = function () {
         adapter_1.sendTo(null, "addVirtualGroup", null, function (result) {
             if (result && result.error) {
@@ -436,7 +398,6 @@ var Groups = /** @class */ (function (_super) {
     };
     Groups.prototype.changeGroupDevices = function (id, deviceIDs) {
         // update it on the server
-        console.log("updating virtual group (" + id + "): devices = " + JSON.stringify(deviceIDs));
         adapter_1.sendTo(null, "editVirtualGroup", { id: id, deviceIDs: deviceIDs }, function (result) {
             if (result && result.error) {
                 console.error(result.error);
@@ -453,7 +414,6 @@ var Groups = /** @class */ (function (_super) {
     };
     Groups.prototype.render = function () {
         var _this = this;
-        console.log("render: this.props.devices = " + JSON.stringify(this.props.devices));
         return (React.createElement(React.Fragment, null,
             React.createElement("p", { className: "actions-panel" },
                 React.createElement("button", { id: ADD_GROUP_BUTTON_ID, onClick: this.addGroup, className: "btn" },
@@ -542,14 +502,19 @@ var Settings = /** @class */ (function (_super) {
         _this.handleChange = _this.handleChange.bind(_this);
         return _this;
     }
+    Settings.prototype.parseChangedSetting = function (target) {
+        // Checkboxes in MaterializeCSS are messed up, so we attach our own handler
+        // However that one gets called before the underlying checkbox is actually updated,
+        // so we need to invert the checked value here
+        return target.type === "checkbox" ? !target.checked
+            : target.type === "number" ? parseInt(target.value, 10)
+                : target.value;
+    };
     // gets called when the form elements are changed by the user
     Settings.prototype.handleChange = function (event) {
         var _this = this;
         var target = event.target; // TODO: more types
-        // Checkboxes in MaterializeCSS are messed up, so we attach our own handler
-        // However that one gets called before the underlying checkbox is actually updated,
-        // so we need to invert the checked value here
-        var value = target.type === "checkbox" ? !target.checked : target.value;
+        var value = this.parseChangedSetting(target);
         // store the setting
         this.putSetting(target.id, value, function () {
             // and notify the admin UI about changes
@@ -561,8 +526,9 @@ var Settings = /** @class */ (function (_super) {
      * Reads a setting from the state object and transforms the value into the correct format
      * @param key The setting key to lookup
      */
-    Settings.prototype.getSetting = function (key) {
-        return this.state[key];
+    Settings.prototype.getSetting = function (key, defaultValue) {
+        var ret = this.state[key];
+        return ret != undefined ? ret : defaultValue;
     };
     /**
      * Saves a setting in the state object and transforms the value into the correct format
@@ -618,7 +584,7 @@ var Settings = /** @class */ (function (_super) {
             React.createElement("br", null),
             React.createElement(Label, { for: "roundToDigits", text: "Decimal places:" }),
             React.createElement(Tooltip, { text: "roundto tooltip" }),
-            React.createElement("input", { type: "number", min: "0", max: "2", className: "value", id: "roundToDigits", value: this.getSetting("roundToDigits") || 2, onChange: this.handleChange })));
+            React.createElement("input", { type: "number", min: "0", max: "2", className: "value", id: "roundToDigits", value: this.getSetting("roundToDigits", 2), onChange: this.handleChange })));
     };
     return Settings;
 }(React.Component));
