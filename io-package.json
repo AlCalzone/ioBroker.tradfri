@@ -144,7 +144,8 @@
         "readme": "https://github.com/AlCalzone/ioBroker.tradfri/blob/master/README.md",
         "loglevel": "info",
         "type": "lighting",
-        "messagebox": true
+        "messagebox": true,
+        "materialize": false
     },
     "native": {
         "host": "",
