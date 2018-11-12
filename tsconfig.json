@@ -1,34 +1,29 @@
 {
-    "compileOnSave": true,          // Automatically build files in Visual Studio (Code), in combination with the watch option
+    "compileOnSave": true,
     "compilerOptions": {
-        "declaration": true,        // emit d.ts files
+        "noEmit": true,
+        "noEmitOnError": true,
         "module": "commonjs",
         "moduleResolution": "node",
-        "noEmitOnError": true,     // dont compile faulty code
-        "noImplicitAny": false,     // set to true for stricter type checking
+        "noImplicitAny": false,
         "outDir": "build/",
         "removeComments": false,
-
-        // "noUnusedLocals": true,
-        // "noUnusedParameters": true,
-
         "jsx": "react",
-        
+
         // enable the new reflection API
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
-        
+
         "sourceMap": false,
         "inlineSourceMap": false,
         //"sourceRoot": "src/",
-        "target": "es2015",
-        "watch": true,
-        "skipLibCheck": true
+        "target": "es6"
     },
     "include": [
-        "src/**/*.ts"
+        "**/*.ts"
     ],
     "exclude": [
-        "admin/**/*.ts"
+        "build/**",
+        "node_modules/**"
     ]
 }

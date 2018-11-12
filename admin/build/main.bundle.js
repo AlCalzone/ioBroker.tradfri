@@ -5,76 +5,61 @@ webpackJsonp(["main"],{
 
 "use strict";
 
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 Object.defineProperty(exports, "__esModule", { value: true });
-var React = __webpack_require__("./node_modules/react/index.js");
-var EditableLabel = /** @class */ (function (_super) {
-    __extends(EditableLabel, _super);
-    function EditableLabel(props) {
-        var _this = _super.call(this, props) || this;
-        _this.beginEdit = function () {
-            _this.setState({ editMode: true });
-            _this.selectPending = true;
+const React = __webpack_require__("./node_modules/react/index.js");
+class EditableLabel extends React.Component {
+    constructor(props) {
+        super(props);
+        this.beginEdit = () => {
+            this.setState({ editMode: true });
+            this.selectPending = true;
         };
-        _this.onEdit = function () {
-            _this.setState({
-                text: _this.txtEdit.value,
+        this.onEdit = () => {
+            this.setState({
+                text: this.txtEdit.value,
             });
         };
-        _this.endEdit = function (save) {
-            if (save === void 0) { save = true; }
-            _this.setState({
+        this.endEdit = (save = true) => {
+            this.setState({
                 editMode: false,
             });
-            _this.selectPending = false;
+            this.selectPending = false;
             if (save) {
-                _this.props.textChanged(_this.state.text);
+                this.props.textChanged(this.state.text);
             }
             else {
-                _this.setState({ text: _this.props.text });
+                this.setState({ text: this.props.text });
             }
         };
-        _this.keyDown = function (e) {
+        this.keyDown = (e) => {
             if (e.keyCode === 13 /* Enter */) {
-                _this.endEdit();
+                this.endEdit();
             }
             else if (e.keyCode === 27 /* Escape */) {
-                _this.endEdit(false);
+                this.endEdit(false);
             }
         };
-        _this.selectPending = false;
-        _this.state = {
+        this.selectPending = false;
+        this.state = {
             editMode: false,
             text: props.text,
         };
-        return _this;
     }
-    EditableLabel.prototype.render = function () {
-        var _this = this;
+    render() {
         if (this.state.editMode) {
-            return (React.createElement("input", { type: "text", ref: function (me) {
-                    _this.txtEdit = me;
-                    if (_this.txtEdit != null && _this.selectPending) {
-                        _this.txtEdit.select();
-                        _this.selectPending = false;
+            return (React.createElement("input", { type: "text", ref: (me) => {
+                    this.txtEdit = me;
+                    if (this.txtEdit != null && this.selectPending) {
+                        this.txtEdit.select();
+                        this.selectPending = false;
                     }
-                }, onBlur: function () { return _this.endEdit(); }, onKeyDown: this.keyDown, onChange: this.onEdit, value: this.state.text, maxLength: this.props.maxLength || 200, autoFocus: true }));
+                }, onBlur: () => this.endEdit(), onKeyDown: this.keyDown, onChange: this.onEdit, value: this.state.text, maxLength: this.props.maxLength || 200, autoFocus: true }));
         }
         else {
             return (React.createElement("span", { onClick: this.beginEdit }, this.state.text));
         }
-    };
-    return EditableLabel;
-}(React.Component));
+    }
+}
 exports.EditableLabel = EditableLabel;
 
 
@@ -85,71 +70,56 @@ exports.EditableLabel = EditableLabel;
 
 "use strict";
 
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 Object.defineProperty(exports, "__esModule", { value: true });
 // Renders some components in jQuery UI tabs
-var $ = __webpack_require__("jquery");
-var React = __webpack_require__("./node_modules/react/index.js");
-var adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
+const $ = __webpack_require__("jquery");
+const React = __webpack_require__("./node_modules/react/index.js");
+const adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
 // tslint:disable-next-line:variable-name
-var M_Select = (M.FormSelect || M.Select);
-var MultiDropdown = /** @class */ (function (_super) {
-    __extends(MultiDropdown, _super);
-    function MultiDropdown(props) {
-        var _this = _super.call(this, props) || this;
-        _this.state = {
+const M_Select = (M.FormSelect || M.Select);
+class MultiDropdown extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
             checkedOptions: props.checkedOptions,
         };
-        _this.readStateFromUI = _this.readStateFromUI.bind(_this);
-        return _this;
+        this.readStateFromUI = this.readStateFromUI.bind(this);
     }
-    MultiDropdown.prototype.componentDidMount = function () {
+    componentDidMount() {
         this.updateUI();
         if (this.dropdown != null) {
             $(this.dropdown).on("change", this.readStateFromUI);
             this.mcssSelect = M_Select.init(this.dropdown);
         }
-    };
-    MultiDropdown.prototype.componentWillUnmount = function () {
+    }
+    componentWillUnmount() {
         if (this.dropdown != null) {
             $(this.dropdown).off("change", this.readStateFromUI);
         }
-    };
-    MultiDropdown.prototype.componentDidUpdate = function () {
+    }
+    componentDidUpdate() {
         this.updateUI();
-    };
-    MultiDropdown.prototype.updateUI = function () {
-        var $dropdown = $(this.dropdown);
+    }
+    updateUI() {
+        const $dropdown = $(this.dropdown);
         $dropdown.find("option:selected").prop("selected", false);
-        this.state.checkedOptions.forEach(function (val) {
-            $dropdown.find("option[value=" + val + "]").prop("selected", true);
+        this.state.checkedOptions.forEach(val => {
+            $dropdown.find(`option[value=${val}]`).prop("selected", true);
         });
-    };
-    MultiDropdown.prototype.readStateFromUI = function () {
-        var _this = this;
+    }
+    readStateFromUI() {
         // read data from UI
-        this.setState({ checkedOptions: this.mcssSelect.getSelectedValues() }, function () {
+        this.setState({ checkedOptions: this.mcssSelect.getSelectedValues() }, () => {
             // update the adapter settings
-            _this.props.checkedChanged(_this.state.checkedOptions);
+            this.props.checkedChanged(this.state.checkedOptions);
         });
-    };
-    MultiDropdown.prototype.render = function () {
-        var _this = this;
-        return (React.createElement("select", { multiple: true, ref: function (me) { return _this.dropdown = me; }, defaultValue: [""] },
+    }
+    render() {
+        return (React.createElement("select", { multiple: true, ref: (me) => this.dropdown = me, defaultValue: [""] },
             React.createElement("option", { value: "", disabled: true }, adapter_1._("select devices")),
-            Object.keys(this.props.options).map(function (k) { return (React.createElement("option", { key: k, value: k }, _this.props.options[k])); })));
-    };
-    return MultiDropdown;
-}(React.Component));
+            Object.keys(this.props.options).map(k => (React.createElement("option", { key: k, value: k }, this.props.options[k])))));
+    }
+}
 exports.MultiDropdown = MultiDropdown;
 
 
@@ -160,36 +130,22 @@ exports.MultiDropdown = MultiDropdown;
 
 "use strict";
 
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 Object.defineProperty(exports, "__esModule", { value: true });
-var React = __webpack_require__("./node_modules/react/index.js");
-var adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
-var Tabs = /** @class */ (function (_super) {
-    __extends(Tabs, _super);
-    function Tabs(props) {
-        var _this = _super.call(this, props) || this;
-        _this.containerId = _this.props.id || "tabs";
-        return _this;
+const React = __webpack_require__("./node_modules/react/index.js");
+const adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
+class Tabs extends React.Component {
+    constructor(props) {
+        super(props);
+        this.containerId = this.props.id || "tabs";
     }
-    Tabs.prototype.render = function () {
-        var _this = this;
+    render() {
         return (React.createElement("div", { className: "row", id: this.containerId },
             React.createElement("div", { className: "tabs-header col s12" },
-                React.createElement("ul", { className: "tabs" }, this.props.labels.map(function (k, i) { return React.createElement("li", { className: "tab col s3", key: i },
-                    React.createElement("a", { href: "#" + _this.containerId + "-" + i }, adapter_1._(k))); }))),
-            this.props.labels.map(function (k, i) { return React.createElement("div", { className: "col s12", key: i, id: _this.containerId + "-" + i }, _this.props.children[i]); })));
-    };
-    return Tabs;
-}(React.Component));
+                React.createElement("ul", { className: "tabs" }, this.props.labels.map((k, i) => React.createElement("li", { className: "tab col s3", key: i },
+                    React.createElement("a", { href: `#${this.containerId}-${i}` }, adapter_1._(k)))))),
+            this.props.labels.map((k, i) => React.createElement("div", { className: "col s12", key: i, id: `${this.containerId}-${i}` }, this.props.children[i]))));
+    }
+}
 exports.Tabs = Tabs;
 
 
@@ -200,80 +156,65 @@ exports.Tabs = Tabs;
 
 "use strict";
 
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 Object.defineProperty(exports, "__esModule", { value: true });
-var React = __webpack_require__("./node_modules/react/index.js");
-var ReactDOM = __webpack_require__("./node_modules/react-dom/index.js");
-var adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
+const React = __webpack_require__("./node_modules/react/index.js");
+const ReactDOM = __webpack_require__("./node_modules/react-dom/index.js");
+const adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
 // components
-var tabs_1 = __webpack_require__("./admin/src/components/tabs.tsx");
-var groups_1 = __webpack_require__("./admin/src/pages/groups.tsx");
-var settings_1 = __webpack_require__("./admin/src/pages/settings.tsx");
-var namespace = "tradfri." + adapter_1.instance;
+const tabs_1 = __webpack_require__("./admin/src/components/tabs.tsx");
+const groups_1 = __webpack_require__("./admin/src/pages/groups.tsx");
+const settings_1 = __webpack_require__("./admin/src/pages/settings.tsx");
+const namespace = `tradfri.${adapter_1.instance}`;
 // layout components
 function Header() {
     return (React.createElement("h3", { className: "translate", "data-role": "adapter-name" }, adapter_1._("Tradfri adapter settings")));
 }
-var Root = /** @class */ (function (_super) {
-    __extends(Root, _super);
-    function Root(props) {
-        var _this = _super.call(this, props) || this;
-        _this.state = {
+class Root extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
             groups: {},
             devices: {},
         };
-        return _this;
     }
-    Root.prototype.componentDidMount = function () {
-        var _this = this;
+    componentDidMount() {
         // subscribe to changes of virtual group objects
         adapter_1.socket.emit("subscribeObjects", namespace + ".VG-*");
-        adapter_1.socket.on("objectChange", function (id, obj) {
+        adapter_1.socket.on("objectChange", (id, obj) => {
             if (id.substring(0, namespace.length) !== namespace)
                 return;
             if (id.match(/VG\-\d+$/)) {
-                _this.updateGroups();
+                this.updateGroups();
             }
             else if (!obj || obj.common.type === "device") {
-                _this.updateDevices();
+                this.updateDevices();
             }
         });
         // and update once on start
         this.updateGroups();
         this.updateDevices();
-    };
-    Root.prototype.updateGroups = function () {
-        var _this = this;
-        adapter_1.sendTo(null, "getGroups", { type: "virtual" }, function (result) {
+    }
+    updateGroups() {
+        adapter_1.sendTo(null, "getGroups", { type: "virtual" }, (result) => {
             if (result && result.error) {
                 console.error(result.error);
             }
             else {
-                _this.setState({ groups: result.result });
+                this.setState({ groups: result.result });
             }
         });
-    };
-    Root.prototype.updateDevices = function () {
-        var _this = this;
-        adapter_1.sendTo(null, "getDevices", { type: "lightbulb" }, function (result) {
+    }
+    updateDevices() {
+        adapter_1.sendTo(null, "getDevices", { type: "lightbulb" }, (result) => {
             if (result && result.error) {
                 console.error(result.error);
             }
             else {
-                _this.setState({ devices: result.result });
+                this.setState({ devices: result.result });
             }
         });
-    };
-    Root.prototype.render = function () {
+    }
+    render() {
         return (
         // <>
         // 	<Header />
@@ -282,29 +223,27 @@ var Root = /** @class */ (function (_super) {
             React.createElement(groups_1.Groups, { groups: this.state.groups, devices: this.state.devices }))
         // </>
         );
-    };
-    return Root;
-}(React.Component));
+    }
+}
 exports.Root = Root;
-var curSettings;
-var originalSettings;
+let curSettings;
+let originalSettings;
 /**
  * Checks if any setting was changed
  */
 function hasChanges() {
     if (Object.keys(originalSettings).length !== Object.keys(curSettings).length)
         return true;
-    for (var _i = 0, _a = Object.keys(originalSettings); _i < _a.length; _i++) {
-        var key = _a[_i];
+    for (const key of Object.keys(originalSettings)) {
         if (originalSettings[key] !== curSettings[key])
             return true;
     }
     return false;
 }
 // the function loadSettings has to exist ...
-adapter_1.$window.load = function (settings, onChange) {
+adapter_1.$window.load = (settings, onChange) => {
     originalSettings = settings;
-    var settingsChanged = function (newSettings) {
+    const settingsChanged = (newSettings) => {
         curSettings = newSettings;
         onChange(hasChanges());
     };
@@ -314,7 +253,7 @@ adapter_1.$window.load = function (settings, onChange) {
 };
 // ... and the function save has to exist.
 // you have to make sure the callback is called with the settings object as first param!
-adapter_1.$window.save = function (callback) {
+adapter_1.$window.save = (callback) => {
     // save the settings
     callback(curSettings);
     originalSettings = curSettings;
@@ -337,7 +276,7 @@ exports.$window = window;
 // }
 // export const $$ = $window.jQuery as any as (...args: any[]) => JQuery /* & JQueryUI */;
 exports.instance = exports.$window.instance || 0;
-exports._ = exports.$window._ || (function (text) { return text; });
+exports._ = exports.$window._ || ((text) => text);
 exports.socket = exports.$window.socket;
 exports.sendTo = exports.$window.sendTo;
 
@@ -349,71 +288,58 @@ exports.sendTo = exports.$window.sendTo;
 
 "use strict";
 
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 Object.defineProperty(exports, "__esModule", { value: true });
-var React = __webpack_require__("./node_modules/react/index.js");
-var adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
-var editable_label_1 = __webpack_require__("./admin/src/components/editable-label.tsx");
-var multi_dropdown_1 = __webpack_require__("./admin/src/components/multi-dropdown.tsx");
-var ADD_GROUP_BUTTON_ID = "btnAddGroup";
-var Groups = /** @class */ (function (_super) {
-    __extends(Groups, _super);
-    function Groups(props) {
-        return _super.call(this, props) || this;
+const React = __webpack_require__("./node_modules/react/index.js");
+const adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
+const editable_label_1 = __webpack_require__("./admin/src/components/editable-label.tsx");
+const multi_dropdown_1 = __webpack_require__("./admin/src/components/multi-dropdown.tsx");
+const ADD_GROUP_BUTTON_ID = "btnAddGroup";
+class Groups extends React.Component {
+    constructor(props) {
+        super(props);
     }
-    Groups.prototype.addGroup = function () {
-        adapter_1.sendTo(null, "addVirtualGroup", null, function (result) {
+    addGroup() {
+        adapter_1.sendTo(null, "addVirtualGroup", null, (result) => {
             if (result && result.error) {
                 console.error(result.error);
             }
         });
-    };
-    Groups.prototype.deleteGroup = function (id) {
-        adapter_1.sendTo(null, "deleteVirtualGroup", { id: id }, function (result) {
+    }
+    deleteGroup(id) {
+        adapter_1.sendTo(null, "deleteVirtualGroup", { id }, (result) => {
             if (result && result.error) {
                 console.error(result.error);
             }
         });
-    };
-    Groups.prototype.renameGroup = function (id, newName) {
-        var group = this.props.groups[id];
+    }
+    renameGroup(id, newName) {
+        const group = this.props.groups[id];
         // if we have a valid name
         if (typeof newName === "string" && newName.length > 0 && newName !== group.name) {
             // update it on the server
-            adapter_1.sendTo(null, "editVirtualGroup", { id: id, name: newName }, function (result) {
+            adapter_1.sendTo(null, "editVirtualGroup", { id, name: newName }, (result) => {
                 if (result && result.error) {
                     console.error(result.error);
                 }
             });
         }
-    };
-    Groups.prototype.changeGroupDevices = function (id, deviceIDs) {
+    }
+    changeGroupDevices(id, deviceIDs) {
         // update it on the server
-        adapter_1.sendTo(null, "editVirtualGroup", { id: id, deviceIDs: deviceIDs }, function (result) {
+        adapter_1.sendTo(null, "editVirtualGroup", { id, deviceIDs }, (result) => {
             if (result && result.error) {
                 console.error(result.error);
             }
         });
-    };
-    Groups.prototype.devicesToDropdownSource = function (devices) {
-        var ret = {};
-        for (var _i = 0, _a = Object.keys(devices); _i < _a.length; _i++) {
-            var key = _a[_i];
+    }
+    devicesToDropdownSource(devices) {
+        const ret = {};
+        for (const key of Object.keys(devices)) {
             ret[key] = devices[key].name;
         }
         return ret;
-    };
-    Groups.prototype.render = function () {
-        var _this = this;
+    }
+    render() {
         return (React.createElement(React.Fragment, null,
             React.createElement("p", { className: "actions-panel" },
                 React.createElement("button", { id: ADD_GROUP_BUTTON_ID, onClick: this.addGroup, className: "btn" },
@@ -427,20 +353,19 @@ var Groups = /** @class */ (function (_super) {
                         React.createElement("td", { className: "devices" }, adapter_1._("Devices")),
                         React.createElement("td", { className: "delete" }))),
                 React.createElement("tbody", null, (this.props.groups && Object.keys(this.props.groups).length > 0 ? (Object.keys(this.props.groups)
-                    .map(function (k) { return _this.props.groups[k]; })
-                    .map(function (group) { return (React.createElement("tr", { key: group.id },
+                    .map(k => this.props.groups[k])
+                    .map(group => (React.createElement("tr", { key: group.id },
                     React.createElement("td", null, group.id),
                     React.createElement("td", null,
-                        React.createElement(editable_label_1.EditableLabel, { text: group.name, maxLength: 100, textChanged: function (newText) { return _this.renameGroup(group.id, newText); } })),
-                    React.createElement("td", null, (_this.props.devices && Object.keys(_this.props.devices).length > 0) ? (React.createElement(multi_dropdown_1.MultiDropdown, { options: _this.devicesToDropdownSource(_this.props.devices), checkedOptions: (group.deviceIDs || []).map(function (id) { return "" + id; }), checkedChanged: function (checked) { return _this.changeGroupDevices(group.id, checked); } })) : adapter_1._("no devices")),
+                        React.createElement(editable_label_1.EditableLabel, { text: group.name, maxLength: 100, textChanged: (newText) => this.renameGroup(group.id, newText) })),
+                    React.createElement("td", null, (this.props.devices && Object.keys(this.props.devices).length > 0) ? (React.createElement(multi_dropdown_1.MultiDropdown, { options: this.devicesToDropdownSource(this.props.devices), checkedOptions: (group.deviceIDs || []).map(id => `${id}`), checkedChanged: (checked) => this.changeGroupDevices(group.id, checked) })) : adapter_1._("no devices")),
                     React.createElement("td", null,
-                        React.createElement("button", { title: adapter_1._("delete group"), className: "btn-small red", onClick: function () { return _this.deleteGroup(group.id); } },
-                            React.createElement("i", { className: "material-icons" }, "delete"))))); })) : (React.createElement("tr", null,
+                        React.createElement("button", { title: adapter_1._("delete group"), className: "btn-small red", onClick: () => this.deleteGroup(group.id) },
+                            React.createElement("i", { className: "material-icons" }, "delete"))))))) : (React.createElement("tr", null,
                     React.createElement("td", { className: "empty", colSpan: 4 }, adapter_1._("No virtual groups defined"))))))),
             React.createElement("p", null, adapter_1._("changes are live"))));
-    };
-    return Groups;
-}(React.Component));
+    }
+}
 exports.Groups = Groups;
 
 
@@ -451,37 +376,19 @@ exports.Groups = Groups;
 
 "use strict";
 
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-var __assign = (this && this.__assign) || Object.assign || function(t) {
-    for (var s, i = 1, n = arguments.length; i < n; i++) {
-        s = arguments[i];
-        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-            t[p] = s[p];
-    }
-    return t;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-var React = __webpack_require__("./node_modules/react/index.js");
-var adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
+const React = __webpack_require__("./node_modules/react/index.js");
+const adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
 /** Helper component for a settings label */
 function Label(props) {
-    var classNames = (props.class || []);
+    const classNames = (props.class || []);
     return (React.createElement("label", { htmlFor: props.for, className: classNames.join(" ") },
         adapter_1._(props.text),
         props.tooltip != null && React.createElement(Tooltip, { text: props.tooltip })));
 }
 /** Inner label for a Materializes CSS checkbox (span, no for property) */
 function CheckboxLabel(props) {
-    var classNames = (props.class || []);
+    const classNames = (props.class || []);
     return (React.createElement("span", { className: classNames.join(" ") },
         adapter_1._(props.text),
         props.tooltip != null && React.createElement(Tooltip, { text: props.tooltip })));
@@ -490,69 +397,64 @@ function CheckboxLabel(props) {
 function Tooltip(props) {
     return React.createElement("img", { className: "admin-tooltip-icon", src: "../../img/info.png", title: adapter_1._(props.text) });
 }
-var Settings = /** @class */ (function (_super) {
-    __extends(Settings, _super);
-    function Settings(props) {
-        var _this = _super.call(this, props) || this;
+class Settings extends React.Component {
+    constructor(props) {
+        super(props);
         // settings are our state
-        _this.state = __assign({}, props.settings);
+        this.state = Object.assign({}, props.settings);
         // remember the original settings
-        _this.originalSettings = __assign({}, props.settings);
+        this.originalSettings = Object.assign({}, props.settings);
         // setup change handlers
-        _this.handleChange = _this.handleChange.bind(_this);
-        return _this;
+        this.handleChange = this.handleChange.bind(this);
     }
-    Settings.prototype.parseChangedSetting = function (target) {
+    parseChangedSetting(target) {
         // Checkboxes in MaterializeCSS are messed up, so we attach our own handler
         // However that one gets called before the underlying checkbox is actually updated,
         // so we need to invert the checked value here
         return target.type === "checkbox" ? !target.checked
             : target.type === "number" ? parseInt(target.value, 10)
                 : target.value;
-    };
+    }
     // gets called when the form elements are changed by the user
-    Settings.prototype.handleChange = function (event) {
-        var _this = this;
-        var target = event.target; // TODO: more types
-        var value = this.parseChangedSetting(target);
+    handleChange(event) {
+        const target = event.target; // TODO: more types
+        const value = this.parseChangedSetting(target);
         // store the setting
-        this.putSetting(target.id, value, function () {
+        this.putSetting(target.id, value, () => {
             // and notify the admin UI about changes
-            _this.props.onChange(_this.state);
+            this.props.onChange(this.state);
         });
         return false;
-    };
+    }
     /**
      * Reads a setting from the state object and transforms the value into the correct format
      * @param key The setting key to lookup
      */
-    Settings.prototype.getSetting = function (key, defaultValue) {
-        var ret = this.state[key];
+    getSetting(key, defaultValue) {
+        const ret = this.state[key];
         return ret != undefined ? ret : defaultValue;
-    };
+    }
     /**
      * Saves a setting in the state object and transforms the value into the correct format
      * @param key The setting key to store at
      */
-    Settings.prototype.putSetting = function (key, value, callback) {
-        this.setState((_a = {}, _a[key] = value, _a), callback);
-        var _a;
-    };
-    Settings.prototype.componentWillUnmount = function () {
+    putSetting(key, value, callback) {
+        this.setState({ [key]: value }, callback);
+    }
+    componentWillUnmount() {
         if (this.chkPreserveTransitionTime != null) {
             $(this.chkPreserveTransitionTime).off("click", this.handleChange);
         }
-    };
-    Settings.prototype.componentDidMount = function () {
+    }
+    componentDidMount() {
         // update floating labels in materialize design
         M.updateTextFields();
         // Fix materialize checkboxes
         if (this.chkPreserveTransitionTime != null) {
             $(this.chkPreserveTransitionTime).on("click", this.handleChange);
         }
-    };
-    Settings.prototype.render = function () {
-        var _this = this;
+    }
+    render() {
         return (React.createElement(React.Fragment, null,
             React.createElement("div", { className: "row" },
                 React.createElement("div", { className: "col s4 input-field" },
@@ -565,13 +467,13 @@ var Settings = /** @class */ (function (_super) {
             React.createElement("div", { className: "row" },
                 React.createElement("div", { className: "col s4" },
                     React.createElement("label", { htmlFor: "preserveTransitionTime" },
-                        React.createElement("input", { type: "checkbox", className: "value", id: "preserveTransitionTime", defaultChecked: this.getSetting("preserveTransitionTime"), ref: function (me) { return _this.chkPreserveTransitionTime = me; } }),
+                        React.createElement("input", { type: "checkbox", className: "value", id: "preserveTransitionTime", defaultChecked: this.getSetting("preserveTransitionTime"), ref: me => this.chkPreserveTransitionTime = me }),
                         React.createElement(CheckboxLabel, { text: "Preserve transition time", tooltip: "transition time tooltip" }))),
                 React.createElement("div", { className: "col s4 input-field" },
                     React.createElement("input", { type: "number", min: "0", max: "2", className: "value", id: "roundToDigits", value: this.getSetting("roundToDigits") || 2, onChange: this.handleChange }),
                     React.createElement(Label, { for: "roundToDigits", text: "Decimal places:", tooltip: "roundto tooltip" })))));
-    };
-    Settings.prototype.oldrender = function () {
+    }
+    oldrender() {
         return (React.createElement("p", { key: "content", className: "settings-table" },
             React.createElement(Label, { for: "securityCode", text: "Security-Code:" }),
             React.createElement(Tooltip, { text: "security code tooltip" }),
@@ -585,9 +487,8 @@ var Settings = /** @class */ (function (_super) {
             React.createElement(Label, { for: "roundToDigits", text: "Decimal places:" }),
             React.createElement(Tooltip, { text: "roundto tooltip" }),
             React.createElement("input", { type: "number", min: "0", max: "2", className: "value", id: "roundToDigits", value: this.getSetting("roundToDigits", 2), onChange: this.handleChange })));
-    };
-    return Settings;
-}(React.Component));
+    }
+}
 exports.Settings = Settings;
 
 

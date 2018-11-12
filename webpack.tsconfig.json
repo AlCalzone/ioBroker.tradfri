@@ -1,24 +1,12 @@
 {
-    "compileOnSave": true,          // Automatically build files in Visual Studio (Code), in combination with the watch option
+    "extends": "./tsconfig.json",
+    "compileOnSave": true,
     "compilerOptions": {
-        "declaration": false,
-        "module": "commonjs",
-        "moduleResolution": "node",
-        "noEmitOnError": true,     // dont compile faulty code
-        "noImplicitAny": false,     // set to true for stricter type checking
+        "noEmit": false,
         "outDir": "admin/build/",
-        "removeComments": false,
 
-        "jsx": "react",
-
-        // enable the new reflection API
-        "experimentalDecorators": true,
-        "emitDecoratorMetadata": true,
-        
         "sourceMap": true,
-        "sourceRoot": "admin/src/",
-        "target": "es5"
-        //"watch": true
+        "sourceRoot": "admin/src/"
     },
     "include": [
         "admin/**/*.ts*"
