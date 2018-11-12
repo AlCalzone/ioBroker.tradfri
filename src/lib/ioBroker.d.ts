@@ -911,6 +911,11 @@ declare global {
 			noNamespace?: boolean;
 		} // end interface AdapterOptions
 
+		// tslint:disable-next-line:no-empty-interface
+		interface AdapterConfig {
+			// This is a stub to be augmented in every adapter
+		}
+
 		interface Adapter {
 			/** The name of the adapter */
 			name: string;
@@ -921,7 +926,7 @@ declare global {
 			/** Namespace of adapter objects: "<name>.<instance>" */
 			readonly namespace: string;
 			/** native part of the adapter settings */
-			config: any;
+			config: AdapterConfig;
 			/** common part of the adapter settings */
 			common: any;
 			/** system part of the adapter settings */

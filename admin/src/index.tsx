@@ -79,6 +79,7 @@ export class Root extends React.Component<any, any> {
 
 }
 
+// TODO: Strongly type this
 let curSettings: Record<string, any>;
 let originalSettings: Record<string, any>;
 
