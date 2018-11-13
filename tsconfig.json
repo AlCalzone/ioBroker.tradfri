@@ -1,31 +1,31 @@
 {
-    "compileOnSave": true,
-    "compilerOptions": {
-        "noEmit": true,
-        "noEmitOnError": true,
-        "module": "commonjs",
-        "moduleResolution": "node",
-        "noImplicitAny": false,
-        "outDir": "build/",
-        "removeComments": false,
-        "jsx": "react",
+	"compileOnSave": true,
+	"compilerOptions": {
+		"noEmit": true,
+		"noEmitOnError": true,
+		"module": "commonjs",
+		"moduleResolution": "node",
+		"noImplicitAny": false,
+		"outDir": "build/",
+		"removeComments": false,
+		"jsx": "react",
 
-        // enable the new reflection API
-        "experimentalDecorators": true,
-        "emitDecoratorMetadata": true,
+		// enable the new reflection API
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
 
 		"resolveJsonModule": true,
 
-        "sourceMap": false,
-        "inlineSourceMap": false,
-        //"sourceRoot": "src/",
-        "target": "es6"
-    },
-    "include": [
-        "**/*.ts"
-    ],
-    "exclude": [
-        "build/**",
-        "node_modules/**"
-    ]
+		"sourceMap": false,
+		"inlineSourceMap": false,
+		//"sourceRoot": "src/",
+		"target": "es6"
+	},
+	"include": [
+		"**/*.ts"
+	],
+	"exclude": [
+		"build/**",
+		"node_modules/**"
+	]
 }
