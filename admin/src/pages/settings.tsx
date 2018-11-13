@@ -3,11 +3,11 @@ import * as ReactDOM from "react-dom";
 
 import { $window, _, instance } from "../lib/adapter";
 
-export type OnSettingsChangedCallback = (newSettings: Record<string, any>) => void;
+export type OnSettingsChangedCallback = (newSettings: ioBroker.AdapterConfig) => void;
 
 interface SettingsProps {
 	onChange: OnSettingsChangedCallback;
-	settings: Record<string, any>;
+	settings: ioBroker.AdapterConfig;
 }
 
 interface LabelProps {
@@ -61,9 +61,7 @@ export class Settings extends React.Component<SettingsProps, ioBroker.AdapterCon
 		// settings are our state
 		this.state = {
 			...props.settings,
-		} as ioBroker.AdapterConfig;
-		// // remember the original settings
-		// this.originalSettings = { ...props.settings } as ioBroker.AdapterConfig;
+		};
 
 		// setup change handlers
 		this.handleChange = this.handleChange.bind(this);

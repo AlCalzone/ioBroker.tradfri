@@ -169,6 +169,7 @@ const namespace = `tradfri.${adapter_1.instance}`;
 function Header() {
     return (React.createElement("h3", { className: "translate", "data-role": "adapter-name" }, adapter_1._("Tradfri adapter settings")));
 }
+// TODO: Remove `any`
 class Root extends React.Component {
     constructor(props) {
         super(props);
@@ -226,7 +227,6 @@ class Root extends React.Component {
     }
 }
 exports.Root = Root;
-// TODO: Strongly type this
 let curSettings;
 let originalSettings;
 /**
@@ -403,8 +403,6 @@ class Settings extends React.Component {
         super(props);
         // settings are our state
         this.state = Object.assign({}, props.settings);
-        // // remember the original settings
-        // this.originalSettings = { ...props.settings } as ioBroker.AdapterConfig;
         // setup change handlers
         this.handleChange = this.handleChange.bind(this);
     }

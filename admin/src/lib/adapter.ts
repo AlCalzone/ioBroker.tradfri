@@ -4,8 +4,8 @@ interface SendToResult {
 	result?: any;
 }
 export const $window = window as any as {
-	load: (settings, onChange) => void;
-	save: (callback: (settings) => void) => void;
+	load: (settings: ioBroker.AdapterConfig, onChange: (hasChanges: boolean) => void) => void;
+	save: (callback: (settings: ioBroker.AdapterConfig) => void) => void;
 	readonly instance: number;
 	/** Translates text */
 	_: (text: string) => string;

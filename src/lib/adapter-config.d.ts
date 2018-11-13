@@ -1,6 +1,6 @@
 import { native } from "../io-package.json";
 
-type _AdapterConfig = typeof native;
+type _AdapterConfig = Partial<typeof native>;
 
 // Augment the globally declared type ioBroker.AdapterConfig
 declare global {
