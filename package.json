@@ -72,6 +72,7 @@
     "build:ts": "tsc -p src/tsconfig.json",
     "build:webpack": "webpack --config webpack.config.js",
     "build": "npm run build:ts && npm run build:webpack",
+    "postbuild": "rimraf build/{io-,}package.json",
     "watch:webpack": "webpack --config webpack.config.js --watch --progress",
     "watch": "tsc -p src/tsconfig.json --watch",
     "test:js": "node node_modules/mocha/bin/mocha test/test*.js",
