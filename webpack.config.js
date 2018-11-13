@@ -40,10 +40,10 @@ module.exports = {
         rules: [
             // all files with a `.ts` or `.tsx` extension will be handled by `ts-loader`
             {
-                test: /\.tsx?|\.json$/,
+                test: /(\.tsx?)|(\.json)$/,
                 loader: "ts-loader",
                 options: {
-                    configFile: "./admin/tsconfig.json",
+                    configFile: "admin/tsconfig.json",
                 }
             },
         ],
