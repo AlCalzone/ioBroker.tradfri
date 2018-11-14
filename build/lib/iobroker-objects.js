@@ -8,6 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const objects_1 = require("alcalzone-shared/objects");
 const node_tradfri_client_1 = require("node-tradfri-client");
 const session_1 = require("../modules/session");
 const global_1 = require("./global");
@@ -71,9 +72,9 @@ function extendDevice(accessory) {
         // ====
         // from here we can update the states
         // filter out the ones belonging to this device with a property path
-        const stateObjs = object_polyfill_1.filter(session_1.session.objects, obj => obj._id.startsWith(objId) && obj.native && obj.native.path);
+        const stateObjs = objects_1.filter(session_1.session.objects, obj => obj._id.startsWith(objId) && obj.native && obj.native.path);
         // for each property try to update the value
-        for (const [id, obj] of object_polyfill_1.entries(stateObjs)) {
+        for (const [id, obj] of objects_1.entries(stateObjs)) {
             if (global_1.Global.adapter.config.preserveTransitionTime && id.match(/\.transitionDuration$/g)) {
                 // don't override the transition time
                 continue;
@@ -173,7 +174,7 @@ function extendDevice(accessory) {
                 }
                 stateObjs[`${channelID}.transitionDuration`] = exports.objectDefinitions.transitionDuration(objId, "device", accessory.type);
             }
-            else if (accessory.type === node_tradfri_client_1.AccessoryTypes.plug) {
+            else /* if (accessory.type === AccessoryTypes.plug) */ {
                 // obj.plug should be a channel
                 channelID = "plug";
                 stateObjs[channelID] = {
@@ -224,7 +225,7 @@ function updatePossibleScenes(groupInfo) {
         if (scenesId in session_1.session.objects) {
             // map scene ids and names to the dropdown
             const scenes = groupInfo.scenes;
-            const newDropdownStates = object_polyfill_1.composeObject(Object.keys(scenes).map(id => [id, scenes[id].name]));
+            const newDropdownStates = objects_1.composeObject(Object.keys(scenes).map(id => [id, scenes[id].name]));
             // compare with the old dropdown states
             const obj = yield global_1.Global.adapter.$getObject(scenesId);
             const oldDropdownStates = obj.common.states;
@@ -372,7 +373,7 @@ function calcGroupName(group) {
     if (group instanceof node_tradfri_client_1.Group) {
         prefix = "G";
     }
-    else if (group instanceof virtual_group_1.VirtualGroup) {
+    else /* if (group instanceof VirtualGroup) */ {
         prefix = "VG";
     }
     const postfix = group.instanceId.toString();
@@ -442,7 +443,7 @@ exports.objectDefinitions = {
     // Lights and plugs for compatibility reasons
     // Anything > 0% should be "on"
     brightness: (rootId, rootType, deviceType) => {
-        const deviceName = accessoryTypeToString(deviceType);
+        const deviceName = rootType === "device" ? accessoryTypeToString(deviceType) : undefined;
         return {
             _id: rootType === "device" ? `${rootId}.${deviceName}.brightness` : `${rootId}.brightness`,
             type: "state",

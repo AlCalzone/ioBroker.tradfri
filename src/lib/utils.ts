@@ -4,13 +4,13 @@ import * as fs from "fs";
 import * as path from "path";
 
 // Get js-controller directory to load libs
-function getControllerDir(isInstall: boolean): string {
+function getControllerDir(isInstall: boolean): string | never {
 	// Find the js-controller location
 	const possibilities = [
 		"iobroker.js-controller",
 		"ioBroker.js-controller",
 	];
-	let controllerPath: string;
+	let controllerPath: string | undefined;
 	for (const pkg of possibilities) {
 		try {
 			const possiblePath = require.resolve(pkg);
@@ -20,13 +20,14 @@ function getControllerDir(isInstall: boolean): string {
 			}
 		} catch { /* not found */ }
 	}
-	if (controllerPath == null) {
+	if (controllerPath == undefined) {
 		if (!isInstall) {
 			console.log("Cannot find js-controller");
 			process.exit(10);
 		} else {
 			process.exit();
 		}
+		throw new Error("this does not get executed");
 	}
 	// we found the controller
 	return path.dirname(controllerPath);

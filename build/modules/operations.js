@@ -23,6 +23,8 @@ const session_1 = require("./session");
  */
 function operateVirtualGroup(group, operation) {
     return __awaiter(this, void 0, void 0, function* () {
+        if (group.deviceIDs == undefined)
+            return;
         // find all lightbulbs belonging to this group
         const lightbulbAccessories = group.deviceIDs
             .map(id => session_1.session.devices[id])

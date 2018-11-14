@@ -101,6 +101,8 @@ class MultiDropdown extends React.Component {
         this.updateUI();
     }
     updateUI() {
+        if (!this.dropdown)
+            return;
         const $dropdown = $(this.dropdown);
         $dropdown.find("option:selected").prop("selected", false);
         this.state.checkedOptions.forEach(val => {
@@ -108,6 +110,8 @@ class MultiDropdown extends React.Component {
         });
     }
     readStateFromUI() {
+        if (!this.mcssSelect)
+            return;
         // read data from UI
         this.setState({ checkedOptions: this.mcssSelect.getSelectedValues() }, () => {
             // update the adapter settings
@@ -143,7 +147,7 @@ class Tabs extends React.Component {
             React.createElement("div", { className: "tabs-header col s12" },
                 React.createElement("ul", { className: "tabs" }, this.props.labels.map((k, i) => React.createElement("li", { className: "tab col s3", key: i },
                     React.createElement("a", { href: `#${this.containerId}-${i}` }, adapter_1._(k)))))),
-            this.props.labels.map((k, i) => React.createElement("div", { className: "col s12", key: i, id: `${this.containerId}-${i}` }, this.props.children[i]))));
+            React.Children.map(this.props.children, (child, i) => (React.createElement("div", { className: "col s12", key: i, id: `${this.containerId}-${i}` }, child)))));
     }
 }
 exports.Tabs = Tabs;
@@ -187,7 +191,7 @@ class Root extends React.Component {
             if (id.match(/VG\-\d+$/)) {
                 this.updateGroups();
             }
-            else if (!obj || obj.common.type === "device") {
+            else if (!obj || obj.type === "device") {
                 this.updateDevices();
             }
         });
@@ -469,7 +473,7 @@ class Settings extends React.Component {
                         React.createElement("input", { type: "checkbox", className: "value", id: "preserveTransitionTime", defaultChecked: this.getSetting("preserveTransitionTime"), ref: me => this.chkPreserveTransitionTime = me }),
                         React.createElement(CheckboxLabel, { text: "Preserve transition time", tooltip: "transition time tooltip" }))),
                 React.createElement("div", { className: "col s4 input-field" },
-                    React.createElement("input", { type: "number", min: "0", max: "2", className: "value", id: "roundToDigits", value: this.getSetting("roundToDigits") || 2, onChange: this.handleChange }),
+                    React.createElement("input", { type: "number", min: "0", max: "2", className: "value", id: "roundToDigits", value: this.getSetting("roundToDigits", 2), onChange: this.handleChange }),
                     React.createElement(Label, { for: "roundToDigits", text: "Decimal places:", tooltip: "roundto tooltip" })))));
     }
 }

@@ -22,7 +22,7 @@ function getControllerDir(isInstall) {
         }
         catch ( /* not found */_a) { /* not found */ }
     }
-    if (controllerPath == null) {
+    if (controllerPath == undefined) {
         if (!isInstall) {
             console.log("Cannot find js-controller");
             process.exit(10);
@@ -30,6 +30,7 @@ function getControllerDir(isInstall) {
         else {
             process.exit();
         }
+        throw new Error("this does not get executed");
     }
     // we found the controller
     return path.dirname(controllerPath);

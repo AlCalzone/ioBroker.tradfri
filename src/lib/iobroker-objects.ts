@@ -1,8 +1,9 @@
+import { composeObject, entries, filter } from "alcalzone-shared/objects";
 import { Accessory, AccessoryTypes, Group, GroupInfo, Scene, Spectrum } from "node-tradfri-client";
 import { session as $ } from "../modules/session";
 import { Global as _ } from "./global";
 import { roundTo } from "./math";
-import { composeObject, dig, entries, filter } from "./object-polyfill";
+import {  dig } from "./object-polyfill";
 import { padStart } from "./strings";
 import { VirtualGroup } from "./virtual-group";
 
@@ -80,7 +81,7 @@ export function extendDevice(accessory: Accessory) {
 				if (typeof roundToDigits === "number" && typeof newValue === "number") {
 					newValue = roundTo(newValue, roundToDigits);
 				}
-				_.adapter.setState(id, newValue, true);
+				_.adapter.setState(id, newValue as any, true);
 			} catch (e) { /* skip this value */ }
 		}
 
@@ -153,7 +154,7 @@ export function extendDevice(accessory: Accessory) {
 					_id: `${objId}.${channelID}`,
 					type: "channel",
 					common: {
-						name: channelName,
+						name: channelName!,
 						role: "light",
 					},
 					native: {
@@ -169,14 +170,14 @@ export function extendDevice(accessory: Accessory) {
 				}
 				stateObjs[`${channelID}.transitionDuration`] = objectDefinitions.transitionDuration(objId, "device", accessory.type);
 
-			} else if (accessory.type === AccessoryTypes.plug) {
+			} else /* if (accessory.type === AccessoryTypes.plug) */ {
 				// obj.plug should be a channel
 				channelID = "plug";
 				stateObjs[channelID] = {
 					_id: `${objId}.${channelID}`,
 					type: "channel",
 					common: {
-						name: channelName,
+						name: channelName!,
 						role: "switch",
 					},
 					native: {},
@@ -237,7 +238,7 @@ export async function updatePossibleScenes(groupInfo: GroupInfo): Promise<void> 
 	}
 }
 
-export function getAccessoryIcon(accessory: Accessory): string {
+export function getAccessoryIcon(accessory: Accessory): string | undefined {
 	const model = accessory.deviceInfo.modelNumber;
 	switch (model) {
 		case "TRADFRI remote control":
@@ -282,7 +283,7 @@ export function getRootId(stateId: string) {
  * Extracts the instance id from a given state or object id
  * @param id State or object id whose instance id should be extracted
  */
-export function getInstanceId(id: string): number {
+export function getInstanceId(id: string): number | undefined {
 	const match = /^tradfri\.\d+\.\w+\-(\d+)/.exec(id);
 	if (match) return +match[1];
 }
@@ -359,7 +360,7 @@ export function calcGroupName(group: Group | VirtualGroup): string {
 	let prefix: string;
 	if (group instanceof Group) {
 		prefix = "G";
-	} else if (group instanceof VirtualGroup) {
+	} else /* if (group instanceof VirtualGroup) */ {
 		prefix = "VG";
 	}
 	const postfix: string = group.instanceId.toString();
@@ -421,7 +422,7 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 
 	// Lights and plugs
 	onOff: (rootId, rootType, deviceType) => ({
-		_id: rootType === "device" ? `${rootId}.${accessoryTypeToString(deviceType)}.state` : `${rootId}.state`,
+		_id: rootType === "device" ? `${rootId}.${accessoryTypeToString(deviceType!)}.state` : `${rootId}.state`,
 		type: "state",
 		common: {
 			name: "on/off",
@@ -438,7 +439,7 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 	// Lights and plugs for compatibility reasons
 	// Anything > 0% should be "on"
 	brightness: (rootId, rootType, deviceType) => {
-		const deviceName = accessoryTypeToString(deviceType);
+		const deviceName = rootType === "device" ? accessoryTypeToString(deviceType!) : undefined;
 		return {
 			_id: rootType === "device" ? `${rootId}.${deviceName}.brightness` : `${rootId}.brightness`,
 			type: "state",

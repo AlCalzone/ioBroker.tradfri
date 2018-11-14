@@ -8,10 +8,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const fs = require("fs");
-const path = require("path");
+const objects_1 = require("alcalzone-shared/objects");
 const global_1 = require("./global");
-const object_polyfill_1 = require("./object-polyfill");
+const io_package_json_1 = require("../../io-package.json");
+const instanceObjects = io_package_json_1.instanceObjects;
 /**
  * Fixes/updates/deletes existing adapter objects,
  * so they don't have to be deleted manually
@@ -19,7 +19,7 @@ const object_polyfill_1 = require("./object-polyfill");
 function fixAdapterObjects() {
     return __awaiter(this, void 0, void 0, function* () {
         // read all objects, we'll filter them in the fixer functions
-        const stateObjs = object_polyfill_1.values(yield global_1.Global.$$(`${global_1.Global.adapter.namespace}.*`, "state"));
+        const stateObjs = objects_1.values(yield global_1.Global.$$(`${global_1.Global.adapter.namespace}.*`, "state"));
         // const channelObjs = values(await _.$$(`${_.adapter.namespace}.*`, "channel"));
         // const deviceObjs = values(await _.$$(`${_.adapter.namespace}.*`, "device"));
         yield fixBrightnessRange(stateObjs);
@@ -79,12 +79,10 @@ function fixBrightnessRole(stateObjs) {
 // Workaround für unvollständige Adapter-Upgrades
 function ensureInstanceObjects() {
     return __awaiter(this, void 0, void 0, function* () {
-        // read io-package.json
-        const ioPack = JSON.parse(fs.readFileSync(path.join(__dirname, "../../io-package.json"), "utf8"));
-        if (ioPack.instanceObjects == null || ioPack.instanceObjects.length === 0)
+        if (instanceObjects == null || instanceObjects.length === 0)
             return;
         // wait for all instance objects to be created
-        const setObjects = ioPack.instanceObjects.map(obj => global_1.Global.adapter.$setObjectNotExists(obj._id, obj));
+        const setObjects = instanceObjects.map(obj => global_1.Global.adapter.$setObjectNotExists(obj._id, obj));
         yield Promise.all(setObjects);
     });
 }

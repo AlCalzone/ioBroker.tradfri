@@ -19,10 +19,19 @@ function Header() {
 	);
 }
 
-// TODO: Remove `any`
-export class Root extends React.Component<any, any> {
+interface RootProps {
+	settings: ioBroker.AdapterConfig;
+	onSettingsChanged: OnSettingsChangedCallback;
+}
+interface RootState {
+	groups: GroupDictionary;
+	devices: DeviceDictionary;
+}
 
-	constructor(props) {
+// TODO: Remove `any`
+export class Root extends React.Component<RootProps, RootState> {
+
+	constructor(props: RootProps) {
 		super(props);
 		this.state = {
 			groups: {},
@@ -37,7 +46,7 @@ export class Root extends React.Component<any, any> {
 			if (id.substring(0, namespace.length) !== namespace) return;
 			if (id.match(/VG\-\d+$/)) {
 				this.updateGroups();
-			} else if (!obj || obj.common.type === "device") {
+			} else if (!obj || obj.type === "device") {
 				this.updateDevices();
 			}
 		});
@@ -88,7 +97,7 @@ let originalSettings: ioBroker.AdapterConfig;
  */
 function hasChanges(): boolean {
 	if (Object.keys(originalSettings).length !== Object.keys(curSettings).length) return true;
-	for (const key of Object.keys(originalSettings)) {
+	for (const key of Object.keys(originalSettings) as (keyof ioBroker.AdapterConfig)[]) {
 		if (originalSettings[key] !== curSettings[key]) return true;
 	}
 	return false;

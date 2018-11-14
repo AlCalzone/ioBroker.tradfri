@@ -14,7 +14,7 @@ import { session as $ } from "./session";
  * @returns true if a request was sent, false otherwise
  */
 export async function operateVirtualGroup(group: Group | VirtualGroup, operation: LightOperation): Promise<void> {
-
+	if (group.deviceIDs == undefined) return;
 	// find all lightbulbs belonging to this group
 	const lightbulbAccessories = group.deviceIDs
 		.map(id => $.devices[id])

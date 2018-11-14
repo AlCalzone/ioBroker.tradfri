@@ -1,15 +1,16 @@
-import { AccessoryTypes, TradfriError, TradfriErrorCodes } from "node-tradfri-client";
+import { entries } from "alcalzone-shared/objects";
+import { isArray } from "alcalzone-shared/typeguards";
+import { Accessory, AccessoryTypes } from "node-tradfri-client";
 import { Global as _ } from "../lib/global";
 import { calcGroupName } from "../lib/iobroker-objects";
-import { entries } from "../lib/object-polyfill";
 import { VirtualGroup } from "../lib/virtual-group";
 import { Device as SendToDevice, Group as SendToGroup } from "./communication";
 import { extendVirtualGroup, updateGroupStates } from "./groups";
 import { session as $ } from "./session";
 
-export async function onMessage(obj) {
+export const onMessage: ioBroker.MessageHandler = async (obj) => {
 	// responds to the adapter that sent the original message
-	function respond(response) {
+	function respond(response: string | {}) {
 		if (obj.callback) _.adapter.sendTo(obj.from, obj.command, response, obj.callback);
 	}
 	// some predefined responses so we only have to define them once
@@ -17,15 +18,15 @@ export async function onMessage(obj) {
 		ACK: { error: null },
 		OK: { error: null, result: "ok" },
 		ERROR_UNKNOWN_COMMAND: { error: "Unknown command!" },
-		MISSING_PARAMETER: (paramName) => {
+		MISSING_PARAMETER: (paramName: string) => {
 			return { error: 'missing parameter "' + paramName + '"!' };
 		},
 		COMMAND_RUNNING: { error: "command running" },
-		RESULT: (result) => ({ error: null, result }),
+		RESULT: (result: unknown) => ({ error: null, result }),
 		ERROR: (error: string) => ({ error }),
 	};
 	// make required parameters easier
-	function requireParams(...params: string[]) {
+	function requireParams(...params: string[]): boolean {
 		if (!(params && params.length)) return true;
 		for (const param of params) {
 			if (!(obj.message && obj.message.hasOwnProperty(param))) {
@@ -94,8 +95,8 @@ export async function onMessage(obj) {
 
 				const group = $.virtualGroups[id];
 				// Update the device ids
-				if (params.deviceIDs != null && params.deviceIDs instanceof Array) {
-					group.deviceIDs = params.deviceIDs.map(d => parseInt(d, 10)).filter(d => !isNaN(d));
+				if (params.deviceIDs != null && isArray(params.deviceIDs)) {
+					group.deviceIDs = (params.deviceIDs as string[]).map(d => parseInt(d, 10)).filter(d => !isNaN(d));
 				}
 				// Change the name
 				if (typeof params.name === "string" && params.name.length > 0) {
@@ -157,8 +158,8 @@ export async function onMessage(obj) {
 					for (const [id, group] of entries($.virtualGroups)) {
 						ret[id] = {
 							id,
-							name: group.name,
-							deviceIDs: group.deviceIDs,
+							name: group.name || "Unbenannte Gruppe",
+							deviceIDs: group.deviceIDs || [],
 							type: "virtual",
 						};
 					}
@@ -180,7 +181,7 @@ export async function onMessage(obj) {
 				}
 
 				const ret: Record<string, SendToDevice> = {};
-				const predicate = ([, device]) =>
+				const predicate = ([, device]: [unknown, Accessory]) =>
 					deviceType === "all"
 						? allowedDeviceTypes.indexOf(AccessoryTypes[device.type]) > -1
 						: deviceType === AccessoryTypes[device.type];
@@ -227,4 +228,4 @@ export async function onMessage(obj) {
 				return;
 		}
 	}
-}
+};

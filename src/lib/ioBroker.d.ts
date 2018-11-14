@@ -1,4 +1,4 @@
-import fs = require("fs");
+import * as fs from "fs";
 
 // tslint:disable:no-namespace
 declare global {
@@ -299,7 +299,7 @@ declare global {
 
 		interface BaseObject {
 			/** The ID of this object */
-			_id?: string;
+			_id: string;
 			native: Record<string, any>;
 			enums?: Record<string, string>;
 			type: string; // specified in the derived interfaces
@@ -342,6 +342,11 @@ declare global {
 		}
 
 		type Object = StateObject | ChannelObject | DeviceObject | OtherObject;
+		// In set[Foreign]Object[NotExists] methods, the ID and acl of the object is optional
+		interface SettableObject extends Pick<ioBroker.Object, Exclude<keyof ioBroker.Object, "_id" | "acl">> {
+			_id?: ioBroker.Object["_id"];
+			acl?: ioBroker.Object["acl"];
+		}
 		type PartialObject = PartialStateObject | PartialChannelObject | PartialDeviceObject | PartialOtherObject;
 
 		/** Defines access rights for a single file */
@@ -500,7 +505,7 @@ declare global {
 			 * Determines the mime type for a given file extension
 			 * @param ext File extension, including the leading dot, e.g. ".zip"
 			 */
-			getMimeType(ext: string): {mimeType: string, isBinary: boolean};
+			getMimeType(ext: string): { mimeType: string, isBinary: boolean };
 
 			/**
 			 * Writes a file.
@@ -610,7 +615,7 @@ declare global {
 			 * @param options Mode of the access change as a number or hexadecimal string
 			 * @param callback Is called when the operation has finished (successfully or not)
 			 */
-			chmodFile(id: string, name: string, options: {mode: number | string} | Record<string, any>, callback: ChownFileCallback): void;
+			chmodFile(id: string, name: string, options: { mode: number | string } | Record<string, any>, callback: ChownFileCallback): void;
 
 			// not documented. enabled = true seems to disable the cache
 			// enableFileCache(enabled, options, callback)
@@ -712,8 +717,8 @@ declare global {
 			 * @param options (optional) Some internal options.
 			 * @param callback Is called when the operation has finished (successfully or not)
 			 */
-			setObject(id: string, obj: ioBroker.Object, callback: SetObjectCallback): void;
-			setObject(id: string, obj: ioBroker.Object, options: any, callback: SetObjectCallback): void;
+			setObject(id: string, obj: ioBroker.SettableObject, callback: SetObjectCallback): void;
+			setObject(id: string, obj: ioBroker.SettableObject, options: any, callback: SetObjectCallback): void;
 			/**
 			 * Creates or overwrites an object in the object db
 			 * @param id ID of the object
@@ -721,8 +726,8 @@ declare global {
 			 * @param options (optional) Some internal options.
 			 * @param callback Is called when the operation has finished (successfully or not)
 			 */
-			setConfig(id: string, obj: ioBroker.Object, callback: SetObjectCallback): void;
-			setConfig(id: string, obj: ioBroker.Object, options: any, callback: SetObjectCallback): void;
+			setConfig(id: string, obj: ioBroker.SettableObject, callback: SetObjectCallback): void;
+			setConfig(id: string, obj: ioBroker.SettableObject, options: any, callback: SetObjectCallback): void;
 
 			/**
 			 * Deletes an object in the object db
@@ -1247,7 +1252,7 @@ declare global {
 			 * @param options Mode of the access change as a number or hexadecimal string
 			 * @param callback Is called when the operation has finished (successfully or not)
 			 */
-			chmodFile(adapter: string | null, path: string, options: {mode: number | string} | Record<string, any>, callback: ChownFileCallback): void;
+			chmodFile(adapter: string | null, path: string, options: { mode: number | string } | Record<string, any>, callback: ChownFileCallback): void;
 
 			// ==============================
 			// formatting
@@ -1378,7 +1383,7 @@ declare global {
 		}
 		type GetObjectListCallback = (err: string | null, result?: { rows: GetObjectListItem[] }) => void;
 
-		type ExtendObjectCallback = (err: string | null, result?: {id: string, value: ioBroker.Object}, id?: string ) => void;
+		type ExtendObjectCallback = (err: string | null, result?: { id: string, value: ioBroker.Object }, id?: string) => void;
 
 		type GetSessionCallback = (session: Session) => void;
 

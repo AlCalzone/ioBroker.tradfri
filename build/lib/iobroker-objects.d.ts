@@ -18,16 +18,16 @@ export declare function extendDevice(accessory: Accessory): void;
  * @param groupInfo The group to update
  */
 export declare function updatePossibleScenes(groupInfo: GroupInfo): Promise<void>;
-export declare function getAccessoryIcon(accessory: Accessory): string;
+export declare function getAccessoryIcon(accessory: Accessory): string | undefined;
 /**
  * Returns the ioBroker id of the root object for the given state
  */
-export declare function getRootId(stateId: string): string;
+export declare function getRootId(stateId: string): string | undefined;
 /**
  * Extracts the instance id from a given state or object id
  * @param id State or object id whose instance id should be extracted
  */
-export declare function getInstanceId(id: string): number;
+export declare function getInstanceId(id: string): number | undefined;
 /**
  * Determines the object ID under which the given accessory should be stored
  */

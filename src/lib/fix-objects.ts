@@ -1,7 +1,8 @@
-import * as fs from "fs";
-import * as path from "path";
+import { values } from "alcalzone-shared/objects";
 import { Global as _ } from "./global";
-import { values } from "./object-polyfill";
+
+import { instanceObjects as _instanceObjects } from "../../io-package.json";
+const instanceObjects = _instanceObjects as ioBroker.Object[];
 
 /**
  * Fixes/updates/deletes existing adapter objects,
@@ -74,15 +75,10 @@ async function fixBrightnessRole(stateObjs: ioBroker.Object[]) {
 
 // Workaround für unvollständige Adapter-Upgrades
 export async function ensureInstanceObjects(): Promise<void> {
-	// read io-package.json
-	const ioPack = JSON.parse(
-		fs.readFileSync(path.join(__dirname, "../../io-package.json"), "utf8"),
-	);
-
-	if (ioPack.instanceObjects == null || ioPack.instanceObjects.length === 0) return;
+	if (instanceObjects == null || instanceObjects.length === 0) return;
 
 	// wait for all instance objects to be created
-	const setObjects = ioPack.instanceObjects.map(
+	const setObjects = instanceObjects.map(
 		obj => _.adapter.$setObjectNotExists(obj._id, obj),
 	);
 	await Promise.all(setObjects);

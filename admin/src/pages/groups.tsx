@@ -24,7 +24,7 @@ const ADD_GROUP_BUTTON_ID = "btnAddGroup";
 
 export class Groups extends React.Component<GroupsProps, any> {
 
-	constructor(props) {
+	constructor(props: GroupsProps) {
 		super(props);
 	}
 
@@ -67,8 +67,8 @@ export class Groups extends React.Component<GroupsProps, any> {
 	}
 
 	private devicesToDropdownSource(devices: DeviceDictionary) {
-		const ret = {};
-		for (const key of Object.keys(devices)) {
+		const ret: Record<keyof DeviceDictionary, string> = {};
+		for (const key of Object.keys(devices) as (keyof DeviceDictionary)[]) {
 			ret[key] = devices[key].name;
 		}
 		return ret;

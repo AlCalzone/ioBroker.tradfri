@@ -7,4 +7,4 @@
 export declare function intersect(a: number[], b: number[]): number[];
 export declare function except<T>(a: T[], b: T[]): T[];
 export declare function range(min: number, max: number): number[];
-export declare function firstOrDefault<T>(arr: T[], filter: (item: T) => boolean): T;
+export declare function firstOrDefault<T>(arr: T[], filter: (item: T) => boolean): T | null;
