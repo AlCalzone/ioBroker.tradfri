@@ -1,4 +1,4 @@
-import { native } from "../io-package.json";
+import { native } from "../../io-package.json";
 
 type _AdapterConfig = Partial<typeof native>;
 
