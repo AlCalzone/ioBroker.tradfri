@@ -48,13 +48,20 @@ The result object `ret` looks as follows:
 
 #### _WORK IN PROGRESS_
 * (AlCalzone) When `node-aead-crypto` is not installed, display instructions on how to fix it
-
-#### 1.5.1 (2018-10-29)
-* (AlCalzone) Added experimental support for smart plugs
+* (AlCalzone) Optimizations and fixes under the hood
 
 #### 2.0.0 (2018-05-14)
 * (AlCalzone) Support for Admin v3 and material design
 * (AlCalzone) **BREAKING:** Dropped support for Admin v2
+
+#### 1.5.4 (2018-11-11)
+* (AlCalzone) Fix handling of decimal digits in the adapter settings. This fixes rounding of group states.
+
+#### 1.5.2 (2018-11-06)
+* (AlCalzone) Reworked installation procedure to fix problems with `node-aead-crypto`
+
+#### 1.5.1 (2018-10-29)
+* (AlCalzone) Added experimental support for smart plugs
 
 #### 1.4.0 (2018-05-14)
 * (AlCalzone) The names of state objects no longer get overwritten
