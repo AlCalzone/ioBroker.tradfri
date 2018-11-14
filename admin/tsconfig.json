@@ -1,0 +1,16 @@
+{
+    "extends": "../tsconfig.json",
+    "compileOnSave": true,
+    "compilerOptions": {
+        "noEmit": false,
+        "outDir": "./build/",
+
+        "sourceMap": true,
+        "sourceRoot": "./src/"
+    },
+    "include": [
+        "./**/*.ts*",
+        "../src/lib/ioBroker.d.ts",
+        "../src/lib/adapter-config.d.ts"
+    ]
+}

@@ -19,6 +19,7 @@ function Header() {
 	);
 }
 
+// TODO: Remove `any`
 export class Root extends React.Component<any, any> {
 
 	constructor(props) {
@@ -79,8 +80,8 @@ export class Root extends React.Component<any, any> {
 
 }
 
-let curSettings: Record<string, any>;
-let originalSettings: Record<string, any>;
+let curSettings: ioBroker.AdapterConfig;
+let originalSettings: ioBroker.AdapterConfig;
 
 /**
  * Checks if any setting was changed

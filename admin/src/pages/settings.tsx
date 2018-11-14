@@ -3,11 +3,11 @@ import * as ReactDOM from "react-dom";
 
 import { $window, _, instance } from "../lib/adapter";
 
-export type OnSettingsChangedCallback = (newSettings: Record<string, any>) => void;
+export type OnSettingsChangedCallback = (newSettings: ioBroker.AdapterConfig) => void;
 
 interface SettingsProps {
 	onChange: OnSettingsChangedCallback;
-	settings: Record<string, any>;
+	settings: ioBroker.AdapterConfig;
 }
 
 interface LabelProps {
@@ -54,7 +54,7 @@ function Tooltip(props) {
 	return <img className="admin-tooltip-icon" src="../../img/info.png" title={_(props.text)} />;
 }
 
-export class Settings extends React.Component<SettingsProps, Record<string, any>> {
+export class Settings extends React.Component<SettingsProps, ioBroker.AdapterConfig> {
 
 	constructor(props: SettingsProps) {
 		super(props);
@@ -62,19 +62,14 @@ export class Settings extends React.Component<SettingsProps, Record<string, any>
 		this.state = {
 			...props.settings,
 		};
-		// remember the original settings
-		this.originalSettings = { ...props.settings };
 
 		// setup change handlers
 		this.handleChange = this.handleChange.bind(this);
 	}
 
-	private onChange: OnSettingsChangedCallback;
-	private originalSettings: Record<string, any>;
-
 	private chkPreserveTransitionTime: HTMLInputElement;
 
-	private parseChangedSetting(target: HTMLInputElement | HTMLSelectElement): number | string | string[] | boolean {
+	private parseChangedSetting(target: HTMLInputElement | HTMLSelectElement): ioBroker.AdapterConfig[keyof ioBroker.AdapterConfig] {
 		// Checkboxes in MaterializeCSS are messed up, so we attach our own handler
 		// However that one gets called before the underlying checkbox is actually updated,
 		// so we need to invert the checked value here
@@ -90,7 +85,7 @@ export class Settings extends React.Component<SettingsProps, Record<string, any>
 		const value = this.parseChangedSetting(target);
 
 		// store the setting
-		this.putSetting(target.id, value, () => {
+		this.putSetting(target.id as keyof ioBroker.AdapterConfig, value, () => {
 			// and notify the admin UI about changes
 			this.props.onChange(this.state);
 		});
@@ -102,16 +97,22 @@ export class Settings extends React.Component<SettingsProps, Record<string, any>
 	 * Reads a setting from the state object and transforms the value into the correct format
 	 * @param key The setting key to lookup
 	 */
-	private getSetting<T = string | number | string[] | boolean>(key: string, defaultValue?: T): T {
-		const ret = this.state[key] as T | undefined;
+	private getSetting<
+		TKey extends keyof ioBroker.AdapterConfig,
+		TSetting extends ioBroker.AdapterConfig[TKey] = ioBroker.AdapterConfig[TKey],
+	>(key: TKey, defaultValue?: TSetting): TSetting {
+		const ret = this.state[key] as TSetting;
 		return ret != undefined ? ret : defaultValue;
 	}
 	/**
 	 * Saves a setting in the state object and transforms the value into the correct format
 	 * @param key The setting key to store at
 	 */
-	private putSetting(key: string, value: string | number | string[] | boolean, callback?: () => void): void {
-		this.setState({ [key]: value as any }, callback);
+	private putSetting<
+		TKey extends keyof ioBroker.AdapterConfig,
+		TSetting extends ioBroker.AdapterConfig[TKey],
+	>(key: TKey, value: TSetting, callback?: () => void): void {
+		this.setState({ [key]: value } as unknown as Pick<ioBroker.AdapterConfig, TKey>, callback);
 	}
 
 	public componentWillUnmount() {
@@ -161,23 +162,4 @@ export class Settings extends React.Component<SettingsProps, Record<string, any>
 		);
 	}
 
-	public oldrender() {
-		return (
-			<p key="content" className="settings-table">
-
-				<Label for="securityCode" text="Security-Code:" />
-				<Tooltip text="security code tooltip" />
-				<input className="value" id="securityCode" value={this.getSetting("securityCode")} onChange={this.handleChange} />
-				<span>{_("code not stored")}</span><br />
-
-				<Label for="preserveTransitionTime" text="Preserve transition time:" />
-				<Tooltip text="transition time tooltip" />
-				<input type="checkbox" className="value" id="preserveTransitionTime" defaultChecked={this.getSetting("preserveTransitionTime")} onChange={this.handleChange} /><br />
-
-				<Label for="roundToDigits" text="Decimal places:" />
-				<Tooltip text="roundto tooltip" />
-				<input type="number" min="0" max="2" className="value" id="roundToDigits" value={this.getSetting("roundToDigits", 2)} onChange={this.handleChange}  />
-			</p >
-		);
-	}
 }

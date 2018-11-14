@@ -102,10 +102,10 @@ let adapter: ExtendedAdapter = utils.adapter({
 		subscribeStates(/L\-\d+\.lightbulb\./, syncGroupsWithState);
 
 		// Auth-Parameter laden
-		const hostname = (adapter.config.host as string).toLowerCase();
-		const securityCode = (adapter.config.securityCode as string);
-		let identity = (adapter.config.identity as string);
-		let psk = (adapter.config.psk as string);
+		const hostname = adapter.config.host.toLowerCase();
+		const securityCode = adapter.config.securityCode;
+		let identity = adapter.config.identity;
+		let psk = adapter.config.psk;
 
 		$.tradfri = new TradfriClient(hostname, {
 			customLogger: _.log,
@@ -540,9 +540,9 @@ let adapter: ExtendedAdapter = utils.adapter({
 	},
 }) as ExtendedAdapter;
 
-async function updateConfig(newConfig: Record<string, any>) {
+async function updateConfig(newConfig: Partial<ioBroker.AdapterConfig>) {
 	// Create the config object
-	const config: Record<string, any> = {
+	const config: ioBroker.AdapterConfig = {
 		...adapter.config,
 		...newConfig,
 	};

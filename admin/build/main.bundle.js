@@ -169,6 +169,7 @@ const namespace = `tradfri.${adapter_1.instance}`;
 function Header() {
     return (React.createElement("h3", { className: "translate", "data-role": "adapter-name" }, adapter_1._("Tradfri adapter settings")));
 }
+// TODO: Remove `any`
 class Root extends React.Component {
     constructor(props) {
         super(props);
@@ -402,8 +403,6 @@ class Settings extends React.Component {
         super(props);
         // settings are our state
         this.state = Object.assign({}, props.settings);
-        // remember the original settings
-        this.originalSettings = Object.assign({}, props.settings);
         // setup change handlers
         this.handleChange = this.handleChange.bind(this);
     }
@@ -472,21 +471,6 @@ class Settings extends React.Component {
                 React.createElement("div", { className: "col s4 input-field" },
                     React.createElement("input", { type: "number", min: "0", max: "2", className: "value", id: "roundToDigits", value: this.getSetting("roundToDigits") || 2, onChange: this.handleChange }),
                     React.createElement(Label, { for: "roundToDigits", text: "Decimal places:", tooltip: "roundto tooltip" })))));
-    }
-    oldrender() {
-        return (React.createElement("p", { key: "content", className: "settings-table" },
-            React.createElement(Label, { for: "securityCode", text: "Security-Code:" }),
-            React.createElement(Tooltip, { text: "security code tooltip" }),
-            React.createElement("input", { className: "value", id: "securityCode", value: this.getSetting("securityCode"), onChange: this.handleChange }),
-            React.createElement("span", null, adapter_1._("code not stored")),
-            React.createElement("br", null),
-            React.createElement(Label, { for: "preserveTransitionTime", text: "Preserve transition time:" }),
-            React.createElement(Tooltip, { text: "transition time tooltip" }),
-            React.createElement("input", { type: "checkbox", className: "value", id: "preserveTransitionTime", defaultChecked: this.getSetting("preserveTransitionTime"), onChange: this.handleChange }),
-            React.createElement("br", null),
-            React.createElement(Label, { for: "roundToDigits", text: "Decimal places:" }),
-            React.createElement(Tooltip, { text: "roundto tooltip" }),
-            React.createElement("input", { type: "number", min: "0", max: "2", className: "value", id: "roundToDigits", value: this.getSetting("roundToDigits", 2), onChange: this.handleChange })));
     }
 }
 exports.Settings = Settings;
