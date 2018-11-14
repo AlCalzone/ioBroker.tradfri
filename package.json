@@ -30,6 +30,7 @@
     "@types/sinon": "^4.3.3",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
+    "cpx": "^1.5.0",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
     "gulp": "^3.9.1",
@@ -68,7 +69,7 @@
     "url": "https://github.com/AlCalzone/ioBroker.tradfri"
   },
   "scripts": {
-    "prebuild": "rimraf ./build",
+    "prebuild": "rimraf ./build && cpx \"io-package.json\" src",
     "build:ts": "tsc -p src/tsconfig.json",
     "build:webpack": "webpack --config webpack.config.js",
     "build": "npm run build:ts && npm run build:webpack",
