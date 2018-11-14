@@ -29,8 +29,8 @@ import {
 } from "node-tradfri-client";
 
 // Eigene Module laden
+import { composeObject, entries, values } from "alcalzone-shared/objects";
 import { ExtendedAdapter, Global as _ } from "./lib/global";
-import { composeObject, entries, values } from "./lib/object-polyfill";
 
 // Datentypen laden
 import { VirtualGroup } from "./lib/virtual-group";
@@ -150,7 +150,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 		} else {
 			// connect with previously negotiated identity and psk
 			try {
-				await $.tradfri.connect(identity, psk);
+				await $.tradfri.connect(identity!, psk!);
 			} catch (e) {
 				if (e instanceof TradfriError) {
 					switch (e.code) {
@@ -222,6 +222,8 @@ let adapter: ExtendedAdapter = utils.adapter({
 			if (obj) {
 				// first check if we have to modify a device/group/whatever
 				const instanceId = getInstanceId(id);
+				if (instanceId == undefined) return;
+
 				if (obj.type === "device" && instanceId in $.devices && $.devices[instanceId] != null) {
 					// if this device is in the device list, check for changed properties
 					const acc = $.devices[instanceId];
@@ -304,7 +306,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 						}
 						const group = $.groups[rootObj.native.instanceId].group;
 						// if the change was acknowledged, update the state later
-						let wasAcked: boolean;
+						let wasAcked: boolean = false;
 
 						if (id.endsWith(".state")) {
 							wasAcked = !await group.toggle(val);
@@ -374,7 +376,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 						}
 						const vGroup = $.virtualGroups[rootObj.native.instanceId];
 
-						let operation: LightOperation;
+						let operation: LightOperation | undefined;
 						let wasAcked: boolean = false;
 
 						if (id.endsWith(".state")) {
@@ -452,7 +454,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 							}
 
 							// if the change was acknowledged, update the state later
-							let wasAcked: boolean;
+							let wasAcked: boolean = false;
 
 							// operate the lights depending on the set state
 							// if no request was sent, we can ack the state immediately
@@ -583,7 +585,7 @@ async function tradfri_groupUpdated(group: Group) {
 	if (!(group.instanceId in $.groups)) {
 		// if there's none, create one
 		$.groups[group.instanceId] = {
-			group: null,
+			group: null!, // we'll assign this directly after the if branch
 			scenes: {},
 		};
 	}
@@ -642,8 +644,10 @@ async function getTransitionDuration(accessoryOrGroup: Accessory | Group | Virtu
 		switch (accessoryOrGroup.type) {
 			case AccessoryTypes.lightbulb:
 				stateId = calcObjId(accessoryOrGroup) + ".lightbulb.transitionDuration";
+			default:
+				return 0; // other accessories have no transition duration
 		}
-	} else if (accessoryOrGroup instanceof Group || accessoryOrGroup instanceof VirtualGroup) {
+	} else /* if (accessoryOrGroup instanceof Group || accessoryOrGroup instanceof VirtualGroup) */ {
 		stateId = calcGroupId(accessoryOrGroup) + ".transitionDuration";
 	}
 	const ret = await adapter.$getState(stateId);
@@ -667,7 +671,7 @@ async function loadVirtualGroups(): Promise<void> {
 	Object.assign($.virtualGroups, composeObject<VirtualGroup>(
 		groupObjects.map(g => {
 			const id: number = g.native.instanceId;
-			const deviceIDs: number[] = g.native.deviceIDs.map(d => parseInt(d, 10));
+			const deviceIDs: number[] = g.native.deviceIDs.map((d: string) => parseInt(d, 10));
 			const ret = new VirtualGroup(id);
 			ret.deviceIDs = deviceIDs;
 			ret.name = g.common.name;

@@ -50,7 +50,7 @@ function CheckboxLabel(props: CheckboxLabelProps) {
 }
 
 /** Helper component for a tooltip */
-function Tooltip(props) {
+function Tooltip(props: {text: string}) {
 	return <img className="admin-tooltip-icon" src="../../img/info.png" title={_(props.text)} />;
 }
 
@@ -67,7 +67,7 @@ export class Settings extends React.Component<SettingsProps, ioBroker.AdapterCon
 		this.handleChange = this.handleChange.bind(this);
 	}
 
-	private chkPreserveTransitionTime: HTMLInputElement;
+	private chkPreserveTransitionTime: HTMLInputElement | null | undefined;
 
 	private parseChangedSetting(target: HTMLInputElement | HTMLSelectElement): ioBroker.AdapterConfig[keyof ioBroker.AdapterConfig] {
 		// Checkboxes in MaterializeCSS are messed up, so we attach our own handler
@@ -100,7 +100,7 @@ export class Settings extends React.Component<SettingsProps, ioBroker.AdapterCon
 	private getSetting<
 		TKey extends keyof ioBroker.AdapterConfig,
 		TSetting extends ioBroker.AdapterConfig[TKey] = ioBroker.AdapterConfig[TKey],
-	>(key: TKey, defaultValue?: TSetting): TSetting {
+	>(key: TKey, defaultValue?: TSetting): TSetting | undefined {
 		const ret = this.state[key] as TSetting;
 		return ret != undefined ? ret : defaultValue;
 	}
@@ -154,7 +154,7 @@ export class Settings extends React.Component<SettingsProps, ioBroker.AdapterCon
 						</label>
 					</div>
 					<div className="col s4 input-field">
-						<input type="number" min="0" max="2" className="value" id="roundToDigits" value={this.getSetting("roundToDigits") || 2} onChange={this.handleChange} />
+						<input type="number" min="0" max="2" className="value" id="roundToDigits" value={this.getSetting("roundToDigits", 2)} onChange={this.handleChange} />
 						<Label for="roundToDigits" text="Decimal places:" tooltip="roundto tooltip" />
 					</div>
 				</div>

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const object_polyfill_1 = require("./object-polyfill");
+const objects_1 = require("alcalzone-shared/objects");
 class VirtualGroup {
     constructor(instanceId) {
         this.instanceId = instanceId;
@@ -9,7 +9,7 @@ class VirtualGroup {
      * Updates this virtual group's state with the changes contained in the given operation
      */
     merge(operation) {
-        for (const [prop, val] of object_polyfill_1.entries(operation)) {
+        for (const [prop, val] of objects_1.entries(operation)) {
             if (this.hasOwnProperty(prop))
                 this[prop] = val;
         }

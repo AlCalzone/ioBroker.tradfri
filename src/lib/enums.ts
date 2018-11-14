@@ -1,4 +1,4 @@
-import { entries } from "./object-polyfill";
+import { entries } from "alcalzone-shared/objects";
 
 export interface Enumeration { [id: string]: number; }
 

@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const object_polyfill_1 = require("./object-polyfill");
+const objects_1 = require("alcalzone-shared/objects");
 function getEnumValueAsName(enumeration, value) {
-    for (const [id, val] of object_polyfill_1.entries(enumeration)) {
+    for (const [id, val] of objects_1.entries(enumeration)) {
         if (val === value)
             return id;
     }

@@ -1,8 +1,9 @@
+import { entries, filter, values } from "alcalzone-shared/objects";
 import { Accessory, AccessoryTypes, Group } from "node-tradfri-client";
 import { Global as _ } from "../lib/global";
 import { calcGroupId, getInstanceId, groupToCommon, groupToNative, objectDefinitions } from "../lib/iobroker-objects";
 import { roundTo } from "../lib/math";
-import { dig, entries, filter, values } from "../lib/object-polyfill";
+import { dig } from "../lib/object-polyfill";
 import { VirtualGroup } from "../lib/virtual-group";
 import { session as $ } from "./session";
 
@@ -106,12 +107,12 @@ export function extendGroup(group: Group) {
 		for (const [id, obj] of entries(stateObjs)) {
 			try {
 				// Object could have a default value, find it
-				let newValue = dig<any>(group, obj.native.path);
+				let newValue = dig(group, obj.native.path);
 				const roundToDigits = _.adapter.config.roundToDigits;
 				if (typeof roundToDigits === "number" && typeof newValue === "number") {
 					newValue = roundTo(newValue, roundToDigits);
 				}
-				_.adapter.setState(id, newValue, true);
+				_.adapter.setState(id, newValue as any, true);
 			} catch (e) {/* skip this value */ }
 		}
 
@@ -155,7 +156,7 @@ export function extendGroup(group: Group) {
 }
 
 /** Returns the only value in the given array if they are all the same, otherwise null */
-function getCommonValue<T>(arr: T[]): T {
+function getCommonValue<T>(arr: T[]): T | null {
 	for (let i = 1; i < arr.length; i++) {
 		if (arr[i] !== arr[i - 1]) return null;
 	}
@@ -173,7 +174,7 @@ function debounce(id: string, action: () => void, timeout: number) {
 	}, timeout);
 }
 
-async function updateGroupState(id: string, value: string | number | boolean | ioBroker.State): Promise<void> {
+async function updateGroupState(id: string, value: string | number | boolean | ioBroker.State | null): Promise<void> {
 	const curState = await _.adapter.$getState(id);
 	if (curState != null && value == null) {
 		await _.adapter.$delState(id);
@@ -195,7 +196,9 @@ export function updateMultipleGroupStates(changedAccessory?: Accessory, changedS
 	const groupsToUpdate: (Group | VirtualGroup)[] =
 		values($.groups).map(g => g.group as (Group | VirtualGroup))
 		.concat(values($.virtualGroups))
-		.filter(g => changedAccessory == null || g.deviceIDs.indexOf(changedAccessory.instanceId) > -1)
+		.filter(g => changedAccessory == null || (
+			g.deviceIDs != undefined && g.deviceIDs.indexOf(changedAccessory.instanceId) > -1
+		))
 		;
 	for (const group of groupsToUpdate) {
 		updateGroupStates(group, changedStateId);
@@ -224,14 +227,16 @@ export function updateGroupStates(group: Group | VirtualGroup, changedStateId?: 
 	// Try to update the on/off state
 	if (changedStateId == null || changedStateId.endsWith("lightbulb.state")) {
 		const commonState = getCommonValue(groupBulbs.map(b => b.onOff));
-		group.onOff = commonState;
+		// TODO: Assigning null is not allowed as per the node-tradfri-client definitions but it works
+		group.onOff = commonState!;
 		const stateId = `${objId}.state`;
 		debounce(stateId, () => updateGroupState(stateId, commonState), debounceTimeout);
 	}
 	// Try to update the brightness state
 	if (changedStateId == null || changedStateId.endsWith("lightbulb.brightness")) {
 		const commonState = getCommonValue(groupBulbs.map(b => b.dimmer));
-		group.dimmer = commonState;
+		// TODO: Assigning null is not allowed as per the node-tradfri-client definitions but it works
+		group.dimmer = commonState!;
 		const stateId = `${objId}.brightness`;
 		debounce(stateId, () => updateGroupState(stateId, commonState), debounceTimeout);
 	}
@@ -263,9 +268,10 @@ export function updateGroupStates(group: Group | VirtualGroup, changedStateId?: 
 
 // gets called when a lightbulb state gets updated
 // we use this to sync group states because those are not advertised by the gateway
-export function syncGroupsWithState(id: string, state: ioBroker.State) {
+export function syncGroupsWithState(id: string, state: ioBroker.State | null | undefined) {
 	if (state && state.ack) {
 		const instanceId = getInstanceId(id);
+		if (instanceId == undefined) return;
 		if (instanceId in $.devices && $.devices[instanceId] != null) {
 			const accessory = $.devices[instanceId];
 			updateMultipleGroupStates(accessory, id);

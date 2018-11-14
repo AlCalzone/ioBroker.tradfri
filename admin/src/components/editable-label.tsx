@@ -15,7 +15,7 @@ interface EditableLabelProps {
 
 export class EditableLabel extends React.Component<EditableLabelProps, EditableLabelState> {
 
-	constructor(props) {
+	constructor(props: EditableLabelProps) {
 		super(props);
 		this.state = {
 			editMode: false,
@@ -23,7 +23,7 @@ export class EditableLabel extends React.Component<EditableLabelProps, EditableL
 		};
 	}
 
-	private txtEdit: HTMLInputElement;
+	private txtEdit: HTMLInputElement | null | undefined;
 
 	private readonly beginEdit = () => {
 		this.setState({editMode: true});
@@ -31,7 +31,7 @@ export class EditableLabel extends React.Component<EditableLabelProps, EditableL
 	}
 	private readonly onEdit = () => {
 		this.setState({
-			text: this.txtEdit.value,
+			text: this.txtEdit!.value,
 		});
 	}
 	private readonly endEdit = (save: boolean = true) => {

@@ -23,21 +23,22 @@ function checkPattern(pattern) {
         }
         else {
             // NOPE
-            throw new Error("must be regex or string");
+            throw new Error("The pattern must be regex or string");
         }
     }
     catch (e) {
-        global_1.Global.log("cannot subscribe with this pattern. reason: " + e);
-        return null;
+        global_1.Global.log("cannot subscribe with this pattern. reason: " + e, "error");
     }
 }
 function applyCustomStateSubscriptions(id, state) {
     try {
         for (const sub of customStateSubscriptions.subscriptions.values()) {
-            if (sub && sub.pattern && sub.callback) {
+            if (sub
+                && sub.pattern
+                && sub.pattern.test(id)
+                && typeof sub.callback === "function") {
                 // Wenn die ID zum aktuellen Pattern passt, dann Callback aufrufen
-                if (sub.pattern.test(id))
-                    sub.callback(id, state);
+                sub.callback(id, state);
             }
         }
     }
@@ -49,10 +50,12 @@ exports.applyCustomStateSubscriptions = applyCustomStateSubscriptions;
 function applyCustomObjectSubscriptions(id, obj) {
     try {
         for (const sub of customObjectSubscriptions.subscriptions.values()) {
-            if (sub && sub.pattern && sub.callback) {
+            if (sub
+                && sub.pattern
+                && sub.pattern.test(id)
+                && typeof sub.callback === "function") {
                 // Wenn die ID zum aktuellen Pattern passt, dann Callback aufrufen
-                if (sub.pattern.test(id))
-                    sub.callback(id, obj);
+                sub.callback(id, obj);
             }
         }
     }
@@ -68,12 +71,12 @@ exports.applyCustomObjectSubscriptions = applyCustomObjectSubscriptions;
  * @returns a subscription ID
  */
 function subscribeStates(pattern, callback) {
-    pattern = checkPattern(pattern);
-    if (!pattern)
+    const checkedPattern = checkPattern(pattern);
+    if (checkedPattern == undefined)
         return;
     const newCounter = (++customStateSubscriptions.counter);
     const id = "" + newCounter;
-    customStateSubscriptions.subscriptions.set(id, { pattern, callback });
+    customStateSubscriptions.subscriptions.set(id, { pattern: checkedPattern, callback });
     return id;
 }
 exports.subscribeStates = subscribeStates;
@@ -94,12 +97,12 @@ exports.unsubscribeStates = unsubscribeStates;
  * @returns a subscription ID
  */
 function subscribeObjects(pattern, callback) {
-    pattern = checkPattern(pattern);
-    if (!pattern)
+    const checkedPattern = checkPattern(pattern);
+    if (checkedPattern == undefined)
         return;
     const newCounter = (++customObjectSubscriptions.counter);
     const id = "" + newCounter;
-    customObjectSubscriptions.subscriptions.set(id, { pattern, callback });
+    customObjectSubscriptions.subscriptions.set(id, { pattern: checkedPattern, callback });
     return id;
 }
 exports.subscribeObjects = subscribeObjects;
@@ -113,3 +116,9 @@ function unsubscribeObjects(id) {
     }
 }
 exports.unsubscribeObjects = unsubscribeObjects;
+/** Clears all custom subscriptions */
+function clearCustomSubscriptions() {
+    customStateSubscriptions.subscriptions.clear();
+    customObjectSubscriptions.subscriptions.clear();
+}
+exports.clearCustomSubscriptions = clearCustomSubscriptions;

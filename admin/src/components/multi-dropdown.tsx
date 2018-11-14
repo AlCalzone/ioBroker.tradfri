@@ -20,7 +20,7 @@ interface MultiDropdownState {
 
 export class MultiDropdown extends React.Component<MultiDropdownProps, MultiDropdownState> {
 
-	constructor(props) {
+	constructor(props: MultiDropdownProps) {
 		super(props);
 		this.state = {
 			checkedOptions: props.checkedOptions,
@@ -29,8 +29,8 @@ export class MultiDropdown extends React.Component<MultiDropdownProps, MultiDrop
 		this.readStateFromUI = this.readStateFromUI.bind(this);
 	}
 
-	private dropdown: HTMLSelectElement;
-	private mcssSelect: M.FormSelect;
+	private dropdown: HTMLSelectElement | null | undefined;
+	private mcssSelect: M.FormSelect | null | undefined;
 
 	public componentDidMount() {
 		this.updateUI();
@@ -53,6 +53,7 @@ export class MultiDropdown extends React.Component<MultiDropdownProps, MultiDrop
 	}
 
 	private updateUI() {
+		if (!this.dropdown) return;
 		const $dropdown = $(this.dropdown);
 		$dropdown.find("option:selected").prop("selected", false);
 		this.state.checkedOptions.forEach(val => {
@@ -61,6 +62,7 @@ export class MultiDropdown extends React.Component<MultiDropdownProps, MultiDrop
 	}
 
 	private readStateFromUI() {
+		if (!this.mcssSelect) return;
 		// read data from UI
 		this.setState({checkedOptions: this.mcssSelect.getSelectedValues()}, () => {
 			// update the adapter settings

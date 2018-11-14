@@ -2,7 +2,8 @@ import { Accessory, GroupInfo, TradfriClient } from "node-tradfri-client";
 import { VirtualGroup } from "../lib/virtual-group";
 
 export class Session {
-	public tradfri: TradfriClient;
+	// We know this will be definitely assigned in the adapter ready callback
+	public tradfri!: TradfriClient;
 
 	/** dictionary of known devices */
 	public devices: Record<string, Accessory> = {};

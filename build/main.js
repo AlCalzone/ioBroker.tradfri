@@ -27,8 +27,8 @@ catch (e) {
 // actually load them now
 const node_tradfri_client_1 = require("node-tradfri-client");
 // Eigene Module laden
+const objects_1 = require("alcalzone-shared/objects");
 const global_1 = require("./lib/global");
-const object_polyfill_1 = require("./lib/object-polyfill");
 // Datentypen laden
 const virtual_group_1 = require("./lib/virtual-group");
 // Adapter-Utils laden
@@ -197,6 +197,8 @@ let adapter = utils_1.default.adapter({
             if (obj) {
                 // first check if we have to modify a device/group/whatever
                 const instanceId = iobroker_objects_1.getInstanceId(id);
+                if (instanceId == undefined)
+                    return;
                 if (obj.type === "device" && instanceId in session_1.session.devices && session_1.session.devices[instanceId] != null) {
                     // if this device is in the device list, check for changed properties
                     const acc = session_1.session.devices[instanceId];
@@ -276,7 +278,7 @@ let adapter = utils_1.default.adapter({
                         }
                         const group = session_1.session.groups[rootObj.native.instanceId].group;
                         // if the change was acknowledged, update the state later
-                        let wasAcked;
+                        let wasAcked = false;
                         if (id.endsWith(".state")) {
                             wasAcked = !(yield group.toggle(val));
                         }
@@ -425,7 +427,7 @@ let adapter = utils_1.default.adapter({
                                 return;
                             }
                             // if the change was acknowledged, update the state later
-                            let wasAcked;
+                            let wasAcked = false;
                             // operate the lights depending on the set state
                             // if no request was sent, we can ack the state immediately
                             if (id.endsWith(".state")) {
@@ -607,9 +609,11 @@ function getTransitionDuration(accessoryOrGroup) {
             switch (accessoryOrGroup.type) {
                 case node_tradfri_client_1.AccessoryTypes.lightbulb:
                     stateId = iobroker_objects_1.calcObjId(accessoryOrGroup) + ".lightbulb.transitionDuration";
+                default:
+                    return 0; // other accessories have no transition duration
             }
         }
-        else if (accessoryOrGroup instanceof node_tradfri_client_1.Group || accessoryOrGroup instanceof virtual_group_1.VirtualGroup) {
+        else /* if (accessoryOrGroup instanceof Group || accessoryOrGroup instanceof VirtualGroup) */ {
             stateId = iobroker_objects_1.calcGroupId(accessoryOrGroup) + ".transitionDuration";
         }
         const ret = yield adapter.$getState(stateId);
@@ -625,28 +629,28 @@ function loadVirtualGroups() {
     return __awaiter(this, void 0, void 0, function* () {
         // find all defined virtual groups
         const iobObjects = yield global_1.Global.$$(`${adapter.namespace}.VG-*`, "channel");
-        const groupObjects = object_polyfill_1.values(iobObjects).filter(g => {
+        const groupObjects = objects_1.values(iobObjects).filter(g => {
             return g.native != null &&
                 g.native.instanceId != null &&
                 g.native.deviceIDs != null &&
                 g.native.type === "virtual group";
         });
         // load them into the virtualGroups dict
-        Object.assign(session_1.session.virtualGroups, object_polyfill_1.composeObject(groupObjects.map(g => {
+        Object.assign(session_1.session.virtualGroups, objects_1.composeObject(groupObjects.map(g => {
             const id = g.native.instanceId;
-            const deviceIDs = g.native.deviceIDs.map(d => parseInt(d, 10));
+            const deviceIDs = g.native.deviceIDs.map((d) => parseInt(d, 10));
             const ret = new virtual_group_1.VirtualGroup(id);
             ret.deviceIDs = deviceIDs;
             ret.name = g.common.name;
             return [`${id}`, ret];
         })));
         // remember the actual objects
-        for (const obj of object_polyfill_1.values(session_1.session.virtualGroups)) {
+        for (const obj of objects_1.values(session_1.session.virtualGroups)) {
             const id = iobroker_objects_1.calcGroupId(obj);
             session_1.session.objects[id] = iobObjects[id];
             // also remember all states
             const stateObjs = yield global_1.Global.$$(`${id}.*`, "state");
-            for (const [sid, sobj] of object_polyfill_1.entries(stateObjs)) {
+            for (const [sid, sobj] of objects_1.entries(stateObjs)) {
                 session_1.session.objects[sid] = sobj;
             }
         }
@@ -659,7 +663,7 @@ function loadDevices() {
     return __awaiter(this, void 0, void 0, function* () {
         // find all defined devices
         const iobObjects = yield global_1.Global.$$(`${adapter.namespace}.*`, "device");
-        const deviceObjects = object_polyfill_1.values(iobObjects).filter(d => {
+        const deviceObjects = objects_1.values(iobObjects).filter(d => {
             return d.native &&
                 d.native.instanceId != null;
         });
@@ -668,7 +672,7 @@ function loadDevices() {
             session_1.session.objects[obj._id] = obj;
             // also remember all states
             const stateObjs = yield global_1.Global.$$(`${obj._id}.*`, "state");
-            for (const [sid, sobj] of object_polyfill_1.entries(stateObjs)) {
+            for (const [sid, sobj] of objects_1.entries(stateObjs)) {
                 session_1.session.objects[sid] = sobj;
             }
         }
@@ -681,7 +685,7 @@ function loadGroups() {
     return __awaiter(this, void 0, void 0, function* () {
         // find all defined groups
         const iobObjects = yield global_1.Global.$$(`${adapter.namespace}.G-*`, "channel");
-        const groupObjects = object_polyfill_1.values(iobObjects).filter(g => {
+        const groupObjects = objects_1.values(iobObjects).filter(g => {
             return g.native &&
                 g.native.instanceId != null &&
                 g.native.type === "group";
@@ -691,7 +695,7 @@ function loadGroups() {
             session_1.session.objects[obj._id] = obj;
             // also remember all states
             const stateObjs = yield global_1.Global.$$(`${obj._id}.*`, "state");
-            for (const [sid, sobj] of object_polyfill_1.entries(stateObjs)) {
+            for (const [sid, sobj] of objects_1.entries(stateObjs)) {
                 session_1.session.objects[sid] = sobj;
             }
         }

@@ -5,9 +5,15 @@ import * as ReactDOM from "react-dom";
 
 import { $window, _, instance } from "../lib/adapter";
 
-export class Tabs extends React.Component<any, any> {
+interface TabsProps {
+	id?: string;
+	labels: string[];
+	children: React.ReactNode[];
+}
 
-	constructor(props) {
+export class Tabs extends React.Component<TabsProps> {
+
+	constructor(props: TabsProps) {
 		super(props);
 		this.containerId = this.props.id || "tabs";
 	}
@@ -24,9 +30,11 @@ export class Tabs extends React.Component<any, any> {
 						)}
 					</ul>
 				</div>
-				{this.props.labels.map(
-					(k, i) => <div className="col s12" key={i} id={`${this.containerId}-${i}`}>{this.props.children[i]}</div>,
-				)}
+				{React.Children.map(this.props.children, (child, i) => (
+					<div className="col s12" key={i} id={`${this.containerId}-${i}`}>
+						{child}
+					</div>
+				))}
 			</div>
 		);
 	}

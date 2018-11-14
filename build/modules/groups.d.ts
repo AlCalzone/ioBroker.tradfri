@@ -9,4 +9,4 @@ export declare function extendGroup(group: Group): void;
  */
 export declare function updateMultipleGroupStates(changedAccessory?: Accessory, changedStateId?: string): void;
 export declare function updateGroupStates(group: Group | VirtualGroup, changedStateId?: string): void;
-export declare function syncGroupsWithState(id: string, state: ioBroker.State): void;
+export declare function syncGroupsWithState(id: string, state: ioBroker.State | null | undefined): void;

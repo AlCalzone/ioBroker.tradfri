@@ -8,6 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const objects_1 = require("alcalzone-shared/objects");
 const node_tradfri_client_1 = require("node-tradfri-client");
 const global_1 = require("../lib/global");
 const iobroker_objects_1 = require("../lib/iobroker-objects");
@@ -99,9 +100,9 @@ function extendGroup(group) {
         // ====
         // from here we can update the states
         // filter out the ones belonging to this device with a property path
-        const stateObjs = object_polyfill_1.filter(session_1.session.objects, obj => obj._id.startsWith(objId) && obj.native && obj.native.path);
+        const stateObjs = objects_1.filter(session_1.session.objects, obj => obj._id.startsWith(objId) && obj.native && obj.native.path);
         // for each property try to update the value
-        for (const [id, obj] of object_polyfill_1.entries(stateObjs)) {
+        for (const [id, obj] of objects_1.entries(stateObjs)) {
             try {
                 // Object could have a default value, find it
                 let newValue = object_polyfill_1.dig(group, obj.native.path);
@@ -189,9 +190,9 @@ function updateGroupState(id, value) {
  * @param changedStateId If defined, only update the corresponding states in the group.
  */
 function updateMultipleGroupStates(changedAccessory, changedStateId) {
-    const groupsToUpdate = object_polyfill_1.values(session_1.session.groups).map(g => g.group)
-        .concat(object_polyfill_1.values(session_1.session.virtualGroups))
-        .filter(g => changedAccessory == null || g.deviceIDs.indexOf(changedAccessory.instanceId) > -1);
+    const groupsToUpdate = objects_1.values(session_1.session.groups).map(g => g.group)
+        .concat(objects_1.values(session_1.session.virtualGroups))
+        .filter(g => changedAccessory == null || (g.deviceIDs != undefined && g.deviceIDs.indexOf(changedAccessory.instanceId) > -1));
     for (const group of groupsToUpdate) {
         updateGroupStates(group, changedStateId);
     }
@@ -217,6 +218,7 @@ function updateGroupStates(group, changedStateId) {
     // Try to update the on/off state
     if (changedStateId == null || changedStateId.endsWith("lightbulb.state")) {
         const commonState = getCommonValue(groupBulbs.map(b => b.onOff));
+        // TODO: Assigning null is not allowed as per the node-tradfri-client definitions but it works
         group.onOff = commonState;
         const stateId = `${objId}.state`;
         debounce(stateId, () => updateGroupState(stateId, commonState), debounceTimeout);
@@ -224,6 +226,7 @@ function updateGroupStates(group, changedStateId) {
     // Try to update the brightness state
     if (changedStateId == null || changedStateId.endsWith("lightbulb.brightness")) {
         const commonState = getCommonValue(groupBulbs.map(b => b.dimmer));
+        // TODO: Assigning null is not allowed as per the node-tradfri-client definitions but it works
         group.dimmer = commonState;
         const stateId = `${objId}.brightness`;
         debounce(stateId, () => updateGroupState(stateId, commonState), debounceTimeout);
@@ -259,6 +262,8 @@ exports.updateGroupStates = updateGroupStates;
 function syncGroupsWithState(id, state) {
     if (state && state.ack) {
         const instanceId = iobroker_objects_1.getInstanceId(id);
+        if (instanceId == undefined)
+            return;
         if (instanceId in session_1.session.devices && session_1.session.devices[instanceId] != null) {
             const accessory = session_1.session.devices[instanceId];
             updateMultipleGroupStates(accessory, id);

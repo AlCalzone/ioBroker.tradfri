@@ -1,35 +1,36 @@
-import { entries, filter as objFilter } from "./object-polyfill";
-import { promisify, promisifyNoError } from "./promises";
+import { promisify, promisifyNoError } from "alcalzone-shared/async";
+import { entries, filter as objFilter } from "alcalzone-shared/objects";
 
 // ==================================
 
-const colors = {
-	red: "#db3340",
-	yellow: "#ffa200",
-	green: "#5bb12f",
-	blue: "#0087cb",
-};
+// Disabled for now since there's no more html support in ioBroker
+// const colors = {
+// 	red: "#db3340",
+// 	yellow: "#ffa200",
+// 	green: "#5bb12f",
+// 	blue: "#0087cb",
+// };
 
-const replacements: {
-	[id: string]: [RegExp, string | ((substring: string, ...args: any[]) => string)];
-} = {
-	bold: [/\*{2}(.*?)\*{2}/g, "<b>$1</b>"],
-	italic: [/#{2}(.*?)#{2}/g, "<i>$1</i>"],
-	underline: [/_{2}(.*?)_{2}/g, "<u>$1</u>"],
-	strikethrough: [/\~{2}(.*?)\~{2}/g, "<s>$1</s>"],
-	color: [/\{{2}(\w+)\|(.*?)\}{2}/, (str, p1, p2) => {
-		const color = colors[p1];
-		if (!color) return str;
+// const replacements: {
+// 	[id: string]: [RegExp, string | ((substring: string, ...args: any[]) => string)];
+// } = {
+// 	bold: [/\*{2}(.*?)\*{2}/g, "<b>$1</b>"],
+// 	italic: [/#{2}(.*?)#{2}/g, "<i>$1</i>"],
+// 	underline: [/_{2}(.*?)_{2}/g, "<u>$1</u>"],
+// 	strikethrough: [/\~{2}(.*?)\~{2}/g, "<s>$1</s>"],
+// 	color: [/\{{2}(\w+)\|(.*?)\}{2}/, (str, p1, p2) => {
+// 		const color = colors[p1];
+// 		if (!color) return str;
 
-		return `<span style="color: ${color}">${p2}</span>`;
-	}],
-	fullcolor: [/^\{{2}(\w+)\}{2}(.*?)$/, (str, p1, p2) => {
-		const color = colors[p1];
-		if (!color) return str;
+// 		return `<span style="color: ${color}">${p2}</span>`;
+// 	}],
+// 	fullcolor: [/^\{{2}(\w+)\}{2}(.*?)$/, (str, p1, p2) => {
+// 		const color = colors[p1];
+// 		if (!color) return str;
 
-		return `<span style="color: ${color}">${p2}</span>`;
-	}],
-};
+// 		return `<span style="color: ${color}">${p2}</span>`;
+// 	}],
+// };
 
 export interface ExtendedAdapter extends ioBroker.Adapter {
 	__isExtended: boolean;
@@ -39,17 +40,17 @@ export interface ExtendedAdapter extends ioBroker.Adapter {
 	/** Get all states, channels and devices of this adapter */
 	$getAdapterObjects(): Promise<Record<string, ioBroker.Object>>;
 	/** Creates or overwrites an object in the object db */
-	$setObject(id: string, obj: ioBroker.Object, options?: any): Promise<{ id: string }>;
+	$setObject(id: string, obj: ioBroker.SettableObject, options?: any): Promise<{ id: string }>;
 	/** Creates an object in the object db if it doesn't exist yet */
-	$setObjectNotExists(id: string, obj: ioBroker.Object, options?: any): Promise<{ id: string }>;
+	$setObjectNotExists(id: string, obj: ioBroker.SettableObject, options?: any): Promise<{ id: string }>;
 	/** Extends an object in the object db */
 	$extendObject(id: string, obj: ioBroker.PartialObject, options?: any): Promise<{ id: string }>;
 	/** Reads an object (which might not belong to this adapter) from the object db */
 	$getForeignObject(id: string, options?: any): Promise<ioBroker.Object>;
 	/** Creates or overwrites an object (which might not belong to this adapter) in the object db */
-	$setForeignObject(id: string, obj: ioBroker.Object, options?: any): Promise<{ id: string }>;
+	$setForeignObject(id: string, obj: ioBroker.SettableObject, options?: any): Promise<{ id: string }>;
 	/** Creates an object (which might not belong to this adapter) in the object db if it doesn't exist yet */
-	$setForeignObjectNotExists(id: string, obj: ioBroker.Object, options?: any): Promise<{ id: string }>;
+	$setForeignObjectNotExists(id: string, obj: ioBroker.SettableObject, options?: any): Promise<{ id: string }>;
 	/** Extends an object in the object (which might not belong to this adapter) db */
 	$extendForeignObject(id: string, obj: ioBroker.PartialObject, options?: any): Promise<{ id: string }>;
 	/** Get foreign objects by pattern, by specific type and resolve their enums. */
@@ -70,9 +71,9 @@ export interface ExtendedAdapter extends ioBroker.Adapter {
 	/** Read all states of this adapter which match the given pattern */
 	$getStates(pattern: string, options?: any): Promise<Record<string, ioBroker.State>>;
 	/** Writes a value into the states DB. */
-	$setState(id: string, state: string | number | boolean | ioBroker.State, ack?: boolean, options?: any): Promise<string>;
+	$setState(id: string, state: string | number | boolean | ioBroker.State | null, ack?: boolean, options?: any): Promise<string>;
 	/** Writes a value into the states DB only if it has changed. */
-	$setStateChanged(id: string, state: string | number | boolean | ioBroker.State, ack?: boolean, options?: any): Promise<string>;
+	$setStateChanged(id: string, state: string | number | boolean | ioBroker.State | null, ack?: boolean, options?: any): Promise<string>;
 	/** creates a state and the corresponding object */
 	$createState(parentDevice: string, parentChannel: string, stateName: string, roleOrCommon?: string | ioBroker.StateCommon, native?: any, options?: any): Promise<{ id: string }>;
 	/** deletes a state */
@@ -179,16 +180,16 @@ export class Global {
 	public static log(message: string, level: ioBroker.LogLevel = "info") {
 		if (!Global.adapter) return;
 
-		if (message) {
-			// Farben und Formatierungen
-			for (const [/*key*/, [regex, repl]] of entries(replacements)) {
-				if (typeof repl === "string") {
-					message = message.replace(regex, repl);
-				} else { // a bit verbose, but TS doesn't get the overload thingy here
-					message = message.replace(regex, repl);
-				}
-			}
-		}
+		// if (message) {
+		// 	// Farben und Formatierungen
+		// 	for (const [/*key*/, [regex, repl]] of entries(replacements)) {
+		// 		if (typeof repl === "string") {
+		// 			message = message.replace(regex, repl);
+		// 		} else { // a bit verbose, but TS doesn't get the overload thingy here
+		// 			message = message.replace(regex, repl);
+		// 		}
+		// 	}
+		// }
 
 		if (level === "silly" && !(level in Global._adapter.log)) level = "debug";
 		Global._adapter.log[level](message);
