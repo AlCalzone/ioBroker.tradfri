@@ -41,6 +41,7 @@ const custom_subscriptions_1 = require("./modules/custom-subscriptions");
 const groups_1 = require("./modules/groups");
 const message_1 = require("./modules/message");
 const operations_1 = require("./modules/operations");
+const helpers_1 = require("alcalzone-shared/helpers");
 const math_1 = require("./lib/math");
 const session_1 = require("./modules/session");
 let connectionAlive;
@@ -613,9 +614,11 @@ function getTransitionDuration(accessoryOrGroup) {
                     return 0; // other accessories have no transition duration
             }
         }
-        else /* if (accessoryOrGroup instanceof Group || accessoryOrGroup instanceof VirtualGroup) */ {
+        else if (accessoryOrGroup instanceof node_tradfri_client_1.Group || accessoryOrGroup instanceof virtual_group_1.VirtualGroup) {
             stateId = iobroker_objects_1.calcGroupId(accessoryOrGroup) + ".transitionDuration";
         }
+        else
+            return helpers_1.assertNever(accessoryOrGroup);
         const ret = yield adapter.$getState(stateId);
         if (ret != null)
             return ret.val;

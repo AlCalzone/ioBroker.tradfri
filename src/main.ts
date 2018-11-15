@@ -47,6 +47,7 @@ import { extendGroup, syncGroupsWithState, updateGroupStates } from "./modules/g
 import { onMessage } from "./modules/message";
 import { operateVirtualGroup, renameDevice, renameGroup } from "./modules/operations";
 
+import { assertNever } from "alcalzone-shared/helpers";
 import { roundTo } from "./lib/math";
 import { session as $ } from "./modules/session";
 
@@ -647,9 +648,10 @@ async function getTransitionDuration(accessoryOrGroup: Accessory | Group | Virtu
 			default:
 				return 0; // other accessories have no transition duration
 		}
-	} else /* if (accessoryOrGroup instanceof Group || accessoryOrGroup instanceof VirtualGroup) */ {
+	} else if (accessoryOrGroup instanceof Group || accessoryOrGroup instanceof VirtualGroup) {
 		stateId = calcGroupId(accessoryOrGroup) + ".transitionDuration";
-	}
+	} else return assertNever(accessoryOrGroup);
+
 	const ret = await adapter.$getState(stateId);
 	if (ret != null) return ret.val;
 	return 0.5; // default

@@ -8,6 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const helpers_1 = require("alcalzone-shared/helpers");
 const objects_1 = require("alcalzone-shared/objects");
 const node_tradfri_client_1 = require("node-tradfri-client");
 const session_1 = require("../modules/session");
@@ -335,7 +336,7 @@ function groupToCommon(group) {
     if (group instanceof node_tradfri_client_1.Group) {
         name = group.name;
     }
-    else /* group instanceof VirtualGroup */ {
+    else if (group instanceof virtual_group_1.VirtualGroup) {
         if (typeof group.name === "string" && group.name.length > 0) {
             name = group.name;
         }
@@ -343,6 +344,8 @@ function groupToCommon(group) {
             name = `virtual group ${group.instanceId}`;
         }
     }
+    else
+        return helpers_1.assertNever(group);
     return { name };
 }
 exports.groupToCommon = groupToCommon;
@@ -373,9 +376,11 @@ function calcGroupName(group) {
     if (group instanceof node_tradfri_client_1.Group) {
         prefix = "G";
     }
-    else /* if (group instanceof VirtualGroup) */ {
+    else if (group instanceof virtual_group_1.VirtualGroup) {
         prefix = "VG";
     }
+    else
+        return helpers_1.assertNever(group);
     const postfix = group.instanceId.toString();
     return `${prefix}-${strings_1.padStart(postfix, 5, "0")}`;
 }

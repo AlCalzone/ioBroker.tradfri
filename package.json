@@ -16,7 +16,7 @@
     }
   ],
   "dependencies": {
-    "alcalzone-shared": "^1.3.2",
+    "alcalzone-shared": "^1.4.0",
     "node-tradfri-client": "^1.5.0"
   },
   "devDependencies": {

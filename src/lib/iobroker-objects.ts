@@ -1,9 +1,10 @@
+import { assertNever } from "alcalzone-shared/helpers";
 import { composeObject, entries, filter } from "alcalzone-shared/objects";
 import { Accessory, AccessoryTypes, Group, GroupInfo, Scene, Spectrum } from "node-tradfri-client";
 import { session as $ } from "../modules/session";
 import { Global as _ } from "./global";
 import { roundTo } from "./math";
-import {  dig } from "./object-polyfill";
+import { dig } from "./object-polyfill";
 import { padStart } from "./strings";
 import { VirtualGroup } from "./virtual-group";
 
@@ -325,13 +326,13 @@ export function groupToCommon(group: Group | VirtualGroup): ioBroker.ObjectCommo
 	let name: string;
 	if (group instanceof Group) {
 		name = group.name;
-	} else /* group instanceof VirtualGroup */ {
+	} else if (group instanceof VirtualGroup) {
 		if (typeof group.name === "string" && group.name.length > 0) {
 			name = group.name;
 		} else {
 			name = `virtual group ${group.instanceId}`;
 		}
-	}
+	} else return assertNever(group);
 	return { name };
 }
 
@@ -360,9 +361,9 @@ export function calcGroupName(group: Group | VirtualGroup): string {
 	let prefix: string;
 	if (group instanceof Group) {
 		prefix = "G";
-	} else /* if (group instanceof VirtualGroup) */ {
+	} else if (group instanceof VirtualGroup) {
 		prefix = "VG";
-	}
+	} else return assertNever(group);
 	const postfix: string = group.instanceId.toString();
 	return `${prefix}-${padStart(postfix, 5, "0")}`;
 }
