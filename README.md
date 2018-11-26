@@ -18,6 +18,29 @@ Windows: [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/AlCalzo
 1. In the ioBroker GUI, add an adapter instance. 
 1. Configure the instance by entering the IP/hostname of your gateway and the security code that can be found on the label at the bottom.
 
+### Troubleshooting installation issues:
+#### Linux/OSX:
+Make sure you install the most recent released version. If there are compilation errors, you might have to install build-essential:
+```
+apt-get -y install build-essential
+```
+
+#### Windows:
+If you are running on older NodeJS versions (< 10), the installation may fail with the following error somewhere in the log:
+```
+Can't find Python executable "python", you can set the PYTHON env variable.
+```
+
+To solve it, open an administrative shell:
+1. Press the <kbd>&#8862;&nbsp;Windows</kbd> key
+2. Enter `cmd`, press <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Enter</kbd>
+3. Confirm the UAC prompt
+and run the following command:
+```
+npm install --add-python-to-path --global windows-build-tools
+```
+This may take a while... afterwards the installation should succeed.
+
 ## Sending custom CoAP packets
 You can send custom CoAP packets from other adapters by using `sendTo`. Example from JavaScript:
 ```js
