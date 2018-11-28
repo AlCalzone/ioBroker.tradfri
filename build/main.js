@@ -7,19 +7,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 // tslint:disable:object-literal-key-quotes
-const path = __importStar(require("path"));
+const path = require("path");
 // try loading tradfri module to catch potential errors
 try {
     // tslint:disable-next-line:no-var-requires
@@ -42,7 +32,7 @@ const global_1 = require("./lib/global");
 // Datentypen laden
 const virtual_group_1 = require("./lib/virtual-group");
 // Adapter-Utils laden
-const iobroker_adapter_core_1 = __importDefault(require("iobroker.adapter-core"));
+const utils = require("iobroker.adapter-core");
 // Adapter-Module laden
 const colors_1 = require("./lib/colors");
 const fix_objects_1 = require("./lib/fix-objects");
@@ -56,7 +46,7 @@ const math_1 = require("./lib/math");
 const session_1 = require("./modules/session");
 let connectionAlive;
 // Adapter-Objekt erstellen
-let adapter = iobroker_adapter_core_1.default.adapter({
+let adapter = utils.adapter({
     name: "tradfri",
     // Wird aufgerufen, wenn Adapter initialisiert wird
     ready: () => __awaiter(this, void 0, void 0, function* () {

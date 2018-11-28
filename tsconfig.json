@@ -16,7 +16,6 @@
 		"emitDecoratorMetadata": true,
 
 		"resolveJsonModule": true,
-		"esModuleInterop": true,
 
 		"sourceMap": false,
 		"inlineSourceMap": false,
