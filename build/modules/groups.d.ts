@@ -1,3 +1,4 @@
+/// <reference types="iobroker" />
 import { Accessory, Group } from "node-tradfri-client";
 import { VirtualGroup } from "../lib/virtual-group";
 export declare function extendVirtualGroup(group: VirtualGroup): void;

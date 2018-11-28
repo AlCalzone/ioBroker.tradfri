@@ -1,3 +1,4 @@
+/// <reference types="iobroker" />
 import { Accessory, AccessoryTypes, Group, GroupInfo, Scene } from "node-tradfri-client";
 import { VirtualGroup } from "./virtual-group";
 /**

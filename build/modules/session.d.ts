@@ -1,3 +1,4 @@
+/// <reference types="iobroker" />
 import { Accessory, GroupInfo, TradfriClient } from "node-tradfri-client";
 import { VirtualGroup } from "../lib/virtual-group";
 export declare class Session {

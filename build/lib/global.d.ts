@@ -1,3 +1,4 @@
+/// <reference types="iobroker" />
 export interface ExtendedAdapter extends ioBroker.Adapter {
     __isExtended: boolean;
     /** Reads an object from the object db */

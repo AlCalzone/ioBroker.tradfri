@@ -5,8 +5,15 @@ webpackJsonp(["main"],{
 
 "use strict";
 
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const React = __webpack_require__("./node_modules/react/index.js");
+const React = __importStar(__webpack_require__("./node_modules/react/index.js"));
 class EditableLabel extends React.Component {
     constructor(props) {
         super(props);
@@ -70,10 +77,20 @@ exports.EditableLabel = EditableLabel;
 
 "use strict";
 
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 // Renders some components in jQuery UI tabs
-const $ = __webpack_require__("jquery");
-const React = __webpack_require__("./node_modules/react/index.js");
+const jquery_1 = __importDefault(__webpack_require__("jquery"));
+const React = __importStar(__webpack_require__("./node_modules/react/index.js"));
 const adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
 // tslint:disable-next-line:variable-name
 const M_Select = (M.FormSelect || M.Select);
@@ -88,13 +105,13 @@ class MultiDropdown extends React.Component {
     componentDidMount() {
         this.updateUI();
         if (this.dropdown != null) {
-            $(this.dropdown).on("change", this.readStateFromUI);
+            jquery_1.default(this.dropdown).on("change", this.readStateFromUI);
             this.mcssSelect = M_Select.init(this.dropdown);
         }
     }
     componentWillUnmount() {
         if (this.dropdown != null) {
-            $(this.dropdown).off("change", this.readStateFromUI);
+            jquery_1.default(this.dropdown).off("change", this.readStateFromUI);
         }
     }
     componentDidUpdate() {
@@ -103,7 +120,7 @@ class MultiDropdown extends React.Component {
     updateUI() {
         if (!this.dropdown)
             return;
-        const $dropdown = $(this.dropdown);
+        const $dropdown = jquery_1.default(this.dropdown);
         $dropdown.find("option:selected").prop("selected", false);
         this.state.checkedOptions.forEach(val => {
             $dropdown.find(`option[value=${val}]`).prop("selected", true);
@@ -134,8 +151,15 @@ exports.MultiDropdown = MultiDropdown;
 
 "use strict";
 
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const React = __webpack_require__("./node_modules/react/index.js");
+const React = __importStar(__webpack_require__("./node_modules/react/index.js"));
 const adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
 class Tabs extends React.Component {
     constructor(props) {
@@ -160,9 +184,16 @@ exports.Tabs = Tabs;
 
 "use strict";
 
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const React = __webpack_require__("./node_modules/react/index.js");
-const ReactDOM = __webpack_require__("./node_modules/react-dom/index.js");
+const React = __importStar(__webpack_require__("./node_modules/react/index.js"));
+const ReactDOM = __importStar(__webpack_require__("./node_modules/react-dom/index.js"));
 const adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
 // components
 const tabs_1 = __webpack_require__("./admin/src/components/tabs.tsx");
@@ -293,8 +324,15 @@ exports.sendTo = exports.$window.sendTo;
 
 "use strict";
 
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const React = __webpack_require__("./node_modules/react/index.js");
+const React = __importStar(__webpack_require__("./node_modules/react/index.js"));
 const adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
 const editable_label_1 = __webpack_require__("./admin/src/components/editable-label.tsx");
 const multi_dropdown_1 = __webpack_require__("./admin/src/components/multi-dropdown.tsx");
@@ -381,8 +419,15 @@ exports.Groups = Groups;
 
 "use strict";
 
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const React = __webpack_require__("./node_modules/react/index.js");
+const React = __importStar(__webpack_require__("./node_modules/react/index.js"));
 const adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
 /** Helper component for a settings label */
 function Label(props) {
