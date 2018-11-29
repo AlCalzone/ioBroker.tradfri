@@ -32,7 +32,7 @@ const global_1 = require("./lib/global");
 // Datentypen laden
 const virtual_group_1 = require("./lib/virtual-group");
 // Adapter-Utils laden
-const utils = require("iobroker.adapter-core");
+const utils = require("@iobroker/adapter-core");
 // Adapter-Module laden
 const colors_1 = require("./lib/colors");
 const fix_objects_1 = require("./lib/fix-objects");

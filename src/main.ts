@@ -36,7 +36,7 @@ import { ExtendedAdapter, Global as _ } from "./lib/global";
 import { VirtualGroup } from "./lib/virtual-group";
 
 // Adapter-Utils laden
-import * as utils from "iobroker.adapter-core";
+import * as utils from "@iobroker/adapter-core";
 
 // Adapter-Module laden
 import { normalizeHexColor } from "./lib/colors";
