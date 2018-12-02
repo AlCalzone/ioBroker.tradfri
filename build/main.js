@@ -32,7 +32,7 @@ const global_1 = require("./lib/global");
 // Datentypen laden
 const virtual_group_1 = require("./lib/virtual-group");
 // Adapter-Utils laden
-const utils_1 = require("./lib/utils");
+const utils = require("@iobroker/adapter-core");
 // Adapter-Module laden
 const colors_1 = require("./lib/colors");
 const fix_objects_1 = require("./lib/fix-objects");
@@ -46,7 +46,7 @@ const math_1 = require("./lib/math");
 const session_1 = require("./modules/session");
 let connectionAlive;
 // Adapter-Objekt erstellen
-let adapter = utils_1.default.adapter({
+let adapter = utils.adapter({
     name: "tradfri",
     // Wird aufgerufen, wenn Adapter initialisiert wird
     ready: () => __awaiter(this, void 0, void 0, function* () {
