@@ -6,7 +6,7 @@ import * as ReactDOM from "react-dom";
 import { $window, _, instance, sendTo, socket} from "./lib/adapter";
 
 // components
-import { Tabs } from "./components/tabs";
+import { Tabs } from "iobroker-react-components";
 import { DeviceDictionary, GroupDictionary, Groups } from "./pages/groups";
 import { OnSettingsChangedCallback, Settings } from "./pages/settings";
 

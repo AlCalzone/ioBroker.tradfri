@@ -1,6 +1,7 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
+import { Tooltip } from "iobroker-react-components";
 import { $window, _, instance } from "../lib/adapter";
 
 export type OnSettingsChangedCallback = (newSettings: ioBroker.AdapterConfig) => void;
@@ -47,11 +48,6 @@ function CheckboxLabel(props: CheckboxLabelProps) {
 			{props.tooltip != null && <Tooltip text={props.tooltip} />}
 		</span>
 	);
-}
-
-/** Helper component for a tooltip */
-function Tooltip(props: {text: string}) {
-	return <img className="admin-tooltip-icon" src="../../img/info.png" title={_(props.text)} />;
 }
 
 export class Settings extends React.Component<SettingsProps, ioBroker.AdapterConfig> {
