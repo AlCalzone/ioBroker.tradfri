@@ -57,7 +57,7 @@ let adapter = utils.adapter({
         yield fix_objects_1.ensureInstanceObjects();
         yield fix_objects_1.fixAdapterObjects();
         // we're not connected yet!
-        yield adapter.setState("info.connection", false, true);
+        yield adapter.setStateAsync("info.connection", false, true);
         // Sicherstellen, dass die Optionen vollständig ausgefüllt sind.
         if (adapter.config
             && adapter.config.host != null && adapter.config.host !== ""
@@ -163,7 +163,7 @@ let adapter = utils.adapter({
             }
         }
         // watch the connection
-        yield adapter.$setState("info.connection", true, true);
+        yield adapter.setStateAsync("info.connection", true, true);
         connectionAlive = true;
         session_1.session.tradfri
             .on("connection alive", () => {
@@ -317,10 +317,10 @@ let adapter = utils.adapter({
                             const prefix = id.substr(0, id.lastIndexOf(".") + 1);
                             // Try to read the hue and saturation states. If one of them doesn't exist,
                             // we cannot issue a command
-                            const hueState = yield global_1.Global.adapter.$getState(prefix + "hue");
+                            const hueState = yield global_1.Global.adapter.getStateAsync(prefix + "hue");
                             if (hueState == undefined)
                                 return;
-                            const saturationState = yield global_1.Global.adapter.$getState(prefix + "saturation");
+                            const saturationState = yield global_1.Global.adapter.getStateAsync(prefix + "saturation");
                             if (saturationState == undefined)
                                 return;
                             const hue = hueState.val;
@@ -340,7 +340,7 @@ let adapter = utils.adapter({
                         }
                         // ack the state if neccessary and return
                         if (wasAcked)
-                            adapter.$setState(id, state, true);
+                            adapter.setStateAsync(id, state, true);
                         return;
                     }
                     case "virtual group": {
@@ -384,10 +384,10 @@ let adapter = utils.adapter({
                             const prefix = id.substr(0, id.lastIndexOf(".") + 1);
                             // Try to read the hue and saturation states. If one of them doesn't exist,
                             // we cannot issue a command
-                            const hueState = yield global_1.Global.adapter.$getState(prefix + "hue");
+                            const hueState = yield global_1.Global.adapter.getStateAsync(prefix + "hue");
                             if (hueState == undefined)
                                 return;
-                            const saturationState = yield global_1.Global.adapter.$getState(prefix + "saturation");
+                            const saturationState = yield global_1.Global.adapter.getStateAsync(prefix + "saturation");
                             if (saturationState == undefined)
                                 return;
                             const hue = hueState.val;
@@ -409,7 +409,7 @@ let adapter = utils.adapter({
                         }
                         // and ack the state change
                         if (wasAcked)
-                            adapter.$setState(id, state, true);
+                            adapter.setStateAsync(id, state, true);
                         return;
                     }
                     default: { // accessory
@@ -465,10 +465,10 @@ let adapter = utils.adapter({
                                 const prefix = id.substr(0, id.lastIndexOf(".") + 1);
                                 // Try to read the hue and saturation states. If one of them doesn't exist,
                                 // we cannot issue a command
-                                const hueState = yield global_1.Global.adapter.$getState(prefix + "hue");
+                                const hueState = yield global_1.Global.adapter.getStateAsync(prefix + "hue");
                                 if (hueState == undefined)
                                     return;
-                                const saturationState = yield global_1.Global.adapter.$getState(prefix + "saturation");
+                                const saturationState = yield global_1.Global.adapter.getStateAsync(prefix + "saturation");
                                 if (saturationState == undefined)
                                     return;
                                 const hue = hueState.val;
@@ -485,7 +485,7 @@ let adapter = utils.adapter({
                             }
                             // ack the state if neccessary and return
                             if (wasAcked)
-                                adapter.$setState(id, state, true);
+                                adapter.setStateAsync(id, state, true);
                             return;
                         }
                     }
@@ -514,9 +514,9 @@ function updateConfig(newConfig) {
         // Create the config object
         const config = Object.assign({}, adapter.config, newConfig);
         // Update the adapter object
-        const adapterObj = yield adapter.$getForeignObject(`system.adapter.${adapter.namespace}`);
+        const adapterObj = yield adapter.getForeignObjectAsync(`system.adapter.${adapter.namespace}`);
         adapterObj.native = config;
-        yield adapter.$setForeignObject(`system.adapter.${adapter.namespace}`, adapterObj);
+        yield adapter.setForeignObjectAsync(`system.adapter.${adapter.namespace}`, adapterObj);
     });
 }
 // ==================================
@@ -540,7 +540,7 @@ function tradfri_deviceRemoved(instanceId) {
         if (instanceId in session_1.session.devices) {
             // delete ioBroker device
             const deviceName = iobroker_objects_1.calcObjName(session_1.session.devices[instanceId]);
-            yield adapter.$deleteDevice(deviceName);
+            yield adapter.deleteDeviceAsync(deviceName);
             delete session_1.session.devices[instanceId];
         }
     });
@@ -569,7 +569,7 @@ function tradfri_groupRemoved(instanceId) {
         if (instanceId in session_1.session.groups) {
             // delete ioBroker group
             const groupName = iobroker_objects_1.calcGroupName(session_1.session.groups[instanceId].group);
-            yield adapter.$deleteChannel(groupName);
+            yield adapter.deleteChannelAsync(groupName);
             // remove group from dictionary
             delete session_1.session.groups[instanceId];
         }
@@ -619,7 +619,7 @@ function getTransitionDuration(accessoryOrGroup) {
         }
         else
             return helpers_1.assertNever(accessoryOrGroup);
-        const ret = yield adapter.$getState(stateId);
+        const ret = yield adapter.getStateAsync(stateId);
         if (ret != null)
             return ret.val;
         return 0.5; // default

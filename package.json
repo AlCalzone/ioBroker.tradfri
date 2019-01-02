@@ -16,7 +16,7 @@
     }
   ],
   "dependencies": {
-    "@iobroker/adapter-core": "^1.0.1",
+    "@iobroker/adapter-core": "^1.0.2",
     "alcalzone-shared": "^1.4.0",
     "node-tradfri-client": "^1.5.0"
   },
@@ -37,7 +37,7 @@
     "cpx": "^1.5.0",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
-    "gulp": "^3.9.1",
+    "gulp": "^4.0.0",
     "html-webpack-plugin": "^3.2.0",
     "iobroker-react-components": "^1.0.0",
     "jquery": "^3.3.1",

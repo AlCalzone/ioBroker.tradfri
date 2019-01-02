@@ -40,7 +40,7 @@ function fixBrightnessRange(stateObjs) {
             const newCommon = JSON.stringify(Object.assign({ name: "Brightness" }, obj.common, { min: 0, max: 100, unit: "%" }));
             if (oldCommon !== newCommon) {
                 obj.common = JSON.parse(newCommon);
-                yield global_1.Global.adapter.$setForeignObject(obj._id, obj);
+                yield global_1.Global.adapter.setForeignObjectAsync(obj._id, obj);
             }
         }
     });
@@ -52,7 +52,7 @@ function fixBrightnessRange(stateObjs) {
  */
 function fixAuthenticationObjects() {
     return __awaiter(this, void 0, void 0, function* () {
-        const identityObj = yield global_1.Global.adapter.$getObject("info.identity");
+        const identityObj = yield global_1.Global.adapter.getObjectAsync("info.identity");
         if (identityObj != null) {
             yield global_1.Global.adapter.delState("info.identity");
             yield global_1.Global.adapter.delObject("info.identity");
@@ -71,7 +71,7 @@ function fixBrightnessRole(stateObjs) {
             const newCommon = JSON.stringify(Object.assign({}, obj.common, { role: "level.dimmer" }));
             if (oldCommon !== newCommon) {
                 obj.common = JSON.parse(newCommon);
-                yield global_1.Global.adapter.$setForeignObject(obj._id, obj);
+                yield global_1.Global.adapter.setForeignObjectAsync(obj._id, obj);
             }
         }
     });
@@ -82,7 +82,7 @@ function ensureInstanceObjects() {
         if (instanceObjects == null || instanceObjects.length === 0)
             return;
         // wait for all instance objects to be created
-        const setObjects = instanceObjects.map(obj => global_1.Global.adapter.$setObjectNotExists(obj._id, obj));
+        const setObjects = instanceObjects.map(obj => global_1.Global.adapter.setObjectNotExistsAsync(obj._id, obj));
         yield Promise.all(setObjects);
     });
 }

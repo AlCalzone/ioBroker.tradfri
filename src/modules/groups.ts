@@ -63,7 +63,7 @@ export function extendVirtualGroup(group: VirtualGroup) {
 					initialValue = dig<any>(group, obj.native.path);
 				}
 				// create object and return the promise, so we can wait
-				return _.adapter.$createOwnStateEx(obj._id, obj, initialValue);
+				return _.adapter.createOwnStateExAsync(obj._id, obj, initialValue);
 			})
 			;
 		Promise.all(createObjects);
@@ -147,7 +147,7 @@ export function extendGroup(group: Group) {
 					initialValue = dig<any>(group, obj.native.path);
 				}
 				// create object and return the promise, so we can wait
-				return _.adapter.$createOwnStateEx(obj._id, obj, initialValue);
+				return _.adapter.createOwnStateExAsync(obj._id, obj, initialValue);
 			})
 			;
 		Promise.all(createObjects);
@@ -175,15 +175,15 @@ function debounce(id: string, action: () => void, timeout: number) {
 }
 
 async function updateGroupState(id: string, value: string | number | boolean | ioBroker.State | null): Promise<void> {
-	const curState = await _.adapter.$getState(id);
+	const curState = await _.adapter.getStateAsync(id);
 	if (curState != null && value == null) {
-		await _.adapter.$delState(id);
+		await _.adapter.delStateAsync(id);
 	} else if (curState !== value) {
 		const roundToDigits = _.adapter.config.roundToDigits;
 		if (typeof roundToDigits === "number" && typeof value === "number") {
 			value = roundTo(value, roundToDigits);
 		}
-		await _.adapter.$setState(id, value, true);
+		await _.adapter.setStateAsync(id, value as any, true);
 	}
 }
 

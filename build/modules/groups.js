@@ -68,7 +68,7 @@ function extendVirtualGroup(group) {
                 initialValue = object_polyfill_1.dig(group, obj.native.path);
             }
             // create object and return the promise, so we can wait
-            return global_1.Global.adapter.$createOwnStateEx(obj._id, obj, initialValue);
+            return global_1.Global.adapter.createOwnStateExAsync(obj._id, obj, initialValue);
         });
         Promise.all(createObjects);
     }
@@ -144,7 +144,7 @@ function extendGroup(group) {
                 initialValue = object_polyfill_1.dig(group, obj.native.path);
             }
             // create object and return the promise, so we can wait
-            return global_1.Global.adapter.$createOwnStateEx(obj._id, obj, initialValue);
+            return global_1.Global.adapter.createOwnStateExAsync(obj._id, obj, initialValue);
         });
         Promise.all(createObjects);
     }
@@ -171,16 +171,16 @@ function debounce(id, action, timeout) {
 }
 function updateGroupState(id, value) {
     return __awaiter(this, void 0, void 0, function* () {
-        const curState = yield global_1.Global.adapter.$getState(id);
+        const curState = yield global_1.Global.adapter.getStateAsync(id);
         if (curState != null && value == null) {
-            yield global_1.Global.adapter.$delState(id);
+            yield global_1.Global.adapter.delStateAsync(id);
         }
         else if (curState !== value) {
             const roundToDigits = global_1.Global.adapter.config.roundToDigits;
             if (typeof roundToDigits === "number" && typeof value === "number") {
                 value = math_1.roundTo(value, roundToDigits);
             }
-            yield global_1.Global.adapter.$setState(id, value, true);
+            yield global_1.Global.adapter.setStateAsync(id, value, true);
         }
     });
 }

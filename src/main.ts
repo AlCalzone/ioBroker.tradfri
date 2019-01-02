@@ -69,7 +69,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 		await fixAdapterObjects();
 
 		// we're not connected yet!
-		await adapter.setState("info.connection", false, true);
+		await adapter.setStateAsync("info.connection", false, true);
 
 		// Sicherstellen, dass die Optionen vollständig ausgefüllt sind.
 		if (adapter.config
@@ -179,7 +179,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 		}
 
 		// watch the connection
-		await adapter.$setState("info.connection", true, true);
+		await adapter.setStateAsync("info.connection", true, true);
 		connectionAlive = true;
 		$.tradfri
 			.on("connection alive", () => {
@@ -344,9 +344,9 @@ let adapter: ExtendedAdapter = utils.adapter({
 							const prefix = id.substr(0, id.lastIndexOf(".") + 1);
 							// Try to read the hue and saturation states. If one of them doesn't exist,
 							// we cannot issue a command
-							const hueState = await _.adapter.$getState(prefix + "hue");
+							const hueState = await _.adapter.getStateAsync(prefix + "hue");
 							if (hueState == undefined) return;
-							const saturationState = await _.adapter.$getState(prefix + "saturation");
+							const saturationState = await _.adapter.getStateAsync(prefix + "saturation");
 							if (saturationState == undefined) return;
 
 							const hue = hueState.val;
@@ -365,7 +365,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 						}
 
 						// ack the state if neccessary and return
-						if (wasAcked) adapter.$setState(id, state, true);
+						if (wasAcked) adapter.setStateAsync(id, state, true);
 						return;
 					}
 
@@ -408,9 +408,9 @@ let adapter: ExtendedAdapter = utils.adapter({
 							const prefix = id.substr(0, id.lastIndexOf(".") + 1);
 							// Try to read the hue and saturation states. If one of them doesn't exist,
 							// we cannot issue a command
-							const hueState = await _.adapter.$getState(prefix + "hue");
+							const hueState = await _.adapter.getStateAsync(prefix + "hue");
 							if (hueState == undefined) return;
-							const saturationState = await _.adapter.$getState(prefix + "saturation");
+							const saturationState = await _.adapter.getStateAsync(prefix + "saturation");
 							if (saturationState == undefined) return;
 
 							const hue = hueState.val;
@@ -433,7 +433,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 						}
 
 						// and ack the state change
-						if (wasAcked) adapter.$setState(id, state, true);
+						if (wasAcked) adapter.setStateAsync(id, state, true);
 						return;
 					}
 
@@ -499,9 +499,9 @@ let adapter: ExtendedAdapter = utils.adapter({
 								const prefix = id.substr(0, id.lastIndexOf(".") + 1);
 								// Try to read the hue and saturation states. If one of them doesn't exist,
 								// we cannot issue a command
-								const hueState = await _.adapter.$getState(prefix + "hue");
+								const hueState = await _.adapter.getStateAsync(prefix + "hue");
 								if (hueState == undefined) return;
-								const saturationState = await _.adapter.$getState(prefix + "saturation");
+								const saturationState = await _.adapter.getStateAsync(prefix + "saturation");
 								if (saturationState == undefined) return;
 
 								const hue = hueState.val;
@@ -517,7 +517,7 @@ let adapter: ExtendedAdapter = utils.adapter({
 							}
 
 							// ack the state if neccessary and return
-							if (wasAcked) adapter.$setState(id, state, true);
+							if (wasAcked) adapter.setStateAsync(id, state, true);
 							return;
 						}
 					}
@@ -550,9 +550,9 @@ async function updateConfig(newConfig: Partial<ioBroker.AdapterConfig>) {
 		...newConfig,
 	};
 	// Update the adapter object
-	const adapterObj = await adapter.$getForeignObject(`system.adapter.${adapter.namespace}`);
+	const adapterObj = await adapter.getForeignObjectAsync(`system.adapter.${adapter.namespace}`);
 	adapterObj.native = config;
-	await adapter.$setForeignObject(`system.adapter.${adapter.namespace}`, adapterObj);
+	await adapter.setForeignObjectAsync(`system.adapter.${adapter.namespace}`, adapterObj);
 }
 
 // ==================================
@@ -576,7 +576,7 @@ async function tradfri_deviceRemoved(instanceId: number) {
 	if (instanceId in $.devices) {
 		// delete ioBroker device
 		const deviceName = calcObjName($.devices[instanceId]);
-		await adapter.$deleteDevice(deviceName);
+		await adapter.deleteDeviceAsync(deviceName);
 		delete $.devices[instanceId];
 	}
 }
@@ -603,7 +603,7 @@ async function tradfri_groupRemoved(instanceId: number) {
 	if (instanceId in $.groups) {
 		// delete ioBroker group
 		const groupName = calcGroupName($.groups[instanceId].group);
-		await adapter.$deleteChannel(groupName);
+		await adapter.deleteChannelAsync(groupName);
 		// remove group from dictionary
 		delete $.groups[instanceId];
 	}
@@ -652,7 +652,7 @@ async function getTransitionDuration(accessoryOrGroup: Accessory | Group | Virtu
 		stateId = calcGroupId(accessoryOrGroup) + ".transitionDuration";
 	} else return assertNever(accessoryOrGroup);
 
-	const ret = await adapter.$getState(stateId);
+	const ret = await adapter.getStateAsync(stateId);
 	if (ret != null) return ret.val;
 	return 0.5; // default
 }

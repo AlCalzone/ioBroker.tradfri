@@ -199,7 +199,7 @@ export function extendDevice(accessory: Accessory) {
 					initialValue = dig<any>(accessory, obj.native.path);
 				}
 				// create object and return the promise, so we can wait
-				return _.adapter.$createOwnStateEx(obj._id, obj, initialValue);
+				return _.adapter.createOwnStateExAsync(obj._id, obj, initialValue);
 			})
 			;
 		Promise.all(createObjects);
@@ -228,13 +228,13 @@ export async function updatePossibleScenes(groupInfo: GroupInfo): Promise<void> 
 			Object.keys(scenes).map(id => [id, scenes[id].name] as [string, string]),
 		);
 		// compare with the old dropdown states
-		const obj = await _.adapter.$getObject(scenesId) as ioBroker.StateObject;
+		const obj = await _.adapter.getObjectAsync(scenesId) as ioBroker.StateObject;
 		const oldDropdownStates = obj.common.states;
 		if (JSON.stringify(newDropdownStates) !== JSON.stringify(oldDropdownStates)) {
 			// and only log and update if something changed
 			_.log(`updating possible scenes for group ${group.instanceId}: ${JSON.stringify(Object.keys(groupInfo.scenes))}`);
 			obj.common.states = newDropdownStates;
-			await _.adapter.$setObject(scenesId, obj);
+			await _.adapter.setObjectAsync(scenesId, obj);
 		}
 	}
 }

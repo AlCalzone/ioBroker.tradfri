@@ -36,7 +36,7 @@ async function fixBrightnessRange(stateObjs: ioBroker.Object[]) {
 		});
 		if (oldCommon !== newCommon) {
 			obj.common = JSON.parse(newCommon);
-			await _.adapter.$setForeignObject(obj._id, obj);
+			await _.adapter.setForeignObjectAsync(obj._id, obj);
 		}
 	}
 }
@@ -47,7 +47,7 @@ async function fixBrightnessRange(stateObjs: ioBroker.Object[]) {
  * From v0.6.0-beta2 to -beta3, the info.identity object was removed in favor of config properties.
  */
 async function fixAuthenticationObjects() {
-	const identityObj = await _.adapter.$getObject("info.identity");
+	const identityObj = await _.adapter.getObjectAsync("info.identity");
 	if (identityObj != null) {
 		await _.adapter.delState("info.identity");
 		await _.adapter.delObject("info.identity");
@@ -68,7 +68,7 @@ async function fixBrightnessRole(stateObjs: ioBroker.Object[]) {
 		});
 		if (oldCommon !== newCommon) {
 			obj.common = JSON.parse(newCommon);
-			await _.adapter.$setForeignObject(obj._id, obj);
+			await _.adapter.setForeignObjectAsync(obj._id, obj);
 		}
 	}
 }
@@ -79,7 +79,7 @@ export async function ensureInstanceObjects(): Promise<void> {
 
 	// wait for all instance objects to be created
 	const setObjects = instanceObjects.map(
-		obj => _.adapter.$setObjectNotExists(obj._id, obj),
+		obj => _.adapter.setObjectNotExistsAsync(obj._id, obj),
 	);
 	await Promise.all(setObjects);
 }

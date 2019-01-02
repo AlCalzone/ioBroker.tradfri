@@ -202,7 +202,7 @@ function extendDevice(accessory) {
                 initialValue = object_polyfill_1.dig(accessory, obj.native.path);
             }
             // create object and return the promise, so we can wait
-            return global_1.Global.adapter.$createOwnStateEx(obj._id, obj, initialValue);
+            return global_1.Global.adapter.createOwnStateExAsync(obj._id, obj, initialValue);
         });
         Promise.all(createObjects);
     }
@@ -228,13 +228,13 @@ function updatePossibleScenes(groupInfo) {
             const scenes = groupInfo.scenes;
             const newDropdownStates = objects_1.composeObject(Object.keys(scenes).map(id => [id, scenes[id].name]));
             // compare with the old dropdown states
-            const obj = yield global_1.Global.adapter.$getObject(scenesId);
+            const obj = yield global_1.Global.adapter.getObjectAsync(scenesId);
             const oldDropdownStates = obj.common.states;
             if (JSON.stringify(newDropdownStates) !== JSON.stringify(oldDropdownStates)) {
                 // and only log and update if something changed
                 global_1.Global.log(`updating possible scenes for group ${group.instanceId}: ${JSON.stringify(Object.keys(groupInfo.scenes))}`);
                 obj.common.states = newDropdownStates;
-                yield global_1.Global.adapter.$setObject(scenesId, obj);
+                yield global_1.Global.adapter.setObjectAsync(scenesId, obj);
             }
         }
     });
