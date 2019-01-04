@@ -1,1 +1,1 @@
-require("./build/main.js");
+module.exports = require("./build/main.js");

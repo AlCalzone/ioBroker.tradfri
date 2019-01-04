@@ -10,20 +10,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 // tslint:disable:object-literal-key-quotes
 const path = require("path");
-// try loading tradfri module to catch potential errors
-try {
-    // tslint:disable-next-line:no-var-requires
-    require("node-tradfri-client");
-}
-catch (e) {
-    console.error(`The module "node-aead-crypto" was not installed correctly!`);
-    console.error(`To try reinstalling it, goto "${path.join(__dirname, "..")}" and run`);
-    console.error(`npm install --production`);
-    console.error(`If that fails due to missing access rights, run`);
-    console.error(`${process.platform !== "win32" ? "sudo " : ""}npm install --production --unsafe-perm`);
-    console.error(`instead. Afterwards, restart this adapter.`);
-    process.exit(1);
-}
 // actually load them now
 const node_tradfri_client_1 = require("node-tradfri-client");
 // Eigene Module laden
@@ -45,420 +31,272 @@ const helpers_1 = require("alcalzone-shared/helpers");
 const math_1 = require("./lib/math");
 const session_1 = require("./modules/session");
 let connectionAlive;
-// Adapter-Objekt erstellen
-let adapter = utils.adapter({
-    name: "tradfri",
-    // Wird aufgerufen, wenn Adapter initialisiert wird
-    ready: () => __awaiter(this, void 0, void 0, function* () {
-        // Adapter-Instanz global machen
-        adapter = global_1.Global.extend(adapter);
-        global_1.Global.adapter = adapter;
-        // Fix our adapter objects to repair incompatibilities between versions
-        yield fix_objects_1.ensureInstanceObjects();
-        yield fix_objects_1.fixAdapterObjects();
-        // we're not connected yet!
-        yield adapter.setStateAsync("info.connection", false, true);
-        // Sicherstellen, dass die Optionen vollständig ausgefüllt sind.
-        if (adapter.config
-            && adapter.config.host != null && adapter.config.host !== ""
-            && ((adapter.config.securityCode != null && adapter.config.securityCode !== "")
-                || (adapter.config.identity != null && adapter.config.identity !== ""))) {
-            // alles gut
-        }
-        else {
-            adapter.log.error("Please set the connection params in the adapter options before starting the adapter!");
-            return;
-        }
-        // Sicherstellen, dass die Anzahl der Nachkommastellen eine Zahl ist
-        if (typeof adapter.config.roundToDigits === "string") {
-            yield updateConfig({
-                roundToDigits: parseInt(adapter.config.roundToDigits, 10),
-            });
-        }
-        // redirect console output
-        // console.log = (msg) => adapter.log.debug("STDOUT > " + msg);
-        // console.error = (msg) => adapter.log.error("STDERR > " + msg);
-        global_1.Global.log(`startfile = ${process.argv[1]}`);
-        // watch own states
-        adapter.subscribeStates(`${adapter.namespace}.*`);
-        adapter.subscribeObjects(`${adapter.namespace}.*`);
-        // add special watch for lightbulb states, so we can later sync the group states
-        custom_subscriptions_1.subscribeStates(/L\-\d+\.lightbulb\./, groups_1.syncGroupsWithState);
-        // Auth-Parameter laden
-        const hostname = adapter.config.host.toLowerCase();
-        const securityCode = adapter.config.securityCode;
-        let identity = adapter.config.identity;
-        let psk = adapter.config.psk;
-        session_1.session.tradfri = new node_tradfri_client_1.TradfriClient(hostname, {
-            customLogger: global_1.Global.log,
-            watchConnection: true,
-        });
-        if (securityCode != null && securityCode.length > 0) {
-            // we temporarily stored the security code to replace it with identity/psk
-            try {
-                ({ identity, psk } = yield session_1.session.tradfri.authenticate(securityCode));
-                // store it and restart the adapter
-                global_1.Global.log(`The authentication was successful. The adapter should now restart. If not, please restart it manually.`, "info");
-                yield updateConfig({
-                    identity,
-                    psk,
-                    securityCode: "",
-                });
-            }
-            catch (e) {
-                if (e instanceof node_tradfri_client_1.TradfriError) {
-                    switch (e.code) {
-                        case node_tradfri_client_1.TradfriErrorCodes.ConnectionTimedOut: {
-                            global_1.Global.log(`The gateway ${hostname} is unreachable or did not respond in time!`, "error");
-                            global_1.Global.log(`Please check your network and adapter settings and restart the adapter!`, "error");
-                        }
-                        case node_tradfri_client_1.TradfriErrorCodes.AuthenticationFailed: {
-                            global_1.Global.log(`The security code is incorrect or something else went wrong with the authentication.`, "error");
-                            global_1.Global.log(`Please check your adapter settings and restart the adapter!`, "error");
-                            return;
-                        }
-                        case node_tradfri_client_1.TradfriErrorCodes.ConnectionFailed: {
-                            global_1.Global.log(`Could not authenticate with the gateway ${hostname}!`, "error");
-                            global_1.Global.log(e.message, "error");
-                            return;
-                        }
-                    }
-                }
-                else {
-                    global_1.Global.log(`Could not authenticate with the gateway ${hostname}!`, "error");
-                    global_1.Global.log(e.message, "error");
-                    return;
-                }
-            }
-        }
-        else {
-            // connect with previously negotiated identity and psk
-            try {
-                yield session_1.session.tradfri.connect(identity, psk);
-            }
-            catch (e) {
-                if (e instanceof node_tradfri_client_1.TradfriError) {
-                    switch (e.code) {
-                        case node_tradfri_client_1.TradfriErrorCodes.ConnectionTimedOut: {
-                            global_1.Global.log(`The gateway ${hostname} is unreachable or did not respond in time!`, "error");
-                            global_1.Global.log(`Please check your network and adapter settings and restart the adapter!`, "error");
-                        }
-                        case node_tradfri_client_1.TradfriErrorCodes.AuthenticationFailed: {
-                            global_1.Global.log(`The stored credentials are no longer valid!`, "error");
-                            global_1.Global.log(`Please re-enter your security code in the adapter settings!`, "error");
-                            return;
-                        }
-                        case node_tradfri_client_1.TradfriErrorCodes.ConnectionFailed: {
-                            global_1.Global.log(`Could not connect to the gateway ${hostname}!`, "error");
-                            global_1.Global.log(e.message, "error");
-                            return;
-                        }
-                    }
-                }
-                else {
-                    global_1.Global.log(`Could not connect to the gateway ${hostname}!`, "error");
-                    global_1.Global.log(e.message, "error");
-                    return;
-                }
-            }
-        }
-        // watch the connection
-        yield adapter.setStateAsync("info.connection", true, true);
-        connectionAlive = true;
-        session_1.session.tradfri
-            .on("connection alive", () => {
-            global_1.Global.log("Connection to gateway reestablished", "info");
-            adapter.setState("info.connection", true, true);
-            connectionAlive = true;
-        })
-            .on("connection lost", () => {
-            global_1.Global.log("Lost connection to gateway", "warn");
-            adapter.setState("info.connection", false, true);
-            connectionAlive = false;
-        });
-        yield loadDevices();
-        yield loadGroups();
-        yield loadVirtualGroups();
-        session_1.session.tradfri
-            .on("device updated", tradfri_deviceUpdated)
-            .on("device removed", tradfri_deviceRemoved)
-            .on("group updated", tradfri_groupUpdated)
-            .on("group removed", tradfri_groupRemoved)
-            .on("scene updated", tradfri_sceneUpdated)
-            .on("scene removed", tradfri_sceneRemoved)
-            .on("error", tradfri_error);
-        observeAll();
-    }),
-    // Handle sendTo-Messages
-    message: message_1.onMessage,
-    objectChange: (id, obj) => {
-        global_1.Global.log(`{{blue}} object with id ${id} ${obj ? "updated" : "deleted"}`, "debug");
-        if (id.startsWith(adapter.namespace)) {
-            // this is our own object.
-            if (obj) {
-                // first check if we have to modify a device/group/whatever
-                const instanceId = iobroker_objects_1.getInstanceId(id);
-                if (instanceId == undefined)
-                    return;
-                if (obj.type === "device" && instanceId in session_1.session.devices && session_1.session.devices[instanceId] != null) {
-                    // if this device is in the device list, check for changed properties
-                    const acc = session_1.session.devices[instanceId];
-                    if (obj.common && obj.common.name !== acc.name) {
-                        // the name has changed, notify the gateway
-                        global_1.Global.log(`the device ${id} was renamed to "${obj.common.name}"`);
-                        operations_1.renameDevice(acc, obj.common.name);
-                    }
-                }
-                else if (obj.type === "channel" && instanceId in session_1.session.groups && session_1.session.groups[instanceId] != null) {
-                    // if this group is in the groups list, check for changed properties
-                    const grp = session_1.session.groups[instanceId].group;
-                    if (obj.common && obj.common.name !== grp.name) {
-                        // the name has changed, notify the gateway
-                        global_1.Global.log(`the group ${id} was renamed to "${obj.common.name}"`);
-                        operations_1.renameGroup(grp, obj.common.name);
-                    }
-                }
-                // remember the object
-                session_1.session.objects[id] = obj;
+let adapter;
+function startAdapter(options = {}) {
+    return adapter = utils.adapter(Object.assign({}, options, { 
+        // custom options
+        name: "tradfri", 
+        // Wird aufgerufen, wenn Adapter initialisiert wird
+        ready: () => __awaiter(this, void 0, void 0, function* () {
+            // Adapter-Instanz global machen
+            adapter = global_1.Global.extend(adapter);
+            global_1.Global.adapter = adapter;
+            // Fix our adapter objects to repair incompatibilities between versions
+            yield fix_objects_1.ensureInstanceObjects();
+            yield fix_objects_1.fixAdapterObjects();
+            // we're not connected yet!
+            yield adapter.setStateAsync("info.connection", false, true);
+            // Sicherstellen, dass die Optionen vollständig ausgefüllt sind.
+            if (adapter.config
+                && adapter.config.host != null && adapter.config.host !== ""
+                && ((adapter.config.securityCode != null && adapter.config.securityCode !== "")
+                    || (adapter.config.identity != null && adapter.config.identity !== ""))) {
+                // alles gut
             }
             else {
-                // object deleted, forget it
-                if (id in session_1.session.objects)
-                    delete session_1.session.objects[id];
-            }
-        }
-        // apply additional subscriptions we've defined
-        custom_subscriptions_1.applyCustomObjectSubscriptions(id, obj);
-    },
-    stateChange: (id, state) => __awaiter(this, void 0, void 0, function* () {
-        if (state) {
-            global_1.Global.log(`{{blue}} state with id ${id} updated: ack=${state.ack}; val=${state.val}`, "debug");
-        }
-        else {
-            global_1.Global.log(`{{blue}} state with id ${id} deleted`, "debug");
-        }
-        if (!connectionAlive && state && !state.ack && id.startsWith(adapter.namespace)) {
-            global_1.Global.log("Not connected to the gateway. Cannot send changes!", "warn");
-            return;
-        }
-        // apply additional subscriptions we've defined
-        custom_subscriptions_1.applyCustomStateSubscriptions(id, state);
-        // Eigene Handling-Logik zum Schluss, damit wir return benutzen können
-        if (state && !state.ack && id.startsWith(adapter.namespace)) {
-            // our own state was changed from within ioBroker, react to it
-            const stateObj = session_1.session.objects[id];
-            if (!(stateObj && stateObj.type === "state" && stateObj.native && stateObj.native.path))
+                adapter.log.error("Please set the connection params in the adapter options before starting the adapter!");
                 return;
-            // get "official" value for the parent object
-            const rootId = iobroker_objects_1.getRootId(id);
-            if (rootId) {
-                // get the ioBroker object
-                const rootObj = session_1.session.objects[rootId];
-                // for now: handle changes on a case by case basis
-                // everything else is too complicated for now
-                let val = state.val;
-                if (stateObj.common.type === "number") {
-                    // node-tradfri-client handles floating point numbers,
-                    // but we'll round to 2 digits for clarity (or the configured value)
-                    let roundToDigits = adapter.config.roundToDigits || 2;
-                    // don't round the transition duration!
-                    if (id.endsWith("transitionDuration"))
-                        roundToDigits = 2;
-                    val = math_1.roundTo(val, roundToDigits);
-                    if (stateObj.common.min != null)
-                        val = Math.max(stateObj.common.min, val);
-                    if (stateObj.common.max != null)
-                        val = Math.min(stateObj.common.max, val);
+            }
+            // Sicherstellen, dass die Anzahl der Nachkommastellen eine Zahl ist
+            if (typeof adapter.config.roundToDigits === "string") {
+                yield updateConfig({
+                    roundToDigits: parseInt(adapter.config.roundToDigits, 10),
+                });
+            }
+            // redirect console output
+            // console.log = (msg) => adapter.log.debug("STDOUT > " + msg);
+            // console.error = (msg) => adapter.log.error("STDERR > " + msg);
+            global_1.Global.log(`startfile = ${process.argv[1]}`);
+            // watch own states
+            adapter.subscribeStates(`${adapter.namespace}.*`);
+            adapter.subscribeObjects(`${adapter.namespace}.*`);
+            // add special watch for lightbulb states, so we can later sync the group states
+            custom_subscriptions_1.subscribeStates(/L\-\d+\.lightbulb\./, groups_1.syncGroupsWithState);
+            // Auth-Parameter laden
+            const hostname = adapter.config.host.toLowerCase();
+            const securityCode = adapter.config.securityCode;
+            let identity = adapter.config.identity;
+            let psk = adapter.config.psk;
+            session_1.session.tradfri = new node_tradfri_client_1.TradfriClient(hostname, {
+                customLogger: global_1.Global.log,
+                watchConnection: true,
+            });
+            if (securityCode != null && securityCode.length > 0) {
+                // we temporarily stored the security code to replace it with identity/psk
+                try {
+                    ({ identity, psk } = yield session_1.session.tradfri.authenticate(securityCode));
+                    // store it and restart the adapter
+                    global_1.Global.log(`The authentication was successful. The adapter should now restart. If not, please restart it manually.`, "info");
+                    yield updateConfig({
+                        identity,
+                        psk,
+                        securityCode: "",
+                    });
                 }
-                switch (rootObj.native.type) {
-                    case "group": {
-                        // read the instanceId and get a reference value
-                        if (!(rootObj.native.instanceId in session_1.session.groups)) {
-                            global_1.Global.log(`The group with ID ${rootObj.native.instanceId} was not found!`, "warn");
-                            return;
-                        }
-                        const group = session_1.session.groups[rootObj.native.instanceId].group;
-                        // if the change was acknowledged, update the state later
-                        let wasAcked = false;
-                        if (id.endsWith(".state")) {
-                            wasAcked = !(yield group.toggle(val));
-                        }
-                        else if (id.endsWith(".brightness")) {
-                            wasAcked = !(yield group.setBrightness(val, yield getTransitionDuration(group)));
-                        }
-                        else if (id.endsWith(".activeScene")) {
-                            // turn on and activate a scene
-                            wasAcked = !(yield group.activateScene(val));
-                        }
-                        else if (id.endsWith(".color")) {
-                            // color change is only supported manually, so we operate
-                            // the virtual state of this group
-                            val = colors_1.normalizeHexColor(val);
-                            if (val != null) {
-                                state.val = val;
-                                yield operations_1.operateVirtualGroup(group, {
-                                    color: val,
-                                    transitionTime: yield getTransitionDuration(group),
-                                });
-                                wasAcked = true;
+                catch (e) {
+                    if (e instanceof node_tradfri_client_1.TradfriError) {
+                        switch (e.code) {
+                            case node_tradfri_client_1.TradfriErrorCodes.ConnectionTimedOut: {
+                                global_1.Global.log(`The gateway ${hostname} is unreachable or did not respond in time!`, "error");
+                                global_1.Global.log(`Please check your network and adapter settings and restart the adapter!`, "error");
+                            }
+                            case node_tradfri_client_1.TradfriErrorCodes.AuthenticationFailed: {
+                                global_1.Global.log(`The security code is incorrect or something else went wrong with the authentication.`, "error");
+                                global_1.Global.log(`Please check your adapter settings and restart the adapter!`, "error");
+                                return;
+                            }
+                            case node_tradfri_client_1.TradfriErrorCodes.ConnectionFailed: {
+                                global_1.Global.log(`Could not authenticate with the gateway ${hostname}!`, "error");
+                                global_1.Global.log(e.message, "error");
+                                return;
                             }
                         }
-                        else if (id.endsWith(".colorTemperature")) {
-                            // color change is only supported manually, so we operate
-                            // the virtual state of this group
-                            yield operations_1.operateVirtualGroup(group, {
-                                colorTemperature: val,
-                                transitionTime: yield getTransitionDuration(group),
-                            });
-                            wasAcked = true;
-                        }
-                        else if (/\.(hue|saturation)$/.test(id)) {
-                            // hue and saturation have to be set together
-                            const prefix = id.substr(0, id.lastIndexOf(".") + 1);
-                            // Try to read the hue and saturation states. If one of them doesn't exist,
-                            // we cannot issue a command
-                            const hueState = yield global_1.Global.adapter.getStateAsync(prefix + "hue");
-                            if (hueState == undefined)
-                                return;
-                            const saturationState = yield global_1.Global.adapter.getStateAsync(prefix + "saturation");
-                            if (saturationState == undefined)
-                                return;
-                            const hue = hueState.val;
-                            const saturation = saturationState.val;
-                            // color change is only supported manually, so we operate
-                            // the virtual state of this group
-                            yield operations_1.operateVirtualGroup(group, {
-                                hue,
-                                saturation,
-                                transitionTime: yield getTransitionDuration(group),
-                            });
-                            wasAcked = true;
-                        }
-                        else if (id.endsWith(".transitionDuration")) {
-                            // this is part of another operation, just ack the state
-                            wasAcked = true;
-                        }
-                        // ack the state if neccessary and return
-                        if (wasAcked)
-                            adapter.setStateAsync(id, state, true);
+                    }
+                    else {
+                        global_1.Global.log(`Could not authenticate with the gateway ${hostname}!`, "error");
+                        global_1.Global.log(e.message, "error");
                         return;
                     }
-                    case "virtual group": {
-                        // find the virtual group instance
-                        if (!(rootObj.native.instanceId in session_1.session.virtualGroups)) {
-                            global_1.Global.log(`The virtual group with ID ${rootObj.native.instanceId} was not found!`, "warn");
-                            return;
-                        }
-                        const vGroup = session_1.session.virtualGroups[rootObj.native.instanceId];
-                        let operation;
-                        let wasAcked = false;
-                        if (id.endsWith(".state")) {
-                            operation = {
-                                onOff: val,
-                            };
-                        }
-                        else if (id.endsWith(".brightness")) {
-                            operation = {
-                                dimmer: val,
-                                transitionTime: yield getTransitionDuration(vGroup),
-                            };
-                        }
-                        else if (id.endsWith(".color")) {
-                            val = colors_1.normalizeHexColor(val);
-                            if (val != null) {
-                                state.val = val;
-                                operation = {
-                                    color: val,
-                                    transitionTime: yield getTransitionDuration(vGroup),
-                                };
+                }
+            }
+            else {
+                // connect with previously negotiated identity and psk
+                try {
+                    yield session_1.session.tradfri.connect(identity, psk);
+                }
+                catch (e) {
+                    if (e instanceof node_tradfri_client_1.TradfriError) {
+                        switch (e.code) {
+                            case node_tradfri_client_1.TradfriErrorCodes.ConnectionTimedOut: {
+                                global_1.Global.log(`The gateway ${hostname} is unreachable or did not respond in time!`, "error");
+                                global_1.Global.log(`Please check your network and adapter settings and restart the adapter!`, "error");
+                            }
+                            case node_tradfri_client_1.TradfriErrorCodes.AuthenticationFailed: {
+                                global_1.Global.log(`The stored credentials are no longer valid!`, "error");
+                                global_1.Global.log(`Please re-enter your security code in the adapter settings!`, "error");
+                                return;
+                            }
+                            case node_tradfri_client_1.TradfriErrorCodes.ConnectionFailed: {
+                                global_1.Global.log(`Could not connect to the gateway ${hostname}!`, "error");
+                                global_1.Global.log(e.message, "error");
+                                return;
                             }
                         }
-                        else if (id.endsWith(".colorTemperature")) {
-                            operation = {
-                                colorTemperature: val,
-                                transitionTime: yield getTransitionDuration(vGroup),
-                            };
-                        }
-                        else if (/\.(hue|saturation)$/.test(id)) {
-                            // hue and saturation have to be set together
-                            const prefix = id.substr(0, id.lastIndexOf(".") + 1);
-                            // Try to read the hue and saturation states. If one of them doesn't exist,
-                            // we cannot issue a command
-                            const hueState = yield global_1.Global.adapter.getStateAsync(prefix + "hue");
-                            if (hueState == undefined)
-                                return;
-                            const saturationState = yield global_1.Global.adapter.getStateAsync(prefix + "saturation");
-                            if (saturationState == undefined)
-                                return;
-                            const hue = hueState.val;
-                            const saturation = saturationState.val;
-                            operation = {
-                                hue,
-                                saturation,
-                                transitionTime: yield getTransitionDuration(vGroup),
-                            };
-                        }
-                        else if (id.endsWith(".transitionDuration")) {
-                            // No operation here, since this is part of another one
-                            wasAcked = true;
-                        }
-                        // update all lightbulbs in this group
-                        if (operation != null) {
-                            operations_1.operateVirtualGroup(vGroup, operation);
-                            wasAcked = true;
-                        }
-                        // and ack the state change
-                        if (wasAcked)
-                            adapter.setStateAsync(id, state, true);
+                    }
+                    else {
+                        global_1.Global.log(`Could not connect to the gateway ${hostname}!`, "error");
+                        global_1.Global.log(e.message, "error");
                         return;
                     }
-                    default: { // accessory
-                        if (id.indexOf(".lightbulb.") > -1 || id.indexOf(".plug.") > -1) {
+                }
+            }
+            // watch the connection
+            yield adapter.setStateAsync("info.connection", true, true);
+            connectionAlive = true;
+            session_1.session.tradfri
+                .on("connection alive", () => {
+                global_1.Global.log("Connection to gateway reestablished", "info");
+                adapter.setState("info.connection", true, true);
+                connectionAlive = true;
+            })
+                .on("connection lost", () => {
+                global_1.Global.log("Lost connection to gateway", "warn");
+                adapter.setState("info.connection", false, true);
+                connectionAlive = false;
+            });
+            yield loadDevices();
+            yield loadGroups();
+            yield loadVirtualGroups();
+            session_1.session.tradfri
+                .on("device updated", tradfri_deviceUpdated)
+                .on("device removed", tradfri_deviceRemoved)
+                .on("group updated", tradfri_groupUpdated)
+                .on("group removed", tradfri_groupRemoved)
+                .on("scene updated", tradfri_sceneUpdated)
+                .on("scene removed", tradfri_sceneRemoved)
+                .on("error", tradfri_error);
+            observeAll();
+        }), 
+        // Handle sendTo-Messages
+        message: message_1.onMessage, objectChange: (id, obj) => {
+            global_1.Global.log(`{{blue}} object with id ${id} ${obj ? "updated" : "deleted"}`, "debug");
+            if (id.startsWith(adapter.namespace)) {
+                // this is our own object.
+                if (obj) {
+                    // first check if we have to modify a device/group/whatever
+                    const instanceId = iobroker_objects_1.getInstanceId(id);
+                    if (instanceId == undefined)
+                        return;
+                    if (obj.type === "device" && instanceId in session_1.session.devices && session_1.session.devices[instanceId] != null) {
+                        // if this device is in the device list, check for changed properties
+                        const acc = session_1.session.devices[instanceId];
+                        if (obj.common && obj.common.name !== acc.name) {
+                            // the name has changed, notify the gateway
+                            global_1.Global.log(`the device ${id} was renamed to "${obj.common.name}"`);
+                            operations_1.renameDevice(acc, obj.common.name);
+                        }
+                    }
+                    else if (obj.type === "channel" && instanceId in session_1.session.groups && session_1.session.groups[instanceId] != null) {
+                        // if this group is in the groups list, check for changed properties
+                        const grp = session_1.session.groups[instanceId].group;
+                        if (obj.common && obj.common.name !== grp.name) {
+                            // the name has changed, notify the gateway
+                            global_1.Global.log(`the group ${id} was renamed to "${obj.common.name}"`);
+                            operations_1.renameGroup(grp, obj.common.name);
+                        }
+                    }
+                    // remember the object
+                    session_1.session.objects[id] = obj;
+                }
+                else {
+                    // object deleted, forget it
+                    if (id in session_1.session.objects)
+                        delete session_1.session.objects[id];
+                }
+            }
+            // apply additional subscriptions we've defined
+            custom_subscriptions_1.applyCustomObjectSubscriptions(id, obj);
+        }, stateChange: (id, state) => __awaiter(this, void 0, void 0, function* () {
+            if (state) {
+                global_1.Global.log(`{{blue}} state with id ${id} updated: ack=${state.ack}; val=${state.val}`, "debug");
+            }
+            else {
+                global_1.Global.log(`{{blue}} state with id ${id} deleted`, "debug");
+            }
+            if (!connectionAlive && state && !state.ack && id.startsWith(adapter.namespace)) {
+                global_1.Global.log("Not connected to the gateway. Cannot send changes!", "warn");
+                return;
+            }
+            // apply additional subscriptions we've defined
+            custom_subscriptions_1.applyCustomStateSubscriptions(id, state);
+            // Eigene Handling-Logik zum Schluss, damit wir return benutzen können
+            if (state && !state.ack && id.startsWith(adapter.namespace)) {
+                // our own state was changed from within ioBroker, react to it
+                const stateObj = session_1.session.objects[id];
+                if (!(stateObj && stateObj.type === "state" && stateObj.native && stateObj.native.path))
+                    return;
+                // get "official" value for the parent object
+                const rootId = iobroker_objects_1.getRootId(id);
+                if (rootId) {
+                    // get the ioBroker object
+                    const rootObj = session_1.session.objects[rootId];
+                    // for now: handle changes on a case by case basis
+                    // everything else is too complicated for now
+                    let val = state.val;
+                    if (stateObj.common.type === "number") {
+                        // node-tradfri-client handles floating point numbers,
+                        // but we'll round to 2 digits for clarity (or the configured value)
+                        let roundToDigits = adapter.config.roundToDigits || 2;
+                        // don't round the transition duration!
+                        if (id.endsWith("transitionDuration"))
+                            roundToDigits = 2;
+                        val = math_1.roundTo(val, roundToDigits);
+                        if (stateObj.common.min != null)
+                            val = Math.max(stateObj.common.min, val);
+                        if (stateObj.common.max != null)
+                            val = Math.min(stateObj.common.max, val);
+                    }
+                    switch (rootObj.native.type) {
+                        case "group": {
                             // read the instanceId and get a reference value
-                            if (!(rootObj.native.instanceId in session_1.session.devices)) {
-                                global_1.Global.log(`The device with ID ${rootObj.native.instanceId} was not found!`, "warn");
+                            if (!(rootObj.native.instanceId in session_1.session.groups)) {
+                                global_1.Global.log(`The group with ID ${rootObj.native.instanceId} was not found!`, "warn");
                                 return;
                             }
-                            const accessory = session_1.session.devices[rootObj.native.instanceId];
-                            const light = accessory.lightList && accessory.lightList[0];
-                            const plug = accessory.plugList && accessory.plugList[0];
-                            const lightOrPlug = light || plug;
-                            if (lightOrPlug == undefined) {
-                                global_1.Global.log(`Cannot switch an accessory that is neither a lightbulb or a plug`, "warn");
-                                return;
-                            }
+                            const group = session_1.session.groups[rootObj.native.instanceId].group;
                             // if the change was acknowledged, update the state later
                             let wasAcked = false;
-                            // operate the lights depending on the set state
-                            // if no request was sent, we can ack the state immediately
                             if (id.endsWith(".state")) {
-                                wasAcked = !(yield lightOrPlug.toggle(val));
+                                wasAcked = !(yield group.toggle(val));
                             }
                             else if (id.endsWith(".brightness")) {
-                                if (light != undefined) {
-                                    wasAcked = !(yield light.setBrightness(val, yield getTransitionDuration(accessory)));
-                                }
-                                else if (plug != undefined) {
-                                    wasAcked = !(yield plug.setBrightness(val));
-                                }
+                                wasAcked = !(yield group.setBrightness(val, yield getTransitionDuration(group)));
+                            }
+                            else if (id.endsWith(".activeScene")) {
+                                // turn on and activate a scene
+                                wasAcked = !(yield group.activateScene(val));
                             }
                             else if (id.endsWith(".color")) {
-                                // we need to differentiate here, because some ppl
-                                // might already have "color" states for white spectrum bulbs
-                                // in the future, we create different states for white and RGB bulbs
-                                if (light.spectrum === "rgb") {
-                                    val = colors_1.normalizeHexColor(val);
-                                    if (val != null) {
-                                        state.val = val;
-                                        wasAcked = !(yield light.setColor(val, yield getTransitionDuration(accessory)));
-                                    }
-                                }
-                                else if (light.spectrum === "white") {
-                                    wasAcked = !(yield light.setColorTemperature(val, yield getTransitionDuration(accessory)));
+                                // color change is only supported manually, so we operate
+                                // the virtual state of this group
+                                val = colors_1.normalizeHexColor(val);
+                                if (val != null) {
+                                    state.val = val;
+                                    yield operations_1.operateVirtualGroup(group, {
+                                        color: val,
+                                        transitionTime: yield getTransitionDuration(group),
+                                    });
+                                    wasAcked = true;
                                 }
                             }
                             else if (id.endsWith(".colorTemperature")) {
-                                wasAcked = !(yield light.setColorTemperature(val, yield getTransitionDuration(accessory)));
+                                // color change is only supported manually, so we operate
+                                // the virtual state of this group
+                                yield operations_1.operateVirtualGroup(group, {
+                                    colorTemperature: val,
+                                    transitionTime: yield getTransitionDuration(group),
+                                });
+                                wasAcked = true;
                             }
                             else if (/\.(hue|saturation)$/.test(id)) {
                                 // hue and saturation have to be set together
@@ -473,11 +311,14 @@ let adapter = utils.adapter({
                                     return;
                                 const hue = hueState.val;
                                 const saturation = saturationState.val;
-                                wasAcked = !(yield session_1.session.tradfri.operateLight(accessory, {
+                                // color change is only supported manually, so we operate
+                                // the virtual state of this group
+                                yield operations_1.operateVirtualGroup(group, {
                                     hue,
                                     saturation,
-                                    transitionTime: yield getTransitionDuration(accessory),
-                                }));
+                                    transitionTime: yield getTransitionDuration(group),
+                                });
+                                wasAcked = true;
                             }
                             else if (id.endsWith(".transitionDuration")) {
                                 // this is part of another operation, just ack the state
@@ -488,27 +329,171 @@ let adapter = utils.adapter({
                                 adapter.setStateAsync(id, state, true);
                             return;
                         }
+                        case "virtual group": {
+                            // find the virtual group instance
+                            if (!(rootObj.native.instanceId in session_1.session.virtualGroups)) {
+                                global_1.Global.log(`The virtual group with ID ${rootObj.native.instanceId} was not found!`, "warn");
+                                return;
+                            }
+                            const vGroup = session_1.session.virtualGroups[rootObj.native.instanceId];
+                            let operation;
+                            let wasAcked = false;
+                            if (id.endsWith(".state")) {
+                                operation = {
+                                    onOff: val,
+                                };
+                            }
+                            else if (id.endsWith(".brightness")) {
+                                operation = {
+                                    dimmer: val,
+                                    transitionTime: yield getTransitionDuration(vGroup),
+                                };
+                            }
+                            else if (id.endsWith(".color")) {
+                                val = colors_1.normalizeHexColor(val);
+                                if (val != null) {
+                                    state.val = val;
+                                    operation = {
+                                        color: val,
+                                        transitionTime: yield getTransitionDuration(vGroup),
+                                    };
+                                }
+                            }
+                            else if (id.endsWith(".colorTemperature")) {
+                                operation = {
+                                    colorTemperature: val,
+                                    transitionTime: yield getTransitionDuration(vGroup),
+                                };
+                            }
+                            else if (/\.(hue|saturation)$/.test(id)) {
+                                // hue and saturation have to be set together
+                                const prefix = id.substr(0, id.lastIndexOf(".") + 1);
+                                // Try to read the hue and saturation states. If one of them doesn't exist,
+                                // we cannot issue a command
+                                const hueState = yield global_1.Global.adapter.getStateAsync(prefix + "hue");
+                                if (hueState == undefined)
+                                    return;
+                                const saturationState = yield global_1.Global.adapter.getStateAsync(prefix + "saturation");
+                                if (saturationState == undefined)
+                                    return;
+                                const hue = hueState.val;
+                                const saturation = saturationState.val;
+                                operation = {
+                                    hue,
+                                    saturation,
+                                    transitionTime: yield getTransitionDuration(vGroup),
+                                };
+                            }
+                            else if (id.endsWith(".transitionDuration")) {
+                                // No operation here, since this is part of another one
+                                wasAcked = true;
+                            }
+                            // update all lightbulbs in this group
+                            if (operation != null) {
+                                operations_1.operateVirtualGroup(vGroup, operation);
+                                wasAcked = true;
+                            }
+                            // and ack the state change
+                            if (wasAcked)
+                                adapter.setStateAsync(id, state, true);
+                            return;
+                        }
+                        default: { // accessory
+                            if (id.indexOf(".lightbulb.") > -1 || id.indexOf(".plug.") > -1) {
+                                // read the instanceId and get a reference value
+                                if (!(rootObj.native.instanceId in session_1.session.devices)) {
+                                    global_1.Global.log(`The device with ID ${rootObj.native.instanceId} was not found!`, "warn");
+                                    return;
+                                }
+                                const accessory = session_1.session.devices[rootObj.native.instanceId];
+                                const light = accessory.lightList && accessory.lightList[0];
+                                const plug = accessory.plugList && accessory.plugList[0];
+                                const lightOrPlug = light || plug;
+                                if (lightOrPlug == undefined) {
+                                    global_1.Global.log(`Cannot switch an accessory that is neither a lightbulb or a plug`, "warn");
+                                    return;
+                                }
+                                // if the change was acknowledged, update the state later
+                                let wasAcked = false;
+                                // operate the lights depending on the set state
+                                // if no request was sent, we can ack the state immediately
+                                if (id.endsWith(".state")) {
+                                    wasAcked = !(yield lightOrPlug.toggle(val));
+                                }
+                                else if (id.endsWith(".brightness")) {
+                                    if (light != undefined) {
+                                        wasAcked = !(yield light.setBrightness(val, yield getTransitionDuration(accessory)));
+                                    }
+                                    else if (plug != undefined) {
+                                        wasAcked = !(yield plug.setBrightness(val));
+                                    }
+                                }
+                                else if (id.endsWith(".color")) {
+                                    // we need to differentiate here, because some ppl
+                                    // might already have "color" states for white spectrum bulbs
+                                    // in the future, we create different states for white and RGB bulbs
+                                    if (light.spectrum === "rgb") {
+                                        val = colors_1.normalizeHexColor(val);
+                                        if (val != null) {
+                                            state.val = val;
+                                            wasAcked = !(yield light.setColor(val, yield getTransitionDuration(accessory)));
+                                        }
+                                    }
+                                    else if (light.spectrum === "white") {
+                                        wasAcked = !(yield light.setColorTemperature(val, yield getTransitionDuration(accessory)));
+                                    }
+                                }
+                                else if (id.endsWith(".colorTemperature")) {
+                                    wasAcked = !(yield light.setColorTemperature(val, yield getTransitionDuration(accessory)));
+                                }
+                                else if (/\.(hue|saturation)$/.test(id)) {
+                                    // hue and saturation have to be set together
+                                    const prefix = id.substr(0, id.lastIndexOf(".") + 1);
+                                    // Try to read the hue and saturation states. If one of them doesn't exist,
+                                    // we cannot issue a command
+                                    const hueState = yield global_1.Global.adapter.getStateAsync(prefix + "hue");
+                                    if (hueState == undefined)
+                                        return;
+                                    const saturationState = yield global_1.Global.adapter.getStateAsync(prefix + "saturation");
+                                    if (saturationState == undefined)
+                                        return;
+                                    const hue = hueState.val;
+                                    const saturation = saturationState.val;
+                                    wasAcked = !(yield session_1.session.tradfri.operateLight(accessory, {
+                                        hue,
+                                        saturation,
+                                        transitionTime: yield getTransitionDuration(accessory),
+                                    }));
+                                }
+                                else if (id.endsWith(".transitionDuration")) {
+                                    // this is part of another operation, just ack the state
+                                    wasAcked = true;
+                                }
+                                // ack the state if neccessary and return
+                                if (wasAcked)
+                                    adapter.setStateAsync(id, state, true);
+                                return;
+                            }
+                        }
                     }
                 }
             }
-        }
-        else if (!state) {
-            // TODO: find out what to do when states are deleted
-        }
-    }),
-    unload: (callback) => {
-        // is called when adapter shuts down - callback has to be called under any circumstances!
-        try {
-            // close the gateway connection
-            session_1.session.tradfri.destroy();
-            adapter.setState("info.connection", false, true);
-            callback();
-        }
-        catch (e) {
-            callback();
-        }
-    },
-});
+            else if (!state) {
+                // TODO: find out what to do when states are deleted
+            }
+        }), unload: (callback) => {
+            // is called when adapter shuts down - callback has to be called under any circumstances!
+            try {
+                // close the gateway connection
+                session_1.session.tradfri.destroy();
+                adapter.setState("info.connection", false, true);
+                callback();
+            }
+            catch (e) {
+                callback();
+            }
+        } }));
+}
 function updateConfig(newConfig) {
     return __awaiter(this, void 0, void 0, function* () {
         // Create the config object
@@ -726,8 +711,45 @@ function onUnhandledError(err) {
     adapter.log.error("unhandled exception:" + getMessage(err));
     if (err.stack != null)
         adapter.log.error("> stack: " + err.stack);
-    process.exit(1);
+    terminate(1, "unhandled exception");
+}
+function terminate(exitCode, reason) {
+    if (adapter && typeof adapter.terminate === "function") {
+        adapter.terminate(reason);
+    }
+    else {
+        process.exit(exitCode);
+    }
 }
 // Trace unhandled errors
 process.on("unhandledRejection", onUnhandledRejection);
 process.on("uncaughtException", onUnhandledError);
+// try loading tradfri module to catch potential errors
+let tradfriClientLibLoaded = false;
+try {
+    // tslint:disable-next-line:no-var-requires
+    require("node-tradfri-client");
+    tradfriClientLibLoaded = true;
+}
+catch (e) {
+    console.error(`The module "node-aead-crypto" was not installed correctly!`);
+    console.error(`To try reinstalling it, goto "${path.join(__dirname, "..")}" and run`);
+    console.error(`npm install --production`);
+    console.error(`If that fails due to missing access rights, run`);
+    console.error(`${process.platform !== "win32" ? "sudo " : ""}npm install --production --unsafe-perm`);
+    console.error(`instead. Afterwards, restart this adapter.`);
+}
+// Export startAdapter in compact mode or execute it immediately
+if (module && module.parent) {
+    if (tradfriClientLibLoaded)
+        module.exports = startAdapter;
+}
+else {
+    // or start the instance directly
+    if (tradfriClientLibLoaded) {
+        startAdapter();
+    }
+    else {
+        terminate(11, "Required library missing"); // Do not restart!
+    }
+}

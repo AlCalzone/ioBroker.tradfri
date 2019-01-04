@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "2.0.0",
+        "version": "2.0.1",
         "news": {
+            "2.0.1": {
+                "en": "Experimental support for compact mode",
+                "de": "Experimentelle Unterstützung für den neuen Compact-Modus"
+            },
             "2.0.0": {
                 "en": "Switched to material design, dropped Admin v2 support.",
                 "de": "Zu material design gewechselt und Admin v2 Unterstützung gestrichen."
@@ -160,6 +164,7 @@
         "type": "lighting",
         "messagebox": true,
         "materialize": true,
+        "compact": true,
         "dependencies": [
             {
                 "admin": ">=3.0.0"
@@ -174,6 +179,11 @@
         "preserveTransitionTime": false,
         "roundToDigits": 2
     },
+    "protectedNative": [
+        "securityCode",
+        "identity",
+        "psk"
+    ],
     "objects": [],
     "instanceObjects": [
         {
