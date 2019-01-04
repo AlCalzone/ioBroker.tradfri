@@ -12,15 +12,6 @@
 			"port": 9229,
 			"localRoot": "${workspaceFolder}",
 			"remoteRoot": "/opt/iobroker/node_modules/iobroker.tradfri"
-		},
-		{
-			"type": "node",
-			"request": "launch",
-			"name": "Programm starten",
-			"program": "${workspaceFolder}\\build\\main.js",
-			"outFiles": [
-				"${workspaceFolder}/**/*.js"
-			]
 		}
 	]
 }

@@ -48,6 +48,7 @@
     "react": "^16.3.2",
     "react-dom": "^16.3.2",
     "react-test-renderer": "^16.3.2",
+    "rexreplace": "^4.1.1",
     "rimraf": "^2.6.2",
     "semver": "^5.5.0",
     "sinon": "^5.0.7",
@@ -74,10 +75,11 @@
     "url": "https://github.com/AlCalzone/ioBroker.tradfri"
   },
   "scripts": {
-    "clean-build-dir": "cpx build/src/**/*.* build && rimraf build/src && rimraf build/{io-,}package.json",
-    "prebuild": "rimraf ./build",
+    "restoreBuildDirectoryStructure": "cpx build/src/**/*.* build && rimraf build/src && rimraf build/{io-,}package.json",
+    "fixSourceMaps": "rexreplace \"\\\"sources\\\"\\:\\[\\\"../../\" \"\\\"sources\\\"\\:\\[\\\"../\" \"{build/**,build}/*.map\"",
+    "prebuild:ts": "rimraf ./build",
     "build:ts": "tsc -p src/tsconfig.json",
-    "postbuild:ts": "npm run clean-build-dir",
+    "postbuild:ts": "npm run restoreBuildDirectoryStructure && npm run fixSourceMaps",
     "build:webpack": "webpack --config webpack.config.js",
     "build": "npm run build:ts && npm run build:webpack",
     "watch:webpack": "webpack --config webpack.config.js --watch --progress",

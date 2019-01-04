@@ -5,7 +5,7 @@
 		"noEmitOnError": true,
 		"module": "commonjs",
 		"moduleResolution": "node",
-		"outDir": "build/",
+		"outDir": "./build/",
 		"removeComments": false,
 		"jsx": "react",
 
@@ -16,10 +16,8 @@
 		"emitDecoratorMetadata": true,
 
 		"resolveJsonModule": true,
-
 		"sourceMap": false,
-		"inlineSourceMap": false,
-		//"sourceRoot": "src/",
+		"rootDir": ".",
 		"target": "es6"
 	},
 	"include": [
