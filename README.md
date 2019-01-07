@@ -72,6 +72,7 @@ The result object `ret` looks as follows:
 #### _WORK IN PROGRESS_
 * (AlCalzone) When `node-aead-crypto` is not installed, display instructions on how to fix it
 * (AlCalzone) Optimizations and fixes under the hood
+* (AlCalzone) Experimental support for compact mode
 
 #### 2.0.0 (2018-05-14)
 * (AlCalzone) Support for Admin v3 and material design
