@@ -776,14 +776,21 @@ try {
 }
 
 export = function run(isCompactMode: boolean) {
+	console.log(`run(isCompactMode: ${isCompactMode})`);
 	if (isCompactMode) {
 		// Export startAdapter in compact mode
-		if (tradfriClientLibLoaded) return startAdapter;
+		if (tradfriClientLibLoaded) {
+			console.log(`tradfri lib is loaded`);
+			return startAdapter;
+		}
+		console.log(`tradfri lib is NOT loaded`);
 	} else {
 		// otherwise start the instance directly
 		if (tradfriClientLibLoaded) {
+			console.log(`tradfri lib is loaded, starting adapter`);
 			startAdapter();
 		} else {
+			console.log(`tradfri lib is NOT loaded, terminating`);
 			terminate(11, "Required library missing"); // Do not restart!
 		}
 	}
