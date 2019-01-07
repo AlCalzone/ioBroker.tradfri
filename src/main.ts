@@ -775,14 +775,16 @@ try {
 	console.error(`instead. Afterwards, restart this adapter.`);
 }
 
-// Export startAdapter in compact mode or execute it immediately
-if (module && module.parent) {
-	if (tradfriClientLibLoaded) module.exports = startAdapter;
-} else {
-	// or start the instance directly
-	if (tradfriClientLibLoaded) {
-		startAdapter();
+export = function run(isCompactMode: boolean) {
+	if (isCompactMode) {
+		// Export startAdapter in compact mode
+		if (tradfriClientLibLoaded) return startAdapter;
 	} else {
-		terminate(11, "Required library missing"); // Do not restart!
+		// otherwise start the instance directly
+		if (tradfriClientLibLoaded) {
+			startAdapter();
+		} else {
+			terminate(11, "Required library missing"); // Do not restart!
+		}
 	}
-}
+};

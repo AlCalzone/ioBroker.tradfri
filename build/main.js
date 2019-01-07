@@ -7,7 +7,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-Object.defineProperty(exports, "__esModule", { value: true });
 // tslint:disable:object-literal-key-quotes
 const path = require("path");
 // actually load them now
@@ -739,17 +738,19 @@ catch (e) {
     console.error(`${process.platform !== "win32" ? "sudo " : ""}npm install --production --unsafe-perm`);
     console.error(`instead. Afterwards, restart this adapter.`);
 }
-// Export startAdapter in compact mode or execute it immediately
-if (module && module.parent) {
-    if (tradfriClientLibLoaded)
-        module.exports = startAdapter;
-}
-else {
-    // or start the instance directly
-    if (tradfriClientLibLoaded) {
-        startAdapter();
+module.exports = function run(isCompactMode) {
+    if (isCompactMode) {
+        // Export startAdapter in compact mode
+        if (tradfriClientLibLoaded)
+            return startAdapter;
     }
     else {
-        terminate(11, "Required library missing"); // Do not restart!
+        // otherwise start the instance directly
+        if (tradfriClientLibLoaded) {
+            startAdapter();
+        }
+        else {
+            terminate(11, "Required library missing"); // Do not restart!
+        }
     }
-}
+};
