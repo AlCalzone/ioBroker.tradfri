@@ -771,22 +771,20 @@ try {
 	console.error(`To try reinstalling it, goto "${path.join(__dirname, "..")}" and run`);
 	console.error(`npm install --production`);
 	console.error(`If that fails due to missing access rights, run`);
-	console.error(`${process.platform !== "win32" ? "sudo " : ""}npm install --production --unsafe-perm`);
+	console.error(`${process.platform !== "win32" ? "sudo -H " : ""}npm install --production --unsafe-perm`);
 	console.error(`instead. Afterwards, restart this adapter.`);
 }
 
 if (module && module.parent) {
 	// Export startAdapter in compact mode
 	if (tradfriClientLibLoaded) {
-		console.log(`tradfri lib is loaded`);
 		module.exports = startAdapter;
-	} else console.log(`tradfri lib is NOT loaded`);
+	}
 } else {
+	// Otherwise start the adapter immediately
 	if (tradfriClientLibLoaded) {
-		console.log(`tradfri lib is loaded, starting adapter`);
 		startAdapter();
 	} else {
-		console.log(`tradfri lib is NOT loaded, terminating`);
 		terminate(11, "Required library missing"); // Do not restart!
 	}
 }
