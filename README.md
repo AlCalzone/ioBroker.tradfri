@@ -5,6 +5,8 @@ ioBroker.tradfri
 **Tests:** Linux/Mac: [![Build Status](https://travis-ci.org/AlCalzone/ioBroker.tradfri.svg?branch=master)](https://travis-ci.org/AlCalzone/ioBroker.tradfri) 
 Windows: [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/AlCalzone/ioBroker.tradfri?branch=master&svg=true)](https://ci.appveyor.com/project/AlCalzone/ioBroker-tradfri/)
 
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/AlCalzone/ioBroker.tradfri.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/AlCalzone/ioBroker.tradfri/alerts/)
+
 ================
 
 
