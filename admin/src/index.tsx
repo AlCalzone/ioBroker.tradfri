@@ -1,5 +1,4 @@
 // root objects
-import * as $ from "jquery";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
@@ -77,13 +76,13 @@ export class Root extends React.Component<RootProps, RootState> {
 
 	public render() {
 		return (
-			// <>
-			// 	<Header />
+			<>
+				<Header />
 				<Tabs labels={["Settings", "Groups"]}>
 					<Settings settings={this.props.settings} onChange={this.props.onSettingsChanged} />
 					<Groups groups={this.state.groups} devices={this.state.devices} />
 				</Tabs>
-			// </>
+			</>
 		);
 	}
 

@@ -1,8 +1,7 @@
 import * as React from "react";
-import * as ReactDOM from "react-dom";
 
 import { Tooltip } from "iobroker-react-components";
-import { $window, _, instance } from "../lib/adapter";
+import { _ } from "../lib/adapter";
 
 export type OnSettingsChangedCallback = (newSettings: ioBroker.AdapterConfig) => void;
 

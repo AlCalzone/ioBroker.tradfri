@@ -6,6 +6,7 @@ webpackJsonp(["main"],{
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+// root objects
 const React = __webpack_require__("./node_modules/react/index.js");
 const ReactDOM = __webpack_require__("./node_modules/react-dom/index.js");
 const adapter_1 = __webpack_require__("./admin/src/lib/adapter.ts");
@@ -65,14 +66,11 @@ class Root extends React.Component {
         });
     }
     render() {
-        return (
-        // <>
-        // 	<Header />
-        React.createElement(iobroker_react_components_1.Tabs, { labels: ["Settings", "Groups"] },
-            React.createElement(settings_1.Settings, { settings: this.props.settings, onChange: this.props.onSettingsChanged }),
-            React.createElement(groups_1.Groups, { groups: this.state.groups, devices: this.state.devices }))
-        // </>
-        );
+        return (React.createElement(React.Fragment, null,
+            React.createElement(Header, null),
+            React.createElement(iobroker_react_components_1.Tabs, { labels: ["Settings", "Groups"] },
+                React.createElement(settings_1.Settings, { settings: this.props.settings, onChange: this.props.onSettingsChanged }),
+                React.createElement(groups_1.Groups, { groups: this.state.groups, devices: this.state.devices }))));
     }
 }
 exports.Root = Root;

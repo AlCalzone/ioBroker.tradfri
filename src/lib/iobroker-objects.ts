@@ -405,7 +405,7 @@ function getCoapAccessoryPropertyPathPrefix(deviceType: AccessoryTypes | undefin
  * Contains definitions for all kinds of states we're going to create
  */
 export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
-	activeScene: (rootId, rootType, deviceType) => ({
+	activeScene: (rootId, _rootType, _deviceType) => ({
 		_id: `${rootId}.activeScene`,
 		type: "state",
 		common: {

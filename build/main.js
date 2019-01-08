@@ -707,7 +707,6 @@ function onUnhandledRejection(err) {
         adapter.log.error("> stack: " + err.stack);
 }
 function onUnhandledError(err) {
-    const msg = getMessage(err);
     adapter.log.error("unhandled exception:" + getMessage(err));
     if (err.stack != null)
         adapter.log.error("> stack: " + err.stack);
@@ -739,7 +738,7 @@ catch (e) {
     console.error(`${process.platform !== "win32" ? "sudo -H " : ""}npm install --production --unsafe-perm`);
     console.error(`instead. Afterwards, restart this adapter.`);
 }
-if (module && module.parent) {
+if (module.parent) {
     // Export startAdapter in compact mode
     if (tradfriClientLibLoaded) {
         module.exports = startAdapter;
