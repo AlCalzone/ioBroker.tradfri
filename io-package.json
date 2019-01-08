@@ -1,11 +1,18 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "2.0.1",
+        "version": "2.1.0",
         "news": {
-            "2.0.1": {
-                "en": "Experimental support for compact mode",
-                "de": "Experimentelle Unterstützung für den neuen Compact-Modus"
+            "2.1.0": {
+                "en": "* Support for compact mode\n* Optimizations and fixes under the hood\n* When `node-aead-crypto` is not installed, display instructions on how to fix it",
+                "de": "* Unterstützung für den Kompaktmodus\n* Optimierungen und Korrekturen unter der Haube\n* Wenn `node-aead-crypto` nicht installiert ist, zeigen Sie Anweisungen zur Behebung an",
+                "ru": "* Поддержка компактного режима\n* Оптимизация и исправления под капотом\n* Когда `node-aead-crypto` не установлен, отобразите инструкции о том, как это исправить",
+                "pt": "* Suporte para o modo compacto\n* Otimizações e correções sob o capô\n* Quando o `node-aead-crypto` não está instalado, exibe instruções sobre como corrigi-lo",
+                "nl": "* Ondersteuning voor de compacte modus\n* Optimalisaties en oplossingen onder de motorkap\n* Wanneer `node-aead-crypto` niet is geïnstalleerd, geeft u instructies voor het oplossen ervan op",
+                "fr": "* Prise en charge du mode compact\n* Optimisations et corrections sous le capot\n* Lorsque `node-aead-crypto` n'est pas installé, affiche les instructions pour le corriger.",
+                "it": "* Supporto per la modalità compatta\n* Ottimizzazioni e correzioni sotto il cofano\n* Quando `node-aead-crypto` non è installato, visualizzare le istruzioni su come risolverlo",
+                "es": "* Soporte para modo compacto.\n* Optimizaciones y correcciones bajo el capó.\n* Cuando `node-aead-crypto` no está instalado, muestra instrucciones sobre cómo solucionarlo",
+                "pl": "* Wsparcie dla trybu kompaktowego\n* Optymalizacje i poprawki pod maską\n* Kiedy `node-aead-crypto` nie jest zainstalowany, wyświetl instrukcje, jak to naprawić"
             },
             "2.0.0": {
                 "en": "Switched to material design, dropped Admin v2 support.",
