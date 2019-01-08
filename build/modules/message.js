@@ -36,8 +36,6 @@ exports.onMessage = (obj) => __awaiter(this, void 0, void 0, function* () {
     };
     // make required parameters easier
     function requireParams(...params) {
-        if (!(params && params.length))
-            return true;
         for (const param of params) {
             if (!(obj.message && obj.message.hasOwnProperty(param))) {
                 respond(responses.MISSING_PARAMETER(param));

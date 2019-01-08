@@ -1,7 +1,6 @@
 import * as React from "react";
-import * as ReactDOM from "react-dom";
 
-import { $window, _, instance, sendTo, socket } from "../lib/adapter";
+import { _, sendTo } from "../lib/adapter";
 
 import { CancelableInput, MultiDropdown } from "iobroker-react-components";
 
