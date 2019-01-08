@@ -12,12 +12,6 @@ import { OnSettingsChangedCallback, Settings } from "./pages/settings";
 const namespace = `tradfri.${instance}`;
 
 // layout components
-function Header() {
-	return (
-		<h3 className="translate" data-role="adapter-name">{_("Tradfri adapter settings")}</h3>
-	);
-}
-
 interface RootProps {
 	settings: ioBroker.AdapterConfig;
 	onSettingsChanged: OnSettingsChangedCallback;
@@ -76,13 +70,10 @@ export class Root extends React.Component<RootProps, RootState> {
 
 	public render() {
 		return (
-			<>
-				<Header />
-				<Tabs labels={["Settings", "Groups"]}>
-					<Settings settings={this.props.settings} onChange={this.props.onSettingsChanged} />
-					<Groups groups={this.state.groups} devices={this.state.devices} />
-				</Tabs>
-			</>
+			<Tabs labels={["Settings", "Groups"]}>
+				<Settings settings={this.props.settings} onChange={this.props.onSettingsChanged} />
+				<Groups groups={this.state.groups} devices={this.state.devices} />
+			</Tabs>
 		);
 	}
 
