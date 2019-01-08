@@ -15,6 +15,9 @@
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true,
 
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+
 		"resolveJsonModule": true,
 		"sourceMap": false,
 		"rootDir": ".",

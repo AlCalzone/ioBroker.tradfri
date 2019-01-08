@@ -8,10 +8,10 @@ describe("lib/str2regex => ", () => {
 		expect(str2regex("*").toString()).to.equal("/.*/");
 	});
 	it("should replace dots", () => {
-		expect(str2regex(".").toString()).to.equal("/\./");
+		expect(str2regex(".").toString()).to.equal("/\\./");
 	});
 	it("should replace combined patterns", () => {
-		expect(str2regex("*.*").toString()).to.equal("/.*\..*/");
+		expect(str2regex("*.*").toString()).to.equal("/.*\\..*/");
 	});
 
 });

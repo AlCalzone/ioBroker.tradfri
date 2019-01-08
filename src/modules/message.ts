@@ -27,7 +27,6 @@ export const onMessage: ioBroker.MessageHandler = async (obj) => {
 	};
 	// make required parameters easier
 	function requireParams(...params: string[]): boolean {
-		if (!(params && params.length)) return true;
 		for (const param of params) {
 			if (!(obj.message && obj.message.hasOwnProperty(param))) {
 				respond(responses.MISSING_PARAMETER(param));

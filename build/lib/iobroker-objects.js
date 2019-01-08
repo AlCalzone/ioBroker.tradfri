@@ -415,7 +415,7 @@ function getCoapAccessoryPropertyPathPrefix(deviceType) {
  * Contains definitions for all kinds of states we're going to create
  */
 exports.objectDefinitions = {
-    activeScene: (rootId, rootType, deviceType) => ({
+    activeScene: (rootId, _rootType, _deviceType) => ({
         _id: `${rootId}.activeScene`,
         type: "state",
         common: {
