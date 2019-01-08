@@ -53,3 +53,6 @@ build/admin/**/*.d.ts
 
 # maintenance scripts
 maintenance/**
+
+# Parcel cache
+.cache
