@@ -157,6 +157,7 @@
         "authors": [
             "AlCalzone <d.griesel@gmx.net>"
         ],
+        "license": "MIT",
         "platform": "Javascript/Node.js",
         "main": "build/main.js",
         "mode": "daemon",
