@@ -193,6 +193,11 @@ function extendDevice(accessory) {
             stateObjs[`${channelID}.brightness`] = exports.objectDefinitions.brightness(objId, "device", accessory.type);
             stateObjs[`${channelID}.state`] = exports.objectDefinitions.onOff(objId, "device", accessory.type);
         }
+        if (accessory.deviceInfo.power === node_tradfri_client_1.PowerSources.Battery
+            || accessory.deviceInfo.power === node_tradfri_client_1.PowerSources.InternalBattery
+            || accessory.deviceInfo.power === node_tradfri_client_1.PowerSources.ExternalBattery) {
+            stateObjs.battery = exports.objectDefinitions.batteryPercentage(objId, "device");
+        }
         const createObjects = Object.keys(stateObjs)
             .map((key) => {
             const obj = stateObjs[key];
@@ -621,4 +626,22 @@ exports.objectDefinitions = {
         }
         return ret;
     },
+    batteryPercentage: (rootId) => ({
+        _id: `${rootId}.batteryPercentage`,
+        type: "state",
+        common: {
+            name: "Battery percentage",
+            read: true,
+            write: false,
+            type: "number",
+            min: 0,
+            max: 100,
+            def: 100,
+            role: "indicator.maintenance",
+            unit: "%",
+        },
+        native: {
+            path: "deviceInfo.battery",
+        },
+    }),
 };

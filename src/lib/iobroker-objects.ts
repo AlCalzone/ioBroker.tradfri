@@ -1,6 +1,6 @@
 import { assertNever } from "alcalzone-shared/helpers";
 import { composeObject, entries, filter } from "alcalzone-shared/objects";
-import { Accessory, AccessoryTypes, Group, GroupInfo, Scene, Spectrum } from "node-tradfri-client";
+import { Accessory, AccessoryTypes, Group, GroupInfo, PowerSources, Scene, Spectrum } from "node-tradfri-client";
 import { session as $ } from "../modules/session";
 import { Global as _ } from "./global";
 import { roundTo } from "./math";
@@ -188,6 +188,14 @@ export function extendDevice(accessory: Accessory) {
 			// We keep brightness for now, so groups of plugs and lights can use dimmer commands
 			stateObjs[`${channelID}.brightness`] = objectDefinitions.brightness(objId, "device", accessory.type);
 			stateObjs[`${channelID}.state`] = objectDefinitions.onOff(objId, "device", accessory.type);
+		}
+
+		if (
+			accessory.deviceInfo.power === PowerSources.Battery
+			|| accessory.deviceInfo.power === PowerSources.InternalBattery
+			|| accessory.deviceInfo.power === PowerSources.ExternalBattery
+		) {
+			stateObjs.battery = objectDefinitions.batteryPercentage(objId, "device");
 		}
 
 		const createObjects = Object.keys(stateObjs)
@@ -610,5 +618,24 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 		}
 		return ret;
 	},
+
+	batteryPercentage: (rootId) => ({
+		_id: `${rootId}.batteryPercentage`,
+		type: "state",
+		common: {
+			name: "Battery percentage",
+			read: true,
+			write: false,
+			type: "number",
+			min: 0,
+			max: 100,
+			def: 100,
+			role: "indicator.maintenance",
+			unit: "%",
+		},
+		native: {
+			path: "deviceInfo.battery",
+		},
+	}),
 
 };
