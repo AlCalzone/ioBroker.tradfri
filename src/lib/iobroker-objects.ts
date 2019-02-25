@@ -259,6 +259,14 @@ export function getAccessoryIcon(accessory: Accessory): string | undefined {
 		case "TRADFRI plug":
 			return "plug.png";
 	}
+	if (model.indexOf(" control outlet ") > -1) {
+		return "plug.png";
+	} else if (
+		model.toLowerCase().indexOf(" transformer ") > -1
+		|| model.toLowerCase().indexOf(" driver ") > -1
+	) {
+		return "transformer.png";
+	}
 	if (accessory.type === AccessoryTypes.lightbulb) {
 		let prefix: string;
 		if (model.indexOf(" panel ") > -1) {

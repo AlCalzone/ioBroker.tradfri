@@ -257,6 +257,13 @@ function getAccessoryIcon(accessory) {
         case "TRADFRI plug":
             return "plug.png";
     }
+    if (model.indexOf(" control outlet ") > -1) {
+        return "plug.png";
+    }
+    else if (model.toLowerCase().indexOf(" transformer ") > -1
+        || model.toLowerCase().indexOf(" driver ") > -1) {
+        return "transformer.png";
+    }
     if (accessory.type === node_tradfri_client_1.AccessoryTypes.lightbulb) {
         let prefix;
         if (model.indexOf(" panel ") > -1) {
