@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "2.1.0",
+        "version": "2.2.0",
         "news": {
+            "2.2.0": {
+                "en": "Expose the battery percentage for devices with a battery",
+                "de": "Legen Sie den Batterieprozentsatz für Geräte mit Akku offen",
+                "ru": "Выставьте процент батареи для устройств с батареей",
+                "pt": "Exponha a porcentagem da bateria para dispositivos com bateria",
+                "nl": "Stel het batterijpercentage bloot voor apparaten met een batterij",
+                "fr": "Exposer le pourcentage de batterie pour les appareils dotés d'une batterie",
+                "it": "Esporre la percentuale della batteria per i dispositivi con una batteria",
+                "es": "Exponer el porcentaje de batería para dispositivos con batería.",
+                "pl": "Odsłonić procent baterii dla urządzeń z baterią",
+                "zh-cn": "显示带电池的设备的电池百分比"
+            },
             "2.1.0": {
                 "en": "* Support for compact mode\n* Optimizations and fixes under the hood\n* When `node-aead-crypto` is not installed, display instructions on how to fix it",
                 "de": "* Unterstützung für den Kompaktmodus\n* Optimierungen und Korrekturen unter der Haube\n* Wenn `node-aead-crypto` nicht installiert ist, zeigen Sie Anweisungen zur Behebung an",
