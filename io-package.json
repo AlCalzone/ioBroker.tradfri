@@ -187,9 +187,8 @@
         "materialize": true,
         "compact": true,
         "dependencies": [
-            {
-                "admin": ">=3.0.0"
-            }
+            { "admin": ">=3.0.0" },
+            { "js-controller": ">=1.4.2" }
         ]
     },
     "native": {
