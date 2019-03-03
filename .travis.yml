@@ -7,6 +7,7 @@ node_js:
 os:
   - linux
   - osx
+  - windows
 allow_failures:
   - os: osx
     node_js: '4'
@@ -18,9 +19,9 @@ before_script:
   - 'if [[ $NPMVERSION == 5 ]]; then npm install -g npm@5; fi'
   - npm -v
 script:
-  - npm run test:package
-  - npm run test:unit
-  - export DEBUG=testing:*
-  - npm run test:integration
+  - 'npm run test:package'
+  - 'npm run test:unit'
+  - 'export DEBUG=testing:*'
+  - 'npm run test:integration'
 notifications:
   email: false
