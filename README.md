@@ -11,7 +11,7 @@ Windows: [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/AlCalzo
 
 
 ## Requirements
-* Linux (e.g. Raspberry Pi) / OSX / Windows
+![Number of Installations](http://iobroker.live/badges/tradfri-installed.svg) ![Number of Installations](http://iobroker.live/badges/tradfri-stable.svg) * Linux (e.g. Raspberry Pi) / OSX / Windows
 * NodeJS >= 6.x
 * Trådfri gateway
 
