@@ -49,7 +49,7 @@
     "iobroker-react-components": "^1.0.0",
     "jquery": "^3.3.1",
     "jsdom": "^11.10.0",
-    "mocha": "^5.1.1",
+    "mocha": "^6.0.2",
     "node-ssh": "^5.1.1",
     "nyc": "^11.7.3",
     "parcel-bundler": "^1.11.0",

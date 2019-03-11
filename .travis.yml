@@ -7,9 +7,6 @@ node_js:
 os:
   - linux
   - osx
-allow_failures:
-  - os: osx
-    node_js: '4'
 before_install:
   - sudo chmod +x ./travis/setup.sh
   - ./travis/setup.sh
@@ -18,9 +15,9 @@ before_script:
   - 'if [[ $NPMVERSION == 5 ]]; then npm install -g npm@5; fi'
   - npm -v
 script:
-  - npm run test:package
-  - npm run test:unit
-  - export DEBUG=testing:*
-  - npm run test:integration
+  - 'npm run test:package'
+  - 'npm run test:unit'
+  - 'export DEBUG=testing:*'
+  - 'npm run test:integration'
 notifications:
   email: false
