@@ -17,7 +17,9 @@
   ],
   "files": [
     "build/",
-    "admin/",
+    "admin/build/",
+    "admin/icons/",
+    "admin/*.{html,css,js,png}",
     "LICENSE",
     "io-package.json"
   ],
