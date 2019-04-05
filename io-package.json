@@ -24,123 +24,20 @@
                 "fr": "* Prise en charge du mode compact\n* Optimisations et corrections sous le capot\n* Lorsque `node-aead-crypto` n'est pas installé, affiche les instructions pour le corriger.",
                 "it": "* Supporto per la modalità compatta\n* Ottimizzazioni e correzioni sotto il cofano\n* Quando `node-aead-crypto` non è installato, visualizzare le istruzioni su come risolverlo",
                 "es": "* Soporte para modo compacto.\n* Optimizaciones y correcciones bajo el capó.\n* Cuando `node-aead-crypto` no está instalado, muestra instrucciones sobre cómo solucionarlo",
-                "pl": "* Wsparcie dla trybu kompaktowego\n* Optymalizacje i poprawki pod maską\n* Kiedy `node-aead-crypto` nie jest zainstalowany, wyświetl instrukcje, jak to naprawić"
+                "pl": "* Wsparcie dla trybu kompaktowego\n* Optymalizacje i poprawki pod maską\n* Kiedy `node-aead-crypto` nie jest zainstalowany, wyświetl instrukcje, jak to naprawić",
+                "zh-cn": "*支持紧凑的模式\n*优化和修复盖下\n*当`节点-aead-加密`是没有安装，显示说明如何解决它"
             },
             "2.0.0": {
                 "en": "Switched to material design, dropped Admin v2 support.",
-                "de": "Zu material design gewechselt und Admin v2 Unterstützung gestrichen."
-            },
-            "1.5.1": {
-                "en": "Added experimental support for smart plugs",
-                "de": "Experimentelle Unterstützung für Steckdosen hinzugefügt"
-            },
-            "1.4.0": {
-                "en": "The names of state objects no longer get overwritten",
-                "de": "Die Namen von State-Objekten werden nicht mehr überschrieben."
-            },
-            "1.3.0": {
-                "en": "Made rounding of numeric values configurable. Reduce logging of \"updated scenes for group...\"",
-                "de": "Runden von Zahlen ist jetzt einstellbar. Log-Ausgabe \"updated scenes for group...\" reduziert"
-            },
-            "1.2.1": {
-                "en": "Use the native encryption methods of NodeJS 10 instead of `node-aead-crypto`",
-                "de": "Die nativen Verschlüsselungsmethoden von NodeJS 10 werden anstatt `node-aead-crypto` verwendet"
-            },
-            "1.1.11": {
-                "en": "Add support for NodeJS 10",
-                "de": "Unterstützung für NodeJS 10 hinzugefügt"
-            },
-            "1.1.10": {
-                "en": "Improved automatic reconnection",
-                "de": "Automatische Verbindungswiederherstellung verbessert"
-            },
-            "1.1.9": {
-                "en": "Fixed group states not always updating the lightbulbs when changed",
-                "de": "Fehler behoben, dass Gruppen-States bei Änderungen nicht immer die Lampen schalten"
-            },
-            "1.1.8": {
-                "en": "Ignore minimum brightness reports when lights are turned off",
-                "de": "Lampen werden nicht mehr auf minimale Helligkeit gesetzt, wenn sie bereits ausgeschaltet sind."
-            },
-            "1.1.7": {
-                "en": "Fixed activation of scenes when the scene is already selected",
-                "de": "Szenen werden jetzt korrekt aktiviert, selbst wenn sie bereits ausgewählt waren."
-            },
-            "1.1.6": {
-                "en": "* Fixes for RGB support\n* Support for floating point values",
-                "de": "* Fehlerbehebungen für RGB-Unterstützung\n* Unterstützung für Kommazahlen"
-            },
-            "1.1.0": {
-                "en": "Added an option to preserve the transition duration for single lightbulbs.",
-                "de": "Option hinzugefügt, um die Übergangsdauer für einzelne Lampen beizubehalten."
-            },
-            "1.0.7": {
-                "en": "Fixed an error while loading virtual groups.",
-                "de": "Fehler beim Laden virtueller Gruppen behoben."
-            },
-            "1.0.6": {
-                "en": "Updated node-tradfri-client version.",
-                "de": "Version von node-tradfri-client aktualisiert."
-            },
-            "1.0.5": {
-                "en": "Removed error in the log on adapter startup. Changed brightness role for better compatibility with the cloud adapter.",
-                "de": "Fehler im Log beim Start des Adapters wurde entfernt. Geänderte Helligkeitsrolle für bessere Kompatibilität mit dem Cloud-Adapter."
-            },
-            "1.0.4": {
-                "en": "Removed warning caused by Gateway v1.3.14",
-                "de": "Warnung entfernt, die durch Gateway v1.3.14 ausgelöst wird"
-            },
-            "1.0.3": {
-                "en": "Updated node-tradfri-client version.\r\nBugfixes.",
-                "de": "Version von node-tradfri-client aktualisiert.\r\nBugfixes."
-            },
-            "1.0.2": {
-                "en": "New attempt at automatically restarting the adapter on connection loss",
-                "de": "Neuer Versuch, den Adapter bei Verbindungsverlust neu zu starten"
-            },
-            "1.0.0": {
-                "en": "This is stable enough for a 1.x version.",
-                "de": "Der Adapter ist stabil genug für ein 1.x-Version."
-            },
-            "0.6.0": {
-                "en": "Moved tradfri-related code into its own library.",
-                "de": "Tradfri-Code in eigene Library ausgelagert."
-            },
-            "0.5.5": {
-                "en": "Restored compatibility to Gateway version 1.2.42",
-                "de": "Kompatibilität zu Gateway-Version 1.2.42 wiederhergestellt"
-            },
-            "0.5.4": {
-                "en": "Support of virtual groups. Added icons for devices.",
-                "de": "Unterstützung virtueller Gruppen. Icons für Geräte hinzugefügt."
-            },
-            "0.4.5": {
-                "en": "Bugfixes",
-                "de": "Bugfixes"
-            },
-            "0.4.4": {
-                "en": "Experimental support for RGB and lightbulbs with fixed color.",
-                "de": "Experimentelle Unterstützung für RGB und Lampen mit fester Farbtemperatur."
-            },
-            "0.3.4": {
-                "en": "Disabled automatic restart on connection loss.",
-                "de": "Automatischen Neustart bei Verbindungsverlust deaktiviert."
-            },
-            "0.3.3": {
-                "en": "Eliminated potential sources of infinite loops",
-                "de": "Potentielle Auslöser von Endlosschleifen eliminiert"
-            },
-            "0.3.0": {
-                "en": "Support of groups and scenes, improved connection handling, internal improvements.",
-                "de": "Unterstützung von Gruppen und Szenen, verbesserte Verbindungsverwaltung, interne Verbesserungen."
-            },
-            "0.2.1": {
-                "en": "Removed git dependency, published to npm.",
-                "de": "Git-Abhängigkeit entfernt, auf npm veröffentlicht."
-            },
-            "0.1.3": {
-                "en": "Initial release without broken 3rd party libraries",
-                "de": "Initiale Version des Adapters ohne fehlerhafte Dritt-Software"
+                "de": "Zu material design gewechselt und Admin v2 Unterstützung gestrichen.",
+                "ru": "Перешли на материал конструкции, за админ поддержка V2.",
+                "pt": "Mudou para material de desenho, caiu de Administração v2 suporte.",
+                "nl": "Geschakeld-ontwerp van het materiaal, liet Admin v2 ondersteuning.",
+                "fr": "Passé à la conception de matériel, a chuté de l'Admin v2 de soutien.",
+                "it": "Commutato in material design, è sceso Admin v2 supporto.",
+                "es": "De conmutación para el diseño de materiales, cayó Administrador v2 apoyo.",
+                "pl": "Przeszli na materiał konstrukcji, za admin wsparcie V2.",
+                "zh-cn": "切换到的材料设计，下降了管理v2的支持。"
             }
         },
         "title": "IKEA Trådfri",
@@ -153,18 +50,20 @@
             "nl": "IKEA Trådfri",
             "pl": "IKEA Trådfri",
             "pt": "IKEA Trådfri",
-            "ru": "IKEA Trådfri"
+            "ru": "IKEA Trådfri",
+            "zh-cn": "宜家Trådfri"
         },
         "desc": {
             "en": "Communicates with IKEA Trådfri Gateway to control devices",
             "de": "Kommuniziert mit IKEA Trådfri Gateway, um Geräte zu steuern",
-            "ru": "Общается с IKEA Trådfri Gateway для управления устройствами",
-            "pt": "Comunica com o IKEA Trådfri Gateway para controlar dispositivos",
-            "nl": "Communiceert met IKEA Trådfri Gateway om apparaten te bedienen",
-            "fr": "Communique avec IKEA Trådfri Gateway pour contrôler les appareils",
-            "it": "Comunica con IKEA Trådfri Gateway per controllare i dispositivi",
-            "es": "Se comunica con IKEA Trådfri Gateway para controlar dispositivos",
-            "pl": "Komunikuje się z Bramą IKEA Trårdri do sterowania urządzeniami"
+            "ru": "Общается с ИКЕА шлюз Trådfri для управления устройствами",
+            "pt": "Comunica-se com a IKEA Trådfri Gateway para dispositivos de controle de",
+            "nl": "Communiceert met de IKEA Trådfri Gateway om de apparatuur te bedienen",
+            "fr": "Communique avec IKEA Trådfri Passerelle de dispositifs de contrôle de la",
+            "it": "Comunica con IKEA Trådfri Gateway per dispositivi di controllo",
+            "es": "Se comunica con IKEA Trådfri Puerta de entrada a los dispositivos de control de",
+            "pl": "Komunikuje się z IKEA brama Trådfri do zarządzania urządzeniami",
+            "zh-cn": "与IKEA Trådfri网关，以控制设备"
         },
         "authors": [
             "AlCalzone <d.griesel@gmx.net>"
