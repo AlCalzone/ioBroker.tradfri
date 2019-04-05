@@ -63,6 +63,7 @@ export class Settings extends React.Component<SettingsProps, ioBroker.AdapterCon
 	}
 
 	private chkPreserveTransitionTime: HTMLInputElement | null | undefined;
+	private chkDiscoverGateway: HTMLInputElement | null | undefined;
 
 	private parseChangedSetting(target: HTMLInputElement | HTMLSelectElement): ioBroker.AdapterConfig[keyof ioBroker.AdapterConfig] {
 		// Checkboxes in MaterializeCSS are messed up, so we attach our own handler
@@ -111,8 +112,11 @@ export class Settings extends React.Component<SettingsProps, ioBroker.AdapterCon
 	}
 
 	public componentWillUnmount() {
-		if (this.chkPreserveTransitionTime != null) {
-			$(this.chkPreserveTransitionTime).off("click", this.handleChange as any);
+		for (const checkbox of [
+			this.chkPreserveTransitionTime,
+			this.chkDiscoverGateway,
+		]) {
+			if (checkbox) $(checkbox).off("click", this.handleChange as any);
 		}
 	}
 
@@ -120,8 +124,11 @@ export class Settings extends React.Component<SettingsProps, ioBroker.AdapterCon
 		// update floating labels in materialize design
 		M.updateTextFields();
 		// Fix materialize checkboxes
-		if (this.chkPreserveTransitionTime != null) {
-			$(this.chkPreserveTransitionTime).on("click", this.handleChange as any);
+		for (const checkbox of [
+			this.chkPreserveTransitionTime,
+			this.chkDiscoverGateway,
+		]) {
+			if (checkbox) $(checkbox).on("click", this.handleChange as any);
 		}
 	}
 
@@ -129,9 +136,17 @@ export class Settings extends React.Component<SettingsProps, ioBroker.AdapterCon
 		return (
 			<>
 				<div className="row">
-					<div className="col s4 input-field">
+					<div className="col s2 input-field">
 						<input type="text" className="value" id="host" value={this.getSetting("host")} onChange={this.handleChange} />
 						<Label for="host" text="Gateway IP/Hostname:" tooltip="hostname tooltip" />
+					</div>
+					<div className="col s2 input-field">
+						<label htmlFor="discoverGateway">
+							<input type="checkbox" className="value" id="discoverGateway" defaultChecked={this.getSetting("discoverGateway")}
+								ref={me => this.chkDiscoverGateway = me}
+							/>
+							<CheckboxLabel text="Auto-discover" tooltip="discovery tooltip" />
+						</label>
 					</div>
 					<div className="col s4 input-field">
 						<input type="text" className="value" id="securityCode" value={this.getSetting("securityCode")} onChange={this.handleChange} />
@@ -140,7 +155,7 @@ export class Settings extends React.Component<SettingsProps, ioBroker.AdapterCon
 					</div>
 				</div>
 				<div className="row">
-					<div className="col s4">
+					<div className="col s4 input-field">
 						<label htmlFor="preserveTransitionTime">
 							<input type="checkbox" className="value" id="preserveTransitionTime" defaultChecked={this.getSetting("preserveTransitionTime")}
 								ref={me => this.chkPreserveTransitionTime = me}

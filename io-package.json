@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "2.2.0",
+        "version": "2.3.0",
         "news": {
+            "2.3.0": {
+                "en": "The gateway can now be discovered automatically",
+                "de": "Automatische Erkennung des Gateways hinzugefügt",
+                "ru": "Шлюз теперь может быть обнаружен автоматически",
+                "pt": "O gateway pode agora ser descobertos automaticamente",
+                "nl": "De gateway kan nu worden ontdekt automatisch",
+                "fr": "La passerelle peut maintenant être découvert automatiquement",
+                "it": "Il gateway può ora essere individuati automaticamente",
+                "es": "La puerta de enlace puede ahora ser descubiertos automáticamente",
+                "pl": "Brama może być wykryty automatycznie",
+                "zh-cn": "该网关，现在可以自动发现"
+            },
             "2.2.0": {
                 "en": "Expose the battery percentage for devices with a battery",
                 "de": "Legen Sie den Batterieprozentsatz für Geräte mit Akku offen",
@@ -86,11 +98,16 @@
         "materialize": true,
         "compact": true,
         "dependencies": [
-            { "admin": ">=3.0.0" },
-            { "js-controller": ">=1.4.2" }
+            {
+                "admin": ">=3.0.0"
+            },
+            {
+                "js-controller": ">=1.4.2"
+            }
         ]
     },
     "native": {
+        "discoverGateway": true,
         "host": "",
         "securityCode": "",
         "identity": "",

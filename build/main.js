@@ -48,14 +48,35 @@ function startAdapter(options = {}) {
             yield adapter.setStateAsync("info.connection", false, true);
             // Sicherstellen, dass die Optionen vollständig ausgefüllt sind.
             if (adapter.config
-                && adapter.config.host != null && adapter.config.host !== ""
-                && ((adapter.config.securityCode != null && adapter.config.securityCode !== "")
-                    || (adapter.config.identity != null && adapter.config.identity !== ""))) {
+                && ((adapter.config.host != null && adapter.config.host !== "")
+                    || adapter.config.discoverGateway) && ((adapter.config.securityCode != null && adapter.config.securityCode !== "")
+                || (adapter.config.identity != null && adapter.config.identity !== ""))) {
                 // alles gut
             }
             else {
                 adapter.log.error("Please set the connection params in the adapter options before starting the adapter!");
                 return;
+            }
+            // Auth-Parameter laden
+            let hostname = adapter.config.host && adapter.config.host.toLowerCase();
+            const useAutoDiscovery = adapter.config.discoverGateway;
+            const securityCode = adapter.config.securityCode;
+            let identity = adapter.config.identity;
+            let psk = adapter.config.psk;
+            if (useAutoDiscovery) {
+                global_1.Global.log("Discovering the gateway automatically...");
+                const discovered = yield node_tradfri_client_1.discoverGateway();
+                if (discovered && discovered.addresses.length) {
+                    global_1.Global.log(`Found gateway ${discovered.name || "with unknown name"} at ${discovered.addresses[0]}`);
+                    hostname = discovered.addresses[0];
+                }
+                else {
+                    global_1.Global.log("discovery failed!", "warn");
+                    if (!hostname) {
+                        adapter.log.error("In order to use this adapter without auto-discovery, please set a hostname!");
+                        return;
+                    }
+                }
             }
             // Sicherstellen, dass die Anzahl der Nachkommastellen eine Zahl ist
             if (typeof adapter.config.roundToDigits === "string") {
@@ -66,17 +87,11 @@ function startAdapter(options = {}) {
             // redirect console output
             // console.log = (msg) => adapter.log.debug("STDOUT > " + msg);
             // console.error = (msg) => adapter.log.error("STDERR > " + msg);
-            global_1.Global.log(`startfile = ${process.argv[1]}`);
             // watch own states
             adapter.subscribeStates(`${adapter.namespace}.*`);
             adapter.subscribeObjects(`${adapter.namespace}.*`);
             // add special watch for lightbulb states, so we can later sync the group states
             custom_subscriptions_1.subscribeStates(/L\-\d+\.lightbulb\./, groups_1.syncGroupsWithState);
-            // Auth-Parameter laden
-            const hostname = adapter.config.host.toLowerCase();
-            const securityCode = adapter.config.securityCode;
-            let identity = adapter.config.identity;
-            let psk = adapter.config.psk;
             session_1.session.tradfri = new node_tradfri_client_1.TradfriClient(hostname, {
                 customLogger: global_1.Global.log,
                 watchConnection: true,
@@ -121,6 +136,9 @@ function startAdapter(options = {}) {
             }
             else {
                 // connect with previously negotiated identity and psk
+                session_1.session.tradfri.on("connection failed", (attempt, maxAttempts) => {
+                    global_1.Global.log(`failed connection attempt ${attempt} of ${Number.isFinite(maxAttempts) ? maxAttempts : "∞"}`, "warn");
+                });
                 try {
                     yield session_1.session.tradfri.connect(identity, psk);
                 }
@@ -155,11 +173,15 @@ function startAdapter(options = {}) {
             connectionAlive = true;
             session_1.session.tradfri
                 .on("connection alive", () => {
+                if (connectionAlive)
+                    return;
                 global_1.Global.log("Connection to gateway reestablished", "info");
                 adapter.setState("info.connection", true, true);
                 connectionAlive = true;
             })
                 .on("connection lost", () => {
+                if (!connectionAlive)
+                    return;
                 global_1.Global.log("Lost connection to gateway", "warn");
                 adapter.setState("info.connection", false, true);
                 connectionAlive = false;
@@ -702,9 +724,13 @@ function getMessage(err) {
     return err.toString();
 }
 function onUnhandledRejection(err) {
-    adapter.log.error("unhandled promise rejection: " + getMessage(err));
-    if (err.stack != null)
-        adapter.log.error("> stack: " + err.stack);
+    if (err instanceof Error) {
+        if (err.stack != null)
+            adapter.log.error("> stack: " + err.stack);
+    }
+    else {
+        adapter.log.error(`unhandled promise rejection: ${err}`);
+    }
 }
 function onUnhandledError(err) {
     adapter.log.error("unhandled exception:" + getMessage(err));

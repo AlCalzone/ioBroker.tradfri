@@ -73,3 +73,7 @@ div.loading {
 	/* Offset the downscaling in active labels */
 	transform: scale(1.25);
 }
+
+label i.material-icons {
+	vertical-align: middle;
+}

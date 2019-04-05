@@ -4,6 +4,7 @@ import * as path from "path";
 // actually load them now
 import {
 	Accessory, AccessoryTypes,
+	discoverGateway,
 	Group,
 	Light,
 	LightOperation,
@@ -63,8 +64,9 @@ function startAdapter(options: Partial<ioBroker.AdapterOptions> = {}) {
 
 			// Sicherstellen, dass die Optionen vollständig ausgefüllt sind.
 			if (adapter.config
-				&& adapter.config.host != null && adapter.config.host !== ""
-				&& ((adapter.config.securityCode != null && adapter.config.securityCode !== "")
+				&& ((adapter.config.host != null && adapter.config.host !== "")
+					|| adapter.config.discoverGateway
+				) && ((adapter.config.securityCode != null && adapter.config.securityCode !== "")
 					|| (adapter.config.identity != null && adapter.config.identity !== "")
 				)
 			) {
@@ -72,6 +74,28 @@ function startAdapter(options: Partial<ioBroker.AdapterOptions> = {}) {
 			} else {
 				adapter.log.error("Please set the connection params in the adapter options before starting the adapter!");
 				return;
+			}
+
+			// Auth-Parameter laden
+			let hostname = adapter.config.host && adapter.config.host.toLowerCase();
+			const useAutoDiscovery = adapter.config.discoverGateway;
+			const securityCode = adapter.config.securityCode;
+			let identity = adapter.config.identity;
+			let psk = adapter.config.psk;
+
+			if (useAutoDiscovery) {
+				_.log("Discovering the gateway automatically...");
+				const discovered = await discoverGateway();
+				if (discovered && discovered.addresses.length) {
+					_.log(`Found gateway ${discovered.name || "with unknown name"} at ${discovered.addresses[0]}`);
+					hostname = discovered.addresses[0];
+				} else {
+					_.log("discovery failed!", "warn");
+					if (!hostname) {
+						adapter.log.error("In order to use this adapter without auto-discovery, please set a hostname!");
+						return;
+					}
+				}
 			}
 
 			// Sicherstellen, dass die Anzahl der Nachkommastellen eine Zahl ist
@@ -84,7 +108,6 @@ function startAdapter(options: Partial<ioBroker.AdapterOptions> = {}) {
 			// redirect console output
 			// console.log = (msg) => adapter.log.debug("STDOUT > " + msg);
 			// console.error = (msg) => adapter.log.error("STDERR > " + msg);
-			_.log(`startfile = ${process.argv[1]}`);
 
 			// watch own states
 			adapter.subscribeStates(`${adapter.namespace}.*`);
@@ -92,13 +115,7 @@ function startAdapter(options: Partial<ioBroker.AdapterOptions> = {}) {
 			// add special watch for lightbulb states, so we can later sync the group states
 			subscribeStates(/L\-\d+\.lightbulb\./, syncGroupsWithState);
 
-			// Auth-Parameter laden
-			const hostname = adapter.config.host.toLowerCase();
-			const securityCode = adapter.config.securityCode;
-			let identity = adapter.config.identity;
-			let psk = adapter.config.psk;
-
-			$.tradfri = new TradfriClient(hostname, {
+			$.tradfri = new TradfriClient(hostname!, {
 				customLogger: _.log,
 				watchConnection: true,
 			});
@@ -140,6 +157,10 @@ function startAdapter(options: Partial<ioBroker.AdapterOptions> = {}) {
 				}
 			} else {
 				// connect with previously negotiated identity and psk
+				$.tradfri.on("connection failed", (attempt: number, maxAttempts: number) => {
+					_.log(`failed connection attempt ${attempt} of ${Number.isFinite(maxAttempts) ? maxAttempts : "∞"}`, "warn");
+				});
+
 				try {
 					await $.tradfri.connect(identity!, psk!);
 				} catch (e) {
@@ -173,11 +194,13 @@ function startAdapter(options: Partial<ioBroker.AdapterOptions> = {}) {
 			connectionAlive = true;
 			$.tradfri
 				.on("connection alive", () => {
+					if (connectionAlive) return;
 					_.log("Connection to gateway reestablished", "info");
 					adapter.setState("info.connection", true, true);
 					connectionAlive = true;
 				})
 				.on("connection lost", () => {
+					if (!connectionAlive) return;
 					_.log("Lost connection to gateway", "warn");
 					adapter.setState("info.connection", false, true);
 					connectionAlive = false;
@@ -736,9 +759,12 @@ function getMessage(err: Error | string): string {
 	return err.toString();
 }
 
-function onUnhandledRejection(err: Error) {
-	adapter.log.error("unhandled promise rejection: " + getMessage(err));
-	if (err.stack != null) adapter.log.error("> stack: " + err.stack);
+function onUnhandledRejection(err: unknown) {
+	if (err instanceof Error) {
+		if (err.stack != null) adapter.log.error("> stack: " + err.stack);
+	} else {
+		adapter.log.error(`unhandled promise rejection: ${err}`);
+	}
 }
 
 function onUnhandledError(err: Error) {
