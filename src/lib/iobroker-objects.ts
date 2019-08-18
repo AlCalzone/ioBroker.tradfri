@@ -248,6 +248,9 @@ export async function updatePossibleScenes(groupInfo: GroupInfo): Promise<void> 
 }
 
 export function getAccessoryIcon(accessory: Accessory): string | undefined {
+	if (accessory.type === AccessoryTypes.blind) {
+		return "blind.png";
+	}
 	const model = accessory.deviceInfo.modelNumber;
 	switch (model) {
 		case "TRADFRI remote control":

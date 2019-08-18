@@ -246,6 +246,9 @@ function updatePossibleScenes(groupInfo) {
 }
 exports.updatePossibleScenes = updatePossibleScenes;
 function getAccessoryIcon(accessory) {
+    if (accessory.type === node_tradfri_client_1.AccessoryTypes.blind) {
+        return "blind.png";
+    }
     const model = accessory.deviceInfo.modelNumber;
     switch (model) {
         case "TRADFRI remote control":
