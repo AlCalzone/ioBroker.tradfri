@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "2.3.0",
+        "version": "2.4.0",
         "news": {
+            "2.4.0": {
+                "en": "Added support for blinds",
+                "de": "Unterstützung für Jalousien hinzugefügt",
+                "ru": "Добавлена поддержка жалюзи",
+                "pt": "Adicionado suporte para blinds",
+                "nl": "Ondersteuning toegevoegd voor blinds",
+                "fr": "Ajout du support pour les stores",
+                "it": "Aggiunto supporto per i bui",
+                "es": "Se agregó soporte para persianas",
+                "pl": "Dodano obsługę żaluzji",
+                "zh-cn": "增加了对百叶窗的支持"
+            },
             "2.3.0": {
                 "en": "The gateway can now be discovered automatically",
                 "de": "Automatische Erkennung des Gateways hinzugefügt",
@@ -77,9 +89,7 @@
             "pl": "Komunikuje się z IKEA brama Trådfri do zarządzania urządzeniami",
             "zh-cn": "与IKEA Trådfri网关，以控制设备"
         },
-        "authors": [
-            "AlCalzone <d.griesel@gmx.net>"
-        ],
+        "authors": ["AlCalzone <d.griesel@gmx.net>"],
         "license": "MIT",
         "platform": "Javascript/Node.js",
         "main": "build/main.js",
@@ -87,10 +97,7 @@
         "icon": "tradfri.png",
         "enabled": false,
         "extIcon": "https://raw.githubusercontent.com/AlCalzone/ioBroker.tradfri/master/admin/tradfri.png",
-        "keywords": [
-            "ikea",
-            "tradfri"
-        ],
+        "keywords": ["ikea", "tradfri"],
         "readme": "https://github.com/AlCalzone/ioBroker.tradfri/blob/master/README.md",
         "loglevel": "info",
         "type": "lighting",
@@ -115,11 +122,7 @@
         "preserveTransitionTime": false,
         "roundToDigits": 2
     },
-    "protectedNative": [
-        "securityCode",
-        "identity",
-        "psk"
-    ],
+    "protectedNative": ["securityCode", "identity", "psk"],
     "objects": [],
     "instanceObjects": [
         {
