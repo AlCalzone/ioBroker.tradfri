@@ -60,7 +60,7 @@
     "react-dom": "^16.3.2",
     "react-test-renderer": "^16.3.2",
     "rexreplace": "^4.1.1",
-    "rimraf": "^2.6.2",
+    "rimraf": "^3.0.0",
     "semver": "^6.0.0",
     "sinon": "^7.3.1",
     "source-map-support": "^0.5.6",
