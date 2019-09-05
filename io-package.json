@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "2.4.0",
+        "version": "2.4.1",
         "news": {
+            "2.4.1": {
+                "en": "Fix: also create objects for blinds",
+                "de": "Fix: Objekte für Jalousien werden nun korrekt erstellt",
+                "ru": "Исправлено: также создавать объекты для жалюзи",
+                "pt": "Correção: também cria objetos para blinds",
+                "nl": "Oplossing: maak ook objecten voor blinds",
+                "fr": "Correction: créer également des objets pour les stores",
+                "it": "Correzione: crea anche oggetti per persiane",
+                "es": "Solución: también crea objetos para persianas",
+                "pl": "Poprawka: twórz także obiekty dla żaluzji",
+                "zh-cn": "修复：还为百叶窗创建对象"
+            },
             "2.4.0": {
                 "en": "Added support for blinds",
                 "de": "Unterstützung für Jalousien hinzugefügt",
