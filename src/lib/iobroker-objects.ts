@@ -1,6 +1,14 @@
 import { assertNever } from "alcalzone-shared/helpers";
 import { composeObject, entries, filter } from "alcalzone-shared/objects";
-import { Accessory, AccessoryTypes, Group, GroupInfo, PowerSources, Scene, Spectrum } from "node-tradfri-client";
+import {
+	Accessory,
+	AccessoryTypes,
+	Group,
+	GroupInfo,
+	PowerSources,
+	Scene,
+	Spectrum
+} from "node-tradfri-client";
 import { session as $ } from "../modules/session";
 import { Global as _ } from "./global";
 import { roundTo } from "./math";
@@ -13,7 +21,7 @@ import { VirtualGroup } from "./virtual-group";
  */
 export function accessoryToCommon(accessory: Accessory): ioBroker.ObjectCommon {
 	const ret: ioBroker.ObjectCommon = {
-		name: accessory.name,
+		name: accessory.name
 	};
 	const icon = getAccessoryIcon(accessory);
 	if (icon != null) ret.icon = "icons/" + icon;
@@ -30,7 +38,7 @@ export function accessoryToNative(accessory: Accessory): Record<string, any> {
 		firmwareVersion: accessory.deviceInfo.firmwareVersion,
 		modelNumber: accessory.deviceInfo.modelNumber,
 		type: AccessoryTypes[accessory.type],
-		serialNumber: accessory.deviceInfo.serialNumber,
+		serialNumber: accessory.deviceInfo.serialNumber
 	};
 }
 
@@ -67,11 +75,14 @@ export function extendDevice(accessory: Accessory) {
 		// filter out the ones belonging to this device with a property path
 		const stateObjs = filter(
 			$.objects,
-			obj => obj._id.startsWith(objId) && obj.native && obj.native.path,
+			obj => obj._id.startsWith(objId) && obj.native && obj.native.path
 		);
 		// for each property try to update the value
 		for (const [id, obj] of entries(stateObjs)) {
-			if (_.adapter.config.preserveTransitionTime && id.match(/\.transitionDuration$/g)) {
+			if (
+				_.adapter.config.preserveTransitionTime &&
+				id.match(/\.transitionDuration$/g)
+			) {
 				// don't override the transition time
 				continue;
 			}
@@ -79,26 +90,31 @@ export function extendDevice(accessory: Accessory) {
 				// Object could have a default value, find it
 				let newValue = dig<any>(accessory, obj.native.path);
 				const roundToDigits = _.adapter.config.roundToDigits;
-				if (typeof roundToDigits === "number" && typeof newValue === "number") {
+				if (
+					typeof roundToDigits === "number" &&
+					typeof newValue === "number"
+				) {
 					newValue = roundTo(newValue, roundToDigits);
 				}
 				_.adapter.setState(id, newValue as any, true);
-			} catch (e) { /* skip this value */ }
+			} catch (e) {
+				/* skip this value */
+			}
 		}
-
 	} else {
 		// create new object
 		const devObj: ioBroker.Object = {
 			_id: objId,
 			type: "device",
 			common: accessoryToCommon(accessory),
-			native: accessoryToNative(accessory),
+			native: accessoryToNative(accessory)
 		};
 		_.adapter.setObject(objId, devObj);
 
 		// also create state objects, depending on the accessory type
 		const stateObjs: Record<string, ioBroker.Object> = {
-			alive: { // alive state
+			alive: {
+				// alive state
 				_id: `${objId}.alive`,
 				type: "state",
 				common: {
@@ -107,13 +123,15 @@ export function extendDevice(accessory: Accessory) {
 					write: false,
 					type: "boolean",
 					role: "indicator.alive",
-					desc: "indicates if the device is currently alive and connected to the gateway",
+					desc:
+						"indicates if the device is currently alive and connected to the gateway"
 				},
 				native: {
-					path: "alive",
-				},
+					path: "alive"
+				}
 			},
-			lastSeen: { // last seen state
+			lastSeen: {
+				// last seen state
 				_id: `${objId}.lastSeen`,
 				type: "state",
 				common: {
@@ -122,23 +140,27 @@ export function extendDevice(accessory: Accessory) {
 					write: false,
 					type: "number",
 					role: "indicator.lastSeen",
-					desc: "indicates when the device has last been seen by the gateway",
+					desc:
+						"indicates when the device has last been seen by the gateway"
 				},
 				native: {
-					path: "lastSeen",
-				},
-			},
+					path: "lastSeen"
+				}
+			}
 		};
 
 		if (
-			accessory.type === AccessoryTypes.lightbulb
-			|| accessory.type === AccessoryTypes.plug
+			accessory.type === AccessoryTypes.lightbulb ||
+			accessory.type === AccessoryTypes.plug
 		) {
 			let channelName: string;
 			let channelID: string;
 			if (accessory.type === AccessoryTypes.lightbulb) {
 				let spectrum: Spectrum = "none";
-				if (accessory.lightList != null && accessory.lightList.length > 0) {
+				if (
+					accessory.lightList != null &&
+					accessory.lightList.length > 0
+				) {
 					spectrum = accessory.lightList[0].spectrum;
 				}
 				if (spectrum === "none") {
@@ -156,22 +178,37 @@ export function extendDevice(accessory: Accessory) {
 					type: "channel",
 					common: {
 						name: channelName!,
-						role: "light",
+						role: "light"
 					},
 					native: {
-						spectrum: spectrum, // remember the spectrum, so we can update different properties later
-					},
+						spectrum: spectrum // remember the spectrum, so we can update different properties later
+					}
 				};
 				if (spectrum === "white") {
-					stateObjs[`${channelID}.colorTemperature`] = objectDefinitions.colorTemperature(objId, "device");
+					stateObjs[
+						`${channelID}.colorTemperature`
+					] = objectDefinitions.colorTemperature(objId, "device");
 				} else if (spectrum === "rgb") {
-					stateObjs[`${channelID}.color`] = objectDefinitions.color(objId, "device");
-					stateObjs[`${channelID}.hue`] = objectDefinitions.hue(objId, "device");
-					stateObjs[`${channelID}.saturation`] = objectDefinitions.saturation(objId, "device");
+					stateObjs[`${channelID}.color`] = objectDefinitions.color(
+						objId,
+						"device"
+					);
+					stateObjs[`${channelID}.hue`] = objectDefinitions.hue(
+						objId,
+						"device"
+					);
+					stateObjs[
+						`${channelID}.saturation`
+					] = objectDefinitions.saturation(objId, "device");
 				}
-				stateObjs[`${channelID}.transitionDuration`] = objectDefinitions.transitionDuration(objId, "device", accessory.type);
-
-			} else /* if (accessory.type === AccessoryTypes.plug) */ {
+				stateObjs[
+					`${channelID}.transitionDuration`
+				] = objectDefinitions.transitionDuration(
+					objId,
+					"device",
+					accessory.type
+				);
+			} /* if (accessory.type === AccessoryTypes.plug) */ else {
 				// obj.plug should be a channel
 				channelID = "plug";
 				stateObjs[channelID] = {
@@ -179,39 +216,55 @@ export function extendDevice(accessory: Accessory) {
 					type: "channel",
 					common: {
 						name: channelName!,
-						role: "switch",
+						role: "switch"
 					},
-					native: {},
+					native: {}
 				};
 			}
 			// Common properties for both plugs and lights
 			// We keep brightness for now, so groups of plugs and lights can use dimmer commands
-			stateObjs[`${channelID}.brightness`] = objectDefinitions.brightness(objId, "device", accessory.type);
-			stateObjs[`${channelID}.state`] = objectDefinitions.onOff(objId, "device", accessory.type);
+			stateObjs[`${channelID}.brightness`] = objectDefinitions.brightness(
+				objId,
+				"device",
+				accessory.type
+			);
+			stateObjs[`${channelID}.state`] = objectDefinitions.onOff(
+				objId,
+				"device",
+				accessory.type
+			);
 		}
 
 		if (
-			accessory.deviceInfo.power === PowerSources.Battery
-			|| accessory.deviceInfo.power === PowerSources.InternalBattery
-			|| accessory.deviceInfo.power === PowerSources.ExternalBattery
+			accessory.deviceInfo.power === PowerSources.Battery ||
+			accessory.deviceInfo.power === PowerSources.InternalBattery ||
+			accessory.deviceInfo.power === PowerSources.ExternalBattery
 		) {
-			stateObjs.battery = objectDefinitions.batteryPercentage(objId, "device");
+			stateObjs.battery = objectDefinitions.batteryPercentage(
+				objId,
+				"device"
+			);
 		}
 
-		const createObjects = Object.keys(stateObjs)
-			.map((key) => {
-				const obj = stateObjs[key];
-				let initialValue = null;
-				if (obj.native.path != null) {
-					// Object could have a default value, find it
-					initialValue = dig<any>(accessory, obj.native.path);
-				}
-				// create object and return the promise, so we can wait
-				return _.adapter.createOwnStateExAsync(obj._id, obj, initialValue);
-			})
-			;
-		Promise.all(createObjects);
+		if (accessory.type === AccessoryTypes.blind) {
+			stateObjs.position = objectDefinitions.position(
+				objId,
+				"device",
+				accessory.type
+			);
+		}
 
+		const createObjects = Object.keys(stateObjs).map(key => {
+			const obj = stateObjs[key];
+			let initialValue = null;
+			if (obj.native.path != null) {
+				// Object could have a default value, find it
+				initialValue = dig<any>(accessory, obj.native.path);
+			}
+			// create object and return the promise, so we can wait
+			return _.adapter.createOwnStateExAsync(obj._id, obj, initialValue);
+		});
+		Promise.all(createObjects);
 	}
 }
 
@@ -219,7 +272,9 @@ export function extendDevice(accessory: Accessory) {
  * Updates the possible scenes for a group
  * @param groupInfo The group to update
  */
-export async function updatePossibleScenes(groupInfo: GroupInfo): Promise<void> {
+export async function updatePossibleScenes(
+	groupInfo: GroupInfo
+): Promise<void> {
 	const group = groupInfo.group;
 	// if this group is not in the dictionary, don't do anything
 	if (!(group.instanceId in $.groups)) return;
@@ -233,14 +288,25 @@ export async function updatePossibleScenes(groupInfo: GroupInfo): Promise<void> 
 		// map scene ids and names to the dropdown
 		const scenes = groupInfo.scenes;
 		const newDropdownStates = composeObject(
-			Object.keys(scenes).map(id => [id, scenes[id].name] as [string, string]),
+			Object.keys(scenes).map(
+				id => [id, scenes[id].name] as [string, string]
+			)
 		);
 		// compare with the old dropdown states
-		const obj = await _.adapter.getObjectAsync(scenesId) as ioBroker.StateObject;
+		const obj = (await _.adapter.getObjectAsync(
+			scenesId
+		)) as ioBroker.StateObject;
 		const oldDropdownStates = obj.common.states;
-		if (JSON.stringify(newDropdownStates) !== JSON.stringify(oldDropdownStates)) {
+		if (
+			JSON.stringify(newDropdownStates) !==
+			JSON.stringify(oldDropdownStates)
+		) {
 			// and only log and update if something changed
-			_.log(`updating possible scenes for group ${group.instanceId}: ${JSON.stringify(Object.keys(groupInfo.scenes))}`);
+			_.log(
+				`updating possible scenes for group ${
+					group.instanceId
+				}: ${JSON.stringify(Object.keys(groupInfo.scenes))}`
+			);
 			obj.common.states = newDropdownStates;
 			await _.adapter.setObjectAsync(scenesId, obj);
 		}
@@ -265,8 +331,8 @@ export function getAccessoryIcon(accessory: Accessory): string | undefined {
 	if (model.indexOf(" control outlet ") > -1) {
 		return "plug.png";
 	} else if (
-		model.toLowerCase().indexOf(" transformer ") > -1
-		|| model.toLowerCase().indexOf(" driver ") > -1
+		model.toLowerCase().indexOf(" transformer ") > -1 ||
+		model.toLowerCase().indexOf(" driver ") > -1
 	) {
 		return "transformer.png";
 	}
@@ -330,8 +396,14 @@ export function calcObjName(accessory: Accessory): string {
 		case AccessoryTypes.plug:
 			prefix = "P";
 			break;
+		case AccessoryTypes.blind:
+			prefix = "B";
+			break;
 		default:
-			_.log(`Unknown accessory type ${accessory.type}. Please send this info to the developer with a short description of the device!`, "warn");
+			_.log(
+				`Unknown accessory type ${accessory.type}. Please send this info to the developer with a short description of the device!`,
+				"warn"
+			);
 			prefix = "XYZ";
 			break;
 	}
@@ -341,7 +413,9 @@ export function calcObjName(accessory: Accessory): string {
 /**
  * Returns the common part of the ioBroker object representing the given group
  */
-export function groupToCommon(group: Group | VirtualGroup): ioBroker.ObjectCommon {
+export function groupToCommon(
+	group: Group | VirtualGroup
+): ioBroker.ObjectCommon {
 	let name: string;
 	if (group instanceof Group) {
 		name = group.name;
@@ -358,11 +432,13 @@ export function groupToCommon(group: Group | VirtualGroup): ioBroker.ObjectCommo
 /**
  * Returns the native part of the ioBroker object representing the given group
  */
-export function groupToNative(group: Group | VirtualGroup): Record<string, any> {
+export function groupToNative(
+	group: Group | VirtualGroup
+): Record<string, any> {
 	return {
 		instanceId: group.instanceId,
 		deviceIDs: group.deviceIDs,
-		type: (group instanceof VirtualGroup ? "virtual " : "") + "group",
+		type: (group instanceof VirtualGroup ? "virtual " : "") + "group"
 	};
 }
 
@@ -404,7 +480,7 @@ export function calcSceneName(scene: Scene): string {
 export type ioBrokerObjectDefinition = (
 	rootId: string,
 	rootType: "device" | "group" | "virtual group",
-	deviceType?: AccessoryTypes | undefined,
+	deviceType?: AccessoryTypes | undefined
 ) => ioBroker.Object;
 
 /** Returns a string representation of a member of the `AccessoryTypes` enum */
@@ -412,11 +488,18 @@ function accessoryTypeToString(type: AccessoryTypes) {
 	return AccessoryTypes[type];
 }
 
-function getCoapAccessoryPropertyPathPrefix(deviceType: AccessoryTypes | undefined) {
+function getCoapAccessoryPropertyPathPrefix(
+	deviceType: AccessoryTypes | undefined
+) {
 	switch (deviceType) {
-		case AccessoryTypes.lightbulb: return "lightList.[0].";
-		case AccessoryTypes.plug: return "plugList.[0].";
-		default: return "";
+		case AccessoryTypes.lightbulb:
+			return "lightList.[0].";
+		case AccessoryTypes.plug:
+			return "plugList.[0].";
+		case AccessoryTypes.blind:
+			return "blindList.[0].";
+		default:
+			return "";
 	}
 }
 
@@ -433,35 +516,44 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 			write: true,
 			type: "number",
 			role: "value.id",
-			desc: "the instance id of the currently active scene",
+			desc: "the instance id of the currently active scene"
 		},
 		native: {
-			path: "sceneId",
-		},
+			path: "sceneId"
+		}
 	}),
 
 	// Lights and plugs
 	onOff: (rootId, rootType, deviceType) => ({
-		_id: rootType === "device" ? `${rootId}.${accessoryTypeToString(deviceType!)}.state` : `${rootId}.state`,
+		_id:
+			rootType === "device"
+				? `${rootId}.${accessoryTypeToString(deviceType!)}.state`
+				: `${rootId}.state`,
 		type: "state",
 		common: {
 			name: "on/off",
 			read: true,
 			write: true,
 			type: "boolean",
-			role: "switch",
+			role: "switch"
 		},
 		native: {
-			path: getCoapAccessoryPropertyPathPrefix(deviceType) + "onOff",
-		},
+			path: getCoapAccessoryPropertyPathPrefix(deviceType) + "onOff"
+		}
 	}),
 
 	// Lights and plugs for compatibility reasons
 	// Anything > 0% should be "on"
 	brightness: (rootId, rootType, deviceType) => {
-		const deviceName = rootType === "device" ? accessoryTypeToString(deviceType!) : undefined;
+		const deviceName =
+			rootType === "device"
+				? accessoryTypeToString(deviceType!)
+				: undefined;
 		return {
-			_id: rootType === "device" ? `${rootId}.${deviceName}.brightness` : `${rootId}.brightness`,
+			_id:
+				rootType === "device"
+					? `${rootId}.${deviceName}.brightness`
+					: `${rootId}.brightness`,
 			type: "state",
 			common: {
 				name: "Brightness",
@@ -472,19 +564,23 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 				unit: "%",
 				type: "number",
 				role: "level.dimmer",
-				desc: rootType === "device" ?
-					`Brightness of the ${deviceName}` :
-					`Brightness of this group's ${deviceName}s`,
+				desc:
+					rootType === "device"
+						? `Brightness of the ${deviceName}`
+						: `Brightness of this group's ${deviceName}s`
 			},
 			native: {
-				path: getCoapAccessoryPropertyPathPrefix(deviceType) + "dimmer",
-			},
+				path: getCoapAccessoryPropertyPathPrefix(deviceType) + "dimmer"
+			}
 		};
 	},
 
 	// Lights only?
 	transitionDuration: (rootId, rootType, deviceType) => ({
-		_id: rootType === "device" ? `${rootId}.lightbulb.transitionDuration` : `${rootId}.transitionDuration`,
+		_id:
+			rootType === "device"
+				? `${rootId}.lightbulb.transitionDuration`
+				: `${rootId}.transitionDuration`,
 		type: "state",
 		common: {
 			name: "Transition duration",
@@ -495,20 +591,26 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 			max: 100, // TODO: check
 			def: 0,
 			role: "light.dimmer", // TODO: better role?
-			desc: rootType === "device" ?
-				"Duration of a state change" :
-				`Duration for state changes of this group's lightbulbs`,
-			unit: "s",
+			desc:
+				rootType === "device"
+					? "Duration of a state change"
+					: `Duration for state changes of this group's lightbulbs`,
+			unit: "s"
 		},
 		native: {
-			path: getCoapAccessoryPropertyPathPrefix(deviceType) + "transitionTime",
-		},
+			path:
+				getCoapAccessoryPropertyPathPrefix(deviceType) +
+				"transitionTime"
+		}
 	}),
 
 	// Lights only
 	colorTemperature: (rootId, rootType) => {
 		const ret: ioBroker.Object = {
-			_id: rootType === "device" ? `${rootId}.lightbulb.colorTemperature` : `${rootId}.colorTemperature`,
+			_id:
+				rootType === "device"
+					? `${rootId}.lightbulb.colorTemperature`
+					: `${rootId}.colorTemperature`,
 			type: "state",
 			common: {
 				name: "Color temperature",
@@ -519,11 +621,12 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 				unit: "%",
 				type: "number",
 				role: "level.color.temperature",
-				desc: rootType === "device" ?
-					"Range: 0% = cold, 100% = warm" :
-					"Color temperature of this group's white spectrum lightbulbs. Range: 0% = cold, 100% = warm",
+				desc:
+					rootType === "device"
+						? "Range: 0% = cold, 100% = warm"
+						: "Color temperature of this group's white spectrum lightbulbs. Range: 0% = cold, 100% = warm"
 			},
-			native: {},
+			native: {}
 		};
 		if (rootType === "device") {
 			ret.native.path = "lightList.[0].colorTemperature";
@@ -540,7 +643,10 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 	// Lights only
 	color: (rootId, rootType) => {
 		const ret: ioBroker.Object = {
-			_id: rootType === "device" ? `${rootId}.lightbulb.color` : `${rootId}.color`,
+			_id:
+				rootType === "device"
+					? `${rootId}.lightbulb.color`
+					: `${rootId}.color`,
 			type: "state",
 			common: {
 				name: "RGB color",
@@ -548,11 +654,12 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 				write: true,
 				type: "string",
 				role: "level.color",
-				desc: rootType === "device" ?
-					"6-digit RGB hex string" :
-					"Color of this group's RGB lightbulbs as a 6-digit hex string.",
+				desc:
+					rootType === "device"
+						? "6-digit RGB hex string"
+						: "Color of this group's RGB lightbulbs as a 6-digit hex string."
 			},
-			native: {},
+			native: {}
 		};
 		if (rootType === "device") {
 			ret.native.path = "lightList.[0].color";
@@ -569,7 +676,10 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 	// Lights only
 	hue: (rootId, rootType) => {
 		const ret: ioBroker.Object = {
-			_id: rootType === "device" ? `${rootId}.lightbulb.hue` : `${rootId}.hue`,
+			_id:
+				rootType === "device"
+					? `${rootId}.lightbulb.hue`
+					: `${rootId}.hue`,
 			type: "state",
 			common: {
 				name: "Hue",
@@ -580,11 +690,12 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 				unit: "°",
 				type: "number",
 				role: "level.color.hue",
-				desc: rootType === "device" ?
-					"Hue of this RGB lightbulb" :
-					"Hue of this group's RGB lightbulbs",
+				desc:
+					rootType === "device"
+						? "Hue of this RGB lightbulb"
+						: "Hue of this group's RGB lightbulbs"
 			},
-			native: {},
+			native: {}
 		};
 		if (rootType === "device") {
 			ret.native.path = "lightList.[0].hue";
@@ -601,7 +712,10 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 	// Lights only
 	saturation: (rootId, rootType) => {
 		const ret: ioBroker.Object = {
-			_id: rootType === "device" ? `${rootId}.lightbulb.saturation` : `${rootId}.saturation`,
+			_id:
+				rootType === "device"
+					? `${rootId}.lightbulb.saturation`
+					: `${rootId}.saturation`,
 			type: "state",
 			common: {
 				name: "Saturation",
@@ -612,11 +726,12 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 				unit: "%",
 				type: "number",
 				role: "level.color.saturation",
-				desc: rootType === "device" ?
-					"Saturation of this RGB lightbulb" :
-					"Saturation of this group's RGB lightbulbs",
+				desc:
+					rootType === "device"
+						? "Saturation of this RGB lightbulb"
+						: "Saturation of this group's RGB lightbulbs"
 			},
-			native: {},
+			native: {}
 		};
 		if (rootType === "device") {
 			ret.native.path = "lightList.[0].saturation";
@@ -630,7 +745,7 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 		return ret;
 	},
 
-	batteryPercentage: (rootId) => ({
+	batteryPercentage: rootId => ({
 		_id: `${rootId}.batteryPercentage`,
 		type: "state",
 		common: {
@@ -642,11 +757,37 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 			max: 100,
 			def: 100,
 			role: "indicator.maintenance",
-			unit: "%",
+			unit: "%"
 		},
 		native: {
-			path: "deviceInfo.battery",
-		},
+			path: "deviceInfo.battery"
+		}
 	}),
 
+	// Blind position: 0% is open, 100% is closed
+	position: (rootId, rootType, deviceType) => ({
+		_id:
+			rootType === "device"
+				? `${rootId}.${accessoryTypeToString(deviceType!)}.position`
+				: `${rootId}.position`,
+		type: "state",
+		common: {
+			name: "Blind position",
+			desc:
+				(rootType === "device"
+					? "Position of the blind in percent."
+					: "Position of this group's blinds in percent.") +
+				" 0% is fully open, 100% is fully closed.",
+			read: true,
+			write: true,
+			type: "number",
+			min: 0,
+			max: 100,
+			role: "level",
+			unit: "%"
+		},
+		native: {
+			path: getCoapAccessoryPropertyPathPrefix(deviceType) + "position"
+		}
+	})
 };
