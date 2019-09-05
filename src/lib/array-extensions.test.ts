@@ -21,13 +21,13 @@ describe("lib/array-extensions => except() =>", () => {
 	it("should work for b[] ⊇ a[]", () => {
 		const b = [1, 3, 5, 7, 8];
 		const a = [1, 5, 8];
-		const expected = [];
+		const expected = [] as number[];
 		expect(except(a, b)).to.deep.equal(expected);
 	});
 
 	it("should work for empty arrays", () => {
 		const a = [1, 5, 8];
-		const b = [];
+		const b = [] as number[];
 		const c = [4, 5, 6];
 		expect(except(a, b)).to.deep.equal(a);
 		expect(except(b, c)).to.deep.equal(b);
@@ -70,7 +70,7 @@ describe("lib/array-extensions => intersect() =>", () => {
 
 	it("should work for empty arrays", () => {
 		const a = [1, 5, 8];
-		const b = [];
+		const b = [] as number[];
 		const c = [4, 5, 6];
 		expect(intersect(a, b)).to.deep.equal([]);
 		expect(intersect(b, c)).to.deep.equal([]);

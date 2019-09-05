@@ -19,7 +19,7 @@ describe("lib/strings => padStart() => ", () => {
 	});
 	it("should throw on empty fillers", () => {
 		expect(() => padStart("1234", 6, "")).to.throw();
-		expect(() => padStart("1234", 6, null)).to.throw();
+		expect(() => padStart("1234", 6, null as any)).to.throw();
 	});
 	it("should truncate fillers whose length is not a multiple of the missing length", () => {
 		expect(padStart("12345", 8, "ab")).to.equal("aba12345");
