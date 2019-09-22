@@ -1,9 +1,9 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "2.4.1",
+        "version": "2.4.2",
         "news": {
-            "2.4.1": {
+            "2.4.2": {
                 "en": "Fix: also create objects for blinds",
                 "de": "Fix: Objekte für Jalousien werden nun korrekt erstellt",
                 "ru": "Исправлено: также создавать объекты для жалюзи",
