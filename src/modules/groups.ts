@@ -352,6 +352,8 @@ export function updateGroupStates(
 			groupBlinds.length > 0
 				? getCommonValue(groupBlinds.map(b => b.position))
 				: null;
+		// TODO: Assigning null is not allowed as per the node-tradfri-client definitions but it works
+		group.position = commonState!;
 		const stateId = `${objId}.position`;
 		debounce(
 			stateId,

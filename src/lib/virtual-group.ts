@@ -1,5 +1,5 @@
 import { entries } from "alcalzone-shared/objects";
-import { LightOperation } from "node-tradfri-client";
+import { LightOperation, BlindOperation } from "node-tradfri-client";
 
 export class VirtualGroup {
 
@@ -9,6 +9,7 @@ export class VirtualGroup {
 	public name: string | undefined;
 	public onOff: boolean | undefined; // <bool>
 	public dimmer: number | undefined; // <int> [0..100]
+	public position: number | undefined; // <float> [0..100]
 	public colorTemperature: number | undefined; // int
 	public transitionTime: number | undefined; // <float>
 	public color: string | undefined; // int
@@ -23,7 +24,7 @@ export class VirtualGroup {
 	/**
 	 * Updates this virtual group's state with the changes contained in the given operation
 	 */
-	public merge(operation: LightOperation): void {
+	public merge(operation: LightOperation | BlindOperation): void {
 		for (const [prop, val] of entries(operation)) {
 			if (this.hasOwnProperty(prop)) this[prop as keyof this] = val as any;
 		}

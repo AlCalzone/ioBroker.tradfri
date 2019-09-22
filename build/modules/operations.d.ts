@@ -1,7 +1,7 @@
 /**
  * Provides operations for Tradfri devices using the CoAP layer
  */
-import { Accessory, Group, LightOperation } from "node-tradfri-client";
+import { Accessory, Group, LightOperation, BlindOperation } from "node-tradfri-client";
 import { VirtualGroup } from "../lib/virtual-group";
 /**
  * Sets some properties on virtual group or virtual properties on a real group.
@@ -10,7 +10,7 @@ import { VirtualGroup } from "../lib/virtual-group";
  * @param operation The properties to be set
  * @returns true if a request was sent, false otherwise
  */
-export declare function operateVirtualGroup(group: Group | VirtualGroup, operation: LightOperation): Promise<void>;
+export declare function operateVirtualGroup(group: Group | VirtualGroup, operation: LightOperation | BlindOperation): Promise<void>;
 /**
  * Renames a device
  * @param accessory The device to be renamed

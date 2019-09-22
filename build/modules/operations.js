@@ -3,10 +3,11 @@
  * Provides operations for Tradfri devices using the CoAP layer
  */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -25,12 +26,26 @@ function operateVirtualGroup(group, operation) {
     return __awaiter(this, void 0, void 0, function* () {
         if (group.deviceIDs == undefined)
             return;
-        // find all lightbulbs belonging to this group
-        const lightbulbAccessories = group.deviceIDs
-            .map(id => session_1.session.devices[id])
-            .filter(dev => dev != null && dev.type === node_tradfri_client_1.AccessoryTypes.lightbulb);
-        for (const acc of lightbulbAccessories) {
-            yield session_1.session.tradfri.operateLight(acc, operation);
+        // Test which kind of operation this is
+        if ("position" in operation) {
+            // This is a blind operation
+            // find all blinds belonging to this group
+            const blindAccessories = group.deviceIDs
+                .map(id => session_1.session.devices[id])
+                .filter(dev => dev != null && dev.type === node_tradfri_client_1.AccessoryTypes.blind);
+            for (const acc of blindAccessories) {
+                yield session_1.session.tradfri.operateBlind(acc, operation);
+            }
+        }
+        else {
+            // This is a light operation
+            // find all lightbulbs belonging to this group
+            const lightbulbAccessories = group.deviceIDs
+                .map(id => session_1.session.devices[id])
+                .filter(dev => dev != null && dev.type === node_tradfri_client_1.AccessoryTypes.lightbulb);
+            for (const acc of lightbulbAccessories) {
+                yield session_1.session.tradfri.operateLight(acc, operation);
+            }
         }
         // and update the group
         if (group instanceof virtual_group_1.VirtualGroup) {

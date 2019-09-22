@@ -1,9 +1,10 @@
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -287,6 +288,8 @@ function updateGroupStates(group, changedStateId) {
         const commonState = groupBlinds.length > 0
             ? getCommonValue(groupBlinds.map(b => b.position))
             : null;
+        // TODO: Assigning null is not allowed as per the node-tradfri-client definitions but it works
+        group.position = commonState;
         const stateId = `${objId}.position`;
         debounce(stateId, () => updateGroupState(stateId, commonState), debounceTimeout);
     }

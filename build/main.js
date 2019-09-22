@@ -1,9 +1,10 @@
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -33,7 +34,7 @@ const session_1 = require("./modules/session");
 let connectionAlive;
 let adapter;
 function startAdapter(options = {}) {
-    return adapter = utils.adapter(Object.assign({}, options, { 
+    return adapter = utils.adapter(Object.assign(Object.assign({}, options), { 
         // custom options
         name: "tradfri", 
         // Wird aufgerufen, wenn Adapter initialisiert wird
@@ -294,6 +295,9 @@ function startAdapter(options = {}) {
                             else if (id.endsWith(".brightness")) {
                                 wasAcked = !(yield group.setBrightness(val, yield getTransitionDuration(group)));
                             }
+                            else if (id.endsWith(".position")) {
+                                wasAcked = !(yield group.setPosition(val));
+                            }
                             else if (id.endsWith(".activeScene")) {
                                 // turn on and activate a scene
                                 wasAcked = !(yield group.activateScene(val));
@@ -371,6 +375,11 @@ function startAdapter(options = {}) {
                                     transitionTime: yield getTransitionDuration(vGroup),
                                 };
                             }
+                            else if (id.endsWith(".position")) {
+                                operation = {
+                                    position: val,
+                                };
+                            }
                             else if (id.endsWith(".color")) {
                                 val = colors_1.normalizeHexColor(val);
                                 if (val != null) {
@@ -421,7 +430,7 @@ function startAdapter(options = {}) {
                             return;
                         }
                         default: { // accessory
-                            if (id.indexOf(".lightbulb.") > -1 || id.indexOf(".plug.") > -1) {
+                            if (id.indexOf(".lightbulb.") > -1 || id.indexOf(".plug.") > -1 || id.indexOf(".blind.") > -1) {
                                 // read the instanceId and get a reference value
                                 if (!(rootObj.native.instanceId in session_1.session.devices)) {
                                     global_1.Global.log(`The device with ID ${rootObj.native.instanceId} was not found!`, "warn");
@@ -430,9 +439,10 @@ function startAdapter(options = {}) {
                                 const accessory = session_1.session.devices[rootObj.native.instanceId];
                                 const light = accessory.lightList && accessory.lightList[0];
                                 const plug = accessory.plugList && accessory.plugList[0];
-                                const lightOrPlug = light || plug;
-                                if (lightOrPlug == undefined) {
-                                    global_1.Global.log(`Cannot switch an accessory that is neither a lightbulb or a plug`, "warn");
+                                const blind = accessory.blindList && accessory.blindList[0];
+                                const specificAccessory = light || plug || blind;
+                                if (specificAccessory == undefined) {
+                                    global_1.Global.log(`Cannot operate an accessory that is neither a lightbulb nor a plug nor a blind`, "warn");
                                     return;
                                 }
                                 // if the change was acknowledged, update the state later
@@ -440,7 +450,7 @@ function startAdapter(options = {}) {
                                 // operate the lights depending on the set state
                                 // if no request was sent, we can ack the state immediately
                                 if (id.endsWith(".state")) {
-                                    wasAcked = !(yield lightOrPlug.toggle(val));
+                                    wasAcked = !(yield specificAccessory.toggle(val));
                                 }
                                 else if (id.endsWith(".brightness")) {
                                     if (light != undefined) {
@@ -448,6 +458,11 @@ function startAdapter(options = {}) {
                                     }
                                     else if (plug != undefined) {
                                         wasAcked = !(yield plug.setBrightness(val));
+                                    }
+                                }
+                                else if (id.endsWith(".position")) {
+                                    if (blind != undefined) {
+                                        wasAcked = !(yield blind.setPosition(val));
                                     }
                                 }
                                 else if (id.endsWith(".color")) {
@@ -519,7 +534,7 @@ function startAdapter(options = {}) {
 function updateConfig(newConfig) {
     return __awaiter(this, void 0, void 0, function* () {
         // Create the config object
-        const config = Object.assign({}, adapter.config, newConfig);
+        const config = Object.assign(Object.assign({}, adapter.config), newConfig);
         // Update the adapter object
         const adapterObj = yield adapter.getForeignObjectAsync(`system.adapter.${adapter.namespace}`);
         adapterObj.native = config;

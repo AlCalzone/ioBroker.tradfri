@@ -2,7 +2,7 @@
  * Provides operations for Tradfri devices using the CoAP layer
  */
 
-import { Accessory, AccessoryTypes, Group, LightOperation } from "node-tradfri-client";
+import { Accessory, AccessoryTypes, Group, LightOperation, BlindOperation } from "node-tradfri-client";
 import { VirtualGroup } from "../lib/virtual-group";
 import { session as $ } from "./session";
 
@@ -13,16 +13,31 @@ import { session as $ } from "./session";
  * @param operation The properties to be set
  * @returns true if a request was sent, false otherwise
  */
-export async function operateVirtualGroup(group: Group | VirtualGroup, operation: LightOperation): Promise<void> {
+export async function operateVirtualGroup(group: Group | VirtualGroup, operation: LightOperation | BlindOperation): Promise<void> {
 	if (group.deviceIDs == undefined) return;
-	// find all lightbulbs belonging to this group
-	const lightbulbAccessories = group.deviceIDs
-		.map(id => $.devices[id])
-		.filter(dev => dev != null && dev.type === AccessoryTypes.lightbulb)
-		;
+	// Test which kind of operation this is
+	if ("position" in operation) {
+		// This is a blind operation
+		// find all blinds belonging to this group
+		const blindAccessories = group.deviceIDs
+			.map(id => $.devices[id])
+			.filter(dev => dev != null && dev.type === AccessoryTypes.blind)
+			;
 
-	for (const acc of lightbulbAccessories) {
-		await $.tradfri.operateLight(acc, operation);
+		for (const acc of blindAccessories) {
+			await $.tradfri.operateBlind(acc, operation);
+		}
+	} else {
+		// This is a light operation
+		// find all lightbulbs belonging to this group
+		const lightbulbAccessories = group.deviceIDs
+			.map(id => $.devices[id])
+			.filter(dev => dev != null && dev.type === AccessoryTypes.lightbulb)
+			;
+
+		for (const acc of lightbulbAccessories) {
+			await $.tradfri.operateLight(acc, operation as LightOperation);
+		}
 	}
 	// and update the group
 	if (group instanceof VirtualGroup) {

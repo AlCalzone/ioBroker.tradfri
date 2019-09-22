@@ -13,6 +13,8 @@ import {
 	TradfriClient,
 	TradfriError,
 	TradfriErrorCodes,
+	BlindOperation,
+	Blind,
 } from "node-tradfri-client";
 
 // Eigene Module laden
@@ -329,6 +331,8 @@ function startAdapter(options: Partial<ioBroker.AdapterOptions> = {}) {
 									val,
 									await getTransitionDuration(group),
 								);
+							} else if (id.endsWith(".position")) {
+								wasAcked = !await group.setPosition(val);
 							} else if (id.endsWith(".activeScene")) {
 								// turn on and activate a scene
 								wasAcked = !await group.activateScene(val);
@@ -390,7 +394,7 @@ function startAdapter(options: Partial<ioBroker.AdapterOptions> = {}) {
 							}
 							const vGroup = $.virtualGroups[rootObj.native.instanceId];
 
-							let operation: LightOperation | undefined;
+							let operation: LightOperation | BlindOperation | undefined;
 							let wasAcked: boolean = false;
 
 							if (id.endsWith(".state")) {
@@ -401,6 +405,10 @@ function startAdapter(options: Partial<ioBroker.AdapterOptions> = {}) {
 								operation = {
 									dimmer: val,
 									transitionTime: await getTransitionDuration(vGroup),
+								};
+							} else if (id.endsWith(".position")) {
+								operation = {
+									position: val,
 								};
 							} else if (id.endsWith(".color")) {
 								val = normalizeHexColor(val);
@@ -452,7 +460,7 @@ function startAdapter(options: Partial<ioBroker.AdapterOptions> = {}) {
 
 						default: { // accessory
 
-							if (id.indexOf(".lightbulb.") > -1 || id.indexOf(".plug.") > -1) {
+							if (id.indexOf(".lightbulb.") > -1 || id.indexOf(".plug.") > -1 || id.indexOf(".blind.") > -1) {
 								// read the instanceId and get a reference value
 								if (!(rootObj.native.instanceId in $.devices)) {
 									_.log(`The device with ID ${rootObj.native.instanceId} was not found!`, "warn");
@@ -461,9 +469,10 @@ function startAdapter(options: Partial<ioBroker.AdapterOptions> = {}) {
 								const accessory = $.devices[rootObj.native.instanceId];
 								const light: Light | undefined = accessory.lightList && accessory.lightList[0];
 								const plug: Plug | undefined = accessory.plugList && accessory.plugList[0];
-								const lightOrPlug = light || plug;
-								if (lightOrPlug == undefined) {
-									_.log(`Cannot switch an accessory that is neither a lightbulb or a plug`, "warn");
+								const blind: Blind | undefined = accessory.blindList && accessory.blindList[0];
+								const specificAccessory = light || plug || blind;
+								if (specificAccessory == undefined) {
+									_.log(`Cannot operate an accessory that is neither a lightbulb nor a plug nor a blind`, "warn");
 									return;
 								}
 
@@ -473,7 +482,7 @@ function startAdapter(options: Partial<ioBroker.AdapterOptions> = {}) {
 								// operate the lights depending on the set state
 								// if no request was sent, we can ack the state immediately
 								if (id.endsWith(".state")) {
-									wasAcked = !await lightOrPlug.toggle(val);
+									wasAcked = !await specificAccessory.toggle(val);
 								} else if (id.endsWith(".brightness")) {
 									if (light != undefined) {
 										wasAcked = !await light.setBrightness(
@@ -482,6 +491,10 @@ function startAdapter(options: Partial<ioBroker.AdapterOptions> = {}) {
 										);
 									} else if (plug != undefined) {
 										wasAcked = !await plug.setBrightness(val);
+									}
+								} else if (id.endsWith(".position")) {
+									if (blind != undefined) {
+										wasAcked = !await blind.setPosition(val);
 									}
 								} else if (id.endsWith(".color")) {
 									// we need to differentiate here, because some ppl
