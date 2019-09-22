@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "2.4.2",
+        "version": "2.4.3",
         "news": {
+            "2.4.3": {
+                "en": "Fix: Operate blinds when states are changed",
+                "de": "Fix: Jalousien betätigen, wenn Zustände geändert werden",
+                "ru": "Исправлено: работа блайндов при смене состояний",
+                "pt": "Correção: operar blinds quando os estados são alterados",
+                "nl": "Oplossing: jaloezieën bedienen wanneer staten worden gewijzigd",
+                "fr": "Corrigé: Utiliser les stores quand les états sont changés",
+                "it": "Correzione: aziona i blind quando cambiano gli stati",
+                "es": "Solución: operar persianas cuando se cambian los estados",
+                "pl": "Poprawka: uruchamiaj żaluzje, gdy zmienia się stan",
+                "zh-cn": "修复：状态更改时操作百叶窗"
+            },
             "2.4.2": {
                 "en": "Fix: also create objects for blinds",
                 "de": "Fix: Objekte für Jalousien werden nun korrekt erstellt",
