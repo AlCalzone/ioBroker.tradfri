@@ -46,10 +46,11 @@ function extendVirtualGroup(group) {
             _id: objId,
             type: "channel",
             common: iobroker_objects_1.groupToCommon(group),
-            native: iobroker_objects_1.groupToNative(group),
+            native: iobroker_objects_1.groupToNative(group)
         };
         global_1.Global.adapter.setObject(objId, devObj);
         // also create state objects, depending on the accessory type
+        // prettier-ignore
         const stateObjs = {
             state: iobroker_objects_1.objectDefinitions.onOff(objId, "virtual group"),
             transitionDuration: iobroker_objects_1.objectDefinitions.transitionDuration(objId, "virtual group"),
@@ -58,9 +59,9 @@ function extendVirtualGroup(group) {
             color: iobroker_objects_1.objectDefinitions.color(objId, "virtual group"),
             hue: iobroker_objects_1.objectDefinitions.hue(objId, "virtual group"),
             saturation: iobroker_objects_1.objectDefinitions.saturation(objId, "virtual group"),
+            position: iobroker_objects_1.objectDefinitions.position(objId, "virtual group"),
         };
-        const createObjects = Object.keys(stateObjs)
-            .map((key) => {
+        const createObjects = Object.keys(stateObjs).map(key => {
             const obj = stateObjs[key];
             let initialValue = null;
             if (obj.native.path != null) {
@@ -107,12 +108,15 @@ function extendGroup(group) {
                 // Object could have a default value, find it
                 let newValue = object_polyfill_1.dig(group, obj.native.path);
                 const roundToDigits = global_1.Global.adapter.config.roundToDigits;
-                if (typeof roundToDigits === "number" && typeof newValue === "number") {
+                if (typeof roundToDigits === "number" &&
+                    typeof newValue === "number") {
                     newValue = math_1.roundTo(newValue, roundToDigits);
                 }
                 global_1.Global.adapter.setState(id, newValue, true);
             }
-            catch (e) { /* skip this value */ }
+            catch (e) {
+                /* skip this value */
+            }
         }
     }
     else {
@@ -121,10 +125,11 @@ function extendGroup(group) {
             _id: objId,
             type: "channel",
             common: iobroker_objects_1.groupToCommon(group),
-            native: iobroker_objects_1.groupToNative(group),
+            native: iobroker_objects_1.groupToNative(group)
         };
         global_1.Global.adapter.setObject(objId, devObj);
         // also create state objects, depending on the accessory type
+        // prettier-ignore
         const stateObjs = {
             activeScene: iobroker_objects_1.objectDefinitions.activeScene(objId, "group"),
             state: iobroker_objects_1.objectDefinitions.onOff(objId, "group"),
@@ -134,9 +139,9 @@ function extendGroup(group) {
             color: iobroker_objects_1.objectDefinitions.color(objId, "group"),
             hue: iobroker_objects_1.objectDefinitions.hue(objId, "group"),
             saturation: iobroker_objects_1.objectDefinitions.saturation(objId, "group"),
+            position: iobroker_objects_1.objectDefinitions.position(objId, "group"),
         };
-        const createObjects = Object.keys(stateObjs)
-            .map((key) => {
+        const createObjects = Object.keys(stateObjs).map(key => {
             const obj = stateObjs[key];
             let initialValue = null;
             if (obj.native.path != null) {
@@ -190,9 +195,12 @@ function updateGroupState(id, value) {
  * @param changedStateId If defined, only update the corresponding states in the group.
  */
 function updateMultipleGroupStates(changedAccessory, changedStateId) {
-    const groupsToUpdate = objects_1.values(session_1.session.groups).map(g => g.group)
+    const groupsToUpdate = objects_1.values(session_1.session.groups)
+        .map(g => g.group)
         .concat(objects_1.values(session_1.session.virtualGroups))
-        .filter(g => changedAccessory == null || (g.deviceIDs != undefined && g.deviceIDs.indexOf(changedAccessory.instanceId) > -1));
+        .filter(g => changedAccessory == null ||
+        (g.deviceIDs != undefined &&
+            g.deviceIDs.indexOf(changedAccessory.instanceId) > -1));
     for (const group of groupsToUpdate) {
         updateGroupStates(group, changedStateId);
     }
@@ -201,22 +209,24 @@ exports.updateMultipleGroupStates = updateMultipleGroupStates;
 function updateGroupStates(group, changedStateId) {
     if (group.deviceIDs == null)
         return;
-    // only works for lightbulbs right now
-    const groupBulbs = group.deviceIDs.map(id => session_1.session.devices[id])
+    const objId = iobroker_objects_1.calcGroupId(group);
+    const groupBulbs = group.deviceIDs
+        .map(id => session_1.session.devices[id])
         .filter(a => a != null && a.type === node_tradfri_client_1.AccessoryTypes.lightbulb)
         .map(a => a.lightList[0]);
-    if (groupBulbs.length === 0)
-        return;
-    const objId = iobroker_objects_1.calcGroupId(group);
+    const groupBlinds = group.deviceIDs
+        .map(id => session_1.session.devices[id])
+        .filter(a => a != null && a.type === node_tradfri_client_1.AccessoryTypes.blind)
+        .map(a => a.blindList[0]);
     // Seperate the bulbs into no spectrum/white spectrum/rgb bulbs
-    // const noSpectrumBulbs = groupBulbs.filter(b => b.spectrum === "none");
     const whiteSpectrumBulbs = groupBulbs.filter(b => b.spectrum === "white");
     const rgbBulbs = groupBulbs.filter(b => b.spectrum === "rgb");
     // we're debouncing the state changes, so group or scene updates don't result in
     // deleting and recreating states
     const debounceTimeout = 250;
     // Try to update the on/off state
-    if (changedStateId == null || changedStateId.endsWith("lightbulb.state")) {
+    if (groupBulbs.length > 0 &&
+        (changedStateId == null || changedStateId.endsWith("lightbulb.state"))) {
         const commonState = getCommonValue(groupBulbs.map(b => b.onOff));
         // TODO: Assigning null is not allowed as per the node-tradfri-client definitions but it works
         group.onOff = commonState;
@@ -224,7 +234,9 @@ function updateGroupStates(group, changedStateId) {
         debounce(stateId, () => updateGroupState(stateId, commonState), debounceTimeout);
     }
     // Try to update the brightness state
-    if (changedStateId == null || changedStateId.endsWith("lightbulb.brightness")) {
+    if (groupBulbs.length > 0 &&
+        (changedStateId == null ||
+            changedStateId.endsWith("lightbulb.brightness"))) {
         const commonState = getCommonValue(groupBulbs.map(b => b.dimmer));
         // TODO: Assigning null is not allowed as per the node-tradfri-client definitions but it works
         group.dimmer = commonState;
@@ -232,27 +244,50 @@ function updateGroupStates(group, changedStateId) {
         debounce(stateId, () => updateGroupState(stateId, commonState), debounceTimeout);
     }
     // Try to update the colorTemperature state
-    if (changedStateId == null || changedStateId.endsWith("lightbulb.colorTemperature")) {
-        const commonState = (whiteSpectrumBulbs.length > 0) ? getCommonValue(whiteSpectrumBulbs.map(b => b.colorTemperature)) : null;
+    if (whiteSpectrumBulbs.length > 0 &&
+        (changedStateId == null ||
+            changedStateId.endsWith("lightbulb.colorTemperature"))) {
+        const commonState = whiteSpectrumBulbs.length > 0
+            ? getCommonValue(whiteSpectrumBulbs.map(b => b.colorTemperature))
+            : null;
         const stateId = `${objId}.colorTemperature`;
         debounce(stateId, () => updateGroupState(stateId, commonState), debounceTimeout);
     }
     // Try to update the color state
-    if (changedStateId == null || changedStateId.endsWith("lightbulb.color")) {
-        const commonState = (rgbBulbs.length > 0) ? getCommonValue(rgbBulbs.map(b => b.color)) : null;
+    if (rgbBulbs.length > 0 &&
+        (changedStateId == null || changedStateId.endsWith("lightbulb.color"))) {
+        const commonState = rgbBulbs.length > 0
+            ? getCommonValue(rgbBulbs.map(b => b.color))
+            : null;
         const stateId = `${objId}.color`;
         debounce(stateId, () => updateGroupState(stateId, commonState), debounceTimeout);
     }
     // Try to update the hue state
-    if (changedStateId == null || changedStateId.endsWith("lightbulb.hue")) {
-        const commonState = (rgbBulbs.length > 0) ? getCommonValue(rgbBulbs.map(b => b.hue)) : null;
+    if (rgbBulbs.length > 0 &&
+        (changedStateId == null || changedStateId.endsWith("lightbulb.hue"))) {
+        const commonState = rgbBulbs.length > 0
+            ? getCommonValue(rgbBulbs.map(b => b.hue))
+            : null;
         const stateId = `${objId}.hue`;
         debounce(stateId, () => updateGroupState(stateId, commonState), debounceTimeout);
     }
     // Try to update the saturation state
-    if (changedStateId == null || changedStateId.endsWith("lightbulb.saturation")) {
-        const commonState = (rgbBulbs.length > 0) ? getCommonValue(rgbBulbs.map(b => b.saturation)) : null;
+    if (rgbBulbs.length > 0 &&
+        (changedStateId == null ||
+            changedStateId.endsWith("lightbulb.saturation"))) {
+        const commonState = rgbBulbs.length > 0
+            ? getCommonValue(rgbBulbs.map(b => b.saturation))
+            : null;
         const stateId = `${objId}.saturation`;
+        debounce(stateId, () => updateGroupState(stateId, commonState), debounceTimeout);
+    }
+    // Try to update the position state
+    if (groupBlinds.length > 0 &&
+        (changedStateId == null || changedStateId.endsWith("blind.position"))) {
+        const commonState = groupBlinds.length > 0
+            ? getCommonValue(groupBlinds.map(b => b.position))
+            : null;
+        const stateId = `${objId}.position`;
         debounce(stateId, () => updateGroupState(stateId, commonState), debounceTimeout);
     }
 }

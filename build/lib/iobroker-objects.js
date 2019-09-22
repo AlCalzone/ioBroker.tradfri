@@ -22,7 +22,7 @@ const virtual_group_1 = require("./virtual-group");
  */
 function accessoryToCommon(accessory) {
     const ret = {
-        name: accessory.name,
+        name: accessory.name
     };
     const icon = getAccessoryIcon(accessory);
     if (icon != null)
@@ -40,7 +40,7 @@ function accessoryToNative(accessory) {
         firmwareVersion: accessory.deviceInfo.firmwareVersion,
         modelNumber: accessory.deviceInfo.modelNumber,
         type: node_tradfri_client_1.AccessoryTypes[accessory.type],
-        serialNumber: accessory.deviceInfo.serialNumber,
+        serialNumber: accessory.deviceInfo.serialNumber
     };
 }
 exports.accessoryToNative = accessoryToNative;
@@ -76,7 +76,8 @@ function extendDevice(accessory) {
         const stateObjs = objects_1.filter(session_1.session.objects, obj => obj._id.startsWith(objId) && obj.native && obj.native.path);
         // for each property try to update the value
         for (const [id, obj] of objects_1.entries(stateObjs)) {
-            if (global_1.Global.adapter.config.preserveTransitionTime && id.match(/\.transitionDuration$/g)) {
+            if (global_1.Global.adapter.config.preserveTransitionTime &&
+                id.match(/\.transitionDuration$/g)) {
                 // don't override the transition time
                 continue;
             }
@@ -84,12 +85,15 @@ function extendDevice(accessory) {
                 // Object could have a default value, find it
                 let newValue = object_polyfill_1.dig(accessory, obj.native.path);
                 const roundToDigits = global_1.Global.adapter.config.roundToDigits;
-                if (typeof roundToDigits === "number" && typeof newValue === "number") {
+                if (typeof roundToDigits === "number" &&
+                    typeof newValue === "number") {
                     newValue = math_1.roundTo(newValue, roundToDigits);
                 }
                 global_1.Global.adapter.setState(id, newValue, true);
             }
-            catch (e) { /* skip this value */ }
+            catch (e) {
+                /* skip this value */
+            }
         }
     }
     else {
@@ -98,12 +102,13 @@ function extendDevice(accessory) {
             _id: objId,
             type: "device",
             common: accessoryToCommon(accessory),
-            native: accessoryToNative(accessory),
+            native: accessoryToNative(accessory)
         };
         global_1.Global.adapter.setObject(objId, devObj);
         // also create state objects, depending on the accessory type
         const stateObjs = {
             alive: {
+                // alive state
                 _id: `${objId}.alive`,
                 type: "state",
                 common: {
@@ -112,13 +117,14 @@ function extendDevice(accessory) {
                     write: false,
                     type: "boolean",
                     role: "indicator.alive",
-                    desc: "indicates if the device is currently alive and connected to the gateway",
+                    desc: "indicates if the device is currently alive and connected to the gateway"
                 },
                 native: {
-                    path: "alive",
-                },
+                    path: "alive"
+                }
             },
             lastSeen: {
+                // last seen state
                 _id: `${objId}.lastSeen`,
                 type: "state",
                 common: {
@@ -127,20 +133,21 @@ function extendDevice(accessory) {
                     write: false,
                     type: "number",
                     role: "indicator.lastSeen",
-                    desc: "indicates when the device has last been seen by the gateway",
+                    desc: "indicates when the device has last been seen by the gateway"
                 },
                 native: {
-                    path: "lastSeen",
-                },
-            },
+                    path: "lastSeen"
+                }
+            }
         };
-        if (accessory.type === node_tradfri_client_1.AccessoryTypes.lightbulb
-            || accessory.type === node_tradfri_client_1.AccessoryTypes.plug) {
+        if (accessory.type === node_tradfri_client_1.AccessoryTypes.lightbulb ||
+            accessory.type === node_tradfri_client_1.AccessoryTypes.plug) {
             let channelName;
             let channelID;
             if (accessory.type === node_tradfri_client_1.AccessoryTypes.lightbulb) {
                 let spectrum = "none";
-                if (accessory.lightList != null && accessory.lightList.length > 0) {
+                if (accessory.lightList != null &&
+                    accessory.lightList.length > 0) {
                     spectrum = accessory.lightList[0].spectrum;
                 }
                 if (spectrum === "none") {
@@ -159,11 +166,11 @@ function extendDevice(accessory) {
                     type: "channel",
                     common: {
                         name: channelName,
-                        role: "light",
+                        role: "light"
                     },
                     native: {
-                        spectrum: spectrum,
-                    },
+                        spectrum: spectrum // remember the spectrum, so we can update different properties later
+                    }
                 };
                 if (spectrum === "white") {
                     stateObjs[`${channelID}.colorTemperature`] = exports.objectDefinitions.colorTemperature(objId, "device");
@@ -174,8 +181,8 @@ function extendDevice(accessory) {
                     stateObjs[`${channelID}.saturation`] = exports.objectDefinitions.saturation(objId, "device");
                 }
                 stateObjs[`${channelID}.transitionDuration`] = exports.objectDefinitions.transitionDuration(objId, "device", accessory.type);
-            }
-            else /* if (accessory.type === AccessoryTypes.plug) */ {
+            } /* if (accessory.type === AccessoryTypes.plug) */
+            else {
                 // obj.plug should be a channel
                 channelID = "plug";
                 stateObjs[channelID] = {
@@ -183,9 +190,9 @@ function extendDevice(accessory) {
                     type: "channel",
                     common: {
                         name: channelName,
-                        role: "switch",
+                        role: "switch"
                     },
-                    native: {},
+                    native: {}
                 };
             }
             // Common properties for both plugs and lights
@@ -193,13 +200,15 @@ function extendDevice(accessory) {
             stateObjs[`${channelID}.brightness`] = exports.objectDefinitions.brightness(objId, "device", accessory.type);
             stateObjs[`${channelID}.state`] = exports.objectDefinitions.onOff(objId, "device", accessory.type);
         }
-        if (accessory.deviceInfo.power === node_tradfri_client_1.PowerSources.Battery
-            || accessory.deviceInfo.power === node_tradfri_client_1.PowerSources.InternalBattery
-            || accessory.deviceInfo.power === node_tradfri_client_1.PowerSources.ExternalBattery) {
+        if (accessory.deviceInfo.power === node_tradfri_client_1.PowerSources.Battery ||
+            accessory.deviceInfo.power === node_tradfri_client_1.PowerSources.InternalBattery ||
+            accessory.deviceInfo.power === node_tradfri_client_1.PowerSources.ExternalBattery) {
             stateObjs.battery = exports.objectDefinitions.batteryPercentage(objId, "device");
         }
-        const createObjects = Object.keys(stateObjs)
-            .map((key) => {
+        if (accessory.type === node_tradfri_client_1.AccessoryTypes.blind) {
+            stateObjs.position = exports.objectDefinitions.position(objId, "device", accessory.type);
+        }
+        const createObjects = Object.keys(stateObjs).map(key => {
             const obj = stateObjs[key];
             let initialValue = null;
             if (obj.native.path != null) {
@@ -233,9 +242,10 @@ function updatePossibleScenes(groupInfo) {
             const scenes = groupInfo.scenes;
             const newDropdownStates = objects_1.composeObject(Object.keys(scenes).map(id => [id, scenes[id].name]));
             // compare with the old dropdown states
-            const obj = yield global_1.Global.adapter.getObjectAsync(scenesId);
+            const obj = (yield global_1.Global.adapter.getObjectAsync(scenesId));
             const oldDropdownStates = obj.common.states;
-            if (JSON.stringify(newDropdownStates) !== JSON.stringify(oldDropdownStates)) {
+            if (JSON.stringify(newDropdownStates) !==
+                JSON.stringify(oldDropdownStates)) {
                 // and only log and update if something changed
                 global_1.Global.log(`updating possible scenes for group ${group.instanceId}: ${JSON.stringify(Object.keys(groupInfo.scenes))}`);
                 obj.common.states = newDropdownStates;
@@ -263,8 +273,8 @@ function getAccessoryIcon(accessory) {
     if (model.indexOf(" control outlet ") > -1) {
         return "plug.png";
     }
-    else if (model.toLowerCase().indexOf(" transformer ") > -1
-        || model.toLowerCase().indexOf(" driver ") > -1) {
+    else if (model.toLowerCase().indexOf(" transformer ") > -1 ||
+        model.toLowerCase().indexOf(" driver ") > -1) {
         return "transformer.png";
     }
     if (accessory.type === node_tradfri_client_1.AccessoryTypes.lightbulb) {
@@ -335,6 +345,9 @@ function calcObjName(accessory) {
         case node_tradfri_client_1.AccessoryTypes.plug:
             prefix = "P";
             break;
+        case node_tradfri_client_1.AccessoryTypes.blind:
+            prefix = "B";
+            break;
         default:
             global_1.Global.log(`Unknown accessory type ${accessory.type}. Please send this info to the developer with a short description of the device!`, "warn");
             prefix = "XYZ";
@@ -371,7 +384,7 @@ function groupToNative(group) {
     return {
         instanceId: group.instanceId,
         deviceIDs: group.deviceIDs,
-        type: (group instanceof virtual_group_1.VirtualGroup ? "virtual " : "") + "group",
+        type: (group instanceof virtual_group_1.VirtualGroup ? "virtual " : "") + "group"
     };
 }
 exports.groupToNative = groupToNative;
@@ -421,9 +434,14 @@ function accessoryTypeToString(type) {
 }
 function getCoapAccessoryPropertyPathPrefix(deviceType) {
     switch (deviceType) {
-        case node_tradfri_client_1.AccessoryTypes.lightbulb: return "lightList.[0].";
-        case node_tradfri_client_1.AccessoryTypes.plug: return "plugList.[0].";
-        default: return "";
+        case node_tradfri_client_1.AccessoryTypes.lightbulb:
+            return "lightList.[0].";
+        case node_tradfri_client_1.AccessoryTypes.plug:
+            return "plugList.[0].";
+        case node_tradfri_client_1.AccessoryTypes.blind:
+            return "blindList.[0].";
+        default:
+            return "";
     }
 }
 /**
@@ -439,33 +457,39 @@ exports.objectDefinitions = {
             write: true,
             type: "number",
             role: "value.id",
-            desc: "the instance id of the currently active scene",
+            desc: "the instance id of the currently active scene"
         },
         native: {
-            path: "sceneId",
-        },
+            path: "sceneId"
+        }
     }),
     // Lights and plugs
     onOff: (rootId, rootType, deviceType) => ({
-        _id: rootType === "device" ? `${rootId}.${accessoryTypeToString(deviceType)}.state` : `${rootId}.state`,
+        _id: rootType === "device"
+            ? `${rootId}.${accessoryTypeToString(deviceType)}.state`
+            : `${rootId}.state`,
         type: "state",
         common: {
             name: "on/off",
             read: true,
             write: true,
             type: "boolean",
-            role: "switch",
+            role: "switch"
         },
         native: {
-            path: getCoapAccessoryPropertyPathPrefix(deviceType) + "onOff",
-        },
+            path: getCoapAccessoryPropertyPathPrefix(deviceType) + "onOff"
+        }
     }),
     // Lights and plugs for compatibility reasons
     // Anything > 0% should be "on"
     brightness: (rootId, rootType, deviceType) => {
-        const deviceName = rootType === "device" ? accessoryTypeToString(deviceType) : undefined;
+        const deviceName = rootType === "device"
+            ? accessoryTypeToString(deviceType)
+            : undefined;
         return {
-            _id: rootType === "device" ? `${rootId}.${deviceName}.brightness` : `${rootId}.brightness`,
+            _id: rootType === "device"
+                ? `${rootId}.${deviceName}.brightness`
+                : `${rootId}.brightness`,
             type: "state",
             common: {
                 name: "Brightness",
@@ -476,18 +500,20 @@ exports.objectDefinitions = {
                 unit: "%",
                 type: "number",
                 role: "level.dimmer",
-                desc: rootType === "device" ?
-                    `Brightness of the ${deviceName}` :
-                    `Brightness of this group's ${deviceName}s`,
+                desc: rootType === "device"
+                    ? `Brightness of the ${deviceName}`
+                    : `Brightness of this group's ${deviceName}s`
             },
             native: {
-                path: getCoapAccessoryPropertyPathPrefix(deviceType) + "dimmer",
-            },
+                path: getCoapAccessoryPropertyPathPrefix(deviceType) + "dimmer"
+            }
         };
     },
     // Lights only?
     transitionDuration: (rootId, rootType, deviceType) => ({
-        _id: rootType === "device" ? `${rootId}.lightbulb.transitionDuration` : `${rootId}.transitionDuration`,
+        _id: rootType === "device"
+            ? `${rootId}.lightbulb.transitionDuration`
+            : `${rootId}.transitionDuration`,
         type: "state",
         common: {
             name: "Transition duration",
@@ -498,19 +524,22 @@ exports.objectDefinitions = {
             max: 100,
             def: 0,
             role: "light.dimmer",
-            desc: rootType === "device" ?
-                "Duration of a state change" :
-                `Duration for state changes of this group's lightbulbs`,
-            unit: "s",
+            desc: rootType === "device"
+                ? "Duration of a state change"
+                : `Duration for state changes of this group's lightbulbs`,
+            unit: "s"
         },
         native: {
-            path: getCoapAccessoryPropertyPathPrefix(deviceType) + "transitionTime",
-        },
+            path: getCoapAccessoryPropertyPathPrefix(deviceType) +
+                "transitionTime"
+        }
     }),
     // Lights only
     colorTemperature: (rootId, rootType) => {
         const ret = {
-            _id: rootType === "device" ? `${rootId}.lightbulb.colorTemperature` : `${rootId}.colorTemperature`,
+            _id: rootType === "device"
+                ? `${rootId}.lightbulb.colorTemperature`
+                : `${rootId}.colorTemperature`,
             type: "state",
             common: {
                 name: "Color temperature",
@@ -521,11 +550,11 @@ exports.objectDefinitions = {
                 unit: "%",
                 type: "number",
                 role: "level.color.temperature",
-                desc: rootType === "device" ?
-                    "Range: 0% = cold, 100% = warm" :
-                    "Color temperature of this group's white spectrum lightbulbs. Range: 0% = cold, 100% = warm",
+                desc: rootType === "device"
+                    ? "Range: 0% = cold, 100% = warm"
+                    : "Color temperature of this group's white spectrum lightbulbs. Range: 0% = cold, 100% = warm"
             },
-            native: {},
+            native: {}
         };
         if (rootType === "device") {
             ret.native.path = "lightList.[0].colorTemperature";
@@ -543,7 +572,9 @@ exports.objectDefinitions = {
     // Lights only
     color: (rootId, rootType) => {
         const ret = {
-            _id: rootType === "device" ? `${rootId}.lightbulb.color` : `${rootId}.color`,
+            _id: rootType === "device"
+                ? `${rootId}.lightbulb.color`
+                : `${rootId}.color`,
             type: "state",
             common: {
                 name: "RGB color",
@@ -551,11 +582,11 @@ exports.objectDefinitions = {
                 write: true,
                 type: "string",
                 role: "level.color",
-                desc: rootType === "device" ?
-                    "6-digit RGB hex string" :
-                    "Color of this group's RGB lightbulbs as a 6-digit hex string.",
+                desc: rootType === "device"
+                    ? "6-digit RGB hex string"
+                    : "Color of this group's RGB lightbulbs as a 6-digit hex string."
             },
-            native: {},
+            native: {}
         };
         if (rootType === "device") {
             ret.native.path = "lightList.[0].color";
@@ -573,7 +604,9 @@ exports.objectDefinitions = {
     // Lights only
     hue: (rootId, rootType) => {
         const ret = {
-            _id: rootType === "device" ? `${rootId}.lightbulb.hue` : `${rootId}.hue`,
+            _id: rootType === "device"
+                ? `${rootId}.lightbulb.hue`
+                : `${rootId}.hue`,
             type: "state",
             common: {
                 name: "Hue",
@@ -584,11 +617,11 @@ exports.objectDefinitions = {
                 unit: "°",
                 type: "number",
                 role: "level.color.hue",
-                desc: rootType === "device" ?
-                    "Hue of this RGB lightbulb" :
-                    "Hue of this group's RGB lightbulbs",
+                desc: rootType === "device"
+                    ? "Hue of this RGB lightbulb"
+                    : "Hue of this group's RGB lightbulbs"
             },
-            native: {},
+            native: {}
         };
         if (rootType === "device") {
             ret.native.path = "lightList.[0].hue";
@@ -606,7 +639,9 @@ exports.objectDefinitions = {
     // Lights only
     saturation: (rootId, rootType) => {
         const ret = {
-            _id: rootType === "device" ? `${rootId}.lightbulb.saturation` : `${rootId}.saturation`,
+            _id: rootType === "device"
+                ? `${rootId}.lightbulb.saturation`
+                : `${rootId}.saturation`,
             type: "state",
             common: {
                 name: "Saturation",
@@ -617,11 +652,11 @@ exports.objectDefinitions = {
                 unit: "%",
                 type: "number",
                 role: "level.color.saturation",
-                desc: rootType === "device" ?
-                    "Saturation of this RGB lightbulb" :
-                    "Saturation of this group's RGB lightbulbs",
+                desc: rootType === "device"
+                    ? "Saturation of this RGB lightbulb"
+                    : "Saturation of this group's RGB lightbulbs"
             },
-            native: {},
+            native: {}
         };
         if (rootType === "device") {
             ret.native.path = "lightList.[0].saturation";
@@ -636,7 +671,7 @@ exports.objectDefinitions = {
         }
         return ret;
     },
-    batteryPercentage: (rootId) => ({
+    batteryPercentage: rootId => ({
         _id: `${rootId}.batteryPercentage`,
         type: "state",
         common: {
@@ -648,10 +683,34 @@ exports.objectDefinitions = {
             max: 100,
             def: 100,
             role: "indicator.maintenance",
-            unit: "%",
+            unit: "%"
         },
         native: {
-            path: "deviceInfo.battery",
-        },
+            path: "deviceInfo.battery"
+        }
     }),
+    // Blind position: 0% is open, 100% is closed
+    position: (rootId, rootType, deviceType) => ({
+        _id: rootType === "device"
+            ? `${rootId}.${accessoryTypeToString(deviceType)}.position`
+            : `${rootId}.position`,
+        type: "state",
+        common: {
+            name: "Blind position",
+            desc: (rootType === "device"
+                ? "Position of the blind in percent."
+                : "Position of this group's blinds in percent.") +
+                " 0% is fully open, 100% is fully closed.",
+            read: true,
+            write: true,
+            type: "number",
+            min: 0,
+            max: 100,
+            role: "level",
+            unit: "%"
+        },
+        native: {
+            path: getCoapAccessoryPropertyPathPrefix(deviceType) + "position"
+        }
+    })
 };
