@@ -388,6 +388,7 @@ export function calcObjName(accessory: Accessory): string {
 	let prefix: string;
 	switch (accessory.type) {
 		case AccessoryTypes.remote:
+		case AccessoryTypes.slaveRemote:
 			prefix = "RC";
 			break;
 		case AccessoryTypes.lightbulb:
@@ -398,6 +399,9 @@ export function calcObjName(accessory: Accessory): string {
 			break;
 		case AccessoryTypes.blind:
 			prefix = "B";
+			break;
+		case AccessoryTypes.signalRepeater:
+			prefix = "SR";
 			break;
 		default:
 			_.log(

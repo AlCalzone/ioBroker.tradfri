@@ -338,6 +338,7 @@ function calcObjName(accessory) {
     let prefix;
     switch (accessory.type) {
         case node_tradfri_client_1.AccessoryTypes.remote:
+        case node_tradfri_client_1.AccessoryTypes.slaveRemote:
             prefix = "RC";
             break;
         case node_tradfri_client_1.AccessoryTypes.lightbulb:
@@ -348,6 +349,9 @@ function calcObjName(accessory) {
             break;
         case node_tradfri_client_1.AccessoryTypes.blind:
             prefix = "B";
+            break;
+        case node_tradfri_client_1.AccessoryTypes.signalRepeater:
+            prefix = "SR";
             break;
         default:
             global_1.Global.log(`Unknown accessory type ${accessory.type}. Please send this info to the developer with a short description of the device!`, "warn");
