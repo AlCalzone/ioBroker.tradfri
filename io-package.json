@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "2.4.3",
+        "version": "2.4.4",
         "news": {
+            "2.4.4": {
+                "en": "Suppressed log warnings for slave remotes and signal repeaters",
+                "de": "Unterdrückte Protokollwarnungen für Slave-Fernbedienungen und Signalwiederholer",
+                "ru": "Подавленные предупреждения журнала для ведомых пультов и ретрансляторов сигнала",
+                "pt": "Advertências de log suprimidas para controles remotos escravos e repetidores de sinal",
+                "nl": "Onderdrukte logwaarschuwingen voor slave-afstandsbedieningen en signaalrepeaters",
+                "fr": "Alertes de journalisation supprimées pour les télécommandes esclaves et les répéteurs de signaux",
+                "it": "Avvisi di registro eliminati per telecomandi slave e ripetitori di segnale",
+                "es": "Advertencias de registro suprimidas para controles remotos esclavos y repetidores de señal",
+                "pl": "Ukryte ostrzeżenia dziennika dla pilotów slave i repeaterów sygnałów",
+                "zh-cn": "从属遥控器和信号中继器的禁止日志警告"
+            },
             "2.4.3": {
                 "en": "Fix: Operate blinds when states are changed",
                 "de": "Fix: Jalousien betätigen, wenn Zustände geändert werden",
