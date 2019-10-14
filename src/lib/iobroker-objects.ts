@@ -766,7 +766,8 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 			unit: "%"
 		},
 		native: {
-			path: "deviceInfo.battery"
+			path: "deviceInfo.battery",
+			onlyChanges: true,
 		}
 	}),
 

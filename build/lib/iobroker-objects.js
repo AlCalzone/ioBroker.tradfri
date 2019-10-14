@@ -696,7 +696,8 @@ exports.objectDefinitions = {
             unit: "%"
         },
         native: {
-            path: "deviceInfo.battery"
+            path: "deviceInfo.battery",
+            onlyChanges: true,
         }
     }),
     // Blind position: 0% is open, 100% is closed
