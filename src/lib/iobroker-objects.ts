@@ -1,5 +1,5 @@
 import { assertNever } from "alcalzone-shared/helpers";
-import { composeObject, entries, filter } from "alcalzone-shared/objects";
+import { composeObject, entries, filter, values } from "alcalzone-shared/objects";
 import {
 	Accessory,
 	AccessoryTypes,
@@ -46,7 +46,7 @@ export function accessoryToNative(accessory: Accessory): Record<string, any> {
  * Creates or edits an existing <device>-object for an accessory.
  * @param accessory The accessory to update
  */
-export function extendDevice(accessory: Accessory) {
+export async function extendDevice(accessory: Accessory) {
 	const objId = calcObjId(accessory);
 
 	if (objId in $.objects) {
@@ -67,7 +67,7 @@ export function extendDevice(accessory: Accessory) {
 			Object.assign(devObj.native, newNative);
 			changed = true;
 		}
-		if (changed) _.adapter.extendObject(objId, devObj);
+		if (changed) await _.adapter.extendObjectAsync(objId, devObj);
 
 		// ====
 
@@ -96,7 +96,11 @@ export function extendDevice(accessory: Accessory) {
 				) {
 					newValue = roundTo(newValue, roundToDigits);
 				}
-				_.adapter.setState(id, newValue as any, true);
+				if (obj.native.onlyChanges) {
+					await _.adapter.setStateChangedAsync(id, newValue as any, true);
+				} else {
+					await _.adapter.setStateAsync(id, newValue as any, true);
+				}
 			} catch (e) {
 				/* skip this value */
 			}
@@ -109,7 +113,7 @@ export function extendDevice(accessory: Accessory) {
 			common: accessoryToCommon(accessory),
 			native: accessoryToNative(accessory)
 		};
-		_.adapter.setObject(objId, devObj);
+		await _.adapter.setObjectAsync(objId, devObj);
 
 		// also create state objects, depending on the accessory type
 		const stateObjs: Record<string, ioBroker.Object> = {
@@ -254,17 +258,15 @@ export function extendDevice(accessory: Accessory) {
 			);
 		}
 
-		const createObjects = Object.keys(stateObjs).map(key => {
-			const obj = stateObjs[key];
+		// Now create all objects
+		for (const obj of values(stateObjs)) {
 			let initialValue = null;
 			if (obj.native.path != null) {
 				// Object could have a default value, find it
 				initialValue = dig<any>(accessory, obj.native.path);
 			}
-			// create object and return the promise, so we can wait
-			return _.adapter.createOwnStateExAsync(obj._id, obj, initialValue);
-		});
-		Promise.all(createObjects);
+			await _.adapter.createOwnStateExAsync(obj._id, obj, initialValue);
+		}
 	}
 }
 
