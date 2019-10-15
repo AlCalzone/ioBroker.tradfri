@@ -13,7 +13,7 @@ export declare function accessoryToNative(accessory: Accessory): Record<string, 
  * Creates or edits an existing <device>-object for an accessory.
  * @param accessory The accessory to update
  */
-export declare function extendDevice(accessory: Accessory): void;
+export declare function extendDevice(accessory: Accessory): Promise<void>;
 /**
  * Updates the possible scenes for a group
  * @param groupInfo The group to update

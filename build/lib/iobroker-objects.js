@@ -50,177 +50,182 @@ exports.accessoryToNative = accessoryToNative;
  * @param accessory The accessory to update
  */
 function extendDevice(accessory) {
-    const objId = calcObjId(accessory);
-    if (objId in session_1.session.objects) {
-        // check if we need to edit the existing object
-        const devObj = session_1.session.objects[objId];
-        let changed = false;
-        // update common part if neccessary
-        const newCommon = accessoryToCommon(accessory);
-        if (JSON.stringify(devObj.common) !== JSON.stringify(newCommon)) {
-            // merge the common objects
-            Object.assign(devObj.common, newCommon);
-            changed = true;
+    return __awaiter(this, void 0, void 0, function* () {
+        const objId = calcObjId(accessory);
+        if (objId in session_1.session.objects) {
+            // check if we need to edit the existing object
+            const devObj = session_1.session.objects[objId];
+            let changed = false;
+            // update common part if neccessary
+            const newCommon = accessoryToCommon(accessory);
+            if (JSON.stringify(devObj.common) !== JSON.stringify(newCommon)) {
+                // merge the common objects
+                Object.assign(devObj.common, newCommon);
+                changed = true;
+            }
+            const newNative = accessoryToNative(accessory);
+            // update native part if neccessary
+            if (JSON.stringify(devObj.native) !== JSON.stringify(newNative)) {
+                // merge the native objects
+                Object.assign(devObj.native, newNative);
+                changed = true;
+            }
+            if (changed)
+                yield global_1.Global.adapter.extendObjectAsync(objId, devObj);
+            // ====
+            // from here we can update the states
+            // filter out the ones belonging to this device with a property path
+            const stateObjs = objects_1.filter(session_1.session.objects, obj => obj._id.startsWith(objId) && obj.native && obj.native.path);
+            // for each property try to update the value
+            for (const [id, obj] of objects_1.entries(stateObjs)) {
+                if (global_1.Global.adapter.config.preserveTransitionTime &&
+                    id.match(/\.transitionDuration$/g)) {
+                    // don't override the transition time
+                    continue;
+                }
+                try {
+                    // Object could have a default value, find it
+                    let newValue = object_polyfill_1.dig(accessory, obj.native.path);
+                    const roundToDigits = global_1.Global.adapter.config.roundToDigits;
+                    if (typeof roundToDigits === "number" &&
+                        typeof newValue === "number") {
+                        newValue = math_1.roundTo(newValue, roundToDigits);
+                    }
+                    if (obj.native.onlyChanges) {
+                        yield global_1.Global.adapter.setStateChangedAsync(id, newValue, true);
+                    }
+                    else {
+                        yield global_1.Global.adapter.setStateAsync(id, newValue, true);
+                    }
+                }
+                catch (e) {
+                    /* skip this value */
+                }
+            }
         }
-        const newNative = accessoryToNative(accessory);
-        // update native part if neccessary
-        if (JSON.stringify(devObj.native) !== JSON.stringify(newNative)) {
-            // merge the native objects
-            Object.assign(devObj.native, newNative);
-            changed = true;
-        }
-        if (changed)
-            global_1.Global.adapter.extendObject(objId, devObj);
-        // ====
-        // from here we can update the states
-        // filter out the ones belonging to this device with a property path
-        const stateObjs = objects_1.filter(session_1.session.objects, obj => obj._id.startsWith(objId) && obj.native && obj.native.path);
-        // for each property try to update the value
-        for (const [id, obj] of objects_1.entries(stateObjs)) {
-            if (global_1.Global.adapter.config.preserveTransitionTime &&
-                id.match(/\.transitionDuration$/g)) {
-                // don't override the transition time
-                continue;
-            }
-            try {
-                // Object could have a default value, find it
-                let newValue = object_polyfill_1.dig(accessory, obj.native.path);
-                const roundToDigits = global_1.Global.adapter.config.roundToDigits;
-                if (typeof roundToDigits === "number" &&
-                    typeof newValue === "number") {
-                    newValue = math_1.roundTo(newValue, roundToDigits);
-                }
-                global_1.Global.adapter.setState(id, newValue, true);
-            }
-            catch (e) {
-                /* skip this value */
-            }
-        }
-    }
-    else {
-        // create new object
-        const devObj = {
-            _id: objId,
-            type: "device",
-            common: accessoryToCommon(accessory),
-            native: accessoryToNative(accessory)
-        };
-        global_1.Global.adapter.setObject(objId, devObj);
-        // also create state objects, depending on the accessory type
-        const stateObjs = {
-            alive: {
-                // alive state
-                _id: `${objId}.alive`,
-                type: "state",
-                common: {
-                    name: "device alive",
-                    read: true,
-                    write: false,
-                    type: "boolean",
-                    role: "indicator.alive",
-                    desc: "indicates if the device is currently alive and connected to the gateway"
-                },
-                native: {
-                    path: "alive"
-                }
-            },
-            lastSeen: {
-                // last seen state
-                _id: `${objId}.lastSeen`,
-                type: "state",
-                common: {
-                    name: "last seen timestamp",
-                    read: true,
-                    write: false,
-                    type: "number",
-                    role: "indicator.lastSeen",
-                    desc: "indicates when the device has last been seen by the gateway"
-                },
-                native: {
-                    path: "lastSeen"
-                }
-            }
-        };
-        if (accessory.type === node_tradfri_client_1.AccessoryTypes.lightbulb ||
-            accessory.type === node_tradfri_client_1.AccessoryTypes.plug) {
-            let channelName;
-            let channelID;
-            if (accessory.type === node_tradfri_client_1.AccessoryTypes.lightbulb) {
-                let spectrum = "none";
-                if (accessory.lightList != null &&
-                    accessory.lightList.length > 0) {
-                    spectrum = accessory.lightList[0].spectrum;
-                }
-                if (spectrum === "none") {
-                    channelName = "Lightbulb";
-                }
-                else if (spectrum === "white") {
-                    channelName = "Lightbulb (white spectrum)";
-                }
-                else if (spectrum === "rgb") {
-                    channelName = "RGB Lightbulb";
-                }
-                // obj.lightbulb should be a channel
-                channelID = "lightbulb";
-                stateObjs[channelID] = {
-                    _id: `${objId}.${channelID}`,
-                    type: "channel",
+        else {
+            // create new object
+            const devObj = {
+                _id: objId,
+                type: "device",
+                common: accessoryToCommon(accessory),
+                native: accessoryToNative(accessory)
+            };
+            yield global_1.Global.adapter.setObjectAsync(objId, devObj);
+            // also create state objects, depending on the accessory type
+            const stateObjs = {
+                alive: {
+                    // alive state
+                    _id: `${objId}.alive`,
+                    type: "state",
                     common: {
-                        name: channelName,
-                        role: "light"
+                        name: "device alive",
+                        read: true,
+                        write: false,
+                        type: "boolean",
+                        role: "indicator.alive",
+                        desc: "indicates if the device is currently alive and connected to the gateway"
                     },
                     native: {
-                        spectrum: spectrum // remember the spectrum, so we can update different properties later
+                        path: "alive"
                     }
-                };
-                if (spectrum === "white") {
-                    stateObjs[`${channelID}.colorTemperature`] = exports.objectDefinitions.colorTemperature(objId, "device");
-                }
-                else if (spectrum === "rgb") {
-                    stateObjs[`${channelID}.color`] = exports.objectDefinitions.color(objId, "device");
-                    stateObjs[`${channelID}.hue`] = exports.objectDefinitions.hue(objId, "device");
-                    stateObjs[`${channelID}.saturation`] = exports.objectDefinitions.saturation(objId, "device");
-                }
-                stateObjs[`${channelID}.transitionDuration`] = exports.objectDefinitions.transitionDuration(objId, "device", accessory.type);
-            } /* if (accessory.type === AccessoryTypes.plug) */
-            else {
-                // obj.plug should be a channel
-                channelID = "plug";
-                stateObjs[channelID] = {
-                    _id: `${objId}.${channelID}`,
-                    type: "channel",
+                },
+                lastSeen: {
+                    // last seen state
+                    _id: `${objId}.lastSeen`,
+                    type: "state",
                     common: {
-                        name: channelName,
-                        role: "switch"
+                        name: "last seen timestamp",
+                        read: true,
+                        write: false,
+                        type: "number",
+                        role: "indicator.lastSeen",
+                        desc: "indicates when the device has last been seen by the gateway"
                     },
-                    native: {}
-                };
+                    native: {
+                        path: "lastSeen"
+                    }
+                }
+            };
+            if (accessory.type === node_tradfri_client_1.AccessoryTypes.lightbulb ||
+                accessory.type === node_tradfri_client_1.AccessoryTypes.plug) {
+                let channelName;
+                let channelID;
+                if (accessory.type === node_tradfri_client_1.AccessoryTypes.lightbulb) {
+                    let spectrum = "none";
+                    if (accessory.lightList != null &&
+                        accessory.lightList.length > 0) {
+                        spectrum = accessory.lightList[0].spectrum;
+                    }
+                    if (spectrum === "none") {
+                        channelName = "Lightbulb";
+                    }
+                    else if (spectrum === "white") {
+                        channelName = "Lightbulb (white spectrum)";
+                    }
+                    else if (spectrum === "rgb") {
+                        channelName = "RGB Lightbulb";
+                    }
+                    // obj.lightbulb should be a channel
+                    channelID = "lightbulb";
+                    stateObjs[channelID] = {
+                        _id: `${objId}.${channelID}`,
+                        type: "channel",
+                        common: {
+                            name: channelName,
+                            role: "light"
+                        },
+                        native: {
+                            spectrum: spectrum // remember the spectrum, so we can update different properties later
+                        }
+                    };
+                    if (spectrum === "white") {
+                        stateObjs[`${channelID}.colorTemperature`] = exports.objectDefinitions.colorTemperature(objId, "device");
+                    }
+                    else if (spectrum === "rgb") {
+                        stateObjs[`${channelID}.color`] = exports.objectDefinitions.color(objId, "device");
+                        stateObjs[`${channelID}.hue`] = exports.objectDefinitions.hue(objId, "device");
+                        stateObjs[`${channelID}.saturation`] = exports.objectDefinitions.saturation(objId, "device");
+                    }
+                    stateObjs[`${channelID}.transitionDuration`] = exports.objectDefinitions.transitionDuration(objId, "device", accessory.type);
+                } /* if (accessory.type === AccessoryTypes.plug) */
+                else {
+                    // obj.plug should be a channel
+                    channelID = "plug";
+                    stateObjs[channelID] = {
+                        _id: `${objId}.${channelID}`,
+                        type: "channel",
+                        common: {
+                            name: channelName,
+                            role: "switch"
+                        },
+                        native: {}
+                    };
+                }
+                // Common properties for both plugs and lights
+                // We keep brightness for now, so groups of plugs and lights can use dimmer commands
+                stateObjs[`${channelID}.brightness`] = exports.objectDefinitions.brightness(objId, "device", accessory.type);
+                stateObjs[`${channelID}.state`] = exports.objectDefinitions.onOff(objId, "device", accessory.type);
             }
-            // Common properties for both plugs and lights
-            // We keep brightness for now, so groups of plugs and lights can use dimmer commands
-            stateObjs[`${channelID}.brightness`] = exports.objectDefinitions.brightness(objId, "device", accessory.type);
-            stateObjs[`${channelID}.state`] = exports.objectDefinitions.onOff(objId, "device", accessory.type);
-        }
-        if (accessory.deviceInfo.power === node_tradfri_client_1.PowerSources.Battery ||
-            accessory.deviceInfo.power === node_tradfri_client_1.PowerSources.InternalBattery ||
-            accessory.deviceInfo.power === node_tradfri_client_1.PowerSources.ExternalBattery) {
-            stateObjs.battery = exports.objectDefinitions.batteryPercentage(objId, "device");
-        }
-        if (accessory.type === node_tradfri_client_1.AccessoryTypes.blind) {
-            stateObjs.position = exports.objectDefinitions.position(objId, "device", accessory.type);
-        }
-        const createObjects = Object.keys(stateObjs).map(key => {
-            const obj = stateObjs[key];
-            let initialValue = null;
-            if (obj.native.path != null) {
-                // Object could have a default value, find it
-                initialValue = object_polyfill_1.dig(accessory, obj.native.path);
+            if (accessory.deviceInfo.power === node_tradfri_client_1.PowerSources.Battery ||
+                accessory.deviceInfo.power === node_tradfri_client_1.PowerSources.InternalBattery ||
+                accessory.deviceInfo.power === node_tradfri_client_1.PowerSources.ExternalBattery) {
+                stateObjs.battery = exports.objectDefinitions.batteryPercentage(objId, "device");
             }
-            // create object and return the promise, so we can wait
-            return global_1.Global.adapter.createOwnStateExAsync(obj._id, obj, initialValue);
-        });
-        Promise.all(createObjects);
-    }
+            if (accessory.type === node_tradfri_client_1.AccessoryTypes.blind) {
+                stateObjs.position = exports.objectDefinitions.position(objId, "device", accessory.type);
+            }
+            // Now create all objects
+            for (const obj of objects_1.values(stateObjs)) {
+                let initialValue = null;
+                if (obj.native.path != null) {
+                    // Object could have a default value, find it
+                    initialValue = object_polyfill_1.dig(accessory, obj.native.path);
+                }
+                yield global_1.Global.adapter.createOwnStateExAsync(obj._id, obj, initialValue);
+            }
+        }
+    });
 }
 exports.extendDevice = extendDevice;
 /**
@@ -691,7 +696,8 @@ exports.objectDefinitions = {
             unit: "%"
         },
         native: {
-            path: "deviceInfo.battery"
+            path: "deviceInfo.battery",
+            onlyChanges: true,
         }
     }),
     // Blind position: 0% is open, 100% is closed
