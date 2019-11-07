@@ -1,11 +1,23 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "2.4.4",
+        "version": "2.4.5",
         "news": {
+            "2.4.5": {
+                "en": "Suppressed log warnings for motion sensors",
+                "de": "Logwarnungen für Bewegungssensoren unterdrückt",
+                "ru": "Подавленные предупреждения журнала для датчиков движения",
+                "pt": "Avisos de log suprimidos para sensores de movimento",
+                "nl": "Onderdrukte logwaarschuwingen voor bewegingssensoren",
+                "fr": "Alertes de journalisation supprimées pour les détecteurs de mouvement",
+                "it": "Avvisi di registro eliminati per i sensori di movimento",
+                "es": "Advertencias de registro suprimidas para sensores de movimiento",
+                "pl": "Ukryte ostrzeżenia dziennika dla czujników ruchu",
+                "zh-cn": "禁止运动传感器的日志警告"
+            },
             "2.4.4": {
                 "en": "Suppressed log warnings for slave remotes and signal repeaters",
-                "de": "Unterdrückte Protokollwarnungen für Slave-Fernbedienungen und Signalwiederholer",
+                "de": "Logwarnungen für Slave-Fernbedienungen und Signalwiederholer unterdrückt",
                 "ru": "Подавленные предупреждения журнала для ведомых пультов и ретрансляторов сигнала",
                 "pt": "Advertências de log suprimidas para controles remotos escravos e repetidores de sinal",
                 "nl": "Onderdrukte logwaarschuwingen voor slave-afstandsbedieningen en signaalrepeaters",
