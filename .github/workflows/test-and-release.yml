@@ -3,7 +3,8 @@
 
 name: Test and Release
 
-# Only run this on tagged versions
+# Run this job on all pushes and pull requests
+# as well as tags with a semantic version
 on:
   push:
     branches:
@@ -14,14 +15,14 @@ on:
 
 jobs:
   debug:
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-latest
     steps:
       - name: Dump GitHub context
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
   test:
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-latest
     if: |
       github.event.name == 'push' &&
       github.event.base_ref == 'refs/heads/master' &&
