@@ -1,5 +1,10 @@
 import { assertNever } from "alcalzone-shared/helpers";
-import { composeObject, entries, filter, values } from "alcalzone-shared/objects";
+import {
+	composeObject,
+	entries,
+	filter,
+	values
+} from "alcalzone-shared/objects";
 import {
 	Accessory,
 	AccessoryTypes,
@@ -97,7 +102,11 @@ export async function extendDevice(accessory: Accessory) {
 					newValue = roundTo(newValue, roundToDigits);
 				}
 				if (obj.native.onlyChanges) {
-					await _.adapter.setStateChangedAsync(id, newValue as any, true);
+					await _.adapter.setStateChangedAsync(
+						id,
+						newValue as any,
+						true
+					);
 				} else {
 					await _.adapter.setStateAsync(id, newValue as any, true);
 				}
@@ -404,6 +413,9 @@ export function calcObjName(accessory: Accessory): string {
 			break;
 		case AccessoryTypes.signalRepeater:
 			prefix = "SR";
+			break;
+		case AccessoryTypes.motionSensor:
+			prefix = "MS";
 			break;
 		default:
 			_.log(
@@ -767,7 +779,7 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 		},
 		native: {
 			path: "deviceInfo.battery",
-			onlyChanges: true,
+			onlyChanges: true
 		}
 	}),
 

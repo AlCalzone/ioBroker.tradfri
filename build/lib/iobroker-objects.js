@@ -358,6 +358,9 @@ function calcObjName(accessory) {
         case node_tradfri_client_1.AccessoryTypes.signalRepeater:
             prefix = "SR";
             break;
+        case node_tradfri_client_1.AccessoryTypes.motionSensor:
+            prefix = "MS";
+            break;
         default:
             global_1.Global.log(`Unknown accessory type ${accessory.type}. Please send this info to the developer with a short description of the device!`, "warn");
             prefix = "XYZ";
@@ -697,7 +700,7 @@ exports.objectDefinitions = {
         },
         native: {
             path: "deviceInfo.battery",
-            onlyChanges: true,
+            onlyChanges: true
         }
     }),
     // Blind position: 0% is open, 100% is closed
