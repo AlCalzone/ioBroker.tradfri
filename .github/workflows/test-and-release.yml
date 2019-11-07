@@ -1,0 +1,99 @@
+# This is a composition of lint and test scripts
+# Make sure to update this file along with the others
+
+name: Test and Release
+
+# Only run this on tagged versions
+on:
+  push:
+    branches:
+      - '*'
+    tags:
+      - 'v*'
+  pull_request: {}
+
+jobs:
+  debug:
+    runs-on: ubuntu-16.04
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
+#   # Performs quick checks before the expensive test runs
+#   check-and-lint:
+#     runs-on: ubuntu-latest
+
+#     strategy:
+#       matrix:
+#         node-version: [12.x]
+
+#     steps:
+#     - uses: actions/checkout@v1
+#     - name: Use Node.js ${{ matrix.node-version }}
+#       uses: actions/setup-node@v1
+#       with:
+#         node-version: ${{ matrix.node-version }}
+#     - name: Install dependencies
+#       run: npm ci
+#     - name: Perform a type check
+#       run: npm run check
+#       env:
+#         CI: true
+#     - name: Lint TypeScript code
+#       run: npm run lint
+#     - name: Test package files
+#       run: npm run test:package
+  
+#   # Runs adapter tests on all supported node versions and OSes
+#   adapter-tests:
+#     runs-on: ${{ matrix.os }}
+#     strategy:
+#       matrix:
+#         node-version: [8.x, 10.x, 12.x]
+#         os: [ubuntu-latest, windows-latest, macos-latest]
+
+#     needs: [check-and-lint]
+
+#     steps:
+#     - uses: actions/checkout@v1
+#     - name: Use Node.js ${{ matrix.node-version }}
+#       uses: actions/setup-node@v1
+#       with:
+#         node-version: ${{ matrix.node-version }}
+#     - name: Install dependencies
+#       run: npm ci
+#     - name: Run local tests
+#       run: npm test
+#     - name: Run unit tests
+#       run: npm run test:unit
+#     - name: Run integration tests
+#       run: |
+#         export DEBUG=testing:*
+#         npm run test:integration
+
+#   # Deploys the final package to NPM
+#   deploy:
+#     runs-on: ubuntu-latest
+#     strategy:
+#       matrix:
+#         node-version: [12.x]
+
+#     needs: [adapter-tests]
+
+#     steps:
+#     - uses: actions/checkout@v1
+#     - name: Use Node.js ${{ matrix.node-version }}
+#       uses: actions/setup-node@v1
+#       with:
+#         node-version: ${{ matrix.node-version }}
+#     - name: Install dependencies
+#       run: npm ci
+#     - name: Create a clean build
+#       run: npm run build
+#     - name: Publish package to npm
+#       run: |
+#         npm config set //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
+#         npm whoami
+#         npm publish
