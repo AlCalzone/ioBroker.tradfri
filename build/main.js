@@ -91,8 +91,9 @@ function startAdapter(options = {}) {
             // watch own states
             adapter.subscribeStates(`${adapter.namespace}.*`);
             adapter.subscribeObjects(`${adapter.namespace}.*`);
-            // add special watch for lightbulb states, so we can later sync the group states
+            // add special watch for lightbulb and blind states, so we can later sync the group states
             custom_subscriptions_1.subscribeStates(/L\-\d+\.lightbulb\./, groups_1.syncGroupsWithState);
+            custom_subscriptions_1.subscribeStates(/B\-\d+\.blind\./, groups_1.syncGroupsWithState);
             session_1.session.tradfri = new node_tradfri_client_1.TradfriClient(hostname, {
                 customLogger: global_1.Global.log,
                 watchConnection: true,

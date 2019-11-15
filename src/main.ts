@@ -114,8 +114,9 @@ function startAdapter(options: Partial<ioBroker.AdapterOptions> = {}) {
 			// watch own states
 			adapter.subscribeStates(`${adapter.namespace}.*`);
 			adapter.subscribeObjects(`${adapter.namespace}.*`);
-			// add special watch for lightbulb states, so we can later sync the group states
+			// add special watch for lightbulb and blind states, so we can later sync the group states
 			subscribeStates(/L\-\d+\.lightbulb\./, syncGroupsWithState);
+			subscribeStates(/B\-\d+\.blind\./, syncGroupsWithState);
 
 			$.tradfri = new TradfriClient(hostname!, {
 				customLogger: _.log,
