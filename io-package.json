@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "2.4.5",
+        "version": "2.4.6",
         "news": {
+            "2.4.6": {
+                "en": "Group states for blinds are now synchronized correctly",
+                "de": "Gruppenstatus für Jalousien werden jetzt korrekt synchronisiert",
+                "ru": "Состояния группы для блайндов теперь правильно синхронизированы",
+                "pt": "Os estados do grupo para blinds agora estão sincronizados corretamente",
+                "nl": "Groepstoestanden voor blinds worden nu correct gesynchroniseerd",
+                "fr": "Les états de groupe pour les stores sont maintenant correctement synchronisés",
+                "it": "Gli stati di gruppo per i blind sono ora sincronizzati correttamente",
+                "es": "Los estados de grupo para persianas ahora se sincronizan correctamente",
+                "pl": "Stany grup dla blindów są teraz poprawnie synchronizowane",
+                "zh-cn": "百叶窗的组状态现在可以正确同步"
+            },
             "2.4.5": {
                 "en": "Suppressed log warnings for motion sensors",
                 "de": "Logwarnungen für Bewegungssensoren unterdrückt",
@@ -153,9 +165,6 @@
         "materialize": true,
         "compact": true,
         "dependencies": [
-            {
-                "admin": ">=3.0.0"
-            },
             {
                 "js-controller": ">=1.4.2"
             }
