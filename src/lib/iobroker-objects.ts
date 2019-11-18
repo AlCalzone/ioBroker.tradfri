@@ -26,7 +26,7 @@ import { VirtualGroup } from "./virtual-group";
  */
 export function accessoryToCommon(accessory: Accessory): ioBroker.ObjectCommon {
 	const ret: ioBroker.ObjectCommon = {
-		name: accessory.name
+		name: accessory.name || accessory.deviceInfo.modelNumber
 	};
 	const icon = getAccessoryIcon(accessory);
 	if (icon != null) ret.icon = "icons/" + icon;
