@@ -253,10 +253,13 @@ export async function extendDevice(accessory: Accessory) {
 			accessory.deviceInfo.power === PowerSources.InternalBattery ||
 			accessory.deviceInfo.power === PowerSources.ExternalBattery
 		) {
-			stateObjs.battery = objectDefinitions.batteryPercentage(
-				objId,
-				"device"
-			);
+			if (accessory.deviceInfo.battery != undefined) {
+				// Some 3rd party devices send no battery info
+				stateObjs.battery = objectDefinitions.batteryPercentage(
+					objId,
+					"device"
+				);
+			}
 		}
 
 		if (accessory.type === AccessoryTypes.blind) {
