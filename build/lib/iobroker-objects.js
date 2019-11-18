@@ -23,7 +23,7 @@ const virtual_group_1 = require("./virtual-group");
  */
 function accessoryToCommon(accessory) {
     const ret = {
-        name: accessory.name
+        name: accessory.name || accessory.deviceInfo.modelNumber
     };
     const icon = getAccessoryIcon(accessory);
     if (icon != null)
@@ -210,7 +210,10 @@ function extendDevice(accessory) {
             if (accessory.deviceInfo.power === node_tradfri_client_1.PowerSources.Battery ||
                 accessory.deviceInfo.power === node_tradfri_client_1.PowerSources.InternalBattery ||
                 accessory.deviceInfo.power === node_tradfri_client_1.PowerSources.ExternalBattery) {
-                stateObjs.battery = exports.objectDefinitions.batteryPercentage(objId, "device");
+                if (accessory.deviceInfo.battery != undefined) {
+                    // Some 3rd party devices send no battery info
+                    stateObjs.battery = exports.objectDefinitions.batteryPercentage(objId, "device");
+                }
             }
             if (accessory.type === node_tradfri_client_1.AccessoryTypes.blind) {
                 stateObjs.position = exports.objectDefinitions.position(objId, "device", accessory.type);

@@ -6,7 +6,8 @@ export interface ExtendedAdapter extends ioBroker.Adapter {
 }
 export declare class Global {
     private static _adapter;
-    static adapter: ExtendedAdapter;
+    static get adapter(): ExtendedAdapter;
+    static set adapter(adapter: ExtendedAdapter);
     static extend(adapter: ioBroker.Adapter): ExtendedAdapter;
     static log(message: string, level?: ioBroker.LogLevel): void;
     /**
