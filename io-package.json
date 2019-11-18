@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "2.4.6",
+        "version": "2.4.7",
         "news": {
+            "2.4.7": {
+                "en": "Fixed small display issues with 3rd party bulbs",
+                "de": "Kleine Anzeigeprobleme mit Glühlampen von Drittanbietern wurden behoben",
+                "ru": "Исправлены небольшие проблемы с отображением ламп сторонних производителей",
+                "pt": "Corrigidos pequenos problemas de exibição com lâmpadas de terceiros",
+                "nl": "Kleine weergaveproblemen met lampen van derden opgelost",
+                "fr": "Correction de petits problèmes d'affichage avec les ampoules de tiers",
+                "it": "Risolti piccoli problemi di visualizzazione con lampadine di terze parti",
+                "es": "Se corrigieron pequeños problemas de visualización con bombillas de terceros",
+                "pl": "Naprawiono małe problemy z wyświetlaniem w żarówkach innych firm",
+                "zh-cn": "修复了第三方灯泡的小型显示问题"
+            },
             "2.4.6": {
                 "en": "Group states for blinds are now synchronized correctly",
                 "de": "Gruppenstatus für Jalousien werden jetzt korrekt synchronisiert",

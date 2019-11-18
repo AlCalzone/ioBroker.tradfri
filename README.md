@@ -67,6 +67,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+### 2.4.7 (2019-11-18)
+* Fixed small display issues with 3rd party bulbs
+
 ### 2.4.6 (2019-11-15)
 * Group states for blinds are now synchronized correctly
 
