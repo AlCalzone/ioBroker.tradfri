@@ -67,6 +67,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+### __WORK IN PROGRESS__
+* Support stopping blinds at their current position
+
 ### 2.4.7 (2019-11-18)
 * Fixed small display issues with 3rd party bulbs
 
