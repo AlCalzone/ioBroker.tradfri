@@ -268,6 +268,11 @@ export async function extendDevice(accessory: Accessory) {
 				"device",
 				accessory.type
 			);
+			stateObjs.stopBlinds = objectDefinitions.stopBlinds(
+				objId,
+				"device",
+				accessory.type
+			);
 		}
 
 		// Now create all objects
@@ -805,11 +810,35 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 			type: "number",
 			min: 0,
 			max: 100,
-			role: "level",
+			role: "blind",
 			unit: "%"
 		},
 		native: {
 			path: getCoapAccessoryPropertyPathPrefix(deviceType) + "position"
 		}
-	})
+	}),
+	// Blind position: 0% is open, 100% is closed
+	stopBlinds: (rootId, rootType, deviceType) => {
+		const isGroup = rootType !== "device";
+		return {
+			_id: isGroup
+				? `${rootId}.stopBlinds`
+				: `${rootId}.${accessoryTypeToString(deviceType!)}.stop`,
+			type: "state",
+			common: {
+				name: isGroup ? "Stop blinds" : "Stop",
+				desc: isGroup
+					? "Stops all moving blinds in this group."
+					: "Stops the motion of this blind.",
+				read: false,
+				write: true,
+				type: "boolean",
+				role: "blind"
+			},
+			native: {
+				// This is only a dummy path. The state changed handler in main.ts requires it to exist
+				path: getCoapAccessoryPropertyPathPrefix(deviceType) + `stop${isGroup ? "Blinds" : ""}`
+			}
+		};
+	}
 };

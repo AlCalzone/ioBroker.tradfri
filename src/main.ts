@@ -380,6 +380,9 @@ function startAdapter(options: Partial<ioBroker.AdapterOptions> = {}) {
 							} else if (id.endsWith(".transitionDuration")) {
 								// this is part of another operation, just ack the state
 								wasAcked = true;
+							} else if (id.endsWith(".stopBlinds")) {
+								// This is a button without feedback, so no need to setState afterwards
+								await group.stopBlinds();
 							}
 
 							// ack the state if neccessary and return
@@ -541,6 +544,9 @@ function startAdapter(options: Partial<ioBroker.AdapterOptions> = {}) {
 								} else if (id.endsWith(".transitionDuration")) {
 									// this is part of another operation, just ack the state
 									wasAcked = true;
+								} else if (id.endsWith("blind.stop")) {
+									// This is a button without feedback, so no need to setState afterwards
+									await blind.stop();
 								}
 
 								// ack the state if neccessary and return

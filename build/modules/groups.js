@@ -61,6 +61,7 @@ function extendVirtualGroup(group) {
             hue: iobroker_objects_1.objectDefinitions.hue(objId, "virtual group"),
             saturation: iobroker_objects_1.objectDefinitions.saturation(objId, "virtual group"),
             position: iobroker_objects_1.objectDefinitions.position(objId, "virtual group"),
+            stopBlinds: iobroker_objects_1.objectDefinitions.stopBlinds(objId, "virtual group"),
         };
         const createObjects = Object.keys(stateObjs).map(key => {
             const obj = stateObjs[key];
@@ -141,6 +142,7 @@ function extendGroup(group) {
             hue: iobroker_objects_1.objectDefinitions.hue(objId, "group"),
             saturation: iobroker_objects_1.objectDefinitions.saturation(objId, "group"),
             position: iobroker_objects_1.objectDefinitions.position(objId, "group"),
+            stopBlinds: iobroker_objects_1.objectDefinitions.stopBlinds(objId, "group"),
         };
         const createObjects = Object.keys(stateObjs).map(key => {
             const obj = stateObjs[key];
