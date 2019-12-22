@@ -3,6 +3,18 @@
         "name": "tradfri",
         "version": "2.4.7",
         "news": {
+            "2.5.0": {
+                "en": "More device types are allowed in virtual groups",
+                "de": "Weitere Gerätetypen sind in virtuellen Gruppen zulässig",
+                "ru": "В виртуальных группах разрешено использовать больше типов устройств",
+                "pt": "Mais tipos de dispositivos são permitidos em grupos virtuais",
+                "nl": "Meer apparaattypen zijn toegestaan in virtuele groepen",
+                "fr": "Plus de types d'appareils sont autorisés dans les groupes virtuels",
+                "it": "Sono consentiti più tipi di dispositivi nei gruppi virtuali",
+                "es": "Se permiten más tipos de dispositivos en grupos virtuales",
+                "pl": "Więcej typów urządzeń jest dozwolonych w grupach wirtualnych",
+                "zh-cn": "虚拟组中允许更多设备类型"
+            },
             "2.4.7": {
                 "en": "Fixed small display issues with 3rd party bulbs",
                 "de": "Kleine Anzeigeprobleme mit Glühlampen von Drittanbietern wurden behoben",
