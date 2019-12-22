@@ -173,7 +173,7 @@ export const onMessage: ioBroker.MessageHandler = async (obj) => {
 				const params = obj.message as any;
 				// device type must be "lightbulb", "plug" or "all"
 				const deviceType = params.type || "all";
-				const allowedDeviceTypes = ["lightbulb", "plug", "all"];
+				const allowedDeviceTypes = ["lightbulb", "plug", "blind", "all"];
 				if (allowedDeviceTypes.indexOf(deviceType) === -1) {
 					respond(responses.ERROR(`device type must be one of ${allowedDeviceTypes.map(t => `"${t}"`).join(", ")}`));
 					return;
@@ -185,11 +185,11 @@ export const onMessage: ioBroker.MessageHandler = async (obj) => {
 						? allowedDeviceTypes.indexOf(AccessoryTypes[device.type]) > -1
 						: deviceType === AccessoryTypes[device.type];
 
-				const lightbulbs = entries($.devices).filter(predicate);
-				for (const [id, bulb] of lightbulbs) {
+				const selectedDevices = entries($.devices).filter(predicate);
+				for (const [id, acc] of selectedDevices) {
 					ret[id] = {
 						id,
-						name: bulb.name,
+						name: acc.name,
 						type: deviceType,
 					};
 				}

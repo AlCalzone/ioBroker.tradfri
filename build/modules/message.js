@@ -160,7 +160,7 @@ exports.onMessage = (obj) => __awaiter(void 0, void 0, void 0, function* () {
                 const params = obj.message;
                 // device type must be "lightbulb", "plug" or "all"
                 const deviceType = params.type || "all";
-                const allowedDeviceTypes = ["lightbulb", "plug", "all"];
+                const allowedDeviceTypes = ["lightbulb", "plug", "blind", "all"];
                 if (allowedDeviceTypes.indexOf(deviceType) === -1) {
                     respond(responses.ERROR(`device type must be one of ${allowedDeviceTypes.map(t => `"${t}"`).join(", ")}`));
                     return;
@@ -169,11 +169,11 @@ exports.onMessage = (obj) => __awaiter(void 0, void 0, void 0, function* () {
                 const predicate = ([, device]) => deviceType === "all"
                     ? allowedDeviceTypes.indexOf(node_tradfri_client_1.AccessoryTypes[device.type]) > -1
                     : deviceType === node_tradfri_client_1.AccessoryTypes[device.type];
-                const lightbulbs = objects_1.entries(session_1.session.devices).filter(predicate);
-                for (const [id, bulb] of lightbulbs) {
+                const selectedDevices = objects_1.entries(session_1.session.devices).filter(predicate);
+                for (const [id, acc] of selectedDevices) {
                     ret[id] = {
                         id,
-                        name: bulb.name,
+                        name: acc.name,
                         type: deviceType,
                     };
                 }

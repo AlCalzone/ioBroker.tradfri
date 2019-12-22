@@ -59,7 +59,7 @@ export class Root extends React.Component<RootProps, RootState> {
 	}
 
 	public updateDevices() {
-		sendTo(null, "getDevices", { type: "lightbulb" }, (result) => {
+		sendTo(null, "getDevices", { type: "all" }, (result) => {
 			if (result && result.error) {
 				console.error(result.error);
 			} else {
