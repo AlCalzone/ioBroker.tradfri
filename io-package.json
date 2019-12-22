@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "2.4.7",
+        "version": "2.5.0",
         "news": {
             "2.5.0": {
                 "en": "More device types are allowed in virtual groups",
@@ -173,7 +173,9 @@
             "pl": "Komunikuje się z IKEA brama Trådfri do zarządzania urządzeniami",
             "zh-cn": "与IKEA Trådfri网关，以控制设备"
         },
-        "authors": ["AlCalzone <d.griesel@gmx.net>"],
+        "authors": [
+            "AlCalzone <d.griesel@gmx.net>"
+        ],
         "license": "MIT",
         "platform": "Javascript/Node.js",
         "main": "build/main.js",
@@ -181,7 +183,10 @@
         "icon": "tradfri.png",
         "enabled": false,
         "extIcon": "https://raw.githubusercontent.com/AlCalzone/ioBroker.tradfri/master/admin/tradfri.png",
-        "keywords": ["ikea", "tradfri"],
+        "keywords": [
+            "ikea",
+            "tradfri"
+        ],
         "readme": "https://github.com/AlCalzone/ioBroker.tradfri/blob/master/README.md",
         "loglevel": "info",
         "type": "lighting",
@@ -203,7 +208,11 @@
         "preserveTransitionTime": false,
         "roundToDigits": 2
     },
-    "protectedNative": ["securityCode", "identity", "psk"],
+    "protectedNative": [
+        "securityCode",
+        "identity",
+        "psk"
+    ],
     "objects": [],
     "instanceObjects": [
         {

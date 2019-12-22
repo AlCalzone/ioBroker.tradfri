@@ -67,7 +67,7 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
-### __WORK IN PROGRESS__
+### 2.5.0 (2019-12-22)
 * Allow more device types in virtual groups
 
 ### 2.4.7 (2019-11-18)
