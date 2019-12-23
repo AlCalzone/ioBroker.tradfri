@@ -67,6 +67,9 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
+### __WORK IN PROGRESS__
+* Made it possible to operate plugs using virtual groups
+
 ### 2.5.0 (2019-12-22)
 * Allow more device types in virtual groups
 

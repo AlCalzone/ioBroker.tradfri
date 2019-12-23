@@ -3,6 +3,18 @@
         "name": "tradfri",
         "version": "2.5.0",
         "news": {
+            "2.5.1": {
+                "en": "Made it possible to operate plugs using virtual groups",
+                "de": "Ermöglicht den Betrieb von Steckern mit virtuellen Gruppen",
+                "ru": "Сделано возможным управлять пробками с помощью виртуальных групп",
+                "pt": "Tornou possível operar plugues usando grupos virtuais",
+                "nl": "Maakte het mogelijk om pluggen te bedienen met behulp van virtuele groepen",
+                "fr": "A rendu possible le fonctionnement des prises à l'aide de groupes virtuels",
+                "it": "Ha reso possibile il funzionamento delle spine tramite gruppi virtuali",
+                "es": "Hizo posible operar enchufes usando grupos virtuales",
+                "pl": "Umożliwiło obsługę wtyczek przy użyciu grup wirtualnych",
+                "zh-cn": "使使用虚拟组操作插头成为可能"
+            },
             "2.5.0": {
                 "en": "More device types are allowed in virtual groups",
                 "de": "Weitere Gerätetypen sind in virtuellen Gruppen zulässig",
