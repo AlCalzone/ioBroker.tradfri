@@ -219,6 +219,10 @@ function updateGroupStates(group, changedStateId) {
         .map(id => session_1.session.devices[id])
         .filter(a => a != null && a.type === node_tradfri_client_1.AccessoryTypes.blind)
         .map(a => a.blindList[0]);
+    const groupPlugs = group.deviceIDs
+        .map(id => session_1.session.devices[id])
+        .filter(a => a != null && a.type === node_tradfri_client_1.AccessoryTypes.plug)
+        .map(a => a.plugList[0]);
     // Seperate the bulbs into no spectrum/white spectrum/rgb bulbs
     const whiteSpectrumBulbs = groupBulbs.filter(b => b.spectrum === "white");
     const rgbBulbs = groupBulbs.filter(b => b.spectrum === "rgb");
@@ -291,6 +295,15 @@ function updateGroupStates(group, changedStateId) {
         // TODO: Assigning null is not allowed as per the node-tradfri-client definitions but it works
         group.position = commonState;
         const stateId = `${objId}.position`;
+        debounce(stateId, () => updateGroupState(stateId, commonState), debounceTimeout);
+    }
+    // Try to update the plug on/off state
+    if (groupPlugs.length > 0 &&
+        (changedStateId == null || changedStateId.endsWith("plug.state"))) {
+        const commonState = getCommonValue(groupPlugs.map(p => p.onOff));
+        // TODO: Assigning null is not allowed as per the node-tradfri-client definitions but it works
+        group.onOff = commonState;
+        const stateId = `${objId}.state`;
         debounce(stateId, () => updateGroupState(stateId, commonState), debounceTimeout);
     }
 }

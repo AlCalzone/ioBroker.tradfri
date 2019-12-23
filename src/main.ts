@@ -15,6 +15,7 @@ import {
 	TradfriErrorCodes,
 	BlindOperation,
 	Blind,
+	PlugOperation,
 } from "node-tradfri-client";
 
 // Eigene Module laden
@@ -395,7 +396,7 @@ function startAdapter(options: Partial<ioBroker.AdapterOptions> = {}) {
 							}
 							const vGroup = $.virtualGroups[rootObj.native.instanceId];
 
-							let operation: LightOperation | BlindOperation | undefined;
+							let operation: LightOperation | BlindOperation | PlugOperation | undefined;
 							let wasAcked: boolean = false;
 
 							if (id.endsWith(".state")) {
