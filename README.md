@@ -67,7 +67,7 @@ The result object `ret` looks as follows:
 
 ## Changelog
 
-### __WORK IN PROGRESS__
+### 2.5.1 (2019-12-23)
 * Made it possible to operate plugs using virtual groups
 
 ### 2.5.0 (2019-12-22)

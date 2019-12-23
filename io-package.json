@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "2.5.0",
+        "version": "2.5.1",
         "news": {
             "2.5.1": {
                 "en": "Made it possible to operate plugs using virtual groups",
