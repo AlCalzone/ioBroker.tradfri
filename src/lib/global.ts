@@ -100,7 +100,7 @@ export class Global {
 	 * Kurzschreibweise für die Ermittlung eines Objekts
 	 * @param id
 	 */
-	public static $(id: string): Promise<ioBroker.Object> {
+	public static $(id: string): Promise<ioBroker.Object | null | undefined> {
 		return Global._adapter.getForeignObjectAsync(id);
 	}
 
@@ -109,8 +109,7 @@ export class Global {
 	 * @param id
 	 */
 	public static async $$(pattern: string, type: ioBroker.ObjectType, role?: string): Promise<Record<string, ioBroker.Object>> {
-		// @types/iobroker@1.4.1 has a bug in the return type of getForeignObjectsAsync
-		const objects = await Global._adapter.getForeignObjectsAsync(pattern, type) as unknown as Record<string, ioBroker.Object>;
+		const objects = await Global._adapter.getForeignObjectsAsync(pattern, type);
 		if (role) {
 			return objFilter(objects, o => (o.common as any).role === role);
 		} else {
