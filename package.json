@@ -86,7 +86,7 @@
     "url": "https://github.com/AlCalzone/ioBroker.tradfri"
   },
   "scripts": {
-    "restoreBuildDirectoryStructure": "cpx \"build/src/**/*.*\" build && rimraf build/src && rimraf build/{io-,}package.json",
+    "restoreBuildDirectoryStructure": "cpx \"build/src/**/*.*\" build && rimraf build/src && rimraf build/{io-,}package.{json,d.ts}",
     "fixSourceMaps": "rexreplace \"\\\"sources\\\"\\:\\[\\\"../../\" \"\\\"sources\\\"\\:\\[\\\"../\" \"{build/**,build}/*.map\"",
     "prebuild:ts": "rimraf ./build",
     "build:ts": "tsc -p src/tsconfig.json",
