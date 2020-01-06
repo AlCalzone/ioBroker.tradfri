@@ -537,7 +537,7 @@ function updateConfig(newConfig) {
         // Create the config object
         const config = Object.assign(Object.assign({}, adapter.config), newConfig);
         // Update the adapter object
-        const adapterObj = yield adapter.getForeignObjectAsync(`system.adapter.${adapter.namespace}`);
+        const adapterObj = (yield adapter.getForeignObjectAsync(`system.adapter.${adapter.namespace}`));
         adapterObj.native = config;
         yield adapter.setForeignObjectAsync(`system.adapter.${adapter.namespace}`, adapterObj);
     });
