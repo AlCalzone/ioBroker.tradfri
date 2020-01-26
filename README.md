@@ -66,6 +66,13 @@ The result object `ret` looks as follows:
 ```
 
 ## Changelog
+<!--
+	Placeholder for next release:
+	### __WORK IN PROGRESS__
+-->
+
+### __WORK IN PROGRESS__
+* Fix: Suppress log warnings for Symfonisk remotes
 
 ### 2.5.1 (2019-12-23)
 * Made it possible to operate plugs using virtual groups
