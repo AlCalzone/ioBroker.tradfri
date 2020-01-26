@@ -71,7 +71,7 @@ The result object `ret` looks as follows:
 	### __WORK IN PROGRESS__
 -->
 
-### __WORK IN PROGRESS__
+### 2.5.2 (2020-01-26)
 * Fix: Suppress log warnings for Symfonisk remotes
 
 ### 2.5.1 (2019-12-23)

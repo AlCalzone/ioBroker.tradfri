@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "2.5.1",
+        "version": "2.5.2",
         "news": {
+            "2.5.2": {
+                "en": "* Fix: Suppress log warnings for Symfonisk remotes",
+                "de": "* Korrektur: Unterdrückung von Protokollwarnungen für Symfonisk-Fernbedienungen",
+                "ru": "* Исправлено: Подавление предупреждений журнала для удаленных пользователей Symfonisk.",
+                "pt": "* Correção: suprimir avisos de log para controles remotos Symfonisk",
+                "nl": "* Oplossing: logboekwaarschuwingen onderdrukken voor Symfonisk-afstandsbedieningen",
+                "fr": "* Correction: supprimer les avertissements de journal pour les télécommandes Symfonisk",
+                "it": "* Correzione: sopprimere gli avvisi del registro per i telecomandi Symfonisk",
+                "es": "* Solución: elimine las advertencias de registro para los controles remotos Symfonisk",
+                "pl": "* Poprawka: Pomija ostrzeżenia dziennika dla pilotów Symfonisk",
+                "zh-cn": "*修复：抑制Symfonisk遥控器的日志警告"
+            },
             "2.5.1": {
                 "en": "Made it possible to operate plugs using virtual groups",
                 "de": "Ermöglicht den Betrieb von Steckern mit virtuellen Gruppen",
