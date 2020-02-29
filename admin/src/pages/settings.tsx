@@ -151,7 +151,6 @@ export class Settings extends React.Component<SettingsProps, ioBroker.AdapterCon
 					<div className="col s4 input-field">
 						<input type="text" className="value" id="securityCode" value={this.getSetting("securityCode")} onChange={this.handleChange} />
 						<Label for="securityCode" text="Security-Code:" tooltip="security code tooltip" />
-						<span>{_("code not stored")}</span>
 					</div>
 				</div>
 				<div className="row">

@@ -124,8 +124,44 @@ function startAdapter(options: Partial<ioBroker.AdapterOptions> = {}) {
 				watchConnection: true,
 			});
 
-			if (securityCode != null && securityCode.length > 0) {
-				// we temporarily stored the security code to replace it with identity/psk
+			if (identity && identity.length > 0 && psk && psk.length > 0) {
+				// connect with previously negotiated identity and psk
+				$.tradfri.on("connection failed", (attempt: number, maxAttempts: number) => {
+					_.log(`failed connection attempt ${attempt} of ${Number.isFinite(maxAttempts) ? maxAttempts : "∞"}`, "warn");
+				});
+
+				try {
+					await $.tradfri.connect(identity!, psk!);
+				} catch (e) {
+					if (e instanceof TradfriError) {
+						switch (e.code) {
+							case TradfriErrorCodes.ConnectionTimedOut: {
+								_.log(`The gateway ${hostname} is unreachable or did not respond in time!`, "error");
+								_.log(`Please check your network and adapter settings and restart the adapter!`, "error");
+							}
+							case TradfriErrorCodes.AuthenticationFailed: {
+								_.log(`The stored credentials are no longer valid!`, "warn");
+								_.log(`The adapter will now restart and re-authenticate! If not, please restart it manually.`, "warn");
+								await updateConfig({
+									identity: "",
+									psk: "",
+								});
+								return;
+							}
+							case TradfriErrorCodes.ConnectionFailed: {
+								_.log(`Could not connect to the gateway ${hostname}!`, "error");
+								_.log(e.message, "error");
+								return;
+							}
+						}
+					} else {
+						_.log(`Could not connect to the gateway ${hostname}!`, "error");
+						_.log(e.message, "error");
+						return;
+					}
+				}
+			} else if (securityCode != null && securityCode.length > 0) {
+				// use the security code to create an identity and psk
 				try {
 					({ identity, psk } = await $.tradfri.authenticate(securityCode));
 					// store it and restart the adapter
@@ -133,7 +169,6 @@ function startAdapter(options: Partial<ioBroker.AdapterOptions> = {}) {
 					await updateConfig({
 						identity,
 						psk,
-						securityCode: "",
 					});
 				} catch (e) {
 					if (e instanceof TradfriError) {
@@ -155,38 +190,6 @@ function startAdapter(options: Partial<ioBroker.AdapterOptions> = {}) {
 						}
 					} else {
 						_.log(`Could not authenticate with the gateway ${hostname}!`, "error");
-						_.log(e.message, "error");
-						return;
-					}
-				}
-			} else {
-				// connect with previously negotiated identity and psk
-				$.tradfri.on("connection failed", (attempt: number, maxAttempts: number) => {
-					_.log(`failed connection attempt ${attempt} of ${Number.isFinite(maxAttempts) ? maxAttempts : "∞"}`, "warn");
-				});
-
-				try {
-					await $.tradfri.connect(identity!, psk!);
-				} catch (e) {
-					if (e instanceof TradfriError) {
-						switch (e.code) {
-							case TradfriErrorCodes.ConnectionTimedOut: {
-								_.log(`The gateway ${hostname} is unreachable or did not respond in time!`, "error");
-								_.log(`Please check your network and adapter settings and restart the adapter!`, "error");
-							}
-							case TradfriErrorCodes.AuthenticationFailed: {
-								_.log(`The stored credentials are no longer valid!`, "error");
-								_.log(`Please re-enter your security code in the adapter settings!`, "error");
-								return;
-							}
-							case TradfriErrorCodes.ConnectionFailed: {
-								_.log(`Could not connect to the gateway ${hostname}!`, "error");
-								_.log(e.message, "error");
-								return;
-							}
-						}
-					} else {
-						_.log(`Could not connect to the gateway ${hostname}!`, "error");
 						_.log(e.message, "error");
 						return;
 					}
