@@ -64,6 +64,23 @@ function operateVirtualGroup(group, operation) {
 }
 exports.operateVirtualGroup = operateVirtualGroup;
 /**
+ * Stops all blinds in a virtual group
+ * @param group The virtual group which contains the blinds to be stopped
+ */
+function stopBlinds(group) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (group.deviceIDs == undefined)
+            return;
+        const blindAccessories = group.deviceIDs
+            .map(id => session_1.session.devices[id])
+            .filter(dev => dev != null && dev.type === node_tradfri_client_1.AccessoryTypes.blind);
+        for (const acc of blindAccessories) {
+            yield acc.blindList[0].stop();
+        }
+    });
+}
+exports.stopBlinds = stopBlinds;
+/**
  * Renames a device
  * @param accessory The device to be renamed
  * @param newName The new name to be given to the device

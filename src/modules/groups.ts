@@ -59,6 +59,7 @@ export function extendVirtualGroup(group: VirtualGroup) {
 			hue: objectDefinitions.hue(objId, "virtual group"),
 			saturation: objectDefinitions.saturation(objId, "virtual group"),
 			position: objectDefinitions.position(objId, "virtual group"),
+			stopBlinds: objectDefinitions.stopBlinds(objId, "virtual group"),
 		};
 
 		const createObjects = Object.keys(stateObjs).map(key => {
@@ -146,6 +147,7 @@ export function extendGroup(group: Group) {
 			hue: objectDefinitions.hue(objId, "group"),
 			saturation: objectDefinitions.saturation(objId, "group"),
 			position: objectDefinitions.position(objId, "group"),
+			stopBlinds: objectDefinitions.stopBlinds(objId, "group"),
 		};
 
 		const createObjects = Object.keys(stateObjs).map(key => {

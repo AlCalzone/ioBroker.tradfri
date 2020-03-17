@@ -217,6 +217,7 @@ function extendDevice(accessory) {
             }
             if (accessory.type === node_tradfri_client_1.AccessoryTypes.blind) {
                 stateObjs.position = exports.objectDefinitions.position(objId, "device", accessory.type);
+                stateObjs.stopBlinds = exports.objectDefinitions.stopBlinds(objId, "device", accessory.type);
             }
             // Now create all objects
             for (const obj of objects_1.values(stateObjs)) {
@@ -726,11 +727,35 @@ exports.objectDefinitions = {
             type: "number",
             min: 0,
             max: 100,
-            role: "level",
+            role: "blind",
             unit: "%"
         },
         native: {
             path: getCoapAccessoryPropertyPathPrefix(deviceType) + "position"
         }
-    })
+    }),
+    // Blind position: 0% is open, 100% is closed
+    stopBlinds: (rootId, rootType, deviceType) => {
+        const isGroup = rootType !== "device";
+        return {
+            _id: isGroup
+                ? `${rootId}.stopBlinds`
+                : `${rootId}.${accessoryTypeToString(deviceType)}.stop`,
+            type: "state",
+            common: {
+                name: isGroup ? "Stop blinds" : "Stop",
+                desc: isGroup
+                    ? "Stops all moving blinds in this group."
+                    : "Stops the motion of this blind.",
+                read: false,
+                write: true,
+                type: "boolean",
+                role: "blind"
+            },
+            native: {
+                // This is only a dummy path. The state changed handler in main.ts requires it to exist
+                path: getCoapAccessoryPropertyPathPrefix(deviceType) + `stop${isGroup ? "Blinds" : ""}`
+            }
+        };
+    }
 };

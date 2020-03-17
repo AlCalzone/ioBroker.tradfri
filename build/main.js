@@ -354,6 +354,10 @@ function startAdapter(options = {}) {
                                 // this is part of another operation, just ack the state
                                 wasAcked = true;
                             }
+                            else if (id.endsWith(".stopBlinds")) {
+                                // This is a button without feedback, so no need to setState afterwards
+                                yield group.stopBlinds();
+                            }
                             // ack the state if neccessary and return
                             if (wasAcked)
                                 adapter.setStateAsync(id, state, true);
@@ -422,6 +426,10 @@ function startAdapter(options = {}) {
                             else if (id.endsWith(".transitionDuration")) {
                                 // No operation here, since this is part of another one
                                 wasAcked = true;
+                            }
+                            else if (id.endsWith(".stopBlinds")) {
+                                // This is a button without feedback, so no need to setState afterwards
+                                yield operations_1.stopBlinds(vGroup);
                             }
                             // update all lightbulbs in this group
                             if (operation != null) {
@@ -509,6 +517,10 @@ function startAdapter(options = {}) {
                                 else if (id.endsWith(".transitionDuration")) {
                                     // this is part of another operation, just ack the state
                                     wasAcked = true;
+                                }
+                                else if (id.endsWith("blind.stop")) {
+                                    // This is a button without feedback, so no need to setState afterwards
+                                    yield blind.stop();
                                 }
                                 // ack the state if neccessary and return
                                 if (wasAcked)
