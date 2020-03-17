@@ -71,6 +71,9 @@ The result object `ret` looks as follows:
 	### __WORK IN PROGRESS__
 -->
 
+### __WORK IN PROGRESS__
+* Support stopping blinds at their current position
+
 ### 2.5.2 (2020-01-26)
 * Fix: Suppress log warnings for Symfonisk remotes
 
@@ -79,9 +82,6 @@ The result object `ret` looks as follows:
 
 ### 2.5.0 (2019-12-22)
 * Allow more device types in virtual groups
-
-### __WORK IN PROGRESS__
-* Support stopping blinds at their current position
 
 ### 2.4.7 (2019-11-18)
 * Fixed small display issues with 3rd party bulbs
