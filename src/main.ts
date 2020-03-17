@@ -35,7 +35,7 @@ import { calcGroupId, calcGroupName, calcObjId, calcObjName, extendDevice, getIn
 import { applyCustomObjectSubscriptions, applyCustomStateSubscriptions, subscribeStates } from "./modules/custom-subscriptions";
 import { extendGroup, syncGroupsWithState, updateGroupStates } from "./modules/groups";
 import { onMessage } from "./modules/message";
-import { operateVirtualGroup, renameDevice, renameGroup } from "./modules/operations";
+import { operateVirtualGroup, renameDevice, renameGroup, stopBlinds } from "./modules/operations";
 
 import { assertNever } from "alcalzone-shared/helpers";
 import { roundTo } from "./lib/math";
@@ -453,6 +453,9 @@ function startAdapter(options: Partial<ioBroker.AdapterOptions> = {}) {
 							} else if (id.endsWith(".transitionDuration")) {
 								// No operation here, since this is part of another one
 								wasAcked = true;
+							} else if (id.endsWith(".stopBlinds")) {
+								// This is a button without feedback, so no need to setState afterwards
+								await stopBlinds(vGroup);
 							}
 
 							// update all lightbulbs in this group

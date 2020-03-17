@@ -427,6 +427,10 @@ function startAdapter(options = {}) {
                                 // No operation here, since this is part of another one
                                 wasAcked = true;
                             }
+                            else if (id.endsWith(".stopBlinds")) {
+                                // This is a button without feedback, so no need to setState afterwards
+                                yield operations_1.stopBlinds(vGroup);
+                            }
                             // update all lightbulbs in this group
                             if (operation != null) {
                                 operations_1.operateVirtualGroup(vGroup, operation);

@@ -2,7 +2,14 @@
  * Provides operations for Tradfri devices using the CoAP layer
  */
 
-import { Accessory, AccessoryTypes, Group, LightOperation, BlindOperation, PlugOperation } from "node-tradfri-client";
+import {
+	Accessory,
+	AccessoryTypes,
+	Group,
+	LightOperation,
+	BlindOperation,
+	PlugOperation
+} from "node-tradfri-client";
 import { VirtualGroup } from "../lib/virtual-group";
 import { session as $ } from "./session";
 
@@ -13,7 +20,10 @@ import { session as $ } from "./session";
  * @param operation The properties to be set
  * @returns true if a request was sent, false otherwise
  */
-export async function operateVirtualGroup(group: Group | VirtualGroup, operation: LightOperation | BlindOperation | PlugOperation): Promise<void> {
+export async function operateVirtualGroup(
+	group: Group | VirtualGroup,
+	operation: LightOperation | BlindOperation | PlugOperation
+): Promise<void> {
 	if (group.deviceIDs == undefined) return;
 	// Test which kind of operation this is
 	if ("position" in operation) {
@@ -21,8 +31,7 @@ export async function operateVirtualGroup(group: Group | VirtualGroup, operation
 		// find all blinds belonging to this group
 		const blindAccessories = group.deviceIDs
 			.map(id => $.devices[id])
-			.filter(dev => dev != null && dev.type === AccessoryTypes.blind)
-			;
+			.filter(dev => dev != null && dev.type === AccessoryTypes.blind);
 
 		for (const acc of blindAccessories) {
 			await $.tradfri.operateBlind(acc, operation);
@@ -32,12 +41,12 @@ export async function operateVirtualGroup(group: Group | VirtualGroup, operation
 		// find all lightbulbs belonging to this group
 		const lightbulbAccessories = group.deviceIDs
 			.map(id => $.devices[id])
-			.filter(dev => dev != null && dev.type === AccessoryTypes.lightbulb)
-			;
+			.filter(
+				dev => dev != null && dev.type === AccessoryTypes.lightbulb
+			);
 		const plugAccessories = group.deviceIDs
 			.map(id => $.devices[id])
-			.filter(dev => dev != null && dev.type === AccessoryTypes.plug)
-			;
+			.filter(dev => dev != null && dev.type === AccessoryTypes.plug);
 
 		if ("onOff" in operation || "dimmer" in operation) {
 			// This operation is compatible with plugs
@@ -57,12 +66,30 @@ export async function operateVirtualGroup(group: Group | VirtualGroup, operation
 }
 
 /**
+ * Stops all blinds in a virtual group
+ * @param group The virtual group which contains the blinds to be stopped
+ */
+export async function stopBlinds(group: VirtualGroup): Promise<void> {
+	if (group.deviceIDs == undefined) return;
+
+	const blindAccessories = group.deviceIDs
+		.map(id => $.devices[id])
+		.filter(dev => dev != null && dev.type === AccessoryTypes.blind);
+	for (const acc of blindAccessories) {
+		await acc.blindList[0].stop();
+	}
+}
+
+/**
  * Renames a device
  * @param accessory The device to be renamed
  * @param newName The new name to be given to the device
  * @returns true if a request was sent, false otherwise
  */
-export function renameDevice(accessory: Accessory, newName: string): Promise<boolean> {
+export function renameDevice(
+	accessory: Accessory,
+	newName: string
+): Promise<boolean> {
 	// create a copy to modify
 	const newAccessory = accessory.clone();
 	newAccessory.name = newName;

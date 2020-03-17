@@ -12,6 +12,11 @@ import { VirtualGroup } from "../lib/virtual-group";
  */
 export declare function operateVirtualGroup(group: Group | VirtualGroup, operation: LightOperation | BlindOperation | PlugOperation): Promise<void>;
 /**
+ * Stops all blinds in a virtual group
+ * @param group The virtual group which contains the blinds to be stopped
+ */
+export declare function stopBlinds(group: VirtualGroup): Promise<void>;
+/**
  * Renames a device
  * @param accessory The device to be renamed
  * @param newName The new name to be given to the device
