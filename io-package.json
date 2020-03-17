@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "2.5.2",
+        "version": "2.6.0",
         "news": {
+            "2.6.0": {
+                "en": "* Support stopping blinds at their current position",
+                "de": "* Unterstützung beim Stoppen von Jalousien an ihrer aktuellen Position",
+                "ru": "* Поддержка остановки блайндов в их текущем положении",
+                "pt": "* Suporte para parar as cortinas na posição atual",
+                "nl": "* Ondersteuning voor het stoppen van jaloezieën op hun huidige positie",
+                "fr": "* Soutenir l'arrêt des stores à leur position actuelle",
+                "it": "* Supporta l'arresto dei bui nella loro posizione attuale",
+                "es": "* Soporte para detener las persianas en su posición actual",
+                "pl": "* Obsługa zatrzymywania żaluzji w ich bieżącej pozycji",
+                "zh-cn": "*支持将百叶窗停在当前位置"
+            },
             "2.5.2": {
                 "en": "* Fix: Suppress log warnings for Symfonisk remotes",
                 "de": "* Korrektur: Unterdrückung von Protokollwarnungen für Symfonisk-Fernbedienungen",
