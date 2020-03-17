@@ -66,6 +66,19 @@ The result object `ret` looks as follows:
 ```
 
 ## Changelog
+<!--
+	Placeholder for next release:
+	### __WORK IN PROGRESS__
+-->
+
+### 2.5.2 (2020-01-26)
+* Fix: Suppress log warnings for Symfonisk remotes
+
+### 2.5.1 (2019-12-23)
+* Made it possible to operate plugs using virtual groups
+
+### 2.5.0 (2019-12-22)
+* Allow more device types in virtual groups
 
 ### __WORK IN PROGRESS__
 * Support stopping blinds at their current position
@@ -281,7 +294,7 @@ The result object `ret` looks as follows:
 ## License
 The MIT License (MIT)
 
-Copyright (c) 2017-2019 AlCalzone <d.griesel@gmx.net>
+Copyright (c) 2017-2020 AlCalzone <d.griesel@gmx.net>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

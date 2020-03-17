@@ -38,11 +38,20 @@ function operateVirtualGroup(group, operation) {
             }
         }
         else {
-            // This is a light operation
+            // This is a light or plug operation
             // find all lightbulbs belonging to this group
             const lightbulbAccessories = group.deviceIDs
                 .map(id => session_1.session.devices[id])
                 .filter(dev => dev != null && dev.type === node_tradfri_client_1.AccessoryTypes.lightbulb);
+            const plugAccessories = group.deviceIDs
+                .map(id => session_1.session.devices[id])
+                .filter(dev => dev != null && dev.type === node_tradfri_client_1.AccessoryTypes.plug);
+            if ("onOff" in operation || "dimmer" in operation) {
+                // This operation is compatible with plugs
+                for (const acc of plugAccessories) {
+                    yield session_1.session.tradfri.operatePlug(acc, operation);
+                }
+            }
             for (const acc of lightbulbAccessories) {
                 yield session_1.session.tradfri.operateLight(acc, operation);
             }

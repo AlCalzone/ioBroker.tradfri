@@ -1,4 +1,4 @@
-import { LightOperation, BlindOperation } from "node-tradfri-client";
+import { LightOperation, BlindOperation, PlugOperation } from "node-tradfri-client";
 export declare class VirtualGroup {
     readonly instanceId: number;
     constructor(instanceId: number);
@@ -18,5 +18,5 @@ export declare class VirtualGroup {
     /**
      * Updates this virtual group's state with the changes contained in the given operation
      */
-    merge(operation: LightOperation | BlindOperation): void;
+    merge(operation: LightOperation | BlindOperation | PlugOperation): void;
 }

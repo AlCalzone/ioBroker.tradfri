@@ -75,7 +75,6 @@ class Global {
      */
     static $$(pattern, type, role) {
         return __awaiter(this, void 0, void 0, function* () {
-            // @types/iobroker@1.4.1 has a bug in the return type of getForeignObjectsAsync
             const objects = yield Global._adapter.getForeignObjectsAsync(pattern, type);
             if (role) {
                 return objects_1.filter(objects, o => o.common.role === role);

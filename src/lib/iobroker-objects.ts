@@ -425,6 +425,9 @@ export function calcObjName(accessory: Accessory): string {
 		case AccessoryTypes.motionSensor:
 			prefix = "MS";
 			break;
+		case AccessoryTypes.soundRemote:
+			prefix = "S";
+			break;
 		default:
 			_.log(
 				`Unknown accessory type ${accessory.type}. Please send this info to the developer with a short description of the device!`,

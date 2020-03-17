@@ -1,8 +1,44 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "2.4.7",
+        "version": "2.5.2",
         "news": {
+            "2.5.2": {
+                "en": "* Fix: Suppress log warnings for Symfonisk remotes",
+                "de": "* Korrektur: Unterdrückung von Protokollwarnungen für Symfonisk-Fernbedienungen",
+                "ru": "* Исправлено: Подавление предупреждений журнала для удаленных пользователей Symfonisk.",
+                "pt": "* Correção: suprimir avisos de log para controles remotos Symfonisk",
+                "nl": "* Oplossing: logboekwaarschuwingen onderdrukken voor Symfonisk-afstandsbedieningen",
+                "fr": "* Correction: supprimer les avertissements de journal pour les télécommandes Symfonisk",
+                "it": "* Correzione: sopprimere gli avvisi del registro per i telecomandi Symfonisk",
+                "es": "* Solución: elimine las advertencias de registro para los controles remotos Symfonisk",
+                "pl": "* Poprawka: Pomija ostrzeżenia dziennika dla pilotów Symfonisk",
+                "zh-cn": "*修复：抑制Symfonisk遥控器的日志警告"
+            },
+            "2.5.1": {
+                "en": "Made it possible to operate plugs using virtual groups",
+                "de": "Ermöglicht den Betrieb von Steckern mit virtuellen Gruppen",
+                "ru": "Сделано возможным управлять пробками с помощью виртуальных групп",
+                "pt": "Tornou possível operar plugues usando grupos virtuais",
+                "nl": "Maakte het mogelijk om pluggen te bedienen met behulp van virtuele groepen",
+                "fr": "A rendu possible le fonctionnement des prises à l'aide de groupes virtuels",
+                "it": "Ha reso possibile il funzionamento delle spine tramite gruppi virtuali",
+                "es": "Hizo posible operar enchufes usando grupos virtuales",
+                "pl": "Umożliwiło obsługę wtyczek przy użyciu grup wirtualnych",
+                "zh-cn": "使使用虚拟组操作插头成为可能"
+            },
+            "2.5.0": {
+                "en": "More device types are allowed in virtual groups",
+                "de": "Weitere Gerätetypen sind in virtuellen Gruppen zulässig",
+                "ru": "В виртуальных группах разрешено использовать больше типов устройств",
+                "pt": "Mais tipos de dispositivos são permitidos em grupos virtuais",
+                "nl": "Meer apparaattypen zijn toegestaan in virtuele groepen",
+                "fr": "Plus de types d'appareils sont autorisés dans les groupes virtuels",
+                "it": "Sono consentiti più tipi di dispositivi nei gruppi virtuali",
+                "es": "Se permiten más tipos de dispositivos en grupos virtuales",
+                "pl": "Więcej typów urządzeń jest dozwolonych w grupach wirtualnych",
+                "zh-cn": "虚拟组中允许更多设备类型"
+            },
             "2.4.7": {
                 "en": "Fixed small display issues with 3rd party bulbs",
                 "de": "Kleine Anzeigeprobleme mit Glühlampen von Drittanbietern wurden behoben",
@@ -161,7 +197,9 @@
             "pl": "Komunikuje się z IKEA brama Trådfri do zarządzania urządzeniami",
             "zh-cn": "与IKEA Trådfri网关，以控制设备"
         },
-        "authors": ["AlCalzone <d.griesel@gmx.net>"],
+        "authors": [
+            "AlCalzone <d.griesel@gmx.net>"
+        ],
         "license": "MIT",
         "platform": "Javascript/Node.js",
         "main": "build/main.js",
@@ -169,7 +207,10 @@
         "icon": "tradfri.png",
         "enabled": false,
         "extIcon": "https://raw.githubusercontent.com/AlCalzone/ioBroker.tradfri/master/admin/tradfri.png",
-        "keywords": ["ikea", "tradfri"],
+        "keywords": [
+            "ikea",
+            "tradfri"
+        ],
         "readme": "https://github.com/AlCalzone/ioBroker.tradfri/blob/master/README.md",
         "loglevel": "info",
         "type": "lighting",
@@ -191,7 +232,11 @@
         "preserveTransitionTime": false,
         "roundToDigits": 2
     },
-    "protectedNative": ["securityCode", "identity", "psk"],
+    "protectedNative": [
+        "securityCode",
+        "identity",
+        "psk"
+    ],
     "objects": [],
     "instanceObjects": [
         {

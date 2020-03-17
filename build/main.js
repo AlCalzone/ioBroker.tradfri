@@ -98,8 +98,46 @@ function startAdapter(options = {}) {
                 customLogger: global_1.Global.log,
                 watchConnection: true,
             });
-            if (securityCode != null && securityCode.length > 0) {
-                // we temporarily stored the security code to replace it with identity/psk
+            if (identity && identity.length > 0 && psk && psk.length > 0) {
+                // connect with previously negotiated identity and psk
+                session_1.session.tradfri.on("connection failed", (attempt, maxAttempts) => {
+                    global_1.Global.log(`failed connection attempt ${attempt} of ${Number.isFinite(maxAttempts) ? maxAttempts : "∞"}`, "warn");
+                });
+                try {
+                    yield session_1.session.tradfri.connect(identity, psk);
+                }
+                catch (e) {
+                    if (e instanceof node_tradfri_client_1.TradfriError) {
+                        switch (e.code) {
+                            case node_tradfri_client_1.TradfriErrorCodes.ConnectionTimedOut: {
+                                global_1.Global.log(`The gateway ${hostname} is unreachable or did not respond in time!`, "error");
+                                global_1.Global.log(`Please check your network and adapter settings and restart the adapter!`, "error");
+                            }
+                            case node_tradfri_client_1.TradfriErrorCodes.AuthenticationFailed: {
+                                global_1.Global.log(`The stored credentials are no longer valid!`, "warn");
+                                global_1.Global.log(`The adapter will now restart and re-authenticate! If not, please restart it manually.`, "warn");
+                                yield updateConfig({
+                                    identity: "",
+                                    psk: "",
+                                });
+                                return;
+                            }
+                            case node_tradfri_client_1.TradfriErrorCodes.ConnectionFailed: {
+                                global_1.Global.log(`Could not connect to the gateway ${hostname}!`, "error");
+                                global_1.Global.log(e.message, "error");
+                                return;
+                            }
+                        }
+                    }
+                    else {
+                        global_1.Global.log(`Could not connect to the gateway ${hostname}!`, "error");
+                        global_1.Global.log(e.message, "error");
+                        return;
+                    }
+                }
+            }
+            else if (securityCode != null && securityCode.length > 0) {
+                // use the security code to create an identity and psk
                 try {
                     ({ identity, psk } = yield session_1.session.tradfri.authenticate(securityCode));
                     // store it and restart the adapter
@@ -107,7 +145,6 @@ function startAdapter(options = {}) {
                     yield updateConfig({
                         identity,
                         psk,
-                        securityCode: "",
                     });
                 }
                 catch (e) {
@@ -131,40 +168,6 @@ function startAdapter(options = {}) {
                     }
                     else {
                         global_1.Global.log(`Could not authenticate with the gateway ${hostname}!`, "error");
-                        global_1.Global.log(e.message, "error");
-                        return;
-                    }
-                }
-            }
-            else {
-                // connect with previously negotiated identity and psk
-                session_1.session.tradfri.on("connection failed", (attempt, maxAttempts) => {
-                    global_1.Global.log(`failed connection attempt ${attempt} of ${Number.isFinite(maxAttempts) ? maxAttempts : "∞"}`, "warn");
-                });
-                try {
-                    yield session_1.session.tradfri.connect(identity, psk);
-                }
-                catch (e) {
-                    if (e instanceof node_tradfri_client_1.TradfriError) {
-                        switch (e.code) {
-                            case node_tradfri_client_1.TradfriErrorCodes.ConnectionTimedOut: {
-                                global_1.Global.log(`The gateway ${hostname} is unreachable or did not respond in time!`, "error");
-                                global_1.Global.log(`Please check your network and adapter settings and restart the adapter!`, "error");
-                            }
-                            case node_tradfri_client_1.TradfriErrorCodes.AuthenticationFailed: {
-                                global_1.Global.log(`The stored credentials are no longer valid!`, "error");
-                                global_1.Global.log(`Please re-enter your security code in the adapter settings!`, "error");
-                                return;
-                            }
-                            case node_tradfri_client_1.TradfriErrorCodes.ConnectionFailed: {
-                                global_1.Global.log(`Could not connect to the gateway ${hostname}!`, "error");
-                                global_1.Global.log(e.message, "error");
-                                return;
-                            }
-                        }
-                    }
-                    else {
-                        global_1.Global.log(`Could not connect to the gateway ${hostname}!`, "error");
                         global_1.Global.log(e.message, "error");
                         return;
                     }
@@ -545,7 +548,7 @@ function updateConfig(newConfig) {
         // Create the config object
         const config = Object.assign(Object.assign({}, adapter.config), newConfig);
         // Update the adapter object
-        const adapterObj = yield adapter.getForeignObjectAsync(`system.adapter.${adapter.namespace}`);
+        const adapterObj = (yield adapter.getForeignObjectAsync(`system.adapter.${adapter.namespace}`));
         adapterObj.native = config;
         yield adapter.setForeignObjectAsync(`system.adapter.${adapter.namespace}`, adapterObj);
     });

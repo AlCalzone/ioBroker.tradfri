@@ -209,7 +209,7 @@ export function updateMultipleGroupStates(
 	changedStateId?: string
 ) {
 	const groupsToUpdate: (Group | VirtualGroup)[] = values($.groups)
-		.map(g => g.group as (Group | VirtualGroup))
+		.map(g => g.group as Group | VirtualGroup)
 		.concat(values($.virtualGroups))
 		.filter(
 			g =>
@@ -237,6 +237,10 @@ export function updateGroupStates(
 		.map(id => $.devices[id])
 		.filter(a => a != null && a.type === AccessoryTypes.blind)
 		.map(a => a.blindList[0]);
+	const groupPlugs = group.deviceIDs
+		.map(id => $.devices[id])
+		.filter(a => a != null && a.type === AccessoryTypes.plug)
+		.map(a => a.plugList[0]);
 
 	// Seperate the bulbs into no spectrum/white spectrum/rgb bulbs
 	const whiteSpectrumBulbs = groupBulbs.filter(b => b.spectrum === "white");
@@ -363,6 +367,22 @@ export function updateGroupStates(
 			debounceTimeout
 		);
 	}
+	// Try to update the plug on/off state
+	if (
+		groupPlugs.length > 0 &&
+		(changedStateId == null || changedStateId.endsWith("plug.state"))
+	) {
+		const commonState = getCommonValue(groupPlugs.map(p => p.onOff));
+		// TODO: Assigning null is not allowed as per the node-tradfri-client definitions but it works
+		group.onOff = commonState!;
+		const stateId = `${objId}.state`;
+		debounce(
+			stateId,
+			() => updateGroupState(stateId, commonState),
+			debounceTimeout
+		);
+	}
+
 }
 
 // gets called when a lightbulb state gets updated
