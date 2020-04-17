@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "2.6.0",
+        "version": "2.6.1",
         "news": {
+            "2.6.1": {
+                "en": "* Bugfix: Blinds would not always be stopped",
+                "de": "* Bugfix: Blinds würden nicht immer gestoppt",
+                "ru": "* Исправление: жалюзи не всегда останавливались",
+                "pt": "* Correção de erros: as cortinas nem sempre eram interrompidas",
+                "nl": "* Bugfix: blinds werden niet altijd gestopt",
+                "fr": "* Bugfix: les stores ne seraient pas toujours arrêtés",
+                "it": "* Bugfix: i blind non sarebbero sempre stati fermati",
+                "es": "* Corrección de errores: las persianas no siempre se detendrían",
+                "pl": "* Bugfix: Żaluzje nie zawsze były zatrzymywane",
+                "zh-cn": "*错误修正：百叶窗不会总是停止"
+            },
             "2.6.0": {
                 "en": "* Support stopping blinds at their current position",
                 "de": "* Unterstützung beim Stoppen von Jalousien an ihrer aktuellen Position",
