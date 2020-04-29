@@ -787,16 +787,16 @@ function getMessage(err: Error | string): string {
 }
 
 function onUnhandledRejection(err: unknown) {
-	if (err instanceof Error) {
-		if (err.stack != null) adapter.log.error("> stack: " + err.stack);
-	} else {
-		adapter.log.error(`unhandled promise rejection: ${err}`);
-	}
+	let message = "unhandled promise rejection:" + getMessage(err as any);
+	if (err instanceof Error && err.stack != null) message += "\n> stack: " + err.stack;
+	(adapter && adapter.log || console).error(message);
+	terminate(1, "unhandled promise rejection");
 }
 
 function onUnhandledError(err: Error) {
-	adapter.log.error("unhandled exception:" + getMessage(err));
-	if (err.stack != null) adapter.log.error("> stack: " + err.stack);
+	let message = "unhandled exception:" + getMessage(err);
+	if (err.stack != null) message += "\n> stack: " + err.stack;
+	(adapter && adapter.log || console).error(message);
 	terminate(1, "unhandled exception");
 }
 

@@ -755,18 +755,17 @@ function getMessage(err) {
     return err.toString();
 }
 function onUnhandledRejection(err) {
-    if (err instanceof Error) {
-        if (err.stack != null)
-            adapter.log.error("> stack: " + err.stack);
-    }
-    else {
-        adapter.log.error(`unhandled promise rejection: ${err}`);
-    }
+    let message = "unhandled promise rejection:" + getMessage(err);
+    if (err instanceof Error && err.stack != null)
+        message += "\n> stack: " + err.stack;
+    (adapter && adapter.log || console).error(message);
+    terminate(1, "unhandled promise rejection");
 }
 function onUnhandledError(err) {
-    adapter.log.error("unhandled exception:" + getMessage(err));
+    let message = "unhandled exception:" + getMessage(err);
     if (err.stack != null)
-        adapter.log.error("> stack: " + err.stack);
+        message += "\n> stack: " + err.stack;
+    (adapter && adapter.log || console).error(message);
     terminate(1, "unhandled exception");
 }
 function terminate(exitCode, reason) {
