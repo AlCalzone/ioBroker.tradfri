@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "2.6.1",
+        "version": "2.6.2",
         "news": {
+            "2.6.2": {
+                "en": "* Bugfix: The unhandled error handler should now correctly log the error even if `adapter` is not defined",
+                "de": "* Bugfix: Der nicht behandelte Fehlerbehandler sollte den Fehler jetzt korrekt protokollieren, auch wenn \"Adapter\" nicht definiert ist",
+                "ru": "* Исправление: необработанный обработчик ошибок теперь должен корректно регистрировать ошибку, даже если `адаптер` не определен",
+                "pt": "* Correção de erro: O manipulador de erros não manipulados agora deve registrar corretamente o erro, mesmo que o `adaptador` não esteja definido",
+                "nl": "* Bugfix: de niet-verwerkte foutafhandelaar moet de fout nu correct registreren, zelfs als `adapter` niet is gedefinieerd",
+                "fr": "* Bugfix: le gestionnaire d'erreurs non géré devrait maintenant correctement enregistrer l'erreur même si `adaptateur` n'est pas défini",
+                "it": "* Bugfix: il gestore degli errori non gestiti dovrebbe ora registrare correttamente l'errore anche se `adapter` non è definito",
+                "es": "* Corrección de errores: el controlador de errores no manejado ahora debe registrar correctamente el error incluso si no se ha definido `adaptador`",
+                "pl": "* Bugfix: Nieobsługiwany moduł obsługi błędów powinien teraz poprawnie rejestrować błąd, nawet jeśli `adapter 'nie jest zdefiniowany",
+                "zh-cn": "*修正：未处理的错误处理程序现在应该正确记录错误，即使未定义`adapter`"
+            },
             "2.6.1": {
                 "en": "* Bugfix: Blinds would not always be stopped",
                 "de": "* Bugfix: Blinds würden nicht immer gestoppt",
