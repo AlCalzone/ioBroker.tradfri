@@ -601,7 +601,7 @@ exports.objectDefinitions = {
                 read: true,
                 write: true,
                 type: "string",
-                role: "level.color",
+                role: "level.color.rgb",
                 desc: rootType === "device"
                     ? "6-digit RGB hex string"
                     : "Color of this group's RGB lightbulbs as a 6-digit hex string."

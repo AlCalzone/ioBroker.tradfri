@@ -682,7 +682,7 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 				read: true,
 				write: true,
 				type: "string",
-				role: "level.color",
+				role: "level.color.rgb",
 				desc:
 					rootType === "device"
 						? "6-digit RGB hex string"
