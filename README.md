@@ -71,7 +71,7 @@ The result object `ret` looks as follows:
 	### __WORK IN PROGRESS__
 -->
 
-### __WORK IN PROGRESS__
+### 2.6.3 (2020-06-01)
 * Bugfix: Changed the role of RGB states to `level.color.rgb`
 
 ### 2.6.2 (2020-04-29)

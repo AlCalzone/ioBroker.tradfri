@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "2.6.2",
+        "version": "2.6.3",
         "news": {
+            "2.6.3": {
+                "en": "Bugfix: Changed the role of RGB states to `level.color.rgb`",
+                "de": "Bugfix: Die Rolle der RGB-Zustände wurde in \"level.color.rgb\" geändert",
+                "ru": "Исправлено: изменена роль состояний RGB на `level.color.rgb`",
+                "pt": "Correção de bug: Alterada a função dos estados RGB para `level.color.rgb`",
+                "nl": "Bugfix: de rol van RGB-staten gewijzigd in `level.color.rgb`",
+                "fr": "Bugfix: Changé le rôle des états RVB en `level.color.rgb`",
+                "it": "Bugfix: modificato il ruolo degli stati RGB in `level.color.rgb`",
+                "es": "Corrección de errores: se cambió la función de los estados RGB a `level.color.rgb`",
+                "pl": "Bugfix: Zmieniono rolę stanów RGB na `level.color.rgb`",
+                "zh-cn": "错误修正：将RGB状态的角色更改为`level.color.rgb`"
+            },
             "2.6.2": {
                 "en": "* Bugfix: The unhandled error handler should now correctly log the error even if `adapter` is not defined",
                 "de": "* Bugfix: Der nicht behandelte Fehlerbehandler sollte den Fehler jetzt korrekt protokollieren, auch wenn \"Adapter\" nicht definiert ist",
