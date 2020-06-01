@@ -71,6 +71,9 @@ The result object `ret` looks as follows:
 	### __WORK IN PROGRESS__
 -->
 
+### __WORK IN PROGRESS__
+* Bugfix: Changed the role of RGB states to `level.color.rgb`
+
 ### 2.6.2 (2020-04-29)
 * Bugfix: The unhandled error handler should now correctly log the error even if `adapter` is not defined
 
