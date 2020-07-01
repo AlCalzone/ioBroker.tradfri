@@ -36,7 +36,7 @@
     "@types/chai-as-promised": "^7.1.0",
     "@types/enzyme": "^3.1.15",
     "@types/enzyme-adapter-react-16": "^1.0.3",
-    "@types/jquery": "^3.3.22",
+    "@types/jquery": "^3.5.0",
     "@types/materialize-css": "^1.0.3",
     "@types/mocha": "^7.0.1",
     "@types/node": "^13.1.1",
