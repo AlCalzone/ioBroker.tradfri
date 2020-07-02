@@ -592,7 +592,7 @@ async function updateConfig(newConfig: Partial<ioBroker.AdapterConfig>) {
 	};
 	// Update the adapter object
 	const adapterObj = (await adapter.getForeignObjectAsync(`system.adapter.${adapter.namespace}`))!;
-	adapterObj.native = config;
+	adapterObj.native = config as Record<string, any>;
 	await adapter.setForeignObjectAsync(`system.adapter.${adapter.namespace}`, adapterObj);
 }
 
