@@ -94,7 +94,7 @@
     "postbuild:ts": "npm run restoreBuildDirectoryStructure && npm run fixSourceMaps",
     "build:parcel": "parcel build admin/src/index.tsx -d admin/build",
     "build": "npm run build:ts && npm run build:parcel",
-    "watch:parcel": "parcel admin/src/index.tsx -d admin/build",
+    "watch:parcel": "parcel admin/src/index.tsx -d admin/build --hmr-port 1235",
     "watch": "tsc -p src/tsconfig.json --watch",
     "test:unit": "mocha test/unit --exit",
     "test:package": "mocha test/package --exit",

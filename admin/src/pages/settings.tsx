@@ -140,7 +140,7 @@ export class Settings extends React.Component<SettingsProps, ioBroker.AdapterCon
 						<input type="text" className="value" id="host" value={this.getSetting("host")} onChange={this.handleChange} />
 						<Label for="host" text="Gateway IP/Hostname:" tooltip="hostname tooltip" />
 					</div>
-					<div className="col s2 input-field">
+					<div className="col s3 input-field">
 						<label htmlFor="discoverGateway">
 							<input type="checkbox" className="value" id="discoverGateway" defaultChecked={this.getSetting("discoverGateway")}
 								ref={me => this.chkDiscoverGateway = me}
@@ -148,13 +148,13 @@ export class Settings extends React.Component<SettingsProps, ioBroker.AdapterCon
 							<CheckboxLabel text="Auto-discover" tooltip="discovery tooltip" />
 						</label>
 					</div>
-					<div className="col s4 input-field">
+					<div className="col s6 input-field">
 						<input type="text" className="value" id="securityCode" value={this.getSetting("securityCode")} onChange={this.handleChange} />
 						<Label for="securityCode" text="Security-Code:" tooltip="security code tooltip" />
 					</div>
 				</div>
 				<div className="row">
-					<div className="col s4 input-field">
+					<div className="col s6 input-field">
 						<label htmlFor="preserveTransitionTime">
 							<input type="checkbox" className="value" id="preserveTransitionTime" defaultChecked={this.getSetting("preserveTransitionTime")}
 								ref={me => this.chkPreserveTransitionTime = me}
@@ -162,7 +162,7 @@ export class Settings extends React.Component<SettingsProps, ioBroker.AdapterCon
 							<CheckboxLabel text="Preserve transition time" tooltip="transition time tooltip" />
 						</label>
 					</div>
-					<div className="col s4 input-field">
+					<div className="col s6 input-field">
 						<input type="number" min="0" max="2" className="value" id="roundToDigits" value={this.getSetting("roundToDigits", 2)} onChange={this.handleChange} />
 						<Label for="roundToDigits" text="Decimal places:" tooltip="roundto tooltip" />
 					</div>

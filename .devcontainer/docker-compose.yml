@@ -16,16 +16,29 @@ services:
             - LANG=en_US.UTF-8
             - LANGUAGE=en_US:en
             - LC_ALL=en_US.UTF-8
-            - TZ=Europe/Zurich
+            - TZ=Europe/Berlin
             - SETGID=1000
+
+    parcel:
+        restart: always
+        container_name: parcel-tradfri
+        build: ./parcel
+        expose:
+            - 1234
+        ports:
+            - '1235:1235'
+        volumes:
+            - ..:/workspace:cached
 
     # Reverse proxy to load up-to-date admin sources from the repo
     nginx:
         image: nginx:latest
         depends_on:
             - iobroker
+            - parcel
         links:
             - iobroker
+            - parcel
         restart: always
         container_name: nginx-tradfri
         volumes:
