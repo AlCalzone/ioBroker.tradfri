@@ -28,6 +28,7 @@ async function fixBrightnessRange(stateObjs: ioBroker.Object[]) {
 	for (const obj of fixableObjs) {
 		const oldCommon = JSON.stringify(obj.common);
 		const newCommon = JSON.stringify({
+			// @ts-expect-error This is for compatibility reasons only
 			name: "Brightness",
 			...obj.common,
 			min: 0,
