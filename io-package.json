@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "2.6.4",
+        "version": "2.6.5",
         "news": {
+            "2.6.5": {
+                "en": "Bugfix: Loading all scenes no longer stalls when a group has no scenes",
+                "de": "Bugfix: Das Laden aller Szenen wird nicht mehr blockiert, wenn eine Gruppe keine Szenen hat",
+                "ru": "Исправление: загрузка всех сцен больше не останавливается, если в группе нет сцен.",
+                "pt": "Correção: o carregamento de todas as cenas não para mais quando um grupo não tem cenas",
+                "nl": "Bugfix: het laden van alle scènes stopt niet langer wanneer een groep geen scènes heeft",
+                "fr": "Correctif: le chargement de toutes les scènes ne s'arrête plus lorsqu'un groupe n'a pas de scènes",
+                "it": "Errore corretto: il caricamento di tutte le scene non si blocca più quando un gruppo non ha scene",
+                "es": "Corrección de error: la carga de todas las escenas ya no se detiene cuando un grupo no tiene escenas",
+                "pl": "Poprawka: Ładowanie wszystkich scen nie zatrzymuje się już, gdy grupa nie ma scen",
+                "zh-cn": "错误修正：当一个组没有场景时，加载所有场景不再停止"
+            },
             "2.6.4": {
                 "en": "Fix: Updated `node-tradfri-client` to suppress warnings about unknown property `9109`",
                 "de": "Fix: `node-tradfri-client` wurde aktualisiert, um Warnungen vor unbekannter Eigenschaft` 9109` zu unterdrücken",
