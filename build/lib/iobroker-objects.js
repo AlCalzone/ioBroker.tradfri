@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.objectDefinitions = exports.calcSceneName = exports.calcSceneId = exports.calcGroupName = exports.calcGroupId = exports.groupToNative = exports.groupToCommon = exports.calcObjName = exports.calcObjId = exports.getInstanceId = exports.getRootId = exports.getAccessoryIcon = exports.updatePossibleScenes = exports.extendDevice = exports.accessoryToNative = exports.accessoryToCommon = void 0;
 const helpers_1 = require("alcalzone-shared/helpers");
 const objects_1 = require("alcalzone-shared/objects");
 const node_tradfri_client_1 = require("node-tradfri-client");

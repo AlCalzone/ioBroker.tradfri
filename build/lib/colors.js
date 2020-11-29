@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.normalizeHexColor = void 0;
 // accept a bunch of stuff that follows 2 rules
 // 1. ends with 6 hex digits
 // 2. the remainder does not contain letters or digits

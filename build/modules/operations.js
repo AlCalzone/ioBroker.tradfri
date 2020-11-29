@@ -12,6 +12,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.renameGroup = exports.renameDevice = exports.stopBlinds = exports.operateVirtualGroup = void 0;
 const node_tradfri_client_1 = require("node-tradfri-client");
 const virtual_group_1 = require("../lib/virtual-group");
 const session_1 = require("./session");

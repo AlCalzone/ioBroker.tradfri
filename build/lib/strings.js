@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.padStart = void 0;
 /**
  * Pads a string to the given length by repeatedly prepending the filler at the beginning of the string.
  * @param str The string to pad

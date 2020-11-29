@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.roundTo = exports.clamp = void 0;
 /** limits a value to the range given by min/max */
 function clamp(value, min, max) {
     if (min > max) {

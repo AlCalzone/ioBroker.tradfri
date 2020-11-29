@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.VirtualGroup = void 0;
 const objects_1 = require("alcalzone-shared/objects");
 class VirtualGroup {
     constructor(instanceId) {

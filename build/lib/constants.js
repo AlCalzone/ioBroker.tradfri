@@ -1,6 +1,7 @@
 "use strict";
 // tslint:disable:variable-name
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ALL = exports.Time = exports.Device = exports.SmartTaskNotification = exports.SmartTaskLightSettings = exports.SmartTaskAction = exports.SmartTask = exports.Shortcut = exports.Sensor = exports.NotificationEvents = exports.Notification = exports.Scene = exports.Plug = exports.LightSetting = exports.Light = exports.HSAccessory = exports.HSLink = exports.HSGroup = exports.GroupSetting = exports.IPSODevice = exports.GetNewPskResponse = exports.GatewayDetails = exports.AuthenticationResponse = exports.Commands = exports.Endpoints = void 0;
 // Endpunkte, die abgefragt werden können
 exports.Endpoints = {
     DEVICES: "15001",

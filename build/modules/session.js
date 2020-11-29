@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.session = exports.Session = void 0;
 class Session {
     constructor() {
         /** dictionary of known devices */

@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ensureInstanceObjects = exports.fixAdapterObjects = void 0;
 const objects_1 = require("alcalzone-shared/objects");
 const global_1 = require("./global");
 const io_package_json_1 = require("../../io-package.json");
@@ -38,7 +39,9 @@ function fixBrightnessRange(stateObjs) {
         const fixableObjs = stateObjs.filter(o => predicate.test(o._id));
         for (const obj of fixableObjs) {
             const oldCommon = JSON.stringify(obj.common);
-            const newCommon = JSON.stringify(Object.assign(Object.assign({ name: "Brightness" }, obj.common), { min: 0, max: 100, unit: "%" }));
+            const newCommon = JSON.stringify(Object.assign(Object.assign({ 
+                // @ts-expect-error This is for compatibility reasons only
+                name: "Brightness" }, obj.common), { min: 0, max: 100, unit: "%" }));
             if (oldCommon !== newCommon) {
                 obj.common = JSON.parse(newCommon);
                 yield global_1.Global.adapter.setForeignObjectAsync(obj._id, obj);

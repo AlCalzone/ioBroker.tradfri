@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.bury = exports.dig = void 0;
 // Gräbt in einem Objekt nach dem Property-Pfad.
 // Bsps: (obj, "common.asdf.qwer") => obj.common.asdf.qwer
 function dig(object, path) {

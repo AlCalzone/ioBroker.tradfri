@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.onMessage = void 0;
 const objects_1 = require("alcalzone-shared/objects");
 const typeguards_1 = require("alcalzone-shared/typeguards");
 const node_tradfri_client_1 = require("node-tradfri-client");
