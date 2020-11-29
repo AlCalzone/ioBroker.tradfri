@@ -1,20 +1,8 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "2.6.4",
+        "version": "2.6.3",
         "news": {
-            "2.6.4": {
-                "en": "Fix: Updated `node-tradfri-client` to suppress warnings about unknown property `9109`",
-                "de": "Fix: `node-tradfri-client` wurde aktualisiert, um Warnungen vor unbekannter Eigenschaft` 9109` zu unterdrücken",
-                "ru": "Исправлено: обновлен `node-tradfri-client` для подавления предупреждений о неизвестном свойстве` 9109`.",
-                "pt": "Correção: Atualizado `node-tradfri-client` para suprimir avisos sobre propriedade desconhecida` 9109`",
-                "nl": "Fix: `node-tradfri-client` bijgewerkt om waarschuwingen over onbekende eigenschap` 9109` te onderdrukken",
-                "fr": "Correction: mise à jour de `node-tradfri-client` pour supprimer les avertissements concernant la propriété inconnue` 9109`",
-                "it": "Correzione: aggiornato `node-tradfri-client` per sopprimere gli avvisi sulla proprietà sconosciuta` 9109`",
-                "es": "Solución: actualizado `node-tradfri-client` para suprimir las advertencias sobre la propiedad desconocida` 9109`",
-                "pl": "Poprawka: Zaktualizowano „node-tradfri-client”, aby pomijał ostrzeżenia o nieznanej właściwości „9109”",
-                "zh-cn": "修复：更新了“ node-tradfri-client”以禁止显示有关未知属性“ 9109”的警告"
-            },
             "2.6.3": {
                 "en": "Bugfix: Changed the role of RGB states to `level.color.rgb`",
                 "de": "Bugfix: Die Rolle der RGB-Zustände wurde in \"level.color.rgb\" geändert",
