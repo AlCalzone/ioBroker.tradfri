@@ -71,7 +71,7 @@ The result object `ret` looks as follows:
 	### __WORK IN PROGRESS__
 -->
 
-### __WORK IN PROGRESS__
+### 2.6.4 (2020-11-29)
 * Fix: Updated `node-tradfri-client` to suppress warnings about unknown property `9109`
 
 ### 2.6.3 (2020-06-01)
