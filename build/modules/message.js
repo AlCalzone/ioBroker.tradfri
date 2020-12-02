@@ -18,7 +18,7 @@ const iobroker_objects_1 = require("../lib/iobroker-objects");
 const virtual_group_1 = require("../lib/virtual-group");
 const groups_1 = require("./groups");
 const session_1 = require("./session");
-exports.onMessage = (obj) => __awaiter(void 0, void 0, void 0, function* () {
+const onMessage = (obj) => __awaiter(void 0, void 0, void 0, function* () {
     // responds to the adapter that sent the original message
     function respond(response) {
         if (obj.callback)
@@ -209,3 +209,4 @@ exports.onMessage = (obj) => __awaiter(void 0, void 0, void 0, function* () {
         }
     }
 });
+exports.onMessage = onMessage;
