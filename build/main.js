@@ -431,6 +431,11 @@ function startAdapter(options = {}) {
                                 // This is a button without feedback, so no need to setState afterwards
                                 yield operations_1.stopBlinds(vGroup);
                             }
+                            else if (id.endsWith(".whenPowerRestored")) {
+                                operation = {
+                                    whenPowerRestored: val,
+                                };
+                            }
                             // update all lightbulbs in this group
                             if (operation != null) {
                                 operations_1.operateVirtualGroup(vGroup, operation);
@@ -521,6 +526,11 @@ function startAdapter(options = {}) {
                                 else if (id.endsWith("blind.stop")) {
                                     // This is a button without feedback, so no need to setState afterwards
                                     yield blind.stop();
+                                }
+                                else if (id.endsWith(".whenPowerRestored")) {
+                                    wasAcked = !(yield session_1.session.tradfri.operateLight(accessory, {
+                                        whenPowerRestored: val,
+                                    }));
                                 }
                                 // ack the state if neccessary and return
                                 if (wasAcked)

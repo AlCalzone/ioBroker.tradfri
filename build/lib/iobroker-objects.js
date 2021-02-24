@@ -189,6 +189,7 @@ function extendDevice(accessory) {
                         stateObjs[`${channelID}.saturation`] = exports.objectDefinitions.saturation(objId, "device");
                     }
                     stateObjs[`${channelID}.transitionDuration`] = exports.objectDefinitions.transitionDuration(objId, "device", accessory.type);
+                    stateObjs[`${channelID}.whenPowerRestored`] = exports.objectDefinitions.whenPowerRestored(objId, "device");
                 } /* if (accessory.type === AccessoryTypes.plug) */
                 else {
                     // obj.plug should be a channel
@@ -501,6 +502,29 @@ exports.objectDefinitions = {
             path: getCoapAccessoryPropertyPathPrefix(deviceType) + "onOff"
         }
     }),
+    // Lights only
+    whenPowerRestored: (rootId, rootType, deviceType) => {
+        const ret = {
+            _id: rootType === "device"
+                ? `${rootId}.lightbulb.whenPowerRestored`
+                : `${rootId}.whenPowerRestored`,
+            type: "state",
+            common: {
+                name: "Action when power restored",
+                read: true,
+                write: true,
+                type: "number",
+                role: "level",
+                desc: rootType === "device"
+                    ? "What this device should do after power is restored"
+                    : "What devices in this group should do after power is restored"
+            },
+            native: {
+                path: getCoapAccessoryPropertyPathPrefix(deviceType) + "whenPowerRestored"
+            }
+        };
+        return ret;
+    },
     // Lights and plugs for compatibility reasons
     // Anything > 0% should be "on"
     brightness: (rootId, rootType, deviceType) => {

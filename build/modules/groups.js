@@ -16,6 +16,7 @@ const global_1 = require("../lib/global");
 const iobroker_objects_1 = require("../lib/iobroker-objects");
 const math_1 = require("../lib/math");
 const object_polyfill_1 = require("../lib/object-polyfill");
+const virtual_group_1 = require("../lib/virtual-group");
 const session_1 = require("./session");
 /* creates or edits an existing <group>-object for a virtual group */
 function extendVirtualGroup(group) {
@@ -55,6 +56,7 @@ function extendVirtualGroup(group) {
         // prettier-ignore
         const stateObjs = {
             state: iobroker_objects_1.objectDefinitions.onOff(objId, "virtual group"),
+            whenPowerRestored: iobroker_objects_1.objectDefinitions.whenPowerRestored(objId, "virtual group"),
             transitionDuration: iobroker_objects_1.objectDefinitions.transitionDuration(objId, "virtual group"),
             brightness: iobroker_objects_1.objectDefinitions.brightness(objId, "virtual group"),
             colorTemperature: iobroker_objects_1.objectDefinitions.colorTemperature(objId, "virtual group"),
@@ -239,6 +241,15 @@ function updateGroupStates(group, changedStateId) {
         // TODO: Assigning null is not allowed as per the node-tradfri-client definitions but it works
         group.onOff = commonState;
         const stateId = `${objId}.state`;
+        debounce(stateId, () => updateGroupState(stateId, commonState), debounceTimeout);
+    }
+    // Try to update the power restored state
+    if (group instanceof virtual_group_1.VirtualGroup &&
+        groupBulbs.length > 0 &&
+        (changedStateId == null || changedStateId.endsWith("lightbulb.whenPowerRestored"))) {
+        const commonState = getCommonValue(groupBulbs.map(b => b.whenPowerRestored));
+        group.whenPowerRestored = commonState;
+        const stateId = `${objId}.whenPowerRestored`;
         debounce(stateId, () => updateGroupState(stateId, commonState), debounceTimeout);
     }
     // Try to update the brightness state
