@@ -456,6 +456,10 @@ function startAdapter(options: Partial<utils.AdapterOptions> = {}) {
 							} else if (id.endsWith(".stopBlinds")) {
 								// This is a button without feedback, so no need to setState afterwards
 								await stopBlinds(vGroup);
+							} else if (id.endsWith(".whenPowerRestored")) {
+								operation = {
+									whenPowerRestored: val as unknown as number,
+								};
 							}
 
 							// update all lightbulbs in this group
@@ -554,6 +558,10 @@ function startAdapter(options: Partial<utils.AdapterOptions> = {}) {
 								} else if (id.endsWith("blind.stop")) {
 									// This is a button without feedback, so no need to setState afterwards
 									await blind.stop();
+								} else if (id.endsWith(".whenPowerRestored")) {
+									wasAcked = !await $.tradfri.operateLight(accessory, {
+										whenPowerRestored: val as unknown as number,
+									});
 								}
 
 								// ack the state if neccessary and return

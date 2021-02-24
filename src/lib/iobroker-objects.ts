@@ -221,6 +221,9 @@ export async function extendDevice(accessory: Accessory) {
 					"device",
 					accessory.type
 				);
+				stateObjs[
+					`${channelID}.whenPowerRestored`
+				] = objectDefinitions.whenPowerRestored(objId, "device");
 			} /* if (accessory.type === AccessoryTypes.plug) */ else {
 				// obj.plug should be a channel
 				channelID = "plug";
@@ -570,6 +573,37 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 			path: getCoapAccessoryPropertyPathPrefix(deviceType) + "onOff"
 		}
 	}),
+
+
+	// Lights only
+	whenPowerRestored: (rootId, rootType, deviceType) => {
+		const ret: ioBroker.Object = {
+			_id:
+				rootType === "device"
+					? `${rootId}.lightbulb.whenPowerRestored`
+					: `${rootId}.whenPowerRestored`,
+			type: "state",
+			common: {
+				name: "Action when power restored",
+				read: true,
+				write: true,
+				type: "number",
+				role: "level",
+				states: {
+					"2": "Turn on",
+					"4": "Previous state"
+				},
+				desc:
+					rootType === "device"
+						? "What this device should do after power is restored"
+						: "What devices in this group should do after power is restored"
+			},
+			native: {
+				path: getCoapAccessoryPropertyPathPrefix(deviceType) + "whenPowerRestored"
+			}
+		};
+		return ret;
+	},
 
 	// Lights and plugs for compatibility reasons
 	// Anything > 0% should be "on"

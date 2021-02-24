@@ -1,5 +1,6 @@
 import { entries } from "alcalzone-shared/objects";
-import { LightOperation, BlindOperation, PlugOperation } from "node-tradfri-client";
+import { LightOperation, BlindOperation, PlugOperation, PowerRestoredAction } from "node-tradfri-client";
+import {  } from "node-tradfri-client/build/lib/light";
 
 export class VirtualGroup {
 
@@ -7,6 +8,7 @@ export class VirtualGroup {
 	}
 
 	public name: string | undefined;
+	public whenPowerRestored: PowerRestoredAction | undefined;
 	public onOff: boolean | undefined; // <bool>
 	public dimmer: number | undefined; // <int> [0..100]
 	public position: number | undefined; // <float> [0..100]

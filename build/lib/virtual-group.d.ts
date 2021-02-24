@@ -1,8 +1,9 @@
-import { LightOperation, BlindOperation, PlugOperation } from "node-tradfri-client";
+import { LightOperation, BlindOperation, PlugOperation, PowerRestoredAction } from "node-tradfri-client";
 export declare class VirtualGroup {
     readonly instanceId: number;
     constructor(instanceId: number);
     name: string | undefined;
+    whenPowerRestored: PowerRestoredAction | undefined;
     onOff: boolean | undefined;
     dimmer: number | undefined;
     position: number | undefined;
