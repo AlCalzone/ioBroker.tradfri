@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "2.6.5",
+        "version": "2.7.0",
         "news": {
+            "2.7.0": {
+                "en": "Compatibility with gateway firmware v1.13.21\nAdded `whenPowerRestored` setting to configure what bulbs do after a power loss",
+                "de": "Kompatibilität mit der Gateway-Firmware v1.13.21\nDie Einstellung \"whenPowerRestored\" wurde hinzugefügt, um zu konfigurieren, was Lampen nach einem Stromausfall tun",
+                "ru": "Совместимость с прошивкой шлюза v1.13.21\nДобавлен параметр whenPowerRestored для настройки действий лампочек после отключения питания.",
+                "pt": "Compatibilidade com firmware de gateway v1.13.21\nAdicionada a configuração `whenPowerRestored` para definir o que as lâmpadas fazem após uma perda de energia",
+                "nl": "Compatibiliteit met gateway-firmware v1.13.21\nInstelling `whenPowerRestored` toegevoegd om te configureren wat lampen doen na stroomuitval",
+                "fr": "Compatibilité avec le firmware de la passerelle v1.13.21\nAjout du paramètre `whenPowerRestored` pour configurer ce que font les ampoules après une coupure de courant",
+                "it": "Compatibilità con il firmware del gateway v1.13.21\nAggiunta l'impostazione `whenPowerRestored` per configurare cosa fanno le lampadine dopo una perdita di alimentazione",
+                "es": "Compatibilidad con el firmware de la puerta de enlace v1.13.21\nSe agregó la configuración `whenPowerRestored` para configurar lo que hacen las bombillas después de una pérdida de energía",
+                "pl": "Zgodność z oprogramowaniem sprzętowym bramy w wersji 1.13.21\nDodano ustawienie WhenPowerRestored, aby skonfigurować działanie żarówek po utracie zasilania",
+                "zh-cn": "与网关固件v1.13.21的兼容性\n添加了“ whenPowerRestored”设置，以配置掉电后灯泡的功能"
+            },
             "2.6.5": {
                 "en": "Bugfix: Loading all scenes no longer stalls when a group has no scenes",
                 "de": "Bugfix: Das Laden aller Szenen wird nicht mehr blockiert, wenn eine Gruppe keine Szenen hat",
@@ -230,18 +242,6 @@
                 "es": "* Soporte para modo compacto.\n* Optimizaciones y correcciones bajo el capó.\n* Cuando `node-aead-crypto` no está instalado, muestra instrucciones sobre cómo solucionarlo",
                 "pl": "* Wsparcie dla trybu kompaktowego\n* Optymalizacje i poprawki pod maską\n* Kiedy `node-aead-crypto` nie jest zainstalowany, wyświetl instrukcje, jak to naprawić",
                 "zh-cn": "*支持紧凑的模式\n*优化和修复盖下\n*当`节点-aead-加密`是没有安装，显示说明如何解决它"
-            },
-            "2.0.0": {
-                "en": "Switched to material design, dropped Admin v2 support.",
-                "de": "Zu material design gewechselt und Admin v2 Unterstützung gestrichen.",
-                "ru": "Перешли на материал конструкции, за админ поддержка V2.",
-                "pt": "Mudou para material de desenho, caiu de Administração v2 suporte.",
-                "nl": "Geschakeld-ontwerp van het materiaal, liet Admin v2 ondersteuning.",
-                "fr": "Passé à la conception de matériel, a chuté de l'Admin v2 de soutien.",
-                "it": "Commutato in material design, è sceso Admin v2 supporto.",
-                "es": "De conmutación para el diseño de materiales, cayó Administrador v2 apoyo.",
-                "pl": "Przeszli na materiał konstrukcji, za admin wsparcie V2.",
-                "zh-cn": "切换到的材料设计，下降了管理v2的支持。"
             }
         },
         "title": "IKEA Trådfri",

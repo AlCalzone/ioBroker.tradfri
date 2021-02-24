@@ -70,7 +70,7 @@ The result object `ret` looks as follows:
 	Placeholder for next release:
 	### __WORK IN PROGRESS__
 -->
-### __WORK IN PROGRESS__
+### 2.7.0 (2021-02-24)
 * Compatibility with gateway firmware v1.13.21
 * Added `whenPowerRestored` setting to configure what bulbs do after a power loss
 
