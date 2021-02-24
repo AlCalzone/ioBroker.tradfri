@@ -52,6 +52,7 @@ export function extendVirtualGroup(group: VirtualGroup) {
 		// prettier-ignore
 		const stateObjs: Record<string, ioBroker.Object> = {
 			state: objectDefinitions.onOff(objId, "virtual group"),
+			whenPowerRestored: objectDefinitions.whenPowerRestored(objId, "virtual group"),
 			transitionDuration: objectDefinitions.transitionDuration(objId, "virtual group"),
 			brightness: objectDefinitions.brightness(objId, "virtual group"),
 			colorTemperature: objectDefinitions.colorTemperature(objId, "virtual group"),
@@ -259,6 +260,21 @@ export function updateGroupStates(
 		// TODO: Assigning null is not allowed as per the node-tradfri-client definitions but it works
 		group.onOff = commonState!;
 		const stateId = `${objId}.state`;
+		debounce(
+			stateId,
+			() => updateGroupState(stateId, commonState),
+			debounceTimeout
+		);
+	}
+	// Try to update the power restored state
+	if (
+		group instanceof VirtualGroup &&
+		groupBulbs.length > 0 &&
+		(changedStateId == null || changedStateId.endsWith("lightbulb.whenPowerRestored"))
+	) {
+		const commonState = getCommonValue(groupBulbs.map(b => b.whenPowerRestored));
+		group.whenPowerRestored = commonState!;
+		const stateId = `${objId}.whenPowerRestored`;
 		debounce(
 			stateId,
 			() => updateGroupState(stateId, commonState),
