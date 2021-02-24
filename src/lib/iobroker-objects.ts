@@ -589,6 +589,10 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 				write: true,
 				type: "number",
 				role: "level",
+				states: {
+					"2": "Turn on",
+					"4": "Previous state"
+				},
 				desc:
 					rootType === "device"
 						? "What this device should do after power is restored"
