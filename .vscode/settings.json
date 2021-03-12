@@ -2,5 +2,11 @@
 	"files.insertFinalNewline": true,
 	"editor.insertSpaces": false,
 	"tslint.autoFixOnSave": true,
-	"typescript.tsdk": "node_modules\\typescript\\lib"
+	"typescript.tsdk": "node_modules\\typescript\\lib",
+	"json.schemas": [
+		{
+			"fileMatch": ["io-package.json"],
+			"url": "https://json.schemastore.org/io-package"
+		}
+	]
 }

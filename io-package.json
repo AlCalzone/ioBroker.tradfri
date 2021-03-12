@@ -286,6 +286,8 @@
         "readme": "https://github.com/AlCalzone/ioBroker.tradfri/blob/master/README.md",
         "loglevel": "info",
         "type": "lighting",
+        "connectionType": "local",
+        "dataSource": "push",
         "messagebox": true,
         "materialize": true,
         "compact": true,
