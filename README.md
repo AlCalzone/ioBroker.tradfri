@@ -70,7 +70,7 @@ The result object `ret` looks as follows:
 	Placeholder for next release:
 	### __WORK IN PROGRESS__
 -->
-### __WORK IN PROGRESS__
+### 2.7.1 (2021-03-12)
 * Dependency updates
 * Fixed issues in `io-package.json` and README found by the adapter checker
 
