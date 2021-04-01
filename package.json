@@ -62,7 +62,7 @@
     "react-test-renderer": "^17.0.1",
     "rexreplace": "^6.1.1",
     "rimraf": "^3.0.2",
-    "semver": "^7.3.4",
+    "semver": "^7.3.5",
     "sinon": "^9.2.4",
     "source-map-support": "^0.5.19",
     "ts-loader": "^8.0.10",
