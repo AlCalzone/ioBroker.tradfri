@@ -181,6 +181,7 @@ function debounce(id, action, timeout) {
     }, timeout);
 }
 function updateGroupState(id, value) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const curState = yield global_1.Global.adapter.getStateAsync(id);
         if (curState != null && value == null) {
@@ -191,7 +192,7 @@ function updateGroupState(id, value) {
             if (typeof roundToDigits === "number" && typeof value === "number") {
                 value = math_1.roundTo(value, roundToDigits);
             }
-            yield global_1.Global.adapter.setStateAsync(id, value, true);
+            yield global_1.Global.adapter.setStateAsync(id, (_a = value) !== null && _a !== void 0 ? _a : null, true);
         }
     });
 }

@@ -51,6 +51,7 @@ exports.accessoryToNative = accessoryToNative;
  * @param accessory The accessory to update
  */
 function extendDevice(accessory) {
+    var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
         const objId = calcObjId(accessory);
         if (objId in session_1.session.objects) {
@@ -93,10 +94,10 @@ function extendDevice(accessory) {
                         newValue = math_1.roundTo(newValue, roundToDigits);
                     }
                     if (obj.native.onlyChanges) {
-                        yield global_1.Global.adapter.setStateChangedAsync(id, newValue, true);
+                        yield global_1.Global.adapter.setStateChangedAsync(id, (_a = newValue) !== null && _a !== void 0 ? _a : null, true);
                     }
                     else {
-                        yield global_1.Global.adapter.setStateAsync(id, newValue, true);
+                        yield global_1.Global.adapter.setStateAsync(id, (_b = newValue) !== null && _b !== void 0 ? _b : null, true);
                     }
                 }
                 catch (e) {

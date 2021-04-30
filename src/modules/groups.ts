@@ -196,7 +196,7 @@ async function updateGroupState(
 		if (typeof roundToDigits === "number" && typeof value === "number") {
 			value = roundTo(value, roundToDigits);
 		}
-		await _.adapter.setStateAsync(id, value as any, true);
+		await _.adapter.setStateAsync(id, value as any ?? null, true);
 	}
 }
 
