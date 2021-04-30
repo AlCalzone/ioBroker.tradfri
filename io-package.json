@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "2.7.1",
+        "version": "2.7.2",
         "news": {
+            "2.7.2": {
+                "en": "Avoid warning about `undefined` states in JS-Controller 3.3+",
+                "de": "Vermeiden Sie Warnungen vor \"undefinierten\" Zuständen in JS-Controller 3.3+",
+                "ru": "Избегайте предупреждений о состояниях undefined в JS-Controller 3.3+",
+                "pt": "Evite advertir sobre estados `undefined` em JS-Controller 3.3+",
+                "nl": "Vermijd waarschuwingen over 'ongedefinieerde' toestanden in JS-Controller 3.3+",
+                "fr": "Évitez les avertissements sur les états `indéfinis` dans JS-Controller 3.3+",
+                "it": "Evita di avvertire gli stati \"undefined\" in JS-Controller 3.3+",
+                "es": "Evite advertir sobre estados \"indefinidos\" en JS-Controller 3.3+",
+                "pl": "Unikaj ostrzeżeń o stanach niezdefiniowanych w JS-Controller 3.3+",
+                "zh-cn": "避免在JS-Controller 3.3+中提示有关“未定义”状态的警告"
+            },
             "2.7.1": {
                 "en": "Dependency updates\nFixed issues in `io-package.json` and README found by the adapter checker",
                 "de": "Abhängigkeitsaktualisierungen\nProbleme in `io-package.json` und README behoben, die vom Adapterprüfer gefunden wurden",
@@ -230,18 +242,6 @@
                 "es": "La puerta de enlace puede ahora ser descubiertos automáticamente",
                 "pl": "Brama może być wykryty automatycznie",
                 "zh-cn": "该网关，现在可以自动发现"
-            },
-            "2.2.0": {
-                "en": "Expose the battery percentage for devices with a battery",
-                "de": "Legen Sie den Batterieprozentsatz für Geräte mit Akku offen",
-                "ru": "Выставьте процент батареи для устройств с батареей",
-                "pt": "Exponha a porcentagem da bateria para dispositivos com bateria",
-                "nl": "Stel het batterijpercentage bloot voor apparaten met een batterij",
-                "fr": "Exposer le pourcentage de batterie pour les appareils dotés d'une batterie",
-                "it": "Esporre la percentuale della batteria per i dispositivi con una batteria",
-                "es": "Exponer el porcentaje de batería para dispositivos con batería.",
-                "pl": "Odsłonić procent baterii dla urządzeń z baterią",
-                "zh-cn": "显示带电池的设备的电池百分比"
             }
         },
         "title": "IKEA Trådfri",
