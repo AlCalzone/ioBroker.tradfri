@@ -79,7 +79,7 @@ exports.HSAccessory = {
     REACHABILITY_STATE: "9019",
     SENSOR: "3300",
     SWITCH: "15009",
-    OTA_UPDATE_STATE: "9054",
+    OTA_UPDATE_STATE: "9054", // updateState
 };
 exports.Light = {
     COLOR: "5706",
@@ -118,7 +118,7 @@ exports.Scene = {
     IKEA_MOODS: "9068",
     LIGHT_SETTING: "15013",
     SCENE_INDEX: "9057",
-    USE_CURRENT_LIGHT_SETTINGS: "9070",
+    USE_CURRENT_LIGHT_SETTINGS: "9070", // default: 0
 };
 exports.Notification = {
     // from IPSODevice:
@@ -145,7 +145,7 @@ exports.Sensor = {
     MAX_RNG_VALUE: "5604",
     MIN_MSR_VALUE: "5601",
     MIN_RNG_VALUE: "5603",
-    RESET_MIN_MAX_MSR: "5605",
+    RESET_MIN_MAX_MSR: "5605", // resetMinMaxMeasureValue <bool>
 };
 exports.Shortcut = {
     GROUP_SETTINGS: "9045",
@@ -167,12 +167,12 @@ exports.SmartTaskAction = {
 exports.SmartTaskLightSettings = {
     DIMMER: "5851",
     INSTANCE_ID: "9003",
-    TRANSITION_TIME: "5712",
+    TRANSITION_TIME: "5712", // dimmer transition time, default 5
 };
 exports.SmartTaskNotification = {
     INSTANCE_ID: "9003",
     ONOFF: "5850",
-    SMART_TASK_ACTION: "9050",
+    SMART_TASK_ACTION: "9050", // <string>
 };
 exports.Device = {
     Battery: "9",
@@ -180,7 +180,7 @@ exports.Device = {
     Manufacture: "0",
     ModelNumber: "1",
     Power: "6",
-    SerialNumber: "2",
+    SerialNumber: "2", // <string>
 };
 exports.Time = {
     END_TIME_HR: "9048",

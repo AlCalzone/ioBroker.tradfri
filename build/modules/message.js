@@ -195,7 +195,7 @@ const onMessage = (obj) => __awaiter(void 0, void 0, void 0, function* () {
                 // TODO: Do we need more?
                 const ret = {
                     name: device.name,
-                    type: node_tradfri_client_1.AccessoryTypes[device.type],
+                    type: node_tradfri_client_1.AccessoryTypes[device.type], // type as string
                 };
                 if (ret.type === "lightbulb") {
                     ret.spectrum = device.lightList[0].spectrum;

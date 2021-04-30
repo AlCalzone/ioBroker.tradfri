@@ -104,11 +104,11 @@ export async function extendDevice(accessory: Accessory) {
 				if (obj.native.onlyChanges) {
 					await _.adapter.setStateChangedAsync(
 						id,
-						newValue as any,
+						newValue as any ?? null,
 						true
 					);
 				} else {
-					await _.adapter.setStateAsync(id, newValue as any, true);
+					await _.adapter.setStateAsync(id, newValue as any ?? null, true);
 				}
 			} catch (e) {
 				/* skip this value */
