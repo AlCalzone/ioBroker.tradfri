@@ -1,7 +1,12 @@
 {
 	"compileOnSave": true,
 	"compilerOptions": {
+		// do not compile anything, this file is just to configure type checking
+		// the compilation is configured in tsconfig.build.json
 		"noEmit": true,
+		// check JS files, but do not compile them => tsconfig.build.json
+		"allowJs": true,
+		"checkJs": true,
 		"noEmitOnError": true,
 		"module": "commonjs",
 		"moduleResolution": "node",
@@ -10,6 +15,7 @@
 		"jsx": "react",
 
 		"strict": true,
+		"importsNotUsedAsValues": "error",
 
 		// enable the new reflection API
 		"experimentalDecorators": true,
@@ -20,14 +26,14 @@
 
 		"resolveJsonModule": true,
 		"sourceMap": false,
-		"rootDir": ".",
-		"target": "es6"
+		"target": "es2018"
 	},
 	"include": [
 		"**/*.ts"
 	],
 	"exclude": [
 		"build/**",
-		"node_modules/**"
+		"node_modules/**",
+		"admin/**"
 	]
 }

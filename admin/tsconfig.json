@@ -5,7 +5,8 @@
 		"noEmit": false,
 		"outDir": "./build/",
 		"sourceMap": true,
-		"sourceRoot": "./src/"
+		"sourceRoot": "./src/",
+		"lib": ["es2018", "DOM"]
 	},
 	"include": [
 		"./**/*.ts*",

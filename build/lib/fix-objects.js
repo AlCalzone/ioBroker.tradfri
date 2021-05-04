@@ -1,93 +1,102 @@
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, {enumerable: true, configurable: true, writable: true, value}) : obj[key] = value;
+var __assign = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ensureInstanceObjects = exports.fixAdapterObjects = void 0;
-const objects_1 = require("alcalzone-shared/objects");
-const global_1 = require("./global");
-const io_package_json_1 = require("../../io-package.json");
-const instanceObjects = io_package_json_1.instanceObjects;
-/**
- * Fixes/updates/deletes existing adapter objects,
- * so they don't have to be deleted manually
- */
-function fixAdapterObjects() {
-    return __awaiter(this, void 0, void 0, function* () {
-        // read all objects, we'll filter them in the fixer functions
-        const stateObjs = objects_1.values(yield global_1.Global.$$(`${global_1.Global.adapter.namespace}.*`, "state"));
-        // const channelObjs = values(await _.$$(`${_.adapter.namespace}.*`, "channel"));
-        // const deviceObjs = values(await _.$$(`${_.adapter.namespace}.*`, "device"));
-        yield fixBrightnessRange(stateObjs);
-        yield fixAuthenticationObjects();
-        yield fixBrightnessRole(stateObjs);
-    });
+var __markAsModule = (target) => __defProp(target, "__esModule", {value: true});
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, {get: all[name], enumerable: true});
+};
+var __exportStar = (target, module2, desc) => {
+  if (module2 && typeof module2 === "object" || typeof module2 === "function") {
+    for (let key of __getOwnPropNames(module2))
+      if (!__hasOwnProp.call(target, key) && key !== "default")
+        __defProp(target, key, {get: () => module2[key], enumerable: !(desc = __getOwnPropDesc(module2, key)) || desc.enumerable});
+  }
+  return target;
+};
+var __toModule = (module2) => {
+  return __exportStar(__markAsModule(__defProp(module2 != null ? __create(__getProtoOf(module2)) : {}, "default", module2 && module2.__esModule && "default" in module2 ? {get: () => module2.default, enumerable: true} : {value: module2, enumerable: true})), module2);
+};
+__markAsModule(exports);
+__export(exports, {
+  ensureInstanceObjects: () => ensureInstanceObjects,
+  fixAdapterObjects: () => fixAdapterObjects
+});
+var import_objects = __toModule(require("alcalzone-shared/objects"));
+var import_global = __toModule(require("./global"));
+var import_io_package = __toModule(require("../../io-package.json"));
+const instanceObjects = import_io_package.instanceObjects;
+async function fixAdapterObjects() {
+  const stateObjs = (0, import_objects.values)(await import_global.Global.$$(`${import_global.Global.adapter.namespace}.*`, "state"));
+  await fixBrightnessRange(stateObjs);
+  await fixAuthenticationObjects();
+  await fixBrightnessRole(stateObjs);
 }
-exports.fixAdapterObjects = fixAdapterObjects;
-/**
- * In v0.5.4, the brightness range was changed from 0..254 to 0..100%
- */
-function fixBrightnessRange(stateObjs) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const predicate = /(G|VG|L)\-\d+\.(lightbulb\.)?brightness$/;
-        const fixableObjs = stateObjs.filter(o => predicate.test(o._id));
-        for (const obj of fixableObjs) {
-            const oldCommon = JSON.stringify(obj.common);
-            const newCommon = JSON.stringify(Object.assign(Object.assign({ 
-                // @ts-expect-error This is for compatibility reasons only
-                name: "Brightness" }, obj.common), { min: 0, max: 100, unit: "%" }));
-            if (oldCommon !== newCommon) {
-                obj.common = JSON.parse(newCommon);
-                yield global_1.Global.adapter.setForeignObjectAsync(obj._id, obj);
-            }
-        }
-    });
+async function fixBrightnessRange(stateObjs) {
+  const predicate = /(G|VG|L)\-\d+\.(lightbulb\.)?brightness$/;
+  const fixableObjs = stateObjs.filter((o) => predicate.test(o._id));
+  for (const obj of fixableObjs) {
+    const oldCommon = JSON.stringify(obj.common);
+    const newCommon = JSON.stringify(__assign(__assign({
+      name: "Brightness"
+    }, obj.common), {
+      min: 0,
+      max: 100,
+      unit: "%"
+    }));
+    if (oldCommon !== newCommon) {
+      obj.common = JSON.parse(newCommon);
+      await import_global.Global.adapter.setForeignObjectAsync(obj._id, obj);
+    }
+  }
 }
-/**
- * In v0.6.0, the authentication procedure was changed to no longer
- * store the security code.
- * From v0.6.0-beta2 to -beta3, the info.identity object was removed in favor of config properties.
- */
-function fixAuthenticationObjects() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const identityObj = yield global_1.Global.adapter.getObjectAsync("info.identity");
-        if (identityObj != null) {
-            yield global_1.Global.adapter.delState("info.identity");
-            yield global_1.Global.adapter.delObject("info.identity");
-        }
-    });
+async function fixAuthenticationObjects() {
+  const identityObj = await import_global.Global.adapter.getObjectAsync("info.identity");
+  if (identityObj != null) {
+    await import_global.Global.adapter.delState("info.identity");
+    await import_global.Global.adapter.delObject("info.identity");
+  }
 }
-/**
- * In v1.0.5, the brightness role was changed from "light.dimmer" to "level.dimmer"
- */
-function fixBrightnessRole(stateObjs) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const predicate = /(G|VG|L)\-\d+\.(lightbulb\.)?brightness$/;
-        const fixableObjs = stateObjs.filter(o => predicate.test(o._id));
-        for (const obj of fixableObjs) {
-            const oldCommon = JSON.stringify(obj.common);
-            const newCommon = JSON.stringify(Object.assign(Object.assign({}, obj.common), { role: "level.dimmer" }));
-            if (oldCommon !== newCommon) {
-                obj.common = JSON.parse(newCommon);
-                yield global_1.Global.adapter.setForeignObjectAsync(obj._id, obj);
-            }
-        }
-    });
+async function fixBrightnessRole(stateObjs) {
+  const predicate = /(G|VG|L)\-\d+\.(lightbulb\.)?brightness$/;
+  const fixableObjs = stateObjs.filter((o) => predicate.test(o._id));
+  for (const obj of fixableObjs) {
+    const oldCommon = JSON.stringify(obj.common);
+    const newCommon = JSON.stringify(__assign(__assign({}, obj.common), {
+      role: "level.dimmer"
+    }));
+    if (oldCommon !== newCommon) {
+      obj.common = JSON.parse(newCommon);
+      await import_global.Global.adapter.setForeignObjectAsync(obj._id, obj);
+    }
+  }
 }
-// Workaround für unvollständige Adapter-Upgrades
-function ensureInstanceObjects() {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (instanceObjects == null || instanceObjects.length === 0)
-            return;
-        // wait for all instance objects to be created
-        const setObjects = instanceObjects.map(obj => global_1.Global.adapter.setObjectNotExistsAsync(obj._id, obj));
-        yield Promise.all(setObjects);
-    });
+async function ensureInstanceObjects() {
+  if (instanceObjects == null || instanceObjects.length === 0)
+    return;
+  const setObjects = instanceObjects.map((obj) => import_global.Global.adapter.setObjectNotExistsAsync(obj._id, obj));
+  await Promise.all(setObjects);
 }
-exports.ensureInstanceObjects = ensureInstanceObjects;
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
+  ensureInstanceObjects,
+  fixAdapterObjects
+});
+//# sourceMappingURL=fix-objects.js.map

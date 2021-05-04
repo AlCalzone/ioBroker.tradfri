@@ -289,5 +289,5 @@ build/admin/**/*.d.ts
 # i18n intermediate files
 admin/i18n
 
-# Parcel cache
-.cache
+# Devserver
+.dev-server

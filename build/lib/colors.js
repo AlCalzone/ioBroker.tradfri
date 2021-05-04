@@ -1,14 +1,21 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.normalizeHexColor = void 0;
-// accept a bunch of stuff that follows 2 rules
-// 1. ends with 6 hex digits
-// 2. the remainder does not contain letters or digits
+var __defProp = Object.defineProperty;
+var __markAsModule = (target) => __defProp(target, "__esModule", {value: true});
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, {get: all[name], enumerable: true});
+};
+__markAsModule(exports);
+__export(exports, {
+  normalizeHexColor: () => normalizeHexColor
+});
 const hexColorRegex = /^[^a-zA-Z0-9]*([a-fA-F0-9]{6})$/;
-/** Normalizes any input that might represent a hex color. Returns undefined if no match was found */
 function normalizeHexColor(color) {
-    const match = hexColorRegex.exec(color);
-    if (match && match.length > 1)
-        return match[1];
+  const match = hexColorRegex.exec(color);
+  if (match && match.length > 1)
+    return match[1];
 }
-exports.normalizeHexColor = normalizeHexColor;
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
+  normalizeHexColor
+});
+//# sourceMappingURL=colors.js.map
