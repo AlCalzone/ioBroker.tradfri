@@ -30,21 +30,21 @@ var __exportStar = (target, module2, desc) => {
 var __toModule = (module2) => {
   return __exportStar(__markAsModule(__defProp(module2 != null ? __create(__getProtoOf(module2)) : {}, "default", module2 && module2.__esModule && "default" in module2 ? {get: () => module2.default, enumerable: true} : {value: module2, enumerable: true})), module2);
 };
-var path = __toModule(require("path"));
-var import_node_tradfri_client = __toModule(require("node-tradfri-client"));
-var import_objects = __toModule(require("alcalzone-shared/objects"));
-var import_global = __toModule(require("./lib/global"));
-var import_virtual_group = __toModule(require("./lib/virtual-group"));
 var utils = __toModule(require("@iobroker/adapter-core"));
+var import_helpers = __toModule(require("alcalzone-shared/helpers"));
+var import_objects = __toModule(require("alcalzone-shared/objects"));
+var import_node_tradfri_client = __toModule(require("node-tradfri-client"));
+var path = __toModule(require("path"));
 var import_colors = __toModule(require("./lib/colors"));
 var import_fix_objects = __toModule(require("./lib/fix-objects"));
+var import_global = __toModule(require("./lib/global"));
 var import_iobroker_objects = __toModule(require("./lib/iobroker-objects"));
+var import_math = __toModule(require("./lib/math"));
+var import_virtual_group = __toModule(require("./lib/virtual-group"));
 var import_custom_subscriptions = __toModule(require("./modules/custom-subscriptions"));
 var import_groups = __toModule(require("./modules/groups"));
 var import_message = __toModule(require("./modules/message"));
 var import_operations = __toModule(require("./modules/operations"));
-var import_helpers = __toModule(require("alcalzone-shared/helpers"));
-var import_math = __toModule(require("./lib/math"));
 var import_session = __toModule(require("./modules/session"));
 let connectionAlive;
 let adapter;
@@ -213,7 +213,7 @@ function startAdapter(options = {}) {
     },
     stateChange: async (id, state) => {
       if (state) {
-        import_global.Global.log(`{{blue}} state with id ${id} updated: ack=${state.ack}; val=${state.val}`, "debug");
+        import_global.Global.log(`{{blue}} state with id ${id} updated: ack=${state.ack}; val=${String(state.val)}`, "debug");
       } else {
         import_global.Global.log(`{{blue}} state with id ${id} deleted`, "debug");
       }

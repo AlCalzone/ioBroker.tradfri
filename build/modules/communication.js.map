@@ -1,6 +1,6 @@
 {
   "version": 3,
   "sources": ["../../src/modules/communication.ts"],
-  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA,iCAAyB;",
+  "mappings": ";;AAAA;",
   "names": []
 }

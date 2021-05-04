@@ -81,7 +81,10 @@ function subscribeStates(pattern, callback) {
     return;
   const newCounter = ++customStateSubscriptions.counter;
   const id = "" + newCounter;
-  customStateSubscriptions.subscriptions.set(id, {pattern: checkedPattern, callback});
+  customStateSubscriptions.subscriptions.set(id, {
+    pattern: checkedPattern,
+    callback
+  });
   return id;
 }
 function unsubscribeStates(id) {
@@ -95,7 +98,10 @@ function subscribeObjects(pattern, callback) {
     return;
   const newCounter = ++customObjectSubscriptions.counter;
   const id = "" + newCounter;
-  customObjectSubscriptions.subscriptions.set(id, {pattern: checkedPattern, callback});
+  customObjectSubscriptions.subscriptions.set(id, {
+    pattern: checkedPattern,
+    callback
+  });
   return id;
 }
 function unsubscribeObjects(id) {

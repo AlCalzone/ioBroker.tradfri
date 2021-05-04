@@ -30,7 +30,6 @@ var import_node_tradfri_client = __toModule(require("node-tradfri-client"));
 var import_global = __toModule(require("../lib/global"));
 var import_iobroker_objects = __toModule(require("../lib/iobroker-objects"));
 var import_virtual_group = __toModule(require("../lib/virtual-group"));
-var import_communication = __toModule(require("./communication"));
 var import_groups = __toModule(require("./groups"));
 var import_session = __toModule(require("./session"));
 const onMessage = async (obj) => {
@@ -66,7 +65,9 @@ const onMessage = async (obj) => {
         const params = obj.message;
         params.method = params.method || "get";
         if (["get", "post", "put", "delete"].indexOf(params.method) === -1) {
-          respond({error: `unsupported request method "${params.method}"`});
+          respond({
+            error: `unsupported request method "${params.method}"`
+          });
           return;
         }
         import_global.Global.log(`custom coap request: ${params.method.toUpperCase()} "${params.path}"`);
@@ -154,7 +155,12 @@ const onMessage = async (obj) => {
       case "getDevices": {
         const params = obj.message;
         const deviceType = params.type || "all";
-        const allowedDeviceTypes = ["lightbulb", "plug", "blind", "all"];
+        const allowedDeviceTypes = [
+          "lightbulb",
+          "plug",
+          "blind",
+          "all"
+        ];
         if (allowedDeviceTypes.indexOf(deviceType) === -1) {
           respond(responses.ERROR(`device type must be one of ${allowedDeviceTypes.map((t) => `"${t}"`).join(", ")}`));
           return;

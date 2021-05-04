@@ -91,6 +91,8 @@ async function extendDevice(accessory) {
       }
       try {
         let newValue = (0, import_object_polyfill.dig)(accessory, obj.native.path);
+        if (typeof newValue === "function")
+          continue;
         const roundToDigits = import_global.Global.adapter.config.roundToDigits;
         if (typeof roundToDigits === "number" && typeof newValue === "number") {
           newValue = (0, import_math.roundTo)(newValue, roundToDigits);

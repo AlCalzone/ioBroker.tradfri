@@ -1,6 +1,6 @@
 {
   "version": 3,
   "sources": ["../../src/modules/session.ts"],
-  "mappings": ";;;;;;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA,iCAAoD;AACpD,2BAA6B;AAEtB,cAAc;AAAA,EAAd,cAHP;AAQQ,mBAAqC;AAErC,kBAAoC;AAEpC,yBAA8C;AAE9C,mBAA2C;AAAA;AAAA;AAG5C,MAAM,UAAU,IAAI;",
+  "mappings": ";;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAGO,cAAc;AAAA,EAAd,cAHP;AAQQ,mBAAqC;AAErC,kBAAoC;AAEpC,yBAA8C;AAE9C,mBAA2C;AAAA;AAAA;AAG5C,MAAM,UAAU,IAAI;",
   "names": []
 }
