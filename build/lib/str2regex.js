@@ -9,7 +9,7 @@ __export(exports, {
   str2regex: () => str2regex
 });
 function str2regex(pattern) {
-  return new RegExp(pattern.replace(/\./g, "\\.").replace(/\*/g, ".*").replace(/\!/g, "?!"));
+  return new RegExp(pattern.replace(/\\/g, "\\\\").replace(/\./g, "\\.").replace(/\*/g, ".*").replace(/\!/g, "?!"));
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
