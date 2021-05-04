@@ -4,7 +4,6 @@ interface SendToResult {
 	result?: any;
 }
 
-// tslint:disable-next-line:class-name
 interface ioBrokerSocket {
 	emit(command: "subscribeObjects", pattern: string): void;
 
@@ -12,8 +11,11 @@ interface ioBrokerSocket {
 	// TODO: other events
 }
 
-export const $window = window as any as {
-	load: (settings: ioBroker.AdapterConfig, onChange: (hasChanges: boolean) => void) => void;
+export const $window = (window as any) as {
+	load: (
+		settings: ioBroker.AdapterConfig,
+		onChange: (hasChanges: boolean) => void,
+	) => void;
 	save: (callback: (settings: ioBroker.AdapterConfig) => void) => void;
 	readonly instance: number;
 	/** Translates text */
@@ -21,7 +23,12 @@ export const $window = window as any as {
 	jQuery: JQueryStatic;
 	$: JQueryStatic;
 	socket: ioBrokerSocket;
-	sendTo: (instance: any | null, command: string, message: any, callback: (result: SendToResult) => void) => void;
+	sendTo: (
+		instance: any | null,
+		command: string,
+		message: any,
+		callback: (result: SendToResult) => void,
+	) => void;
 };
 // export interface JQueryUI {
 // 	tabs: (selector?: any) => JQuery & JQueryUI;

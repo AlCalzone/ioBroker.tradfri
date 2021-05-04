@@ -14,7 +14,7 @@ import { VirtualGroup } from "../lib/virtual-group";
 import { session as $ } from "./session";
 
 /* creates or edits an existing <group>-object for a virtual group */
-export function extendVirtualGroup(group: VirtualGroup) {
+export function extendVirtualGroup(group: VirtualGroup): void {
 	const objId = calcGroupId(group);
 
 	if (objId in $.objects) {
@@ -78,7 +78,7 @@ export function extendVirtualGroup(group: VirtualGroup) {
 }
 
 /* creates or edits an existing <group>-object for a group */
-export function extendGroup(group: Group) {
+export function extendGroup(group: Group): void {
 	const objId = calcGroupId(group);
 
 	if (objId in $.objects) {
@@ -208,7 +208,7 @@ async function updateGroupState(
 export function updateMultipleGroupStates(
 	changedAccessory?: Accessory,
 	changedStateId?: string,
-) {
+): void {
 	const groupsToUpdate: (Group | VirtualGroup)[] = values($.groups)
 		.map((g) => g.group as Group | VirtualGroup)
 		.concat(values($.virtualGroups))
@@ -226,7 +226,7 @@ export function updateMultipleGroupStates(
 export function updateGroupStates(
 	group: Group | VirtualGroup,
 	changedStateId?: string,
-) {
+): void {
 	if (group.deviceIDs == null) return;
 	const objId = calcGroupId(group);
 
@@ -408,7 +408,7 @@ export function updateGroupStates(
 export function syncGroupsWithState(
 	id: string,
 	state: ioBroker.State | null | undefined,
-) {
+): void {
 	if (state && state.ack) {
 		const instanceId = getInstanceId(id);
 		if (instanceId == undefined) return;

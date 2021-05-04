@@ -1,5 +1,3 @@
-// tslint:disable:variable-name
-
 // Endpunkte, die abgefragt werden können
 export const Endpoints = {
 	DEVICES: "15001",

@@ -1,6 +1,5 @@
 import { expect } from "chai";
 import { Enumeration, getEnumValueAsName } from "./enums";
-// tslint:disable:no-unused-expression
 
 describe("lib/enums => getEnumValueAsName() =>", () => {
 	const theEnum: Enumeration = {

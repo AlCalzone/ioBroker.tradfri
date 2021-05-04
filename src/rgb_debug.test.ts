@@ -4,7 +4,6 @@
 // import { values } from "./lib/object-polyfill";
 // import { conversions } from "./modules/conversions";
 // import { predefinedColors } from "./modules/predefined-colors";
-// tslint:disable:no-unused-expression
 
 // describe("RGB debug =>", () => {
 

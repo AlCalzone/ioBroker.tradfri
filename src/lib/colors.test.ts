@@ -1,6 +1,5 @@
 import { expect } from "chai";
 import { normalizeHexColor } from "./colors";
-// tslint:disable:no-unused-expression
 
 describe("lib/colors => normalizeHexColor() =>", () => {
 	it("should not change valid hex colors without #", () => {

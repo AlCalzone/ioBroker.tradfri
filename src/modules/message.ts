@@ -13,7 +13,7 @@ import { session as $ } from "./session";
 
 export const onMessage: ioBroker.MessageHandler = async (obj) => {
 	// responds to the adapter that sent the original message
-	function respond(response: string | {}) {
+	function respond(response: string | Record<string, unknown>) {
 		if (obj.callback)
 			_.adapter.sendTo(obj.from, obj.command, response, obj.callback);
 	}

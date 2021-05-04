@@ -1,4 +1,3 @@
-// tslint:disable:object-literal-key-quotes
 // Adapter-Utils laden
 import * as utils from "@iobroker/adapter-core";
 import { assertNever } from "alcalzone-shared/helpers";
@@ -365,7 +364,9 @@ function startAdapter(options: Partial<utils.AdapterOptions> = {}) {
 		stateChange: async (id, state) => {
 			if (state) {
 				_.log(
-					`{{blue}} state with id ${id} updated: ack=${state.ack}; val=${state.val}`,
+					`{{blue}} state with id ${id} updated: ack=${
+						state.ack
+					}; val=${String(state.val)}`,
 					"debug",
 				);
 			} else {
@@ -1055,7 +1056,6 @@ process.on("uncaughtException", onUnhandledError);
 // try loading tradfri module to catch potential errors
 let tradfriClientLibLoaded = false;
 try {
-	// tslint:disable-next-line:no-var-requires
 	require("node-tradfri-client");
 	tradfriClientLibLoaded = true;
 } catch (e) {

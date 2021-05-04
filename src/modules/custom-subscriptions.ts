@@ -45,7 +45,7 @@ function checkPattern(pattern: string | RegExp): RegExp | undefined {
 export function applyCustomStateSubscriptions(
 	id: string,
 	state: ioBroker.State | null | undefined,
-) {
+): void {
 	try {
 		for (const sub of customStateSubscriptions.subscriptions.values()) {
 			if (
@@ -66,7 +66,7 @@ export function applyCustomStateSubscriptions(
 export function applyCustomObjectSubscriptions(
 	id: string,
 	obj: ioBroker.Object | null | undefined,
-) {
+): void {
 	try {
 		for (const sub of customObjectSubscriptions.subscriptions.values()) {
 			if (
@@ -112,7 +112,7 @@ export function subscribeStates(
  * Release the custom subscription with the given id
  * @param id The subscription ID returned by @link{subscribeStates}
  */
-export function unsubscribeStates(id: string) {
+export function unsubscribeStates(id: string): void {
 	if (customStateSubscriptions.subscriptions.has(id)) {
 		customStateSubscriptions.subscriptions.delete(id);
 	}
@@ -146,14 +146,14 @@ export function subscribeObjects(
  * Release the custom subscription with the given id
  * @param id The subscription ID returned by @link{subscribeObjects}
  */
-export function unsubscribeObjects(id: string) {
+export function unsubscribeObjects(id: string): void {
 	if (customObjectSubscriptions.subscriptions.has(id)) {
 		customObjectSubscriptions.subscriptions.delete(id);
 	}
 }
 
 /** Clears all custom subscriptions */
-export function clearCustomSubscriptions() {
+export function clearCustomSubscriptions(): void {
 	customStateSubscriptions.subscriptions.clear();
 	customObjectSubscriptions.subscriptions.clear();
 }

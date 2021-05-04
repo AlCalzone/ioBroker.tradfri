@@ -8,7 +8,7 @@ const instanceObjects = _instanceObjects as ioBroker.Object[];
  * Fixes/updates/deletes existing adapter objects,
  * so they don't have to be deleted manually
  */
-export async function fixAdapterObjects() {
+export async function fixAdapterObjects(): Promise<void> {
 	// read all objects, we'll filter them in the fixer functions
 	const stateObjs = values(await _.$$(`${_.adapter.namespace}.*`, "state"));
 	// const channelObjs = values(await _.$$(`${_.adapter.namespace}.*`, "channel"));

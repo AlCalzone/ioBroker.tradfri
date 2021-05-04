@@ -1,6 +1,5 @@
 import { expect } from "chai";
 import { except, firstOrDefault, intersect, range } from "./array-extensions";
-// tslint:disable:no-unused-expression
 
 describe("lib/array-extensions => except() =>", () => {
 	it("should work for b[] ⊆ a[]", () => {

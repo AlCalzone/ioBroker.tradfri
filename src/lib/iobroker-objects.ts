@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import { assertNever } from "alcalzone-shared/helpers";
 import {
 	composeObject,
@@ -51,7 +52,7 @@ export function accessoryToNative(accessory: Accessory): Record<string, any> {
  * Creates or edits an existing <device>-object for an accessory.
  * @param accessory The accessory to update
  */
-export async function extendDevice(accessory: Accessory) {
+export async function extendDevice(accessory: Accessory): Promise<void> {
 	const objId = calcObjId(accessory);
 
 	if (objId in $.objects) {
@@ -387,7 +388,7 @@ export function getAccessoryIcon(accessory: Accessory): string | undefined {
 /**
  * Returns the ioBroker id of the root object for the given state
  */
-export function getRootId(stateId: string) {
+export function getRootId(stateId: string): string | undefined {
 	const match = /^tradfri\.\d+\.\w+\-\d+/.exec(stateId);
 	if (match) return match[0];
 }
@@ -437,6 +438,7 @@ export function calcObjName(accessory: Accessory): string {
 			break;
 		default:
 			_.log(
+				// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
 				`Unknown accessory type ${accessory.type}. Please send this info to the developer with a short description of the device!`,
 				"warn",
 			);

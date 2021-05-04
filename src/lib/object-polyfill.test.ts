@@ -1,6 +1,5 @@
 import { expect } from "chai";
 import { bury, dig } from "./object-polyfill";
-// tslint:disable:no-unused-expression
 
 describe("lib/object-polyfill => bury() =>", () => {
 	it("should work with nested properties", () => {

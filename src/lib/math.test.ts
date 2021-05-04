@@ -1,6 +1,5 @@
 import { expect } from "chai";
 import { clamp, roundTo } from "./math";
-// tslint:disable:no-unused-expression
 
 describe("lib/math => clamp() =>", () => {
 	const min = 5;

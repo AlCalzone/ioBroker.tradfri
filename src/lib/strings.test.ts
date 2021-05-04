@@ -1,6 +1,5 @@
 import { assert, expect } from "chai";
 import { padStart } from "./strings";
-// tslint:disable:no-unused-expression
 
 describe("lib/strings => padStart() => ", () => {
 	it("should return a string padded to the given target length", () => {

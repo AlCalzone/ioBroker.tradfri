@@ -1,5 +1,3 @@
-// tslint:disable:curly
-
 ///
 /// Stellt Erweiterungsmethoden für Arrays bereit
 ///
@@ -34,7 +32,7 @@ export function except<T>(a: T[], b: T[]): T[] {
 }
 
 /// Erzeugt ein Range-Array
-export function range(min: number, max: number) {
+export function range(min: number, max: number): number[] {
 	// Potentiell Reihenfolge tauschen
 	if (min > max) [max, min] = [min, max];
 
@@ -43,7 +41,10 @@ export function range(min: number, max: number) {
 }
 
 // Gibt das erste Element eines Array zurück, das mit dem angegebenen Filter übereinstimmt
-export function firstOrDefault<T>(arr: T[], filter: (item: T) => boolean) {
+export function firstOrDefault<T>(
+	arr: T[],
+	filter: (item: T) => boolean,
+): T | null {
 	for (const item of arr) {
 		if (filter(item)) return item;
 	}

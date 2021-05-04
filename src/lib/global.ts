@@ -100,7 +100,10 @@ export class Global {
 		**fett**, ##kursiv##, __unterstrichen__, ~~durchgestrichen~~
 		schwarz{{farbe|bunt}}schwarz, {{farbe}}bunt
 	*/
-	public static log(message: string, level: ioBroker.LogLevel = "info") {
+	public static log(
+		message: string,
+		level: ioBroker.LogLevel = "info",
+	): void {
 		if (!Global.adapter) return;
 
 		// if (message) {

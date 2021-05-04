@@ -1,6 +1,5 @@
 import { expect } from "chai";
 import { str2regex } from "./str2regex";
-// tslint:disable:no-unused-expression
 
 describe("lib/str2regex => ", () => {
 	it("should replace wildcards", () => {
