@@ -1,20 +1,31 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.roundTo = exports.clamp = void 0;
-/** limits a value to the range given by min/max */
+var __defProp = Object.defineProperty;
+var __markAsModule = (target) => __defProp(target, "__esModule", {value: true});
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, {get: all[name], enumerable: true});
+};
+__markAsModule(exports);
+__export(exports, {
+  clamp: () => clamp,
+  roundTo: () => roundTo
+});
 function clamp(value, min, max) {
-    if (min > max) {
-        [min, max] = [max, min];
-    }
-    if (value < min)
-        return min;
-    if (value > max)
-        return max;
-    return value;
+  if (min > max) {
+    [min, max] = [max, min];
+  }
+  if (value < min)
+    return min;
+  if (value > max)
+    return max;
+  return value;
 }
-exports.clamp = clamp;
 function roundTo(value, digits) {
-    const exp = Math.pow(10, digits);
-    return Math.round(value * exp) / exp;
+  const exp = Math.pow(10, digits);
+  return Math.round(value * exp) / exp;
 }
-exports.roundTo = roundTo;
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
+  clamp,
+  roundTo
+});
+//# sourceMappingURL=math.js.map

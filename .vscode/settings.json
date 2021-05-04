@@ -1,7 +1,8 @@
 {
 	"files.insertFinalNewline": true,
 	"editor.insertSpaces": false,
-	"tslint.autoFixOnSave": true,
+	"editor.formatOnSave": true,
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
 	"typescript.tsdk": "node_modules\\typescript\\lib",
 	"json.schemas": [
 		{

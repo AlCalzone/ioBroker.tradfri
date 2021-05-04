@@ -1,11 +1,13 @@
 import { entries } from "alcalzone-shared/objects";
-import { LightOperation, BlindOperation, PlugOperation, PowerRestoredAction } from "node-tradfri-client";
-import {  } from "node-tradfri-client/build/lib/light";
+import type {
+	BlindOperation,
+	LightOperation,
+	PlugOperation,
+	PowerRestoredAction,
+} from "node-tradfri-client";
 
 export class VirtualGroup {
-
-	constructor(public readonly instanceId: number) {
-	}
+	constructor(public readonly instanceId: number) {}
 
 	public name: string | undefined;
 	public whenPowerRestored: PowerRestoredAction | undefined;
@@ -26,9 +28,12 @@ export class VirtualGroup {
 	/**
 	 * Updates this virtual group's state with the changes contained in the given operation
 	 */
-	public merge(operation: LightOperation | BlindOperation | PlugOperation): void {
+	public merge(
+		operation: LightOperation | BlindOperation | PlugOperation,
+	): void {
 		for (const [prop, val] of entries(operation)) {
-			if (this.hasOwnProperty(prop)) this[prop as keyof this] = val as any;
+			if (this.hasOwnProperty(prop))
+				this[prop as keyof this] = val as any;
 		}
 	}
 }

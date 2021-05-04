@@ -1,5 +1,3 @@
-// tslint:disable:variable-name
-
 // Endpunkte, die abgefragt werden können
 export const Endpoints = {
 	DEVICES: "15001",
@@ -308,5 +306,4 @@ export const ALL = {
 	OTA_FORCED: 5,
 	OTA_NORMAL: 0,
 	OTA_REQUIRED: 2,
-
 };

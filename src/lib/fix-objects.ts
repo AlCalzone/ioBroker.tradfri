@@ -1,14 +1,14 @@
 import { values } from "alcalzone-shared/objects";
+import { instanceObjects as _instanceObjects } from "../../io-package.json";
 import { Global as _ } from "./global";
 
-import { instanceObjects as _instanceObjects } from "../../io-package.json";
 const instanceObjects = _instanceObjects as ioBroker.Object[];
 
 /**
  * Fixes/updates/deletes existing adapter objects,
  * so they don't have to be deleted manually
  */
-export async function fixAdapterObjects() {
+export async function fixAdapterObjects(): Promise<void> {
 	// read all objects, we'll filter them in the fixer functions
 	const stateObjs = values(await _.$$(`${_.adapter.namespace}.*`, "state"));
 	// const channelObjs = values(await _.$$(`${_.adapter.namespace}.*`, "channel"));
@@ -24,7 +24,7 @@ export async function fixAdapterObjects() {
  */
 async function fixBrightnessRange(stateObjs: ioBroker.Object[]) {
 	const predicate = /(G|VG|L)\-\d+\.(lightbulb\.)?brightness$/;
-	const fixableObjs = stateObjs.filter(o => predicate.test(o._id));
+	const fixableObjs = stateObjs.filter((o) => predicate.test(o._id));
 	for (const obj of fixableObjs) {
 		const oldCommon = JSON.stringify(obj.common);
 		const newCommon = JSON.stringify({
@@ -60,7 +60,7 @@ async function fixAuthenticationObjects() {
  */
 async function fixBrightnessRole(stateObjs: ioBroker.Object[]) {
 	const predicate = /(G|VG|L)\-\d+\.(lightbulb\.)?brightness$/;
-	const fixableObjs = stateObjs.filter(o => predicate.test(o._id));
+	const fixableObjs = stateObjs.filter((o) => predicate.test(o._id));
 	for (const obj of fixableObjs) {
 		const oldCommon = JSON.stringify(obj.common);
 		const newCommon = JSON.stringify({
@@ -79,8 +79,8 @@ export async function ensureInstanceObjects(): Promise<void> {
 	if (instanceObjects == null || instanceObjects.length === 0) return;
 
 	// wait for all instance objects to be created
-	const setObjects = instanceObjects.map(
-		obj => _.adapter.setObjectNotExistsAsync(obj._id, obj),
+	const setObjects = instanceObjects.map((obj) =>
+		_.adapter.setObjectNotExistsAsync(obj._id, obj),
 	);
 	await Promise.all(setObjects);
 }

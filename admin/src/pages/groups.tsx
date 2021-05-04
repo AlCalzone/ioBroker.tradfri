@@ -5,7 +5,7 @@ import { _, sendTo } from "../lib/adapter";
 import { CancelableInput, MultiDropdown } from "iobroker-react-components";
 
 // Load communication objects as defined in the message module
-import { Device, Group } from "../../../src/modules/communication";
+import type { Device, Group } from "../../../src/modules/communication";
 
 export interface GroupDictionary {
 	[id: string]: Group;

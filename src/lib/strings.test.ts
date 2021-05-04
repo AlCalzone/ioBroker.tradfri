@@ -1,9 +1,7 @@
 import { assert, expect } from "chai";
 import { padStart } from "./strings";
-// tslint:disable:no-unused-expression
 
 describe("lib/strings => padStart() => ", () => {
-
 	it("should return a string padded to the given target length", () => {
 		const targetLength = 6;
 		const filler = " ";
@@ -24,5 +22,4 @@ describe("lib/strings => padStart() => ", () => {
 	it("should truncate fillers whose length is not a multiple of the missing length", () => {
 		expect(padStart("12345", 8, "ab")).to.equal("aba12345");
 	});
-
 });

@@ -1,125 +1,120 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.clearCustomSubscriptions = exports.unsubscribeObjects = exports.subscribeObjects = exports.unsubscribeStates = exports.subscribeStates = exports.applyCustomObjectSubscriptions = exports.applyCustomStateSubscriptions = void 0;
-const global_1 = require("../lib/global");
-const str2regex_1 = require("../lib/str2regex");
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __markAsModule = (target) => __defProp(target, "__esModule", {value: true});
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, {get: all[name], enumerable: true});
+};
+var __exportStar = (target, module2, desc) => {
+  if (module2 && typeof module2 === "object" || typeof module2 === "function") {
+    for (let key of __getOwnPropNames(module2))
+      if (!__hasOwnProp.call(target, key) && key !== "default")
+        __defProp(target, key, {get: () => module2[key], enumerable: !(desc = __getOwnPropDesc(module2, key)) || desc.enumerable});
+  }
+  return target;
+};
+var __toModule = (module2) => {
+  return __exportStar(__markAsModule(__defProp(module2 != null ? __create(__getProtoOf(module2)) : {}, "default", module2 && module2.__esModule && "default" in module2 ? {get: () => module2.default, enumerable: true} : {value: module2, enumerable: true})), module2);
+};
+__markAsModule(exports);
+__export(exports, {
+  applyCustomObjectSubscriptions: () => applyCustomObjectSubscriptions,
+  applyCustomStateSubscriptions: () => applyCustomStateSubscriptions,
+  clearCustomSubscriptions: () => clearCustomSubscriptions,
+  subscribeObjects: () => subscribeObjects,
+  subscribeStates: () => subscribeStates,
+  unsubscribeObjects: () => unsubscribeObjects,
+  unsubscribeStates: () => unsubscribeStates
+});
+var import_global = __toModule(require("../lib/global"));
+var import_str2regex = __toModule(require("../lib/str2regex"));
 const customStateSubscriptions = {
-    subscriptions: new Map(),
-    counter: 0,
+  subscriptions: new Map(),
+  counter: 0
 };
 const customObjectSubscriptions = {
-    subscriptions: new Map(),
-    counter: 0,
+  subscriptions: new Map(),
+  counter: 0
 };
-/**
- * Ensures the subscription pattern is valid
- */
 function checkPattern(pattern) {
-    try {
-        if (typeof pattern === "string") {
-            return str2regex_1.str2regex(pattern);
-        }
-        else if (pattern instanceof RegExp) {
-            return pattern;
-        }
-        else {
-            // NOPE
-            throw new Error("The pattern must be regex or string");
-        }
+  try {
+    if (typeof pattern === "string") {
+      return (0, import_str2regex.str2regex)(pattern);
+    } else if (pattern instanceof RegExp) {
+      return pattern;
+    } else {
+      throw new Error("The pattern must be regex or string");
     }
-    catch (e) {
-        global_1.Global.log("cannot subscribe with this pattern. reason: " + e, "error");
-    }
+  } catch (e) {
+    import_global.Global.log("cannot subscribe with this pattern. reason: " + e, "error");
+  }
 }
 function applyCustomStateSubscriptions(id, state) {
-    try {
-        for (const sub of customStateSubscriptions.subscriptions.values()) {
-            if (sub
-                && sub.pattern
-                && sub.pattern.test(id)
-                && typeof sub.callback === "function") {
-                // Wenn die ID zum aktuellen Pattern passt, dann Callback aufrufen
-                sub.callback(id, state);
-            }
-        }
+  try {
+    for (const sub of customStateSubscriptions.subscriptions.values()) {
+      if (sub && sub.pattern && sub.pattern.test(id) && typeof sub.callback === "function") {
+        sub.callback(id, state);
+      }
     }
-    catch (e) {
-        global_1.Global.log("error handling custom sub: " + e);
-    }
+  } catch (e) {
+    import_global.Global.log("error handling custom sub: " + e);
+  }
 }
-exports.applyCustomStateSubscriptions = applyCustomStateSubscriptions;
 function applyCustomObjectSubscriptions(id, obj) {
-    try {
-        for (const sub of customObjectSubscriptions.subscriptions.values()) {
-            if (sub
-                && sub.pattern
-                && sub.pattern.test(id)
-                && typeof sub.callback === "function") {
-                // Wenn die ID zum aktuellen Pattern passt, dann Callback aufrufen
-                sub.callback(id, obj);
-            }
-        }
+  try {
+    for (const sub of customObjectSubscriptions.subscriptions.values()) {
+      if (sub && sub.pattern && sub.pattern.test(id) && typeof sub.callback === "function") {
+        sub.callback(id, obj);
+      }
     }
-    catch (e) {
-        global_1.Global.log("error handling custom sub: " + e);
-    }
+  } catch (e) {
+    import_global.Global.log("error handling custom sub: " + e);
+  }
 }
-exports.applyCustomObjectSubscriptions = applyCustomObjectSubscriptions;
-/**
- * Subscribe to some ioBroker states
- * @param pattern
- * @param callback
- * @returns a subscription ID
- */
 function subscribeStates(pattern, callback) {
-    const checkedPattern = checkPattern(pattern);
-    if (checkedPattern == undefined)
-        return;
-    const newCounter = (++customStateSubscriptions.counter);
-    const id = "" + newCounter;
-    customStateSubscriptions.subscriptions.set(id, { pattern: checkedPattern, callback });
-    return id;
+  const checkedPattern = checkPattern(pattern);
+  if (checkedPattern == void 0)
+    return;
+  const newCounter = ++customStateSubscriptions.counter;
+  const id = "" + newCounter;
+  customStateSubscriptions.subscriptions.set(id, {pattern: checkedPattern, callback});
+  return id;
 }
-exports.subscribeStates = subscribeStates;
-/**
- * Release the custom subscription with the given id
- * @param id The subscription ID returned by @link{subscribeStates}
- */
 function unsubscribeStates(id) {
-    if (customStateSubscriptions.subscriptions.has(id)) {
-        customStateSubscriptions.subscriptions.delete(id);
-    }
+  if (customStateSubscriptions.subscriptions.has(id)) {
+    customStateSubscriptions.subscriptions.delete(id);
+  }
 }
-exports.unsubscribeStates = unsubscribeStates;
-/**
- * Subscribe to some ioBroker objects
- * @param pattern
- * @param callback
- * @returns a subscription ID
- */
 function subscribeObjects(pattern, callback) {
-    const checkedPattern = checkPattern(pattern);
-    if (checkedPattern == undefined)
-        return;
-    const newCounter = (++customObjectSubscriptions.counter);
-    const id = "" + newCounter;
-    customObjectSubscriptions.subscriptions.set(id, { pattern: checkedPattern, callback });
-    return id;
+  const checkedPattern = checkPattern(pattern);
+  if (checkedPattern == void 0)
+    return;
+  const newCounter = ++customObjectSubscriptions.counter;
+  const id = "" + newCounter;
+  customObjectSubscriptions.subscriptions.set(id, {pattern: checkedPattern, callback});
+  return id;
 }
-exports.subscribeObjects = subscribeObjects;
-/**
- * Release the custom subscription with the given id
- * @param id The subscription ID returned by @link{subscribeObjects}
- */
 function unsubscribeObjects(id) {
-    if (customObjectSubscriptions.subscriptions.has(id)) {
-        customObjectSubscriptions.subscriptions.delete(id);
-    }
+  if (customObjectSubscriptions.subscriptions.has(id)) {
+    customObjectSubscriptions.subscriptions.delete(id);
+  }
 }
-exports.unsubscribeObjects = unsubscribeObjects;
-/** Clears all custom subscriptions */
 function clearCustomSubscriptions() {
-    customStateSubscriptions.subscriptions.clear();
-    customObjectSubscriptions.subscriptions.clear();
+  customStateSubscriptions.subscriptions.clear();
+  customObjectSubscriptions.subscriptions.clear();
 }
-exports.clearCustomSubscriptions = clearCustomSubscriptions;
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
+  applyCustomObjectSubscriptions,
+  applyCustomStateSubscriptions,
+  clearCustomSubscriptions,
+  subscribeObjects,
+  subscribeStates,
+  unsubscribeObjects,
+  unsubscribeStates
+});
+//# sourceMappingURL=custom-subscriptions.js.map

@@ -1,9 +1,7 @@
 import { expect } from "chai";
 import { except, firstOrDefault, intersect, range } from "./array-extensions";
-// tslint:disable:no-unused-expression
 
 describe("lib/array-extensions => except() =>", () => {
-
 	it("should work for b[] ⊆ a[]", () => {
 		const a = [1, 3, 5, 7, 8];
 		const b = [1, 5, 8];
@@ -41,11 +39,9 @@ describe("lib/array-extensions => except() =>", () => {
 		const expected = [11];
 		expect(except(a, b)).to.deep.equal(expected);
 	});
-
 });
 
 describe("lib/array-extensions => intersect() =>", () => {
-
 	it("should work for b[] ⊆ a[]", () => {
 		const a = [1, 3, 5, 7, 8];
 		const b = [1, 5, 8];
@@ -77,11 +73,9 @@ describe("lib/array-extensions => intersect() =>", () => {
 		expect(intersect(c, b)).to.deep.equal([]);
 		expect(intersect(b, b)).to.deep.equal([]);
 	});
-
 });
 
 describe("lib/array-extensions => range() =>", () => {
-
 	it("should work", () => {
 		expect(range(1, 7)).to.deep.equal([1, 2, 3, 4, 5, 6, 7]);
 	});
@@ -96,18 +90,15 @@ describe("lib/array-extensions => range() =>", () => {
 	it("should work for min = max", () => {
 		expect(range(1, 1)).to.deep.equal([1]);
 	});
-
 });
 
 describe("lib/array-extensions => firstOrDefault() =>", () => {
-
 	const source = [1, 2, 3, 4, 5];
 
 	it("should return the first value found", () => {
-		expect(firstOrDefault(source, (i => i > 3))).to.equal(4);
+		expect(firstOrDefault(source, (i) => i > 3)).to.equal(4);
 	});
 	it("should return null if no match is found", () => {
-		expect(firstOrDefault(source, (i => i > 6))).to.be.null;
+		expect(firstOrDefault(source, (i) => i > 6)).to.be.null;
 	});
-
 });

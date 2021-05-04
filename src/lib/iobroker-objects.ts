@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import { assertNever } from "alcalzone-shared/helpers";
 import {
 	composeObject,
 	entries,
 	filter,
-	values
+	values,
 } from "alcalzone-shared/objects";
 import {
 	Accessory,
@@ -12,7 +13,7 @@ import {
 	GroupInfo,
 	PowerSources,
 	Scene,
-	Spectrum
+	Spectrum,
 } from "node-tradfri-client";
 import { session as $ } from "../modules/session";
 import { Global as _ } from "./global";
@@ -26,7 +27,7 @@ import { VirtualGroup } from "./virtual-group";
  */
 export function accessoryToCommon(accessory: Accessory): ioBroker.ObjectCommon {
 	const ret: ioBroker.ObjectCommon = {
-		name: accessory.name || accessory.deviceInfo.modelNumber
+		name: accessory.name || accessory.deviceInfo.modelNumber,
 	};
 	const icon = getAccessoryIcon(accessory);
 	if (icon != null) ret.icon = "icons/" + icon;
@@ -43,7 +44,7 @@ export function accessoryToNative(accessory: Accessory): Record<string, any> {
 		firmwareVersion: accessory.deviceInfo.firmwareVersion,
 		modelNumber: accessory.deviceInfo.modelNumber,
 		type: AccessoryTypes[accessory.type],
-		serialNumber: accessory.deviceInfo.serialNumber
+		serialNumber: accessory.deviceInfo.serialNumber,
 	};
 }
 
@@ -51,7 +52,7 @@ export function accessoryToNative(accessory: Accessory): Record<string, any> {
  * Creates or edits an existing <device>-object for an accessory.
  * @param accessory The accessory to update
  */
-export async function extendDevice(accessory: Accessory) {
+export async function extendDevice(accessory: Accessory): Promise<void> {
 	const objId = calcObjId(accessory);
 
 	if (objId in $.objects) {
@@ -80,7 +81,7 @@ export async function extendDevice(accessory: Accessory) {
 		// filter out the ones belonging to this device with a property path
 		const stateObjs = filter(
 			$.objects,
-			obj => obj._id.startsWith(objId) && obj.native && obj.native.path
+			(obj) => obj._id.startsWith(objId) && obj.native && obj.native.path,
 		);
 		// for each property try to update the value
 		for (const [id, obj] of entries(stateObjs)) {
@@ -104,11 +105,15 @@ export async function extendDevice(accessory: Accessory) {
 				if (obj.native.onlyChanges) {
 					await _.adapter.setStateChangedAsync(
 						id,
-						newValue as any ?? null,
-						true
+						(newValue as any) ?? null,
+						true,
 					);
 				} else {
-					await _.adapter.setStateAsync(id, newValue as any ?? null, true);
+					await _.adapter.setStateAsync(
+						id,
+						(newValue as any) ?? null,
+						true,
+					);
 				}
 			} catch (e) {
 				/* skip this value */
@@ -120,7 +125,7 @@ export async function extendDevice(accessory: Accessory) {
 			_id: objId,
 			type: "device",
 			common: accessoryToCommon(accessory),
-			native: accessoryToNative(accessory)
+			native: accessoryToNative(accessory),
 		};
 		await _.adapter.setObjectAsync(objId, devObj);
 
@@ -137,11 +142,11 @@ export async function extendDevice(accessory: Accessory) {
 					type: "boolean",
 					role: "indicator.alive",
 					desc:
-						"indicates if the device is currently alive and connected to the gateway"
+						"indicates if the device is currently alive and connected to the gateway",
 				},
 				native: {
-					path: "alive"
-				}
+					path: "alive",
+				},
 			},
 			lastSeen: {
 				// last seen state
@@ -154,12 +159,12 @@ export async function extendDevice(accessory: Accessory) {
 					type: "number",
 					role: "indicator.lastSeen",
 					desc:
-						"indicates when the device has last been seen by the gateway"
+						"indicates when the device has last been seen by the gateway",
 				},
 				native: {
-					path: "lastSeen"
-				}
-			}
+					path: "lastSeen",
+				},
+			},
 		};
 
 		if (
@@ -191,11 +196,11 @@ export async function extendDevice(accessory: Accessory) {
 					type: "channel",
 					common: {
 						name: channelName!,
-						role: "light"
+						role: "light",
 					},
 					native: {
-						spectrum: spectrum // remember the spectrum, so we can update different properties later
-					}
+						spectrum: spectrum, // remember the spectrum, so we can update different properties later
+					},
 				};
 				if (spectrum === "white") {
 					stateObjs[
@@ -204,11 +209,11 @@ export async function extendDevice(accessory: Accessory) {
 				} else if (spectrum === "rgb") {
 					stateObjs[`${channelID}.color`] = objectDefinitions.color(
 						objId,
-						"device"
+						"device",
 					);
 					stateObjs[`${channelID}.hue`] = objectDefinitions.hue(
 						objId,
-						"device"
+						"device",
 					);
 					stateObjs[
 						`${channelID}.saturation`
@@ -219,7 +224,7 @@ export async function extendDevice(accessory: Accessory) {
 				] = objectDefinitions.transitionDuration(
 					objId,
 					"device",
-					accessory.type
+					accessory.type,
 				);
 				stateObjs[
 					`${channelID}.whenPowerRestored`
@@ -232,9 +237,9 @@ export async function extendDevice(accessory: Accessory) {
 					type: "channel",
 					common: {
 						name: channelName!,
-						role: "switch"
+						role: "switch",
 					},
-					native: {}
+					native: {},
 				};
 			}
 			// Common properties for both plugs and lights
@@ -242,12 +247,12 @@ export async function extendDevice(accessory: Accessory) {
 			stateObjs[`${channelID}.brightness`] = objectDefinitions.brightness(
 				objId,
 				"device",
-				accessory.type
+				accessory.type,
 			);
 			stateObjs[`${channelID}.state`] = objectDefinitions.onOff(
 				objId,
 				"device",
-				accessory.type
+				accessory.type,
 			);
 		}
 
@@ -260,7 +265,7 @@ export async function extendDevice(accessory: Accessory) {
 				// Some 3rd party devices send no battery info
 				stateObjs.battery = objectDefinitions.batteryPercentage(
 					objId,
-					"device"
+					"device",
 				);
 			}
 		}
@@ -269,12 +274,12 @@ export async function extendDevice(accessory: Accessory) {
 			stateObjs.position = objectDefinitions.position(
 				objId,
 				"device",
-				accessory.type
+				accessory.type,
 			);
 			stateObjs.stopBlinds = objectDefinitions.stopBlinds(
 				objId,
 				"device",
-				accessory.type
+				accessory.type,
 			);
 		}
 
@@ -295,7 +300,7 @@ export async function extendDevice(accessory: Accessory) {
  * @param groupInfo The group to update
  */
 export async function updatePossibleScenes(
-	groupInfo: GroupInfo
+	groupInfo: GroupInfo,
 ): Promise<void> {
 	const group = groupInfo.group;
 	// if this group is not in the dictionary, don't do anything
@@ -311,12 +316,12 @@ export async function updatePossibleScenes(
 		const scenes = groupInfo.scenes;
 		const newDropdownStates = composeObject(
 			Object.keys(scenes).map(
-				id => [id, scenes[id].name] as [string, string]
-			)
+				(id) => [id, scenes[id].name] as [string, string],
+			),
 		);
 		// compare with the old dropdown states
 		const obj = (await _.adapter.getObjectAsync(
-			scenesId
+			scenesId,
 		)) as ioBroker.StateObject;
 		const oldDropdownStates = obj.common.states;
 		if (
@@ -327,7 +332,7 @@ export async function updatePossibleScenes(
 			_.log(
 				`updating possible scenes for group ${
 					group.instanceId
-				}: ${JSON.stringify(Object.keys(groupInfo.scenes))}`
+				}: ${JSON.stringify(Object.keys(groupInfo.scenes))}`,
 			);
 			obj.common.states = newDropdownStates;
 			await _.adapter.setObjectAsync(scenesId, obj);
@@ -369,7 +374,7 @@ export function getAccessoryIcon(accessory: Accessory): string | undefined {
 		} else {
 			prefix = "bulb";
 		}
-		let suffix: string = "";
+		let suffix = "";
 		const spectrum = accessory.lightList[0].spectrum;
 		if (spectrum === "white") {
 			suffix = "_ws";
@@ -383,7 +388,7 @@ export function getAccessoryIcon(accessory: Accessory): string | undefined {
 /**
  * Returns the ioBroker id of the root object for the given state
  */
-export function getRootId(stateId: string) {
+export function getRootId(stateId: string): string | undefined {
 	const match = /^tradfri\.\d+\.\w+\-\d+/.exec(stateId);
 	if (match) return match[0];
 }
@@ -433,8 +438,9 @@ export function calcObjName(accessory: Accessory): string {
 			break;
 		default:
 			_.log(
+				// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
 				`Unknown accessory type ${accessory.type}. Please send this info to the developer with a short description of the device!`,
-				"warn"
+				"warn",
 			);
 			prefix = "XYZ";
 			break;
@@ -446,7 +452,7 @@ export function calcObjName(accessory: Accessory): string {
  * Returns the common part of the ioBroker object representing the given group
  */
 export function groupToCommon(
-	group: Group | VirtualGroup
+	group: Group | VirtualGroup,
 ): ioBroker.ObjectCommon {
 	let name: string;
 	if (group instanceof Group) {
@@ -465,12 +471,12 @@ export function groupToCommon(
  * Returns the native part of the ioBroker object representing the given group
  */
 export function groupToNative(
-	group: Group | VirtualGroup
+	group: Group | VirtualGroup,
 ): Record<string, any> {
 	return {
 		instanceId: group.instanceId,
 		deviceIDs: group.deviceIDs,
-		type: (group instanceof VirtualGroup ? "virtual " : "") + "group"
+		type: (group instanceof VirtualGroup ? "virtual " : "") + "group",
 	};
 }
 
@@ -512,7 +518,7 @@ export function calcSceneName(scene: Scene): string {
 export type ioBrokerObjectDefinition = (
 	rootId: string,
 	rootType: "device" | "group" | "virtual group",
-	deviceType?: AccessoryTypes | undefined
+	deviceType?: AccessoryTypes | undefined,
 ) => ioBroker.Object;
 
 /** Returns a string representation of a member of the `AccessoryTypes` enum */
@@ -521,7 +527,7 @@ function accessoryTypeToString(type: AccessoryTypes) {
 }
 
 function getCoapAccessoryPropertyPathPrefix(
-	deviceType: AccessoryTypes | undefined
+	deviceType: AccessoryTypes | undefined,
 ) {
 	switch (deviceType) {
 		case AccessoryTypes.lightbulb:
@@ -548,11 +554,11 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 			write: true,
 			type: "number",
 			role: "value.id",
-			desc: "the instance id of the currently active scene"
+			desc: "the instance id of the currently active scene",
 		},
 		native: {
-			path: "sceneId"
-		}
+			path: "sceneId",
+		},
 	}),
 
 	// Lights and plugs
@@ -567,13 +573,12 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 			read: true,
 			write: true,
 			type: "boolean",
-			role: "switch"
+			role: "switch",
 		},
 		native: {
-			path: getCoapAccessoryPropertyPathPrefix(deviceType) + "onOff"
-		}
+			path: getCoapAccessoryPropertyPathPrefix(deviceType) + "onOff",
+		},
 	}),
-
 
 	// Lights only
 	whenPowerRestored: (rootId, rootType, deviceType) => {
@@ -591,16 +596,18 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 				role: "level",
 				states: {
 					"2": "Turn on",
-					"4": "Previous state"
+					"4": "Previous state",
 				},
 				desc:
 					rootType === "device"
 						? "What this device should do after power is restored"
-						: "What devices in this group should do after power is restored"
+						: "What devices in this group should do after power is restored",
 			},
 			native: {
-				path: getCoapAccessoryPropertyPathPrefix(deviceType) + "whenPowerRestored"
-			}
+				path:
+					getCoapAccessoryPropertyPathPrefix(deviceType) +
+					"whenPowerRestored",
+			},
 		};
 		return ret;
 	},
@@ -630,11 +637,11 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 				desc:
 					rootType === "device"
 						? `Brightness of the ${deviceName}`
-						: `Brightness of this group's ${deviceName}s`
+						: `Brightness of this group's ${deviceName}s`,
 			},
 			native: {
-				path: getCoapAccessoryPropertyPathPrefix(deviceType) + "dimmer"
-			}
+				path: getCoapAccessoryPropertyPathPrefix(deviceType) + "dimmer",
+			},
 		};
 	},
 
@@ -658,13 +665,13 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 				rootType === "device"
 					? "Duration of a state change"
 					: `Duration for state changes of this group's lightbulbs`,
-			unit: "s"
+			unit: "s",
 		},
 		native: {
 			path:
 				getCoapAccessoryPropertyPathPrefix(deviceType) +
-				"transitionTime"
-		}
+				"transitionTime",
+		},
 	}),
 
 	// Lights only
@@ -687,9 +694,9 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 				desc:
 					rootType === "device"
 						? "Range: 0% = cold, 100% = warm"
-						: "Color temperature of this group's white spectrum lightbulbs. Range: 0% = cold, 100% = warm"
+						: "Color temperature of this group's white spectrum lightbulbs. Range: 0% = cold, 100% = warm",
 			},
-			native: {}
+			native: {},
 		};
 		if (rootType === "device") {
 			ret.native.path = "lightList.[0].colorTemperature";
@@ -720,9 +727,9 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 				desc:
 					rootType === "device"
 						? "6-digit RGB hex string"
-						: "Color of this group's RGB lightbulbs as a 6-digit hex string."
+						: "Color of this group's RGB lightbulbs as a 6-digit hex string.",
 			},
-			native: {}
+			native: {},
 		};
 		if (rootType === "device") {
 			ret.native.path = "lightList.[0].color";
@@ -756,9 +763,9 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 				desc:
 					rootType === "device"
 						? "Hue of this RGB lightbulb"
-						: "Hue of this group's RGB lightbulbs"
+						: "Hue of this group's RGB lightbulbs",
 			},
-			native: {}
+			native: {},
 		};
 		if (rootType === "device") {
 			ret.native.path = "lightList.[0].hue";
@@ -792,9 +799,9 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 				desc:
 					rootType === "device"
 						? "Saturation of this RGB lightbulb"
-						: "Saturation of this group's RGB lightbulbs"
+						: "Saturation of this group's RGB lightbulbs",
 			},
-			native: {}
+			native: {},
 		};
 		if (rootType === "device") {
 			ret.native.path = "lightList.[0].saturation";
@@ -808,7 +815,7 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 		return ret;
 	},
 
-	batteryPercentage: rootId => ({
+	batteryPercentage: (rootId) => ({
 		_id: `${rootId}.batteryPercentage`,
 		type: "state",
 		common: {
@@ -820,12 +827,12 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 			max: 100,
 			def: 100,
 			role: "indicator.maintenance",
-			unit: "%"
+			unit: "%",
 		},
 		native: {
 			path: "deviceInfo.battery",
-			onlyChanges: true
-		}
+			onlyChanges: true,
+		},
 	}),
 
 	// Blind position: 0% is open, 100% is closed
@@ -848,11 +855,11 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 			min: 0,
 			max: 100,
 			role: "blind",
-			unit: "%"
+			unit: "%",
 		},
 		native: {
-			path: getCoapAccessoryPropertyPathPrefix(deviceType) + "position"
-		}
+			path: getCoapAccessoryPropertyPathPrefix(deviceType) + "position",
+		},
 	}),
 	// Blind position: 0% is open, 100% is closed
 	stopBlinds: (rootId, rootType, deviceType) => {
@@ -870,12 +877,14 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 				read: false,
 				write: true,
 				type: "boolean",
-				role: "blind"
+				role: "blind",
 			},
 			native: {
 				// This is only a dummy path. The state changed handler in main.ts requires it to exist
-				path: getCoapAccessoryPropertyPathPrefix(deviceType) + `stop${isGroup ? "Blinds" : ""}`
-			}
+				path:
+					getCoapAccessoryPropertyPathPrefix(deviceType) +
+					`stop${isGroup ? "Blinds" : ""}`,
+			},
 		};
-	}
+	},
 };

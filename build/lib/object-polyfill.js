@@ -1,40 +1,43 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.bury = exports.dig = void 0;
-// Gräbt in einem Objekt nach dem Property-Pfad.
-// Bsps: (obj, "common.asdf.qwer") => obj.common.asdf.qwer
+var __defProp = Object.defineProperty;
+var __markAsModule = (target) => __defProp(target, "__esModule", {value: true});
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, {get: all[name], enumerable: true});
+};
+__markAsModule(exports);
+__export(exports, {
+  bury: () => bury,
+  dig: () => dig
+});
 function dig(object, path) {
-    function _dig(obj, pathArr) {
-        // are we there yet? then return obj
-        if (!pathArr.length)
-            return obj;
-        // go deeper
-        let propName = pathArr.shift();
-        if (/\[\d+\]/.test(propName)) {
-            // this is an array index
-            propName = +propName.slice(1, -1);
-        }
-        return _dig(obj[propName], pathArr);
+  function _dig(obj, pathArr) {
+    if (!pathArr.length)
+      return obj;
+    let propName = pathArr.shift();
+    if (/\[\d+\]/.test(propName)) {
+      propName = +propName.slice(1, -1);
     }
-    return _dig(object, path.split("."));
+    return _dig(obj[propName], pathArr);
+  }
+  return _dig(object, path.split("."));
 }
-exports.dig = dig;
-// Vergräbt eine Eigenschaft in einem Objekt (Gegenteil von dig)
 function bury(object, path, value) {
-    function _bury(obj, pathArr) {
-        // are we there yet? then return obj
-        if (pathArr.length === 1) {
-            obj[pathArr[0]] = value;
-            return;
-        }
-        // go deeper
-        let propName = pathArr.shift();
-        if (/\[\d+\]/.test(propName)) {
-            // this is an array index
-            propName = +propName.slice(1, -1);
-        }
-        _bury(obj[propName], pathArr);
+  function _bury(obj, pathArr) {
+    if (pathArr.length === 1) {
+      obj[pathArr[0]] = value;
+      return;
     }
-    _bury(object, path.split("."));
+    let propName = pathArr.shift();
+    if (/\[\d+\]/.test(propName)) {
+      propName = +propName.slice(1, -1);
+    }
+    _bury(obj[propName], pathArr);
+  }
+  _bury(object, path.split("."));
 }
-exports.bury = bury;
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
+  bury,
+  dig
+});
+//# sourceMappingURL=object-polyfill.js.map
