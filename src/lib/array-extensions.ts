@@ -15,11 +15,9 @@ export function intersect(a: number[], b: number[]): number[] {
 	let bi = 0;
 	const ret = [];
 
-	while ((ai < a.length) && (bi < b.length)) {
-		if (a[ai] < b[bi])
-			ai++;
-		else if (a[ai] > b[bi])
-			bi++;
+	while (ai < a.length && bi < b.length) {
+		if (a[ai] < b[bi]) ai++;
+		else if (a[ai] > b[bi]) bi++;
 		else {
 			ret.push(a[ai]);
 			ai++;

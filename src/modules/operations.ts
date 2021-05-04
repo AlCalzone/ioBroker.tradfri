@@ -5,10 +5,10 @@
 import {
 	Accessory,
 	AccessoryTypes,
+	BlindOperation,
 	Group,
 	LightOperation,
-	BlindOperation,
-	PlugOperation
+	PlugOperation,
 } from "node-tradfri-client";
 import { VirtualGroup } from "../lib/virtual-group";
 import { session as $ } from "./session";
@@ -22,7 +22,7 @@ import { session as $ } from "./session";
  */
 export async function operateVirtualGroup(
 	group: Group | VirtualGroup,
-	operation: LightOperation | BlindOperation | PlugOperation
+	operation: LightOperation | BlindOperation | PlugOperation,
 ): Promise<void> {
 	if (group.deviceIDs == undefined) return;
 	// Test which kind of operation this is
@@ -30,8 +30,8 @@ export async function operateVirtualGroup(
 		// This is a blind operation
 		// find all blinds belonging to this group
 		const blindAccessories = group.deviceIDs
-			.map(id => $.devices[id])
-			.filter(dev => dev != null && dev.type === AccessoryTypes.blind);
+			.map((id) => $.devices[id])
+			.filter((dev) => dev != null && dev.type === AccessoryTypes.blind);
 
 		for (const acc of blindAccessories) {
 			await $.tradfri.operateBlind(acc, operation);
@@ -40,13 +40,13 @@ export async function operateVirtualGroup(
 		// This is a light or plug operation
 		// find all lightbulbs belonging to this group
 		const lightbulbAccessories = group.deviceIDs
-			.map(id => $.devices[id])
+			.map((id) => $.devices[id])
 			.filter(
-				dev => dev != null && dev.type === AccessoryTypes.lightbulb
+				(dev) => dev != null && dev.type === AccessoryTypes.lightbulb,
 			);
 		const plugAccessories = group.deviceIDs
-			.map(id => $.devices[id])
-			.filter(dev => dev != null && dev.type === AccessoryTypes.plug);
+			.map((id) => $.devices[id])
+			.filter((dev) => dev != null && dev.type === AccessoryTypes.plug);
 
 		if ("onOff" in operation || "dimmer" in operation) {
 			// This operation is compatible with plugs
@@ -73,8 +73,8 @@ export async function stopBlinds(group: VirtualGroup): Promise<void> {
 	if (group.deviceIDs == undefined) return;
 
 	const blindAccessories = group.deviceIDs
-		.map(id => $.devices[id])
-		.filter(dev => dev != null && dev.type === AccessoryTypes.blind);
+		.map((id) => $.devices[id])
+		.filter((dev) => dev != null && dev.type === AccessoryTypes.blind);
 	for (const acc of blindAccessories) {
 		await acc.blindList[0].stop();
 	}
@@ -88,7 +88,7 @@ export async function stopBlinds(group: VirtualGroup): Promise<void> {
  */
 export function renameDevice(
 	accessory: Accessory,
-	newName: string
+	newName: string,
 ): Promise<boolean> {
 	// create a copy to modify
 	const newAccessory = accessory.clone();

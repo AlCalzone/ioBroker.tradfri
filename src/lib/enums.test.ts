@@ -3,7 +3,6 @@ import { Enumeration, getEnumValueAsName } from "./enums";
 // tslint:disable:no-unused-expression
 
 describe("lib/enums => getEnumValueAsName() =>", () => {
-
 	const theEnum: Enumeration = {
 		asdfg: 1234,
 		blub: 0x815,
@@ -29,5 +28,4 @@ describe("lib/enums => getEnumValueAsName() =>", () => {
 	it("should return an empty string for non-enum values", () => {
 		expect(getEnumValueAsName(theEnum, 0)).to.equal("");
 	});
-
 });

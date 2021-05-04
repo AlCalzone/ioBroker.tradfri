@@ -4,7 +4,10 @@ export type KeyValuePair<T> = [string, T];
 // Gräbt in einem Objekt nach dem Property-Pfad.
 // Bsps: (obj, "common.asdf.qwer") => obj.common.asdf.qwer
 export function dig<T = any>(object: Record<string, T>, path: string): unknown {
-	function _dig<T2 = any>(obj: Record<string, T2>, pathArr: string[]): unknown {
+	function _dig<T2 = any>(
+		obj: Record<string, T2>,
+		pathArr: string[],
+	): unknown {
 		// are we there yet? then return obj
 		if (!pathArr.length) return obj;
 		// go deeper
@@ -19,7 +22,11 @@ export function dig<T = any>(object: Record<string, T>, path: string): unknown {
 }
 
 // Vergräbt eine Eigenschaft in einem Objekt (Gegenteil von dig)
-export function bury<T = any>(object: Record<string, T>, path: string, value: any): void {
+export function bury<T = any>(
+	object: Record<string, T>,
+	path: string,
+	value: any,
+): void {
 	function _bury(obj: Record<string, any>, pathArr: string[]) {
 		// are we there yet? then return obj
 		if (pathArr.length === 1) {

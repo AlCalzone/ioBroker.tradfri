@@ -21,7 +21,6 @@ describe("lib/math => clamp() =>", () => {
 		expect(clamp(max + 1, max, min)).to.equal(max);
 		expect(clamp(value, max, min)).to.equal(value);
 	});
-
 });
 
 describe("lib/math => roundTo() =>", () => {

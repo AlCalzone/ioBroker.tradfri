@@ -34,15 +34,25 @@ import { filter as objFilter } from "alcalzone-shared/objects";
 export interface ExtendedAdapter extends ioBroker.Adapter {
 	__isExtended: boolean;
 
-	createOwnStateAsync(id: string, initialValue: any, ack?: boolean, commonType?: ioBroker.CommonType): Promise<void>;
-	createOwnStateExAsync(id: string, obj: ioBroker.Object, initialValue: any, ack?: boolean): Promise<void>;
-
+	createOwnStateAsync(
+		id: string,
+		initialValue: any,
+		ack?: boolean,
+		commonType?: ioBroker.CommonType,
+	): Promise<void>;
+	createOwnStateExAsync(
+		id: string,
+		obj: ioBroker.Object,
+		initialValue: any,
+		ack?: boolean,
+	): Promise<void>;
 }
 
 export class Global {
-
 	private static _adapter: ExtendedAdapter;
-	public static get adapter(): ExtendedAdapter { return Global._adapter; }
+	public static get adapter(): ExtendedAdapter {
+		return Global._adapter;
+	}
 	public static set adapter(adapter: ExtendedAdapter) {
 		Global._adapter = adapter;
 	}
@@ -51,7 +61,12 @@ export class Global {
 		// Eine Handvoll Funktionen promisifizieren
 
 		const ret = adapter as ExtendedAdapter;
-		ret.createOwnStateAsync = async (id: string, initialValue: any, ack: boolean = true, commonType: ioBroker.CommonType = "mixed") => {
+		ret.createOwnStateAsync = async (
+			id: string,
+			initialValue: any,
+			ack: boolean = true,
+			commonType: ioBroker.CommonType = "mixed",
+		) => {
 			await ret.setObjectAsync(id, {
 				type: "state",
 				common: {
@@ -63,11 +78,18 @@ export class Global {
 				},
 				native: {},
 			});
-			if (initialValue != undefined) await ret.setStateAsync(id, initialValue, ack);
+			if (initialValue != undefined)
+				await ret.setStateAsync(id, initialValue, ack);
 		};
-		ret.createOwnStateExAsync = async (id: string, obj: ioBroker.Object, initialValue: any, ack = true) => {
+		ret.createOwnStateExAsync = async (
+			id: string,
+			obj: ioBroker.Object,
+			initialValue: any,
+			ack = true,
+		) => {
 			await ret.setObjectAsync(id, obj);
-			if (initialValue != undefined) await ret.setStateAsync(id, initialValue, ack);
+			if (initialValue != undefined)
+				await ret.setStateAsync(id, initialValue, ack);
 		};
 
 		return ret;
@@ -92,7 +114,8 @@ export class Global {
 		// 	}
 		// }
 
-		if (level === "silly" && !(level in Global._adapter.log)) level = "debug";
+		if (level === "silly" && !(level in Global._adapter.log))
+			level = "debug";
 		Global._adapter.log[level](message);
 	}
 
@@ -108,13 +131,19 @@ export class Global {
 	 * Kurzschreibweise für die Ermittlung mehrerer Objekte
 	 * @param id
 	 */
-	public static async $$(pattern: string, type: ioBroker.ObjectType, role?: string): Promise<Record<string, ioBroker.Object>> {
-		const objects = await Global._adapter.getForeignObjectsAsync(pattern, type);
+	public static async $$(
+		pattern: string,
+		type: ioBroker.ObjectType,
+		role?: string,
+	): Promise<Record<string, ioBroker.Object>> {
+		const objects = await Global._adapter.getForeignObjectsAsync(
+			pattern,
+			type,
+		);
 		if (role) {
-			return objFilter(objects, o => (o.common as any).role === role);
+			return objFilter(objects, (o) => (o.common as any).role === role);
 		} else {
 			return objects;
 		}
 	}
-
 }

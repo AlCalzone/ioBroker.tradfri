@@ -308,5 +308,4 @@ export const ALL = {
 	OTA_FORCED: 5,
 	OTA_NORMAL: 0,
 	OTA_REQUIRED: 2,
-
 };
