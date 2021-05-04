@@ -1,6 +1,5 @@
 import { entries } from "alcalzone-shared/objects";
-import { LightOperation, BlindOperation, PlugOperation, PowerRestoredAction } from "node-tradfri-client";
-import {  } from "node-tradfri-client/build/lib/light";
+import type { LightOperation, BlindOperation, PlugOperation, PowerRestoredAction } from "node-tradfri-client";
 
 export class VirtualGroup {
 

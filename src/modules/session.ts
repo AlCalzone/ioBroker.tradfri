@@ -1,5 +1,5 @@
-import { Accessory, GroupInfo, TradfriClient } from "node-tradfri-client";
-import { VirtualGroup } from "../lib/virtual-group";
+import type { Accessory, GroupInfo, TradfriClient } from "node-tradfri-client";
+import type { VirtualGroup } from "../lib/virtual-group";
 
 export class Session {
 	// We know this will be definitely assigned in the adapter ready callback

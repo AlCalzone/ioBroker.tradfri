@@ -1,4 +1,4 @@
-import { Spectrum } from "node-tradfri-client";
+import type { Spectrum } from "node-tradfri-client";
 
 export interface Group {
 	id: string;

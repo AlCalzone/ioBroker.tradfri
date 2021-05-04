@@ -4,7 +4,7 @@ import { Accessory, AccessoryTypes } from "node-tradfri-client";
 import { Global as _ } from "../lib/global";
 import { calcGroupName } from "../lib/iobroker-objects";
 import { VirtualGroup } from "../lib/virtual-group";
-import { Device as SendToDevice, Group as SendToGroup } from "./communication";
+import type { Device as SendToDevice, Group as SendToGroup } from "./communication";
 import { extendVirtualGroup, updateGroupStates } from "./groups";
 import { session as $ } from "./session";
 
