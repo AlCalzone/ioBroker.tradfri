@@ -25,8 +25,6 @@ __export(exports, {
   VirtualGroup: () => VirtualGroup
 });
 var import_objects = __toModule(require("alcalzone-shared/objects"));
-var import_node_tradfri_client = __toModule(require("node-tradfri-client"));
-var import_light = __toModule(require("node-tradfri-client/build/lib/light"));
 class VirtualGroup {
   constructor(instanceId) {
     this.instanceId = instanceId;

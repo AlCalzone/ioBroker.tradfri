@@ -40,8 +40,8 @@ __export(exports, {
   fixAdapterObjects: () => fixAdapterObjects
 });
 var import_objects = __toModule(require("alcalzone-shared/objects"));
-var import_global = __toModule(require("./global"));
 var import_io_package = __toModule(require("../../io-package.json"));
+var import_global = __toModule(require("./global"));
 const instanceObjects = import_io_package.instanceObjects;
 async function fixAdapterObjects() {
   const stateObjs = (0, import_objects.values)(await import_global.Global.$$(`${import_global.Global.adapter.namespace}.*`, "state"));

@@ -105,11 +105,13 @@ function extendGroup(group) {
     for (const [id, obj] of (0, import_objects.entries)(stateObjs)) {
       try {
         let newValue = (0, import_object_polyfill.dig)(group, obj.native.path);
+        if (typeof newValue === "function")
+          continue;
         const roundToDigits = import_global.Global.adapter.config.roundToDigits;
         if (typeof roundToDigits === "number" && typeof newValue === "number") {
           newValue = (0, import_math.roundTo)(newValue, roundToDigits);
         }
-        import_global.Global.adapter.setState(id, newValue, true);
+        import_global.Global.adapter.setState(id, newValue != null ? newValue : null, true);
       } catch (e) {
       }
     }

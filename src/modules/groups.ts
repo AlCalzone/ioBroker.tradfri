@@ -114,6 +114,7 @@ export function extendGroup(group: Group): void {
 			try {
 				// Object could have a default value, find it
 				let newValue = dig(group, obj.native.path);
+				if (typeof newValue === "function") continue;
 				const roundToDigits = _.adapter.config.roundToDigits;
 				if (
 					typeof roundToDigits === "number" &&
@@ -121,7 +122,7 @@ export function extendGroup(group: Group): void {
 				) {
 					newValue = roundTo(newValue, roundToDigits);
 				}
-				_.adapter.setState(id, newValue as any, true);
+				_.adapter.setState(id, (newValue as any) ?? null, true);
 			} catch (e) {
 				/* skip this value */
 			}

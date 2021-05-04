@@ -1,6 +1,6 @@
 {
   "version": 3,
   "sources": ["../../src/lib/str2regex.ts"],
-  "mappings": ";;;;;;AAAA;AAAA;AAAA;AAAA;AACO,mBAAmB,SAAiB;AAC1C,SAAO,IAAI,OACV,QACE,QAAQ,OAAO,OACf,QAAQ,OAAO,MACf,QAAQ,OAAO;AAAA;",
+  "mappings": ";;;;;;AAAA;AAAA;AAAA;AAAA;AAAO,mBAAmB,SAAyB;AAClD,SAAO,IAAI,OACV,QACE,QAAQ,OAAO,OACf,QAAQ,OAAO,MACf,QAAQ,OAAO;AAAA;",
   "names": []
 }

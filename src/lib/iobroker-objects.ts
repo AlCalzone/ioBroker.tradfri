@@ -95,6 +95,7 @@ export async function extendDevice(accessory: Accessory): Promise<void> {
 			try {
 				// Object could have a default value, find it
 				let newValue = dig<any>(accessory, obj.native.path);
+				if (typeof newValue === "function") continue;
 				const roundToDigits = _.adapter.config.roundToDigits;
 				if (
 					typeof roundToDigits === "number" &&
