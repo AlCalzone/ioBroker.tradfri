@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "2.7.2",
+        "version": "2.7.3",
         "news": {
+            "2.7.3": {
+                "en": "Fix remaining JS-Controller 3.3 warnings",
+                "de": "Korrigieren Sie die verbleibenden JS-Controller 3.3-Warnungen",
+                "ru": "Исправить оставшиеся предупреждения JS-Controller 3.3",
+                "pt": "Corrigir os avisos restantes do JS-Controller 3.3",
+                "nl": "Los de resterende JS-Controller 3.3-waarschuwingen op",
+                "fr": "Correction des avertissements restants du JS-Controller 3.3",
+                "it": "Correggere i restanti avvisi JS-Controller 3.3",
+                "es": "Corregir las advertencias restantes de JS-Controller 3.3",
+                "pl": "Napraw pozostałe ostrzeżenia JS-Controller 3.3",
+                "zh-cn": "修复剩余的JS-Controller 3.3警告"
+            },
             "2.7.2": {
                 "en": "Avoid warning about `undefined` states in JS-Controller 3.3+",
                 "de": "Vermeiden Sie Warnungen vor \"undefinierten\" Zuständen in JS-Controller 3.3+",
@@ -230,18 +242,6 @@
                 "es": "Se agregó soporte para persianas",
                 "pl": "Dodano obsługę żaluzji",
                 "zh-cn": "增加了对百叶窗的支持"
-            },
-            "2.3.0": {
-                "en": "The gateway can now be discovered automatically",
-                "de": "Automatische Erkennung des Gateways hinzugefügt",
-                "ru": "Шлюз теперь может быть обнаружен автоматически",
-                "pt": "O gateway pode agora ser descobertos automaticamente",
-                "nl": "De gateway kan nu worden ontdekt automatisch",
-                "fr": "La passerelle peut maintenant être découvert automatiquement",
-                "it": "Il gateway può ora essere individuati automaticamente",
-                "es": "La puerta de enlace puede ahora ser descubiertos automáticamente",
-                "pl": "Brama może być wykryty automatycznie",
-                "zh-cn": "该网关，现在可以自动发现"
             }
         },
         "title": "IKEA Trådfri",
