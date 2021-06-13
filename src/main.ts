@@ -330,9 +330,11 @@ function startAdapter(options: Partial<utils.AdapterOptions> = {}) {
 						if (obj.common && obj.common.name !== acc.name) {
 							// the name has changed, notify the gateway
 							_.log(
-								`the device ${id} was renamed to "${obj.common.name}"`,
+								`the device ${id} was renamed to "${
+									obj.common.name as string
+								}"`,
 							);
-							renameDevice(acc, obj.common.name);
+							renameDevice(acc, obj.common.name as string);
 						}
 					} else if (
 						obj.type === "channel" &&
@@ -344,9 +346,11 @@ function startAdapter(options: Partial<utils.AdapterOptions> = {}) {
 						if (obj.common && obj.common.name !== grp.name) {
 							// the name has changed, notify the gateway
 							_.log(
-								`the group ${id} was renamed to "${obj.common.name}"`,
+								`the group ${id} was renamed to "${
+									obj.common.name as string
+								}"`,
 							);
-							renameGroup(grp, obj.common.name);
+							renameGroup(grp, obj.common.name as string);
 						}
 					}
 					// remember the object
@@ -958,7 +962,7 @@ async function loadVirtualGroups(): Promise<void> {
 				);
 				const ret = new VirtualGroup(id);
 				ret.deviceIDs = deviceIDs;
-				ret.name = g.common.name;
+				ret.name = g.common.name as string;
 				return [`${id}`, ret] as [string, VirtualGroup];
 			}),
 		),
