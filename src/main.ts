@@ -420,10 +420,7 @@ function startAdapter(options: Partial<utils.AdapterOptions> = {}) {
 						// don't round the transition duration!
 						if (id.endsWith("transitionDuration"))
 							roundToDigits = 2;
-						val = roundTo(
-							(val as unknown) as number,
-							roundToDigits,
-						);
+						val = roundTo(val as unknown as number, roundToDigits);
 						if (stateObj.common.min != null)
 							val = Math.max(stateObj.common.min, val);
 						if (stateObj.common.max != null)
@@ -447,35 +444,34 @@ function startAdapter(options: Partial<utils.AdapterOptions> = {}) {
 
 							if (id.endsWith(".state")) {
 								wasAcked = !(await group.toggle(
-									(val as unknown) as boolean,
+									val as unknown as boolean,
 								));
 							} else if (id.endsWith(".brightness")) {
 								wasAcked = !(await group.setBrightness(
-									(val as unknown) as number,
+									val as unknown as number,
 									await getTransitionDuration(group),
 								));
 							} else if (id.endsWith(".position")) {
 								wasAcked = !(await group.setPosition(
-									(val as unknown) as number,
+									val as unknown as number,
 								));
 							} else if (id.endsWith(".activeScene")) {
 								// turn on and activate a scene
 								wasAcked = !(await group.activateScene(
-									(val as unknown) as number,
+									val as unknown as number,
 								));
 							} else if (id.endsWith(".color")) {
 								// color change is only supported manually, so we operate
 								// the virtual state of this group
 								val = normalizeHexColor(
-									(val as unknown) as string,
+									val as unknown as string,
 								);
 								if (val != null) {
 									state.val = val;
 									await operateVirtualGroup(group, {
 										color: val,
-										transitionTime: await getTransitionDuration(
-											group,
-										),
+										transitionTime:
+											await getTransitionDuration(group),
 									});
 									wasAcked = true;
 								}
@@ -483,7 +479,7 @@ function startAdapter(options: Partial<utils.AdapterOptions> = {}) {
 								// color change is only supported manually, so we operate
 								// the virtual state of this group
 								await operateVirtualGroup(group, {
-									colorTemperature: (val as unknown) as number,
+									colorTemperature: val as unknown as number,
 									transitionTime: await getTransitionDuration(
 										group,
 									),
@@ -501,13 +497,15 @@ function startAdapter(options: Partial<utils.AdapterOptions> = {}) {
 									prefix + "hue",
 								);
 								if (hueState == undefined) return;
-								const saturationState = await _.adapter.getStateAsync(
-									prefix + "saturation",
-								);
+								const saturationState =
+									await _.adapter.getStateAsync(
+										prefix + "saturation",
+									);
 								if (saturationState == undefined) return;
 
-								const hue = (hueState.val as unknown) as number;
-								const saturation = (saturationState.val as unknown) as number;
+								const hue = hueState.val as unknown as number;
+								const saturation =
+									saturationState.val as unknown as number;
 								// color change is only supported manually, so we operate
 								// the virtual state of this group
 								await operateVirtualGroup(group, {
@@ -555,35 +553,34 @@ function startAdapter(options: Partial<utils.AdapterOptions> = {}) {
 
 							if (id.endsWith(".state")) {
 								operation = {
-									onOff: (val as unknown) as boolean,
+									onOff: val as unknown as boolean,
 								};
 							} else if (id.endsWith(".brightness")) {
 								operation = {
-									dimmer: (val as unknown) as number,
+									dimmer: val as unknown as number,
 									transitionTime: await getTransitionDuration(
 										vGroup,
 									),
 								};
 							} else if (id.endsWith(".position")) {
 								operation = {
-									position: (val as unknown) as number,
+									position: val as unknown as number,
 								};
 							} else if (id.endsWith(".color")) {
 								val = normalizeHexColor(
-									(val as unknown) as string,
+									val as unknown as string,
 								);
 								if (val != null) {
 									state.val = val;
 									operation = {
 										color: val,
-										transitionTime: await getTransitionDuration(
-											vGroup,
-										),
+										transitionTime:
+											await getTransitionDuration(vGroup),
 									};
 								}
 							} else if (id.endsWith(".colorTemperature")) {
 								operation = {
-									colorTemperature: (val as unknown) as number,
+									colorTemperature: val as unknown as number,
 									transitionTime: await getTransitionDuration(
 										vGroup,
 									),
@@ -600,13 +597,15 @@ function startAdapter(options: Partial<utils.AdapterOptions> = {}) {
 									prefix + "hue",
 								);
 								if (hueState == undefined) return;
-								const saturationState = await _.adapter.getStateAsync(
-									prefix + "saturation",
-								);
+								const saturationState =
+									await _.adapter.getStateAsync(
+										prefix + "saturation",
+									);
 								if (saturationState == undefined) return;
 
-								const hue = (hueState.val as unknown) as number;
-								const saturation = (saturationState.val as unknown) as number;
+								const hue = hueState.val as unknown as number;
+								const saturation =
+									saturationState.val as unknown as number;
 
 								operation = {
 									hue,
@@ -623,7 +622,7 @@ function startAdapter(options: Partial<utils.AdapterOptions> = {}) {
 								await stopBlinds(vGroup);
 							} else if (id.endsWith(".whenPowerRestored")) {
 								operation = {
-									whenPowerRestored: (val as unknown) as number,
+									whenPowerRestored: val as unknown as number,
 								};
 							}
 
@@ -682,25 +681,25 @@ function startAdapter(options: Partial<utils.AdapterOptions> = {}) {
 								// if no request was sent, we can ack the state immediately
 								if (id.endsWith(".state")) {
 									wasAcked = !(await specificAccessory.toggle(
-										(val as unknown) as boolean,
+										val as unknown as boolean,
 									));
 								} else if (id.endsWith(".brightness")) {
 									if (light != undefined) {
 										wasAcked = !(await light.setBrightness(
-											(val as unknown) as number,
+											val as unknown as number,
 											await getTransitionDuration(
 												accessory,
 											),
 										));
 									} else if (plug != undefined) {
 										wasAcked = !(await plug.setBrightness(
-											(val as unknown) as number,
+											val as unknown as number,
 										));
 									}
 								} else if (id.endsWith(".position")) {
 									if (blind != undefined) {
 										wasAcked = !(await blind.setPosition(
-											(val as unknown) as number,
+											val as unknown as number,
 										));
 									}
 								} else if (id.endsWith(".color")) {
@@ -709,7 +708,7 @@ function startAdapter(options: Partial<utils.AdapterOptions> = {}) {
 									// in the future, we create different states for white and RGB bulbs
 									if (light.spectrum === "rgb") {
 										val = normalizeHexColor(
-											(val as unknown) as string,
+											val as unknown as string,
 										);
 										if (val != null) {
 											state.val = val;
@@ -721,18 +720,22 @@ function startAdapter(options: Partial<utils.AdapterOptions> = {}) {
 											));
 										}
 									} else if (light.spectrum === "white") {
-										wasAcked = !(await light.setColorTemperature(
-											(val as unknown) as number,
+										wasAcked =
+											!(await light.setColorTemperature(
+												val as unknown as number,
+												await getTransitionDuration(
+													accessory,
+												),
+											));
+									}
+								} else if (id.endsWith(".colorTemperature")) {
+									wasAcked =
+										!(await light.setColorTemperature(
+											val as unknown as number,
 											await getTransitionDuration(
 												accessory,
 											),
 										));
-									}
-								} else if (id.endsWith(".colorTemperature")) {
-									wasAcked = !(await light.setColorTemperature(
-										(val as unknown) as number,
-										await getTransitionDuration(accessory),
-									));
 								} else if (/\.(hue|saturation)$/.test(id)) {
 									// hue and saturation have to be set together
 									const prefix = id.substr(
@@ -741,25 +744,30 @@ function startAdapter(options: Partial<utils.AdapterOptions> = {}) {
 									);
 									// Try to read the hue and saturation states. If one of them doesn't exist,
 									// we cannot issue a command
-									const hueState = await _.adapter.getStateAsync(
-										prefix + "hue",
-									);
+									const hueState =
+										await _.adapter.getStateAsync(
+											prefix + "hue",
+										);
 									if (hueState == undefined) return;
-									const saturationState = await _.adapter.getStateAsync(
-										prefix + "saturation",
-									);
+									const saturationState =
+										await _.adapter.getStateAsync(
+											prefix + "saturation",
+										);
 									if (saturationState == undefined) return;
 
-									const hue = (hueState.val as unknown) as number;
-									const saturation = (saturationState.val as unknown) as number;
+									const hue =
+										hueState.val as unknown as number;
+									const saturation =
+										saturationState.val as unknown as number;
 									wasAcked = !(await $.tradfri.operateLight(
 										accessory,
 										{
 											hue,
 											saturation,
-											transitionTime: await getTransitionDuration(
-												accessory,
-											),
+											transitionTime:
+												await getTransitionDuration(
+													accessory,
+												),
 										},
 									));
 								} else if (id.endsWith(".transitionDuration")) {
@@ -772,7 +780,8 @@ function startAdapter(options: Partial<utils.AdapterOptions> = {}) {
 									wasAcked = !(await $.tradfri.operateLight(
 										accessory,
 										{
-											whenPowerRestored: (val as unknown) as number,
+											whenPowerRestored:
+												val as unknown as number,
 										},
 									));
 								}
@@ -929,7 +938,7 @@ async function getTransitionDuration(
 	} else return assertNever(accessoryOrGroup);
 
 	const ret = await adapter.getStateAsync(stateId);
-	if (ret != null) return (ret.val as unknown) as number;
+	if (ret != null) return ret.val as unknown as number;
 	return 0.5; // default
 }
 

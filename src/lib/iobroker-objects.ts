@@ -142,8 +142,7 @@ export async function extendDevice(accessory: Accessory): Promise<void> {
 					write: false,
 					type: "boolean",
 					role: "indicator.alive",
-					desc:
-						"indicates if the device is currently alive and connected to the gateway",
+					desc: "indicates if the device is currently alive and connected to the gateway",
 				},
 				native: {
 					path: "alive",
@@ -159,8 +158,7 @@ export async function extendDevice(accessory: Accessory): Promise<void> {
 					write: false,
 					type: "number",
 					role: "indicator.lastSeen",
-					desc:
-						"indicates when the device has last been seen by the gateway",
+					desc: "indicates when the device has last been seen by the gateway",
 				},
 				native: {
 					path: "lastSeen",
@@ -204,9 +202,8 @@ export async function extendDevice(accessory: Accessory): Promise<void> {
 					},
 				};
 				if (spectrum === "white") {
-					stateObjs[
-						`${channelID}.colorTemperature`
-					] = objectDefinitions.colorTemperature(objId, "device");
+					stateObjs[`${channelID}.colorTemperature`] =
+						objectDefinitions.colorTemperature(objId, "device");
 				} else if (spectrum === "rgb") {
 					stateObjs[`${channelID}.color`] = objectDefinitions.color(
 						objId,
@@ -216,20 +213,17 @@ export async function extendDevice(accessory: Accessory): Promise<void> {
 						objId,
 						"device",
 					);
-					stateObjs[
-						`${channelID}.saturation`
-					] = objectDefinitions.saturation(objId, "device");
+					stateObjs[`${channelID}.saturation`] =
+						objectDefinitions.saturation(objId, "device");
 				}
-				stateObjs[
-					`${channelID}.transitionDuration`
-				] = objectDefinitions.transitionDuration(
-					objId,
-					"device",
-					accessory.type,
-				);
-				stateObjs[
-					`${channelID}.whenPowerRestored`
-				] = objectDefinitions.whenPowerRestored(objId, "device");
+				stateObjs[`${channelID}.transitionDuration`] =
+					objectDefinitions.transitionDuration(
+						objId,
+						"device",
+						accessory.type,
+					);
+				stateObjs[`${channelID}.whenPowerRestored`] =
+					objectDefinitions.whenPowerRestored(objId, "device");
 			} /* if (accessory.type === AccessoryTypes.plug) */ else {
 				// obj.plug should be a channel
 				channelID = "plug";
