@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@iobroker/adapter-core": "^2.5.0",
-    "alcalzone-shared": "^3.0.4",
+    "alcalzone-shared": "^4.0.0",
     "node-tradfri-client": "^3.0.0"
   },
   "devDependencies": {
