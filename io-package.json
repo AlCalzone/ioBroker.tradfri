@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "2.7.3",
+        "version": "3.0.0",
         "news": {
+            "3.0.0": {
+                "en": "Update dependencies, require Node.js 12+",
+                "de": "Abhängigkeiten aktualisieren, benötigt Node.js 12+",
+                "ru": "Обновите зависимости, требуется Node.js 12+",
+                "pt": "Atualizar dependências, requer Node.js 12+",
+                "nl": "Afhankelijkheden bijwerken, Node.js 12+ . vereisen",
+                "fr": "Mettre à jour les dépendances, nécessite Node.js 12+",
+                "it": "Aggiorna le dipendenze, richiedi Node.js 12+",
+                "es": "Actualice las dependencias, requiera Node.js 12+",
+                "pl": "Zaktualizuj zależności, wymagaj Node.js 12+",
+                "zh-cn": "更新依赖，需要 Node.js 12+"
+            },
             "2.7.3": {
                 "en": "Fix remaining JS-Controller 3.3 warnings",
                 "de": "Korrigieren Sie die verbleibenden JS-Controller 3.3-Warnungen",
@@ -230,18 +242,6 @@
                 "es": "Solución: también crea objetos para persianas",
                 "pl": "Poprawka: twórz także obiekty dla żaluzji",
                 "zh-cn": "修复：还为百叶窗创建对象"
-            },
-            "2.4.0": {
-                "en": "Added support for blinds",
-                "de": "Unterstützung für Jalousien hinzugefügt",
-                "ru": "Добавлена поддержка жалюзи",
-                "pt": "Adicionado suporte para blinds",
-                "nl": "Ondersteuning toegevoegd voor blinds",
-                "fr": "Ajout du support pour les stores",
-                "it": "Aggiunto supporto per i bui",
-                "es": "Se agregó soporte para persianas",
-                "pl": "Dodano obsługę żaluzji",
-                "zh-cn": "增加了对百叶窗的支持"
             }
         },
         "title": "IKEA Trådfri",
