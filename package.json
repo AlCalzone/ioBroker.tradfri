@@ -24,7 +24,7 @@
     "io-package.json"
   ],
   "dependencies": {
-    "@iobroker/adapter-core": "^2.4.0",
+    "@iobroker/adapter-core": "^2.5.0",
     "alcalzone-shared": "^3.0.4",
     "node-tradfri-client": "^2.2.0"
   },
