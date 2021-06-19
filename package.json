@@ -23,6 +23,9 @@
     "LICENSE",
     "io-package.json"
   ],
+  "engines": {
+    "node": ">=12"
+  },
   "dependencies": {
     "@iobroker/adapter-core": "^2.5.0",
     "alcalzone-shared": "^3.0.4",
