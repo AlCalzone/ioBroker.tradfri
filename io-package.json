@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "3.0.0",
+        "version": "3.0.1",
         "news": {
+            "3.0.1": {
+                "en": "Workaround for a bug in IKEA gateway firmware `v1.15.x`",
+                "de": "Problemumgehung für einen Fehler in der IKEA Gateway-Firmware `v1.15.x`",
+                "ru": "Обход ошибки в прошивке шлюза IKEA `v1.15.x`",
+                "pt": "Solução alternativa para um bug no firmware do gateway IKEA `v1.15.x`",
+                "nl": "Tijdelijke oplossing voor een bug in IKEA gateway-firmware `v1.15.x`",
+                "fr": "Solution de contournement pour un bogue dans le firmware de la passerelle IKEA `v1.15.x`",
+                "it": "Soluzione alternativa per un bug nel firmware del gateway IKEA `v1.15.x`",
+                "es": "Solución alternativa para un error en el firmware de la puerta de enlace IKEA `v1.15.x`",
+                "pl": "Obejście błędu w oprogramowaniu bramy IKEA `v1.15.x`",
+                "zh-cn": "解决宜家网关固件“v1.15.x”中的错误"
+            },
             "3.0.0": {
                 "en": "Update dependencies, require Node.js 12+",
                 "de": "Abhängigkeiten aktualisieren, benötigt Node.js 12+",
@@ -230,18 +242,6 @@
                 "es": "Solución: operar persianas cuando se cambian los estados",
                 "pl": "Poprawka: uruchamiaj żaluzje, gdy zmienia się stan",
                 "zh-cn": "修复：状态更改时操作百叶窗"
-            },
-            "2.4.2": {
-                "en": "Fix: also create objects for blinds",
-                "de": "Fix: Objekte für Jalousien werden nun korrekt erstellt",
-                "ru": "Исправлено: также создавать объекты для жалюзи",
-                "pt": "Correção: também cria objetos para blinds",
-                "nl": "Oplossing: maak ook objecten voor blinds",
-                "fr": "Correction: créer également des objets pour les stores",
-                "it": "Correzione: crea anche oggetti per persiane",
-                "es": "Solución: también crea objetos para persianas",
-                "pl": "Poprawka: twórz także obiekty dla żaluzji",
-                "zh-cn": "修复：还为百叶窗创建对象"
             }
         },
         "title": "IKEA Trådfri",
