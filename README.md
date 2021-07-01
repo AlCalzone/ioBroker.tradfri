@@ -70,6 +70,9 @@ The result object `ret` looks as follows:
 	Placeholder for next release:
 	### __WORK IN PROGRESS__
 -->
+### 2.7.4 (2021-07-01)
+* Workaround for a bug in IKEA gateway firmware `v1.15.x`
+
 ### 2.7.3 (2021-05-14)
 * Fix remaining JS-Controller 3.3 warnings
 
