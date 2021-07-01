@@ -35,7 +35,7 @@
     "@alcalzone/release-script": "^2.1.0",
     "@babel/core": "^7.14.6",
     "@iobroker/testing": "^2.4.4",
-    "@types/chai": "^4.2.18",
+    "@types/chai": "^4.2.19",
     "@types/chai-as-promised": "^7.1.4",
     "@types/enzyme": "^3.10.8",
     "@types/enzyme-adapter-react-16": "^1.0.6",
