@@ -71,7 +71,7 @@
     "react-test-renderer": "^17.0.2",
     "rimraf": "^3.0.2",
     "semver": "^7.3.5",
-    "sinon": "^11.1.1",
+    "sinon": "^11.1.2",
     "source-map-support": "^0.5.19",
     "tiny-glob": "^0.2.9",
     "ts-loader": "^8.0.10",
