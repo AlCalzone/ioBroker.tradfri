@@ -25,7 +25,8 @@ jobs:
       - uses: AlCalzone/iobroker-testing-action-check@master
         with:
           node-version: '14.x' # This should be LTS
-          typescript: 'true'
+          type-checking: 'true'
+          type-checking-command: 'npm run check:ts'
           lint: 'true'
 
 #   # Runs adapter tests on all supported node versions and OSes
