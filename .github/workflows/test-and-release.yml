@@ -15,7 +15,7 @@ on:
   pull_request: {}
 
 jobs:
-  # Performs quick checks before the expensive test runs
+  # Check package file and run linter
   check-and-lint:
     if: contains(github.event.head_commit.message, '[skip ci]') == false
 
@@ -25,15 +25,11 @@ jobs:
       - uses: AlCalzone/iobroker-testing-action-check@master
         with:
           node-version: '14.x' # This should be LTS
-          type-checking: 'true'
-          type-checking-command: 'npm run check:ts'
           lint: 'true'
 
   # Runs adapter tests on all supported node versions and OSes
   adapter-tests:
     if: contains(github.event.head_commit.message, '[skip ci]') == false
-
-    needs: [check-and-lint]
 
     runs-on: ${{ matrix.os }}
     strategy:
