@@ -166,7 +166,7 @@ function startAdapter(options: Partial<utils.AdapterOptions> = {}) {
 
 				try {
 					await $.tradfri.connect(identity!, psk!);
-				} catch (e) {
+				} catch (e: any) {
 					if (e instanceof TradfriError) {
 						switch (e.code) {
 							case TradfriErrorCodes.ConnectionTimedOut: {
@@ -227,7 +227,7 @@ function startAdapter(options: Partial<utils.AdapterOptions> = {}) {
 						identity,
 						psk,
 					});
-				} catch (e) {
+				} catch (e: any) {
 					if (e instanceof TradfriError) {
 						switch (e.code) {
 							case TradfriErrorCodes.ConnectionTimedOut: {
