@@ -50,7 +50,7 @@
     "chai-as-promised": "^7.1.1",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-prettier": "^3.4.0",
+    "eslint-plugin-prettier": "^4.0.0",
     "estrella": "^1.4.1",
     "gulp": "^4.0.0",
     "iobroker-react-components": "^1.0.0",
