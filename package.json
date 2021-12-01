@@ -43,7 +43,7 @@
     "@types/materialize-css": "^1.0.11",
     "@types/mocha": "^9.0.0",
     "@types/node": "^16.11.11",
-    "@types/react": "^17.0.33",
+    "@types/react": "^17.0.37",
     "@types/react-dom": "^17.0.11",
     "@types/sinon": "^10.0.6",
     "@typescript-eslint/eslint-plugin": "^4.33.0",
