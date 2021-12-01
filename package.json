@@ -58,7 +58,7 @@
     "gulp": "^4.0.0",
     "iobroker-react-components": "^1.0.0",
     "jquery": "^3.6.0",
-    "mocha": "^9.0.1",
+    "mocha": "^9.1.3",
     "nyc": "^15.1.0",
     "prettier": "^2.4.1",
     "prettier-plugin-organize-imports": "^2.3.4",
