@@ -70,7 +70,7 @@ The result object `ret` looks as follows:
 	Placeholder for next release:
 	### __WORK IN PROGRESS__
 -->
-### __WORK IN PROGRESS__
+### 3.0.2 (2021-12-03)
 * Improve support for older browsers
 * Update dependencies
 

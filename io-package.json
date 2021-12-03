@@ -1,338 +1,173 @@
 {
-    "common": {
-        "name": "tradfri",
-        "version": "3.0.1",
-        "news": {
-            "3.0.1": {
-                "en": "Workaround for a bug in IKEA gateway firmware `v1.15.x`",
-                "de": "Problemumgehung für einen Fehler in der IKEA Gateway-Firmware `v1.15.x`",
-                "ru": "Обход ошибки в прошивке шлюза IKEA `v1.15.x`",
-                "pt": "Solução alternativa para um bug no firmware do gateway IKEA `v1.15.x`",
-                "nl": "Tijdelijke oplossing voor een bug in IKEA gateway-firmware `v1.15.x`",
-                "fr": "Solution de contournement pour un bogue dans le firmware de la passerelle IKEA `v1.15.x`",
-                "it": "Soluzione alternativa per un bug nel firmware del gateway IKEA `v1.15.x`",
-                "es": "Solución alternativa para un error en el firmware de la puerta de enlace IKEA `v1.15.x`",
-                "pl": "Obejście błędu w oprogramowaniu bramy IKEA `v1.15.x`",
-                "zh-cn": "解决宜家网关固件“v1.15.x”中的错误"
-            },
-            "3.0.0": {
-                "en": "Update dependencies, require Node.js 12+",
-                "de": "Abhängigkeiten aktualisieren, benötigt Node.js 12+",
-                "ru": "Обновите зависимости, требуется Node.js 12+",
-                "pt": "Atualizar dependências, requer Node.js 12+",
-                "nl": "Afhankelijkheden bijwerken, Node.js 12+ . vereisen",
-                "fr": "Mettre à jour les dépendances, nécessite Node.js 12+",
-                "it": "Aggiorna le dipendenze, richiedi Node.js 12+",
-                "es": "Actualice las dependencias, requiera Node.js 12+",
-                "pl": "Zaktualizuj zależności, wymagaj Node.js 12+",
-                "zh-cn": "更新依赖，需要 Node.js 12+"
-            },
-            "2.7.3": {
-                "en": "Fix remaining JS-Controller 3.3 warnings",
-                "de": "Korrigieren Sie die verbleibenden JS-Controller 3.3-Warnungen",
-                "ru": "Исправить оставшиеся предупреждения JS-Controller 3.3",
-                "pt": "Corrigir os avisos restantes do JS-Controller 3.3",
-                "nl": "Los de resterende JS-Controller 3.3-waarschuwingen op",
-                "fr": "Correction des avertissements restants du JS-Controller 3.3",
-                "it": "Correggere i restanti avvisi JS-Controller 3.3",
-                "es": "Corregir las advertencias restantes de JS-Controller 3.3",
-                "pl": "Napraw pozostałe ostrzeżenia JS-Controller 3.3",
-                "zh-cn": "修复剩余的JS-Controller 3.3警告"
-            },
-            "2.7.2": {
-                "en": "Avoid warning about `undefined` states in JS-Controller 3.3+",
-                "de": "Vermeiden Sie Warnungen vor \"undefinierten\" Zuständen in JS-Controller 3.3+",
-                "ru": "Избегайте предупреждений о состояниях undefined в JS-Controller 3.3+",
-                "pt": "Evite advertir sobre estados `undefined` em JS-Controller 3.3+",
-                "nl": "Vermijd waarschuwingen over 'ongedefinieerde' toestanden in JS-Controller 3.3+",
-                "fr": "Évitez les avertissements sur les états `indéfinis` dans JS-Controller 3.3+",
-                "it": "Evita di avvertire gli stati \"undefined\" in JS-Controller 3.3+",
-                "es": "Evite advertir sobre estados \"indefinidos\" en JS-Controller 3.3+",
-                "pl": "Unikaj ostrzeżeń o stanach niezdefiniowanych w JS-Controller 3.3+",
-                "zh-cn": "避免在JS-Controller 3.3+中提示有关“未定义”状态的警告"
-            },
-            "2.7.1": {
-                "en": "Dependency updates\nFixed issues in `io-package.json` and README found by the adapter checker",
-                "de": "Abhängigkeitsaktualisierungen\nProbleme in `io-package.json` und README behoben, die vom Adapterprüfer gefunden wurden",
-                "ru": "Обновления зависимостей\nИсправлены проблемы в `io-package.json` и README, обнаруженные средством проверки адаптера.",
-                "pt": "Atualizações de dependência\nCorrigidos problemas em `io-package.json` e README encontrados pelo verificador de adaptador",
-                "nl": "Afhankelijkheid updates\nProblemen opgelost in `io-package.json` en README gevonden door de adapterchecker",
-                "fr": "Mises à jour des dépendances\nCorrection de problèmes dans `io-package.json` et README trouvés par le vérificateur d'adaptateur",
-                "it": "Aggiornamenti delle dipendenze\nRisolti i problemi in `io-package.json` e README trovati dal controllo dell'adattatore",
-                "es": "Actualizaciones de dependencia\nProblemas resueltos en `io-package.json` y README encontrados por el verificador del adaptador",
-                "pl": "Aktualizacje zależności\nNaprawiono problemy w plikach `io-package.json` i plik README znalezione przez narzędzie do sprawdzania adapterów",
-                "zh-cn": "依赖关系更新\n修复了适配器检查器在io-package.json和自述文件中的问题"
-            },
-            "2.7.0": {
-                "en": "Compatibility with gateway firmware v1.13.21\nAdded `whenPowerRestored` setting to configure what bulbs do after a power loss",
-                "de": "Kompatibilität mit der Gateway-Firmware v1.13.21\nDie Einstellung \"whenPowerRestored\" wurde hinzugefügt, um zu konfigurieren, was Lampen nach einem Stromausfall tun",
-                "ru": "Совместимость с прошивкой шлюза v1.13.21\nДобавлен параметр whenPowerRestored для настройки действий лампочек после отключения питания.",
-                "pt": "Compatibilidade com firmware de gateway v1.13.21\nAdicionada a configuração `whenPowerRestored` para definir o que as lâmpadas fazem após uma perda de energia",
-                "nl": "Compatibiliteit met gateway-firmware v1.13.21\nInstelling `whenPowerRestored` toegevoegd om te configureren wat lampen doen na stroomuitval",
-                "fr": "Compatibilité avec le firmware de la passerelle v1.13.21\nAjout du paramètre `whenPowerRestored` pour configurer ce que font les ampoules après une coupure de courant",
-                "it": "Compatibilità con il firmware del gateway v1.13.21\nAggiunta l'impostazione `whenPowerRestored` per configurare cosa fanno le lampadine dopo una perdita di alimentazione",
-                "es": "Compatibilidad con el firmware de la puerta de enlace v1.13.21\nSe agregó la configuración `whenPowerRestored` para configurar lo que hacen las bombillas después de una pérdida de energía",
-                "pl": "Zgodność z oprogramowaniem sprzętowym bramy w wersji 1.13.21\nDodano ustawienie WhenPowerRestored, aby skonfigurować działanie żarówek po utracie zasilania",
-                "zh-cn": "与网关固件v1.13.21的兼容性\n添加了“ whenPowerRestored”设置，以配置掉电后灯泡的功能"
-            },
-            "2.6.5": {
-                "en": "Bugfix: Loading all scenes no longer stalls when a group has no scenes",
-                "de": "Bugfix: Das Laden aller Szenen wird nicht mehr blockiert, wenn eine Gruppe keine Szenen hat",
-                "ru": "Исправление: загрузка всех сцен больше не останавливается, если в группе нет сцен.",
-                "pt": "Correção: o carregamento de todas as cenas não para mais quando um grupo não tem cenas",
-                "nl": "Bugfix: het laden van alle scènes stopt niet langer wanneer een groep geen scènes heeft",
-                "fr": "Correctif: le chargement de toutes les scènes ne s'arrête plus lorsqu'un groupe n'a pas de scènes",
-                "it": "Errore corretto: il caricamento di tutte le scene non si blocca più quando un gruppo non ha scene",
-                "es": "Corrección de error: la carga de todas las escenas ya no se detiene cuando un grupo no tiene escenas",
-                "pl": "Poprawka: Ładowanie wszystkich scen nie zatrzymuje się już, gdy grupa nie ma scen",
-                "zh-cn": "错误修正：当一个组没有场景时，加载所有场景不再停止"
-            },
-            "2.6.4": {
-                "en": "Fix: Updated `node-tradfri-client` to suppress warnings about unknown property `9109`",
-                "de": "Fix: `node-tradfri-client` wurde aktualisiert, um Warnungen vor unbekannter Eigenschaft` 9109` zu unterdrücken",
-                "ru": "Исправлено: обновлен `node-tradfri-client` для подавления предупреждений о неизвестном свойстве` 9109`.",
-                "pt": "Correção: Atualizado `node-tradfri-client` para suprimir avisos sobre propriedade desconhecida` 9109`",
-                "nl": "Fix: `node-tradfri-client` bijgewerkt om waarschuwingen over onbekende eigenschap` 9109` te onderdrukken",
-                "fr": "Correction: mise à jour de `node-tradfri-client` pour supprimer les avertissements concernant la propriété inconnue` 9109`",
-                "it": "Correzione: aggiornato `node-tradfri-client` per sopprimere gli avvisi sulla proprietà sconosciuta` 9109`",
-                "es": "Solución: actualizado `node-tradfri-client` para suprimir las advertencias sobre la propiedad desconocida` 9109`",
-                "pl": "Poprawka: Zaktualizowano „node-tradfri-client”, aby pomijał ostrzeżenia o nieznanej właściwości „9109”",
-                "zh-cn": "修复：更新了“ node-tradfri-client”以禁止显示有关未知属性“ 9109”的警告"
-            },
-            "2.6.3": {
-                "en": "Bugfix: Changed the role of RGB states to `level.color.rgb`",
-                "de": "Bugfix: Die Rolle der RGB-Zustände wurde in \"level.color.rgb\" geändert",
-                "ru": "Исправлено: изменена роль состояний RGB на `level.color.rgb`",
-                "pt": "Correção de bug: Alterada a função dos estados RGB para `level.color.rgb`",
-                "nl": "Bugfix: de rol van RGB-staten gewijzigd in `level.color.rgb`",
-                "fr": "Bugfix: Changé le rôle des états RVB en `level.color.rgb`",
-                "it": "Bugfix: modificato il ruolo degli stati RGB in `level.color.rgb`",
-                "es": "Corrección de errores: se cambió la función de los estados RGB a `level.color.rgb`",
-                "pl": "Bugfix: Zmieniono rolę stanów RGB na `level.color.rgb`",
-                "zh-cn": "错误修正：将RGB状态的角色更改为`level.color.rgb`"
-            },
-            "2.6.2": {
-                "en": "* Bugfix: The unhandled error handler should now correctly log the error even if `adapter` is not defined",
-                "de": "* Bugfix: Der nicht behandelte Fehlerbehandler sollte den Fehler jetzt korrekt protokollieren, auch wenn \"Adapter\" nicht definiert ist",
-                "ru": "* Исправление: необработанный обработчик ошибок теперь должен корректно регистрировать ошибку, даже если `адаптер` не определен",
-                "pt": "* Correção de erro: O manipulador de erros não manipulados agora deve registrar corretamente o erro, mesmo que o `adaptador` não esteja definido",
-                "nl": "* Bugfix: de niet-verwerkte foutafhandelaar moet de fout nu correct registreren, zelfs als `adapter` niet is gedefinieerd",
-                "fr": "* Bugfix: le gestionnaire d'erreurs non géré devrait maintenant correctement enregistrer l'erreur même si `adaptateur` n'est pas défini",
-                "it": "* Bugfix: il gestore degli errori non gestiti dovrebbe ora registrare correttamente l'errore anche se `adapter` non è definito",
-                "es": "* Corrección de errores: el controlador de errores no manejado ahora debe registrar correctamente el error incluso si no se ha definido `adaptador`",
-                "pl": "* Bugfix: Nieobsługiwany moduł obsługi błędów powinien teraz poprawnie rejestrować błąd, nawet jeśli `adapter 'nie jest zdefiniowany",
-                "zh-cn": "*修正：未处理的错误处理程序现在应该正确记录错误，即使未定义`adapter`"
-            },
-            "2.6.1": {
-                "en": "* Bugfix: Blinds would not always be stopped",
-                "de": "* Bugfix: Blinds würden nicht immer gestoppt",
-                "ru": "* Исправление: жалюзи не всегда останавливались",
-                "pt": "* Correção de erros: as cortinas nem sempre eram interrompidas",
-                "nl": "* Bugfix: blinds werden niet altijd gestopt",
-                "fr": "* Bugfix: les stores ne seraient pas toujours arrêtés",
-                "it": "* Bugfix: i blind non sarebbero sempre stati fermati",
-                "es": "* Corrección de errores: las persianas no siempre se detendrían",
-                "pl": "* Bugfix: Żaluzje nie zawsze były zatrzymywane",
-                "zh-cn": "*错误修正：百叶窗不会总是停止"
-            },
-            "2.6.0": {
-                "en": "* Support stopping blinds at their current position",
-                "de": "* Unterstützung beim Stoppen von Jalousien an ihrer aktuellen Position",
-                "ru": "* Поддержка остановки блайндов в их текущем положении",
-                "pt": "* Suporte para parar as cortinas na posição atual",
-                "nl": "* Ondersteuning voor het stoppen van jaloezieën op hun huidige positie",
-                "fr": "* Soutenir l'arrêt des stores à leur position actuelle",
-                "it": "* Supporta l'arresto dei bui nella loro posizione attuale",
-                "es": "* Soporte para detener las persianas en su posición actual",
-                "pl": "* Obsługa zatrzymywania żaluzji w ich bieżącej pozycji",
-                "zh-cn": "*支持将百叶窗停在当前位置"
-            },
-            "2.5.2": {
-                "en": "* Fix: Suppress log warnings for Symfonisk remotes",
-                "de": "* Korrektur: Unterdrückung von Protokollwarnungen für Symfonisk-Fernbedienungen",
-                "ru": "* Исправлено: Подавление предупреждений журнала для удаленных пользователей Symfonisk.",
-                "pt": "* Correção: suprimir avisos de log para controles remotos Symfonisk",
-                "nl": "* Oplossing: logboekwaarschuwingen onderdrukken voor Symfonisk-afstandsbedieningen",
-                "fr": "* Correction: supprimer les avertissements de journal pour les télécommandes Symfonisk",
-                "it": "* Correzione: sopprimere gli avvisi del registro per i telecomandi Symfonisk",
-                "es": "* Solución: elimine las advertencias de registro para los controles remotos Symfonisk",
-                "pl": "* Poprawka: Pomija ostrzeżenia dziennika dla pilotów Symfonisk",
-                "zh-cn": "*修复：抑制Symfonisk遥控器的日志警告"
-            },
-            "2.5.1": {
-                "en": "Made it possible to operate plugs using virtual groups",
-                "de": "Ermöglicht den Betrieb von Steckern mit virtuellen Gruppen",
-                "ru": "Сделано возможным управлять пробками с помощью виртуальных групп",
-                "pt": "Tornou possível operar plugues usando grupos virtuais",
-                "nl": "Maakte het mogelijk om pluggen te bedienen met behulp van virtuele groepen",
-                "fr": "A rendu possible le fonctionnement des prises à l'aide de groupes virtuels",
-                "it": "Ha reso possibile il funzionamento delle spine tramite gruppi virtuali",
-                "es": "Hizo posible operar enchufes usando grupos virtuales",
-                "pl": "Umożliwiło obsługę wtyczek przy użyciu grup wirtualnych",
-                "zh-cn": "使使用虚拟组操作插头成为可能"
-            },
-            "2.5.0": {
-                "en": "More device types are allowed in virtual groups",
-                "de": "Weitere Gerätetypen sind in virtuellen Gruppen zulässig",
-                "ru": "В виртуальных группах разрешено использовать больше типов устройств",
-                "pt": "Mais tipos de dispositivos são permitidos em grupos virtuais",
-                "nl": "Meer apparaattypen zijn toegestaan in virtuele groepen",
-                "fr": "Plus de types d'appareils sont autorisés dans les groupes virtuels",
-                "it": "Sono consentiti più tipi di dispositivi nei gruppi virtuali",
-                "es": "Se permiten más tipos de dispositivos en grupos virtuales",
-                "pl": "Więcej typów urządzeń jest dozwolonych w grupach wirtualnych",
-                "zh-cn": "虚拟组中允许更多设备类型"
-            },
-            "2.4.7": {
-                "en": "Fixed small display issues with 3rd party bulbs",
-                "de": "Kleine Anzeigeprobleme mit Glühlampen von Drittanbietern wurden behoben",
-                "ru": "Исправлены небольшие проблемы с отображением ламп сторонних производителей",
-                "pt": "Corrigidos pequenos problemas de exibição com lâmpadas de terceiros",
-                "nl": "Kleine weergaveproblemen met lampen van derden opgelost",
-                "fr": "Correction de petits problèmes d'affichage avec les ampoules de tiers",
-                "it": "Risolti piccoli problemi di visualizzazione con lampadine di terze parti",
-                "es": "Se corrigieron pequeños problemas de visualización con bombillas de terceros",
-                "pl": "Naprawiono małe problemy z wyświetlaniem w żarówkach innych firm",
-                "zh-cn": "修复了第三方灯泡的小型显示问题"
-            },
-            "2.4.6": {
-                "en": "Group states for blinds are now synchronized correctly",
-                "de": "Gruppenstatus für Jalousien werden jetzt korrekt synchronisiert",
-                "ru": "Состояния группы для блайндов теперь правильно синхронизированы",
-                "pt": "Os estados do grupo para blinds agora estão sincronizados corretamente",
-                "nl": "Groepstoestanden voor blinds worden nu correct gesynchroniseerd",
-                "fr": "Les états de groupe pour les stores sont maintenant correctement synchronisés",
-                "it": "Gli stati di gruppo per i blind sono ora sincronizzati correttamente",
-                "es": "Los estados de grupo para persianas ahora se sincronizan correctamente",
-                "pl": "Stany grup dla blindów są teraz poprawnie synchronizowane",
-                "zh-cn": "百叶窗的组状态现在可以正确同步"
-            },
-            "2.4.5": {
-                "en": "Suppressed log warnings for motion sensors",
-                "de": "Logwarnungen für Bewegungssensoren unterdrückt",
-                "ru": "Подавленные предупреждения журнала для датчиков движения",
-                "pt": "Avisos de log suprimidos para sensores de movimento",
-                "nl": "Onderdrukte logwaarschuwingen voor bewegingssensoren",
-                "fr": "Alertes de journalisation supprimées pour les détecteurs de mouvement",
-                "it": "Avvisi di registro eliminati per i sensori di movimento",
-                "es": "Advertencias de registro suprimidas para sensores de movimiento",
-                "pl": "Ukryte ostrzeżenia dziennika dla czujników ruchu",
-                "zh-cn": "禁止运动传感器的日志警告"
-            },
-            "2.4.4": {
-                "en": "Suppressed log warnings for slave remotes and signal repeaters",
-                "de": "Logwarnungen für Slave-Fernbedienungen und Signalwiederholer unterdrückt",
-                "ru": "Подавленные предупреждения журнала для ведомых пультов и ретрансляторов сигнала",
-                "pt": "Advertências de log suprimidas para controles remotos escravos e repetidores de sinal",
-                "nl": "Onderdrukte logwaarschuwingen voor slave-afstandsbedieningen en signaalrepeaters",
-                "fr": "Alertes de journalisation supprimées pour les télécommandes esclaves et les répéteurs de signaux",
-                "it": "Avvisi di registro eliminati per telecomandi slave e ripetitori di segnale",
-                "es": "Advertencias de registro suprimidas para controles remotos esclavos y repetidores de señal",
-                "pl": "Ukryte ostrzeżenia dziennika dla pilotów slave i repeaterów sygnałów",
-                "zh-cn": "从属遥控器和信号中继器的禁止日志警告"
-            },
-            "2.4.3": {
-                "en": "Fix: Operate blinds when states are changed",
-                "de": "Fix: Jalousien betätigen, wenn Zustände geändert werden",
-                "ru": "Исправлено: работа блайндов при смене состояний",
-                "pt": "Correção: operar blinds quando os estados são alterados",
-                "nl": "Oplossing: jaloezieën bedienen wanneer staten worden gewijzigd",
-                "fr": "Corrigé: Utiliser les stores quand les états sont changés",
-                "it": "Correzione: aziona i blind quando cambiano gli stati",
-                "es": "Solución: operar persianas cuando se cambian los estados",
-                "pl": "Poprawka: uruchamiaj żaluzje, gdy zmienia się stan",
-                "zh-cn": "修复：状态更改时操作百叶窗"
-            }
-        },
-        "title": "IKEA Trådfri",
-        "titleLang": {
-            "de": "IKEA Trådfri",
-            "en": "IKEA Trådfri",
-            "es": "IKEA Trådfri",
-            "fr": "IKEA Trådfri",
-            "it": "IKEA Trådfri",
-            "nl": "IKEA Trådfri",
-            "pl": "IKEA Trådfri",
-            "pt": "IKEA Trådfri",
-            "ru": "IKEA Trådfri",
-            "zh-cn": "宜家Trådfri"
-        },
-        "desc": {
-            "en": "Communicates with IKEA Trådfri Gateway to control devices",
-            "de": "Kommuniziert mit IKEA Trådfri Gateway, um Geräte zu steuern",
-            "ru": "Общается с ИКЕА шлюз Trådfri для управления устройствами",
-            "pt": "Comunica-se com a IKEA Trådfri Gateway para dispositivos de controle de",
-            "nl": "Communiceert met de IKEA Trådfri Gateway om de apparatuur te bedienen",
-            "fr": "Communique avec IKEA Trådfri Passerelle de dispositifs de contrôle de la",
-            "it": "Comunica con IKEA Trådfri Gateway per dispositivi di controllo",
-            "es": "Se comunica con IKEA Trådfri Puerta de entrada a los dispositivos de control de",
-            "pl": "Komunikuje się z IKEA brama Trådfri do zarządzania urządzeniami",
-            "zh-cn": "与IKEA Trådfri网关，以控制设备"
-        },
-        "authors": [
-            "AlCalzone <d.griesel@gmx.net>"
-        ],
-        "license": "MIT",
-        "platform": "Javascript/Node.js",
-        "main": "build/main.js",
-        "mode": "daemon",
-        "icon": "tradfri.png",
-        "enabled": false,
-        "extIcon": "https://raw.githubusercontent.com/AlCalzone/ioBroker.tradfri/master/admin/tradfri.png",
-        "keywords": [
-            "ikea",
-            "tradfri"
-        ],
-        "readme": "https://github.com/AlCalzone/ioBroker.tradfri/blob/master/README.md",
-        "loglevel": "info",
-        "type": "lighting",
-        "connectionType": "local",
-        "dataSource": "push",
-        "messagebox": true,
-        "materialize": true,
-        "compact": true,
-        "dependencies": [
-            {
-                "js-controller": ">=1.4.2"
-            }
-        ]
-    },
-    "native": {
-        "discoverGateway": true,
-        "host": "",
-        "securityCode": "",
-        "identity": "",
-        "psk": "",
-        "preserveTransitionTime": false,
-        "roundToDigits": 2
-    },
-    "protectedNative": [
-        "securityCode",
-        "identity",
-        "psk"
-    ],
-    "objects": [],
-    "instanceObjects": [
-        {
-            "_id": "info",
-            "type": "channel",
-            "common": {
-                "name": "Adapter-Information"
-            },
-            "native": {}
-        },
-        {
-            "_id": "info.connection",
-            "type": "state",
-            "common": {
-                "role": "indicator.connected",
-                "name": "Whether the adapter is connected to the gateway",
-                "type": "boolean",
-                "read": true,
-                "write": false,
-                "def": false
-            },
-            "native": {}
-        }
-    ]
+	"common": {
+		"name": "tradfri",
+		"version": "3.0.2",
+		"news": {
+			"3.0.2": {
+				"en": "Improve support for older browsers\nUpdate dependencies",
+				"de": "Unterstützung für ältere Browser verbessert\nAbhängigkeiten aktualisiert",
+				"ru": "Улучшить поддержку старых браузеров\nОбновить зависимости",
+				"pt": "Melhore o suporte para navegadores mais antigos\nAtualizar dependências",
+				"nl": "Ondersteuning voor oudere browsers verbeteren\nAfhankelijkheden bijwerken",
+				"fr": "Améliorer la prise en charge des anciens navigateurs\nMettre à jour les dépendances",
+				"it": "Migliora il supporto per i browser meno recenti\nAggiorna dipendenze",
+				"es": "Mejorar la compatibilidad con navegadores más antiguos\nActualizar dependencias",
+				"pl": "Popraw obsługę starszych przeglądarek\nAktualizuj zależności",
+				"zh-cn": "改进对旧浏览器的支持\n更新依赖"
+			},
+			"3.0.1": {
+				"en": "Workaround for a bug in IKEA gateway firmware `v1.15.x`",
+				"de": "Problemumgehung für einen Fehler in der IKEA Gateway-Firmware `v1.15.x`",
+				"ru": "Обход ошибки в прошивке шлюза IKEA `v1.15.x`",
+				"pt": "Solução alternativa para um bug no firmware do gateway IKEA `v1.15.x`",
+				"nl": "Tijdelijke oplossing voor een bug in IKEA gateway-firmware `v1.15.x`",
+				"fr": "Solution de contournement pour un bogue dans le firmware de la passerelle IKEA `v1.15.x`",
+				"it": "Soluzione alternativa per un bug nel firmware del gateway IKEA `v1.15.x`",
+				"es": "Solución alternativa para un error en el firmware de la puerta de enlace IKEA `v1.15.x`",
+				"pl": "Obejście błędu w oprogramowaniu bramy IKEA `v1.15.x`",
+				"zh-cn": "解决宜家网关固件“v1.15.x”中的错误"
+			},
+			"3.0.0": {
+				"en": "Update dependencies, require Node.js 12+",
+				"de": "Abhängigkeiten aktualisieren, benötigt Node.js 12+",
+				"ru": "Обновите зависимости, требуется Node.js 12+",
+				"pt": "Atualizar dependências, requer Node.js 12+",
+				"nl": "Afhankelijkheden bijwerken, Node.js 12+ . vereisen",
+				"fr": "Mettre à jour les dépendances, nécessite Node.js 12+",
+				"it": "Aggiorna le dipendenze, richiedi Node.js 12+",
+				"es": "Actualice las dependencias, requiera Node.js 12+",
+				"pl": "Zaktualizuj zależności, wymagaj Node.js 12+",
+				"zh-cn": "更新依赖，需要 Node.js 12+"
+			},
+			"2.7.3": {
+				"en": "Fix remaining JS-Controller 3.3 warnings",
+				"de": "Korrigieren Sie die verbleibenden JS-Controller 3.3-Warnungen",
+				"ru": "Исправить оставшиеся предупреждения JS-Controller 3.3",
+				"pt": "Corrigir os avisos restantes do JS-Controller 3.3",
+				"nl": "Los de resterende JS-Controller 3.3-waarschuwingen op",
+				"fr": "Correction des avertissements restants du JS-Controller 3.3",
+				"it": "Correggere i restanti avvisi JS-Controller 3.3",
+				"es": "Corregir las advertencias restantes de JS-Controller 3.3",
+				"pl": "Napraw pozostałe ostrzeżenia JS-Controller 3.3",
+				"zh-cn": "修复剩余的JS-Controller 3.3警告"
+			},
+			"2.7.2": {
+				"en": "Avoid warning about `undefined` states in JS-Controller 3.3+",
+				"de": "Vermeiden Sie Warnungen vor \"undefinierten\" Zuständen in JS-Controller 3.3+",
+				"ru": "Избегайте предупреждений о состояниях undefined в JS-Controller 3.3+",
+				"pt": "Evite advertir sobre estados `undefined` em JS-Controller 3.3+",
+				"nl": "Vermijd waarschuwingen over 'ongedefinieerde' toestanden in JS-Controller 3.3+",
+				"fr": "Évitez les avertissements sur les états `indéfinis` dans JS-Controller 3.3+",
+				"it": "Evita di avvertire gli stati \"undefined\" in JS-Controller 3.3+",
+				"es": "Evite advertir sobre estados \"indefinidos\" en JS-Controller 3.3+",
+				"pl": "Unikaj ostrzeżeń o stanach niezdefiniowanych w JS-Controller 3.3+",
+				"zh-cn": "避免在JS-Controller 3.3+中提示有关“未定义”状态的警告"
+			},
+			"2.7.1": {
+				"en": "Dependency updates\nFixed issues in `io-package.json` and README found by the adapter checker",
+				"de": "Abhängigkeitsaktualisierungen\nProbleme in `io-package.json` und README behoben, die vom Adapterprüfer gefunden wurden",
+				"ru": "Обновления зависимостей\nИсправлены проблемы в `io-package.json` и README, обнаруженные средством проверки адаптера.",
+				"pt": "Atualizações de dependência\nCorrigidos problemas em `io-package.json` e README encontrados pelo verificador de adaptador",
+				"nl": "Afhankelijkheid updates\nProblemen opgelost in `io-package.json` en README gevonden door de adapterchecker",
+				"fr": "Mises à jour des dépendances\nCorrection de problèmes dans `io-package.json` et README trouvés par le vérificateur d'adaptateur",
+				"it": "Aggiornamenti delle dipendenze\nRisolti i problemi in `io-package.json` e README trovati dal controllo dell'adattatore",
+				"es": "Actualizaciones de dependencia\nProblemas resueltos en `io-package.json` y README encontrados por el verificador del adaptador",
+				"pl": "Aktualizacje zależności\nNaprawiono problemy w plikach `io-package.json` i plik README znalezione przez narzędzie do sprawdzania adapterów",
+				"zh-cn": "依赖关系更新\n修复了适配器检查器在io-package.json和自述文件中的问题"
+			},
+			"2.7.0": {
+				"en": "Compatibility with gateway firmware v1.13.21\nAdded `whenPowerRestored` setting to configure what bulbs do after a power loss",
+				"de": "Kompatibilität mit der Gateway-Firmware v1.13.21\nDie Einstellung \"whenPowerRestored\" wurde hinzugefügt, um zu konfigurieren, was Lampen nach einem Stromausfall tun",
+				"ru": "Совместимость с прошивкой шлюза v1.13.21\nДобавлен параметр whenPowerRestored для настройки действий лампочек после отключения питания.",
+				"pt": "Compatibilidade com firmware de gateway v1.13.21\nAdicionada a configuração `whenPowerRestored` para definir o que as lâmpadas fazem após uma perda de energia",
+				"nl": "Compatibiliteit met gateway-firmware v1.13.21\nInstelling `whenPowerRestored` toegevoegd om te configureren wat lampen doen na stroomuitval",
+				"fr": "Compatibilité avec le firmware de la passerelle v1.13.21\nAjout du paramètre `whenPowerRestored` pour configurer ce que font les ampoules après une coupure de courant",
+				"it": "Compatibilità con il firmware del gateway v1.13.21\nAggiunta l'impostazione `whenPowerRestored` per configurare cosa fanno le lampadine dopo una perdita di alimentazione",
+				"es": "Compatibilidad con el firmware de la puerta de enlace v1.13.21\nSe agregó la configuración `whenPowerRestored` para configurar lo que hacen las bombillas después de una pérdida de energía",
+				"pl": "Zgodność z oprogramowaniem sprzętowym bramy w wersji 1.13.21\nDodano ustawienie WhenPowerRestored, aby skonfigurować działanie żarówek po utracie zasilania",
+				"zh-cn": "与网关固件v1.13.21的兼容性\n添加了“ whenPowerRestored”设置，以配置掉电后灯泡的功能"
+			}
+		},
+		"title": "IKEA Trådfri",
+		"titleLang": {
+			"de": "IKEA Trådfri",
+			"en": "IKEA Trådfri",
+			"es": "IKEA Trådfri",
+			"fr": "IKEA Trådfri",
+			"it": "IKEA Trådfri",
+			"nl": "IKEA Trådfri",
+			"pl": "IKEA Trådfri",
+			"pt": "IKEA Trådfri",
+			"ru": "IKEA Trådfri",
+			"zh-cn": "宜家Trådfri"
+		},
+		"desc": {
+			"en": "Communicates with IKEA Trådfri Gateway to control devices",
+			"de": "Kommuniziert mit IKEA Trådfri Gateway, um Geräte zu steuern",
+			"ru": "Общается с ИКЕА шлюз Trådfri для управления устройствами",
+			"pt": "Comunica-se com a IKEA Trådfri Gateway para dispositivos de controle de",
+			"nl": "Communiceert met de IKEA Trådfri Gateway om de apparatuur te bedienen",
+			"fr": "Communique avec IKEA Trådfri Passerelle de dispositifs de contrôle de la",
+			"it": "Comunica con IKEA Trådfri Gateway per dispositivi di controllo",
+			"es": "Se comunica con IKEA Trådfri Puerta de entrada a los dispositivos de control de",
+			"pl": "Komunikuje się z IKEA brama Trådfri do zarządzania urządzeniami",
+			"zh-cn": "与IKEA Trådfri网关，以控制设备"
+		},
+		"authors": ["AlCalzone <d.griesel@gmx.net>"],
+		"license": "MIT",
+		"platform": "Javascript/Node.js",
+		"main": "build/main.js",
+		"mode": "daemon",
+		"icon": "tradfri.png",
+		"enabled": false,
+		"extIcon": "https://raw.githubusercontent.com/AlCalzone/ioBroker.tradfri/master/admin/tradfri.png",
+		"keywords": ["ikea", "tradfri"],
+		"readme": "https://github.com/AlCalzone/ioBroker.tradfri/blob/master/README.md",
+		"loglevel": "info",
+		"type": "lighting",
+		"connectionType": "local",
+		"dataSource": "push",
+		"messagebox": true,
+		"materialize": true,
+		"compact": true,
+		"dependencies": [
+			{
+				"js-controller": ">=1.4.2"
+			}
+		]
+	},
+	"native": {
+		"discoverGateway": true,
+		"host": "",
+		"securityCode": "",
+		"identity": "",
+		"psk": "",
+		"preserveTransitionTime": false,
+		"roundToDigits": 2
+	},
+	"protectedNative": ["securityCode", "identity", "psk"],
+	"objects": [],
+	"instanceObjects": [
+		{
+			"_id": "info",
+			"type": "channel",
+			"common": {
+				"name": "Adapter-Information"
+			},
+			"native": {}
+		},
+		{
+			"_id": "info.connection",
+			"type": "state",
+			"common": {
+				"role": "indicator.connected",
+				"name": "Whether the adapter is connected to the gateway",
+				"type": "boolean",
+				"read": true,
+				"write": false,
+				"def": false
+			},
+			"native": {}
+		}
+	]
 }
