@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "tradfri",
-        "version": "2.7.4",
+        "version": "2.7.5",
         "news": {
+            "2.7.5": {
+                "en": "Improve support for older browsers",
+                "de": "Verbessern Sie die Unterstützung für ältere Browser",
+                "ru": "Улучшить поддержку старых браузеров",
+                "pt": "Melhore o suporte para navegadores mais antigos",
+                "nl": "Ondersteuning voor oudere browsers verbeteren",
+                "fr": "Améliorer la prise en charge des anciens navigateurs",
+                "it": "Migliora il supporto per i browser meno recenti",
+                "es": "Mejorar la compatibilidad con navegadores más antiguos",
+                "pl": "Popraw obsługę starszych przeglądarek",
+                "zh-cn": "改进对旧浏览器的支持"
+            },
             "2.7.4": {
                 "en": "Workaround for a bug in IKEA gateway firmware `v1.15.x`",
                 "de": "Problemumgehung für einen Fehler in der IKEA Gateway-Firmware `v1.15.x`",
