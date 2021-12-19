@@ -7,6 +7,8 @@ import { composeObject, entries, values } from "alcalzone-shared/objects";
 import {
 	Accessory,
 	AccessoryTypes,
+	AirPurifier,
+	AirPurifierOperation,
 	Blind,
 	BlindOperation,
 	discoverGateway,
@@ -552,6 +554,7 @@ function startAdapter(options: Partial<utils.AdapterOptions> = {}) {
 								| LightOperation
 								| BlindOperation
 								| PlugOperation
+								| AirPurifierOperation
 								| undefined;
 							let wasAcked = false;
 
@@ -628,6 +631,22 @@ function startAdapter(options: Partial<utils.AdapterOptions> = {}) {
 								operation = {
 									whenPowerRestored: val as unknown as number,
 								};
+							} else if (id.endsWith(".fanMode")) {
+								operation = {
+									fanMode: val as unknown as number,
+								};
+							} else if (id.endsWith(".fanSpeed")) {
+								operation = {
+									fanSpeed: val as unknown as number,
+								};
+							} else if (id.endsWith(".statusLEDs")) {
+								operation = {
+									statusLEDs: val as unknown as boolean,
+								};
+							} else if (id.endsWith(".controlsLocked")) {
+								operation = {
+									controlsLocked: val as unknown as boolean,
+								};
 							}
 
 							// update all lightbulbs in this group
@@ -648,7 +667,8 @@ function startAdapter(options: Partial<utils.AdapterOptions> = {}) {
 							if (
 								id.indexOf(".lightbulb.") > -1 ||
 								id.indexOf(".plug.") > -1 ||
-								id.indexOf(".blind.") > -1
+								id.indexOf(".blind.") > -1 ||
+								id.indexOf(".airpurifier.") > -1
 							) {
 								// read the instanceId and get a reference value
 								if (!(rootObj.native.instanceId in $.devices)) {
@@ -668,11 +688,14 @@ function startAdapter(options: Partial<utils.AdapterOptions> = {}) {
 								const blind: Blind | undefined =
 									accessory.blindList &&
 									accessory.blindList[0];
+								const airPurifier: AirPurifier | undefined =
+									accessory.airPurifierList &&
+									accessory.airPurifierList[0];
 								const specificAccessory =
-									light || plug || blind;
+									light || plug || blind || airPurifier;
 								if (specificAccessory == undefined) {
 									_.log(
-										`Cannot operate an accessory that is neither a lightbulb nor a plug nor a blind`,
+										`Cannot operate an accessory that is neither a lightbulb nor a plug nor a blind nor an airPurifier!`,
 										"warn",
 									);
 									return;
@@ -788,6 +811,34 @@ function startAdapter(options: Partial<utils.AdapterOptions> = {}) {
 												val as unknown as number,
 										},
 									));
+								} else if (id.endsWith(".fanMode")) {
+									if (airPurifier != undefined) {
+										wasAcked =
+											!(await airPurifier.setFanMode(
+												val as unknown as number,
+											));
+									}
+								} else if (id.endsWith(".fanSpeed")) {
+									if (airPurifier != undefined) {
+										wasAcked =
+											!(await airPurifier.setFanSpeed(
+												val as unknown as number,
+											));
+									}
+								} else if (id.endsWith(".statusLEDs")) {
+									if (airPurifier != undefined) {
+										wasAcked =
+											!(await airPurifier.setStatusLEDs(
+												val as unknown as boolean,
+											));
+									}
+								} else if (id.endsWith(".controlsLocked")) {
+									if (airPurifier != undefined) {
+										wasAcked =
+											!(await airPurifier.setControlsLocked(
+												val as unknown as boolean,
+											));
+									}
 								}
 
 								// ack the state if neccessary and return

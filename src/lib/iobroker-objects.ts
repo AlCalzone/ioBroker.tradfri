@@ -284,6 +284,7 @@ export async function extendDevice(accessory: Accessory): Promise<void> {
 			if (obj.native.path != null) {
 				// Object could have a default value, find it
 				initialValue = dig<any>(accessory, obj.native.path);
+				if (typeof initialValue === "function") initialValue = null;
 			}
 			await _.adapter.createOwnStateExAsync(obj._id, obj, initialValue);
 		}
@@ -431,6 +432,9 @@ export function calcObjName(accessory: Accessory): string {
 		case AccessoryTypes.soundRemote:
 			prefix = "S";
 			break;
+		case AccessoryTypes.airPurifier:
+			prefix = "AP";
+			break;
 		default:
 			_.log(
 				// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
@@ -531,6 +535,8 @@ function getCoapAccessoryPropertyPathPrefix(
 			return "plugList.[0].";
 		case AccessoryTypes.blind:
 			return "blindList.[0].";
+		case AccessoryTypes.airPurifier:
+			return "airPurifierList.[0].";
 		default:
 			return "";
 	}
@@ -882,4 +888,220 @@ export const objectDefinitions: Record<string, ioBrokerObjectDefinition> = {
 			},
 		};
 	},
+
+	// STARKVIND Air Purifier
+	airQuality: (rootId, rootType, deviceType) => ({
+		_id:
+			rootType === "device"
+				? `${rootId}.${accessoryTypeToString(deviceType!)}.airQuality`
+				: `${rootId}.airQuality`,
+		type: "state",
+		common: {
+			name: "Air quality",
+			desc:
+				(rootType === "device"
+					? "Air quality measured by this air purifier."
+					: "Air quality measured by this group's air purifiers.") +
+				" 0..35 = good, 36..85 = OK, >= 86 == not good.",
+			read: true,
+			write: false,
+			type: "number",
+			min: 0,
+			max: 100,
+			role: "value",
+		},
+		native: {
+			path: getCoapAccessoryPropertyPathPrefix(deviceType) + "airQuality",
+		},
+	}),
+
+	fanMode: (rootId, rootType, deviceType) => ({
+		_id:
+			rootType === "device"
+				? `${rootId}.${accessoryTypeToString(deviceType!)}.fanMode`
+				: `${rootId}.fanMode`,
+		type: "state",
+		common: {
+			name: "Fan mode",
+			read: true,
+			write: true,
+			type: "number",
+			min: 0,
+			max: 50,
+			role: "level.mode.fan",
+			states: {
+				0: "Off",
+				1: "Auto",
+				10: "Level 1",
+				20: "Level 2",
+				30: "Level 3",
+				40: "Level 4",
+				50: "Level 5",
+			},
+		},
+		native: {
+			path: getCoapAccessoryPropertyPathPrefix(deviceType) + "fanMode",
+		},
+	}),
+
+	fanSpeed: (rootId, rootType, deviceType) => ({
+		_id:
+			rootType === "device"
+				? `${rootId}.${accessoryTypeToString(deviceType!)}.fanSpeed`
+				: `${rootId}.fanSpeed`,
+		type: "state",
+		common: {
+			name: "Fan speed",
+			read: true,
+			write: true,
+			type: "number",
+			min: 0,
+			max: 50,
+			role: "level",
+			states: {
+				0: "Off",
+				10: "min",
+				15: "15",
+				20: "20",
+				25: "25",
+				30: "30",
+				35: "35",
+				40: "40",
+				45: "45",
+				50: "max",
+			},
+		},
+		native: {
+			path: getCoapAccessoryPropertyPathPrefix(deviceType) + "fanSpeed",
+		},
+	}),
+
+	statusLEDs: (rootId, rootType, deviceType) => ({
+		_id:
+			rootType === "device"
+				? `${rootId}.${accessoryTypeToString(deviceType!)}.statusLEDs`
+				: `${rootId}.statusLEDs`,
+		type: "state",
+		common: {
+			name: "Status LEDs",
+			read: true,
+			write: true,
+			type: "boolean",
+			role: "switch",
+		},
+		native: {
+			path: getCoapAccessoryPropertyPathPrefix(deviceType) + "statusLEDs",
+		},
+	}),
+
+	controlsLocked: (rootId, rootType, deviceType) => ({
+		_id:
+			rootType === "device"
+				? `${rootId}.${accessoryTypeToString(
+						deviceType!,
+				  )}.controlsLocked`
+				: `${rootId}.controlsLocked`,
+		type: "state",
+		common: {
+			name: "Controls locked",
+			desc:
+				rootType === "device"
+					? "Enable/disable the controls of this air purifier."
+					: "Enable/disable the controls of this group's air purifiers.",
+			read: true,
+			write: true,
+			type: "boolean",
+			role: "switch",
+		},
+		native: {
+			path:
+				getCoapAccessoryPropertyPathPrefix(deviceType) +
+				"controlsLocked",
+		},
+	}),
+
+	filterLifetime: (rootId, rootType, deviceType) => ({
+		_id:
+			rootType === "device"
+				? `${rootId}.${accessoryTypeToString(
+						deviceType!,
+				  )}.filterLifetime`
+				: `${rootId}.filterLifetime`,
+		type: "state",
+		common: {
+			name: "Filter: Total lifetime",
+			read: true,
+			write: false,
+			type: "number",
+			role: "value",
+		},
+		native: {
+			path:
+				getCoapAccessoryPropertyPathPrefix(deviceType) +
+				"totalFilterLifetime",
+		},
+	}),
+
+	filterRuntime: (rootId, rootType, deviceType) => ({
+		_id:
+			rootType === "device"
+				? `${rootId}.${accessoryTypeToString(
+						deviceType!,
+				  )}.filterRuntime`
+				: `${rootId}.filterRuntime`,
+		type: "state",
+		common: {
+			name: "Filter: Runtime",
+			read: true,
+			write: false,
+			type: "number",
+			role: "value",
+		},
+		native: {
+			path:
+				getCoapAccessoryPropertyPathPrefix(deviceType) +
+				"filterRuntime",
+		},
+	}),
+
+	filterRemainingLifetime: (rootId, rootType, deviceType) => ({
+		_id:
+			rootType === "device"
+				? `${rootId}.${accessoryTypeToString(
+						deviceType!,
+				  )}.filterRemainingLifetime`
+				: `${rootId}.filterRemainingLifetime`,
+		type: "state",
+		common: {
+			name: "Filter: Remaining lifetime",
+			read: true,
+			write: false,
+			type: "number",
+			role: "value",
+		},
+		native: {
+			path:
+				getCoapAccessoryPropertyPathPrefix(deviceType) +
+				"filterRemainingLifetime",
+		},
+	}),
+
+	filterStatus: (rootId, rootType, deviceType) => ({
+		_id:
+			rootType === "device"
+				? `${rootId}.${accessoryTypeToString(deviceType!)}.filterStatus`
+				: `${rootId}.filterStatus`,
+		type: "state",
+		common: {
+			name: "Filter: Status",
+			read: true,
+			write: false,
+			type: "number",
+			role: "value",
+		},
+		native: {
+			path:
+				getCoapAccessoryPropertyPathPrefix(deviceType) + "filterStatus",
+		},
+	}),
 };

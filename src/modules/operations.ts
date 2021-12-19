@@ -5,6 +5,7 @@
 import {
 	Accessory,
 	AccessoryTypes,
+	AirPurifierOperation,
 	BlindOperation,
 	Group,
 	LightOperation,
@@ -22,7 +23,11 @@ import { session as $ } from "./session";
  */
 export async function operateVirtualGroup(
 	group: Group | VirtualGroup,
-	operation: LightOperation | BlindOperation | PlugOperation,
+	operation:
+		| LightOperation
+		| BlindOperation
+		| PlugOperation
+		| AirPurifierOperation,
 ): Promise<void> {
 	if (group.deviceIDs == undefined) return;
 	// Test which kind of operation this is
@@ -35,6 +40,23 @@ export async function operateVirtualGroup(
 
 		for (const acc of blindAccessories) {
 			await $.tradfri.operateBlind(acc, operation);
+		}
+	} else if (
+		"fanMode" in operation ||
+		"fanSpeed" in operation ||
+		"statusLEDs" in operation ||
+		"controlsLocked" in operation
+	) {
+		// This is an air purifier operation
+		// find all air purifiers belonging to this group
+		const apAccessories = group.deviceIDs
+			.map((id) => $.devices[id])
+			.filter(
+				(dev) => dev != null && dev.type === AccessoryTypes.airPurifier,
+			);
+
+		for (const acc of apAccessories) {
+			await $.tradfri.operateAirPurifier(acc, operation);
 		}
 	} else {
 		// This is a light or plug operation

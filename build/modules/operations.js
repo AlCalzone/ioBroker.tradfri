@@ -38,6 +38,11 @@ async function operateVirtualGroup(group, operation) {
     for (const acc of blindAccessories) {
       await import_session.session.tradfri.operateBlind(acc, operation);
     }
+  } else if ("fanMode" in operation || "fanSpeed" in operation || "statusLEDs" in operation || "controlsLocked" in operation) {
+    const apAccessories = group.deviceIDs.map((id) => import_session.session.devices[id]).filter((dev) => dev != null && dev.type === import_node_tradfri_client.AccessoryTypes.airPurifier);
+    for (const acc of apAccessories) {
+      await import_session.session.tradfri.operateAirPurifier(acc, operation);
+    }
   } else {
     const lightbulbAccessories = group.deviceIDs.map((id) => import_session.session.devices[id]).filter((dev) => dev != null && dev.type === import_node_tradfri_client.AccessoryTypes.lightbulb);
     const plugAccessories = group.deviceIDs.map((id) => import_session.session.devices[id]).filter((dev) => dev != null && dev.type === import_node_tradfri_client.AccessoryTypes.plug);

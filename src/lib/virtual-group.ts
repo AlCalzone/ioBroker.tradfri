@@ -1,6 +1,8 @@
 import { entries } from "alcalzone-shared/objects";
 import type {
+	AirPurifierOperation,
 	BlindOperation,
+	FanMode,
 	LightOperation,
 	PlugOperation,
 	PowerRestoredAction,
@@ -19,6 +21,10 @@ export class VirtualGroup {
 	public color: string | undefined; // int
 	public hue: number | undefined; // int
 	public saturation: number | undefined; // int
+	public controlsLocked: boolean | undefined;
+	public fanMode: FanMode | undefined;
+	public fanSpeed: number | undefined; // <int> [0..50]
+	public statusLEDs: boolean | undefined;
 
 	/**
 	 * The instance ids of all devices combined in this group
@@ -29,7 +35,11 @@ export class VirtualGroup {
 	 * Updates this virtual group's state with the changes contained in the given operation
 	 */
 	public merge(
-		operation: LightOperation | BlindOperation | PlugOperation,
+		operation:
+			| LightOperation
+			| BlindOperation
+			| PlugOperation
+			| AirPurifierOperation,
 	): void {
 		for (const [prop, val] of entries(operation)) {
 			if (this.hasOwnProperty(prop))

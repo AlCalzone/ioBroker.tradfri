@@ -71,7 +71,11 @@ function extendVirtualGroup(group) {
       hue: import_iobroker_objects.objectDefinitions.hue(objId, "virtual group"),
       saturation: import_iobroker_objects.objectDefinitions.saturation(objId, "virtual group"),
       position: import_iobroker_objects.objectDefinitions.position(objId, "virtual group"),
-      stopBlinds: import_iobroker_objects.objectDefinitions.stopBlinds(objId, "virtual group")
+      stopBlinds: import_iobroker_objects.objectDefinitions.stopBlinds(objId, "virtual group"),
+      fanMode: import_iobroker_objects.objectDefinitions.fanMode(objId, "virtual group"),
+      fanSpeed: import_iobroker_objects.objectDefinitions.fanSpeed(objId, "virtual group"),
+      statusLEDs: import_iobroker_objects.objectDefinitions.statusLEDs(objId, "virtual group"),
+      controlsLocked: import_iobroker_objects.objectDefinitions.controlsLocked(objId, "virtual group")
     };
     const createObjects = Object.keys(stateObjs).map((key) => {
       const obj = stateObjs[key];
@@ -181,12 +185,14 @@ function updateMultipleGroupStates(changedAccessory, changedStateId) {
   }
 }
 function updateGroupStates(group, changedStateId) {
+  var _a;
   if (group.deviceIDs == null)
     return;
   const objId = (0, import_iobroker_objects.calcGroupId)(group);
   const groupBulbs = group.deviceIDs.map((id) => import_session.session.devices[id]).filter((a) => a != null && a.type === import_node_tradfri_client.AccessoryTypes.lightbulb).map((a) => a.lightList[0]);
   const groupBlinds = group.deviceIDs.map((id) => import_session.session.devices[id]).filter((a) => a != null && a.type === import_node_tradfri_client.AccessoryTypes.blind).map((a) => a.blindList[0]);
   const groupPlugs = group.deviceIDs.map((id) => import_session.session.devices[id]).filter((a) => a != null && a.type === import_node_tradfri_client.AccessoryTypes.plug).map((a) => a.plugList[0]);
+  const groupAPs = group.deviceIDs.map((id) => import_session.session.devices[id]).filter((a) => a != null && a.type === import_node_tradfri_client.AccessoryTypes.airPurifier).map((a) => a.airPurifierList[0]);
   const whiteSpectrumBulbs = groupBulbs.filter((b) => b.spectrum === "white");
   const rgbBulbs = groupBulbs.filter((b) => b.spectrum === "rgb");
   const debounceTimeout = 250;
@@ -239,6 +245,19 @@ function updateGroupStates(group, changedStateId) {
     group.onOff = commonState;
     const stateId = `${objId}.state`;
     debounce(stateId, () => updateGroupState(stateId, commonState), debounceTimeout);
+  }
+  for (const prop of [
+    "fanMode",
+    "fanSpeed",
+    "statusLEDs",
+    "controlsLocked"
+  ]) {
+    if (group instanceof import_virtual_group.VirtualGroup && groupAPs.length > 0 && (changedStateId == null || changedStateId.endsWith(`airPurifier.${prop}`))) {
+      const commonState = (_a = getCommonValue(groupAPs.map((p) => p[prop]))) != null ? _a : null;
+      group[prop] = commonState;
+      const stateId = `${objId}.${prop}`;
+      debounce(stateId, () => updateGroupState(stateId, commonState), debounceTimeout);
+    }
   }
 }
 function syncGroupsWithState(id, state) {
