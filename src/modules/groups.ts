@@ -61,6 +61,10 @@ export function extendVirtualGroup(group: VirtualGroup): void {
 			saturation: objectDefinitions.saturation(objId, "virtual group"),
 			position: objectDefinitions.position(objId, "virtual group"),
 			stopBlinds: objectDefinitions.stopBlinds(objId, "virtual group"),
+			fanMode: objectDefinitions.fanMode(objId, "virtual group"),
+			fanSpeed: objectDefinitions.fanSpeed(objId, "virtual group"),
+			statusLEDs: objectDefinitions.statusLEDs(objId, "virtual group"),
+			controlsLocked: objectDefinitions.controlsLocked(objId, "virtual group"),
 		};
 
 		const createObjects = Object.keys(stateObjs).map((key) => {
@@ -243,6 +247,10 @@ export function updateGroupStates(
 		.map((id) => $.devices[id])
 		.filter((a) => a != null && a.type === AccessoryTypes.plug)
 		.map((a) => a.plugList[0]);
+	const groupAPs = group.deviceIDs
+		.map((id) => $.devices[id])
+		.filter((a) => a != null && a.type === AccessoryTypes.airPurifier)
+		.map((a) => a.airPurifierList[0]);
 
 	// Seperate the bulbs into no spectrum/white spectrum/rgb bulbs
 	const whiteSpectrumBulbs = groupBulbs.filter((b) => b.spectrum === "white");
@@ -401,6 +409,30 @@ export function updateGroupStates(
 			() => updateGroupState(stateId, commonState),
 			debounceTimeout,
 		);
+	}
+	// Try to update the air purifier states
+	for (const prop of [
+		"fanMode",
+		"fanSpeed",
+		"statusLEDs",
+		"controlsLocked",
+	] as const) {
+		if (
+			group instanceof VirtualGroup &&
+			groupAPs.length > 0 &&
+			(changedStateId == null ||
+				changedStateId.endsWith(`airPurifier.${prop}`))
+		) {
+			const commonState =
+				getCommonValue(groupAPs.map((p) => p[prop])) ?? null;
+			group[prop] = commonState as any;
+			const stateId = `${objId}.${prop}`;
+			debounce(
+				stateId,
+				() => updateGroupState(stateId, commonState),
+				debounceTimeout,
+			);
+		}
 	}
 }
 

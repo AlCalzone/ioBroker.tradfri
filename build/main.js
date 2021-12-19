@@ -358,6 +358,22 @@ function startAdapter(options = {}) {
                 operation = {
                   whenPowerRestored: val
                 };
+              } else if (id.endsWith(".fanMode")) {
+                operation = {
+                  fanMode: val
+                };
+              } else if (id.endsWith(".fanSpeed")) {
+                operation = {
+                  fanSpeed: val
+                };
+              } else if (id.endsWith(".statusLEDs")) {
+                operation = {
+                  statusLEDs: val
+                };
+              } else if (id.endsWith(".controlsLocked")) {
+                operation = {
+                  controlsLocked: val
+                };
               }
               if (operation != null) {
                 (0, import_operations.operateVirtualGroup)(vGroup, operation);
@@ -368,7 +384,7 @@ function startAdapter(options = {}) {
               return;
             }
             default: {
-              if (id.indexOf(".lightbulb.") > -1 || id.indexOf(".plug.") > -1 || id.indexOf(".blind.") > -1) {
+              if (id.indexOf(".lightbulb.") > -1 || id.indexOf(".plug.") > -1 || id.indexOf(".blind.") > -1 || id.indexOf(".airpurifier.") > -1) {
                 if (!(rootObj.native.instanceId in import_session.session.devices)) {
                   import_global.Global.log(`The device with ID ${rootObj.native.instanceId} was not found!`, "warn");
                   return;
@@ -377,9 +393,10 @@ function startAdapter(options = {}) {
                 const light = accessory.lightList && accessory.lightList[0];
                 const plug = accessory.plugList && accessory.plugList[0];
                 const blind = accessory.blindList && accessory.blindList[0];
-                const specificAccessory = light || plug || blind;
+                const airPurifier = accessory.airPurifierList && accessory.airPurifierList[0];
+                const specificAccessory = light || plug || blind || airPurifier;
                 if (specificAccessory == void 0) {
-                  import_global.Global.log(`Cannot operate an accessory that is neither a lightbulb nor a plug nor a blind`, "warn");
+                  import_global.Global.log(`Cannot operate an accessory that is neither a lightbulb nor a plug nor a blind nor an airPurifier!`, "warn");
                   return;
                 }
                 let wasAcked = false;
@@ -430,6 +447,22 @@ function startAdapter(options = {}) {
                   wasAcked = !await import_session.session.tradfri.operateLight(accessory, {
                     whenPowerRestored: val
                   });
+                } else if (id.endsWith(".fanMode")) {
+                  if (airPurifier != void 0) {
+                    wasAcked = !await airPurifier.setFanMode(val);
+                  }
+                } else if (id.endsWith(".fanSpeed")) {
+                  if (airPurifier != void 0) {
+                    wasAcked = !await airPurifier.setFanSpeed(val);
+                  }
+                } else if (id.endsWith(".statusLEDs")) {
+                  if (airPurifier != void 0) {
+                    wasAcked = !await airPurifier.setStatusLEDs(val);
+                  }
+                } else if (id.endsWith(".controlsLocked")) {
+                  if (airPurifier != void 0) {
+                    wasAcked = !await airPurifier.setControlsLocked(val);
+                  }
                 }
                 if (wasAcked)
                   adapter.setStateAsync(id, state, true);
