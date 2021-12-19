@@ -90,7 +90,7 @@
     "prebuild": "rimraf ./build",
     "build:react": "node .build.js -react",
     "build:ts": "node .build.js -typescript",
-    "check:ts": "tsc -p tsconfig.build.json --noEmit",
+    "check": "tsc -p tsconfig.build.json --noEmit",
     "build": "node .build.js -typescript -react",
     "watch:react": "npm run build:react -- --watch",
     "watch:ts": "npm run build:ts -- --watch",
