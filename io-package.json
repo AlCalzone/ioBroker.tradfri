@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "tradfri",
-		"version": "3.0.2",
+		"version": "3.1.0",
 		"news": {
+			"3.1.0": {
+				"en": "Add support for STARKVIND Air Purifier",
+				"de": "Unterstützung für STARKVIND Luftreiniger hinzugefügt",
+				"ru": "Добавить поддержку очистителя воздуха СТАРКВИНД",
+				"pt": "Adicionar suporte para purificador de ar STARKVIND",
+				"nl": "Ondersteuning toevoegen voor STARKVIND luchtreiniger",
+				"fr": "Ajout de la prise en charge du purificateur d'air STARKVIND",
+				"it": "Aggiungi il supporto per il purificatore d'aria STARKVIND",
+				"es": "Agregue soporte para el purificador de aire STARKVIND",
+				"pl": "Dodaj obsługę oczyszczacza powietrza STARKVIND",
+				"zh-cn": "添加对 STARKVIND 空气净化器的支持"
+			},
 			"3.0.2": {
 				"en": "Improve support for older browsers\nUpdate dependencies",
 				"de": "Unterstützung für ältere Browser verbessert\nAbhängigkeiten aktualisiert",
@@ -74,18 +86,6 @@
 				"es": "Actualizaciones de dependencia\nProblemas resueltos en `io-package.json` y README encontrados por el verificador del adaptador",
 				"pl": "Aktualizacje zależności\nNaprawiono problemy w plikach `io-package.json` i plik README znalezione przez narzędzie do sprawdzania adapterów",
 				"zh-cn": "依赖关系更新\n修复了适配器检查器在io-package.json和自述文件中的问题"
-			},
-			"2.7.0": {
-				"en": "Compatibility with gateway firmware v1.13.21\nAdded `whenPowerRestored` setting to configure what bulbs do after a power loss",
-				"de": "Kompatibilität mit der Gateway-Firmware v1.13.21\nDie Einstellung \"whenPowerRestored\" wurde hinzugefügt, um zu konfigurieren, was Lampen nach einem Stromausfall tun",
-				"ru": "Совместимость с прошивкой шлюза v1.13.21\nДобавлен параметр whenPowerRestored для настройки действий лампочек после отключения питания.",
-				"pt": "Compatibilidade com firmware de gateway v1.13.21\nAdicionada a configuração `whenPowerRestored` para definir o que as lâmpadas fazem após uma perda de energia",
-				"nl": "Compatibiliteit met gateway-firmware v1.13.21\nInstelling `whenPowerRestored` toegevoegd om te configureren wat lampen doen na stroomuitval",
-				"fr": "Compatibilité avec le firmware de la passerelle v1.13.21\nAjout du paramètre `whenPowerRestored` pour configurer ce que font les ampoules après une coupure de courant",
-				"it": "Compatibilità con il firmware del gateway v1.13.21\nAggiunta l'impostazione `whenPowerRestored` per configurare cosa fanno le lampadine dopo una perdita di alimentazione",
-				"es": "Compatibilidad con el firmware de la puerta de enlace v1.13.21\nSe agregó la configuración `whenPowerRestored` para configurar lo que hacen las bombillas después de una pérdida de energía",
-				"pl": "Zgodność z oprogramowaniem sprzętowym bramy w wersji 1.13.21\nDodano ustawienie WhenPowerRestored, aby skonfigurować działanie żarówek po utracie zasilania",
-				"zh-cn": "与网关固件v1.13.21的兼容性\n添加了“ whenPowerRestored”设置，以配置掉电后灯泡的功能"
 			}
 		},
 		"title": "IKEA Trådfri",
@@ -113,7 +113,9 @@
 			"pl": "Komunikuje się z IKEA brama Trådfri do zarządzania urządzeniami",
 			"zh-cn": "与IKEA Trådfri网关，以控制设备"
 		},
-		"authors": ["AlCalzone <d.griesel@gmx.net>"],
+		"authors": [
+			"AlCalzone <d.griesel@gmx.net>"
+		],
 		"license": "MIT",
 		"platform": "Javascript/Node.js",
 		"main": "build/main.js",
@@ -121,7 +123,10 @@
 		"icon": "tradfri.png",
 		"enabled": false,
 		"extIcon": "https://raw.githubusercontent.com/AlCalzone/ioBroker.tradfri/master/admin/tradfri.png",
-		"keywords": ["ikea", "tradfri"],
+		"keywords": [
+			"ikea",
+			"tradfri"
+		],
 		"readme": "https://github.com/AlCalzone/ioBroker.tradfri/blob/master/README.md",
 		"loglevel": "info",
 		"type": "lighting",
@@ -145,7 +150,11 @@
 		"preserveTransitionTime": false,
 		"roundToDigits": 2
 	},
-	"protectedNative": ["securityCode", "identity", "psk"],
+	"protectedNative": [
+		"securityCode",
+		"identity",
+		"psk"
+	],
 	"objects": [],
 	"instanceObjects": [
 		{
