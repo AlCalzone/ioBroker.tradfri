@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "tradfri",
-		"version": "3.1.0",
+		"version": "3.1.1",
 		"news": {
+			"3.1.1": {
+				"en": "Fix: Actually create states for STARKVIND Air Purifier",
+				"de": "Fix: Zustände für den STARKVIND-Luftreiniger werden jetzt auch erstellt",
+				"ru": "Исправлено: фактическое создание состояний для очистителя воздуха STARKVIND.",
+				"pt": "Correção: crie realmente estados para o purificador de ar STARKVIND",
+				"nl": "Oplossing: maak daadwerkelijk toestanden aan voor STARKVIND-luchtreiniger",
+				"fr": "Correctif : créez réellement des états pour le purificateur d'air STARKVIND",
+				"it": "Correzione: crea effettivamente stati per il purificatore d'aria STARKVIND",
+				"es": "Solución: crear estados para el purificador de aire STARKVIND",
+				"pl": "Poprawka: faktycznie utwórz stany dla oczyszczacza powietrza STARKVIND",
+				"zh-cn": "修复：实际为 STARKVIND 空气净化器创建状态"
+			},
 			"3.1.0": {
 				"en": "Add support for STARKVIND Air Purifier",
 				"de": "Unterstützung für STARKVIND Luftreiniger hinzugefügt",
@@ -74,18 +86,6 @@
 				"es": "Evite advertir sobre estados \"indefinidos\" en JS-Controller 3.3+",
 				"pl": "Unikaj ostrzeżeń o stanach niezdefiniowanych w JS-Controller 3.3+",
 				"zh-cn": "避免在JS-Controller 3.3+中提示有关“未定义”状态的警告"
-			},
-			"2.7.1": {
-				"en": "Dependency updates\nFixed issues in `io-package.json` and README found by the adapter checker",
-				"de": "Abhängigkeitsaktualisierungen\nProbleme in `io-package.json` und README behoben, die vom Adapterprüfer gefunden wurden",
-				"ru": "Обновления зависимостей\nИсправлены проблемы в `io-package.json` и README, обнаруженные средством проверки адаптера.",
-				"pt": "Atualizações de dependência\nCorrigidos problemas em `io-package.json` e README encontrados pelo verificador de adaptador",
-				"nl": "Afhankelijkheid updates\nProblemen opgelost in `io-package.json` en README gevonden door de adapterchecker",
-				"fr": "Mises à jour des dépendances\nCorrection de problèmes dans `io-package.json` et README trouvés par le vérificateur d'adaptateur",
-				"it": "Aggiornamenti delle dipendenze\nRisolti i problemi in `io-package.json` e README trovati dal controllo dell'adattatore",
-				"es": "Actualizaciones de dependencia\nProblemas resueltos en `io-package.json` y README encontrados por el verificador del adaptador",
-				"pl": "Aktualizacje zależności\nNaprawiono problemy w plikach `io-package.json` i plik README znalezione przez narzędzie do sprawdzania adapterów",
-				"zh-cn": "依赖关系更新\n修复了适配器检查器在io-package.json和自述文件中的问题"
 			}
 		},
 		"title": "IKEA Trådfri",
@@ -113,9 +113,7 @@
 			"pl": "Komunikuje się z IKEA brama Trådfri do zarządzania urządzeniami",
 			"zh-cn": "与IKEA Trådfri网关，以控制设备"
 		},
-		"authors": [
-			"AlCalzone <d.griesel@gmx.net>"
-		],
+		"authors": ["AlCalzone <d.griesel@gmx.net>"],
 		"license": "MIT",
 		"platform": "Javascript/Node.js",
 		"main": "build/main.js",
@@ -123,10 +121,7 @@
 		"icon": "tradfri.png",
 		"enabled": false,
 		"extIcon": "https://raw.githubusercontent.com/AlCalzone/ioBroker.tradfri/master/admin/tradfri.png",
-		"keywords": [
-			"ikea",
-			"tradfri"
-		],
+		"keywords": ["ikea", "tradfri"],
 		"readme": "https://github.com/AlCalzone/ioBroker.tradfri/blob/master/README.md",
 		"loglevel": "info",
 		"type": "lighting",
@@ -150,11 +145,7 @@
 		"preserveTransitionTime": false,
 		"roundToDigits": 2
 	},
-	"protectedNative": [
-		"securityCode",
-		"identity",
-		"psk"
-	],
+	"protectedNative": ["securityCode", "identity", "psk"],
 	"objects": [],
 	"instanceObjects": [
 		{
