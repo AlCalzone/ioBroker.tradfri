@@ -71,6 +71,9 @@ The result object `ret` looks as follows:
 	Placeholder for next release:
 	### __WORK IN PROGRESS__
 -->
+### __WORK IN PROGRESS__
+* Fix: actually create states for STARKVIND Air Purifier
+
 ### 3.1.0 (2021-12-19)
 * Add support for STARKVIND Air Purifier
 

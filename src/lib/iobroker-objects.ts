@@ -278,6 +278,26 @@ export async function extendDevice(accessory: Accessory): Promise<void> {
 			);
 		}
 
+		if (accessory.type === AccessoryTypes.airPurifier) {
+			for (const prop of [
+				"airQuality",
+				"fanMode",
+				"fanSpeed",
+				"statusLEDs",
+				"controlsLocked",
+				"filterLifetime",
+				"filterRuntime",
+				"filterRemainingLifetime",
+				"filterStatus",
+			] as const) {
+				stateObjs[prop] = objectDefinitions[prop](
+					objId,
+					"device",
+					accessory.type,
+				);
+			}
+		}
+
 		// Now create all objects
 		for (const obj of values(stateObjs)) {
 			let initialValue = null;

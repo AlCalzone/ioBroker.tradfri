@@ -205,6 +205,21 @@ async function extendDevice(accessory) {
       stateObjs.position = objectDefinitions.position(objId, "device", accessory.type);
       stateObjs.stopBlinds = objectDefinitions.stopBlinds(objId, "device", accessory.type);
     }
+    if (accessory.type === import_node_tradfri_client.AccessoryTypes.airPurifier) {
+      for (const prop of [
+        "airQuality",
+        "fanMode",
+        "fanSpeed",
+        "statusLEDs",
+        "controlsLocked",
+        "filterLifetime",
+        "filterRuntime",
+        "filterRemainingLifetime",
+        "filterStatus"
+      ]) {
+        stateObjs[prop] = objectDefinitions[prop](objId, "device", accessory.type);
+      }
+    }
     for (const obj of (0, import_objects.values)(stateObjs)) {
       let initialValue = null;
       if (obj.native.path != null) {
