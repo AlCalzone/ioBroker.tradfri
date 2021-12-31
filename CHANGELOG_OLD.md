@@ -1,4 +1,7 @@
 # Older changes
+## 3.0.0 (2021-06-19)
+* Update dependencies, require Node.js 12+
+
 ## 2.7.3 (2021-05-14)
 * Fix remaining JS-Controller 3.3 warnings
 

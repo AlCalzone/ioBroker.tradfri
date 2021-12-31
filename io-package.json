@@ -1,173 +1,182 @@
 {
-	"common": {
-		"name": "tradfri",
-		"version": "3.1.1",
-		"news": {
-			"3.1.1": {
-				"en": "Fix: Actually create states for STARKVIND Air Purifier",
-				"de": "Fix: Zustände für den STARKVIND-Luftreiniger werden jetzt auch erstellt",
-				"ru": "Исправлено: фактическое создание состояний для очистителя воздуха STARKVIND.",
-				"pt": "Correção: crie realmente estados para o purificador de ar STARKVIND",
-				"nl": "Oplossing: maak daadwerkelijk toestanden aan voor STARKVIND-luchtreiniger",
-				"fr": "Correctif : créez réellement des états pour le purificateur d'air STARKVIND",
-				"it": "Correzione: crea effettivamente stati per il purificatore d'aria STARKVIND",
-				"es": "Solución: crear estados para el purificador de aire STARKVIND",
-				"pl": "Poprawka: faktycznie utwórz stany dla oczyszczacza powietrza STARKVIND",
-				"zh-cn": "修复：实际为 STARKVIND 空气净化器创建状态"
-			},
-			"3.1.0": {
-				"en": "Add support for STARKVIND Air Purifier",
-				"de": "Unterstützung für STARKVIND Luftreiniger hinzugefügt",
-				"ru": "Добавить поддержку очистителя воздуха СТАРКВИНД",
-				"pt": "Adicionar suporte para purificador de ar STARKVIND",
-				"nl": "Ondersteuning toevoegen voor STARKVIND luchtreiniger",
-				"fr": "Ajout de la prise en charge du purificateur d'air STARKVIND",
-				"it": "Aggiungi il supporto per il purificatore d'aria STARKVIND",
-				"es": "Agregue soporte para el purificador de aire STARKVIND",
-				"pl": "Dodaj obsługę oczyszczacza powietrza STARKVIND",
-				"zh-cn": "添加对 STARKVIND 空气净化器的支持"
-			},
-			"3.0.2": {
-				"en": "Improve support for older browsers\nUpdate dependencies",
-				"de": "Unterstützung für ältere Browser verbessert\nAbhängigkeiten aktualisiert",
-				"ru": "Улучшить поддержку старых браузеров\nОбновить зависимости",
-				"pt": "Melhore o suporte para navegadores mais antigos\nAtualizar dependências",
-				"nl": "Ondersteuning voor oudere browsers verbeteren\nAfhankelijkheden bijwerken",
-				"fr": "Améliorer la prise en charge des anciens navigateurs\nMettre à jour les dépendances",
-				"it": "Migliora il supporto per i browser meno recenti\nAggiorna dipendenze",
-				"es": "Mejorar la compatibilidad con navegadores más antiguos\nActualizar dependencias",
-				"pl": "Popraw obsługę starszych przeglądarek\nAktualizuj zależności",
-				"zh-cn": "改进对旧浏览器的支持\n更新依赖"
-			},
-			"3.0.1": {
-				"en": "Workaround for a bug in IKEA gateway firmware `v1.15.x`",
-				"de": "Problemumgehung für einen Fehler in der IKEA Gateway-Firmware `v1.15.x`",
-				"ru": "Обход ошибки в прошивке шлюза IKEA `v1.15.x`",
-				"pt": "Solução alternativa para um bug no firmware do gateway IKEA `v1.15.x`",
-				"nl": "Tijdelijke oplossing voor een bug in IKEA gateway-firmware `v1.15.x`",
-				"fr": "Solution de contournement pour un bogue dans le firmware de la passerelle IKEA `v1.15.x`",
-				"it": "Soluzione alternativa per un bug nel firmware del gateway IKEA `v1.15.x`",
-				"es": "Solución alternativa para un error en el firmware de la puerta de enlace IKEA `v1.15.x`",
-				"pl": "Obejście błędu w oprogramowaniu bramy IKEA `v1.15.x`",
-				"zh-cn": "解决宜家网关固件“v1.15.x”中的错误"
-			},
-			"3.0.0": {
-				"en": "Update dependencies, require Node.js 12+",
-				"de": "Abhängigkeiten aktualisieren, benötigt Node.js 12+",
-				"ru": "Обновите зависимости, требуется Node.js 12+",
-				"pt": "Atualizar dependências, requer Node.js 12+",
-				"nl": "Afhankelijkheden bijwerken, Node.js 12+ . vereisen",
-				"fr": "Mettre à jour les dépendances, nécessite Node.js 12+",
-				"it": "Aggiorna le dipendenze, richiedi Node.js 12+",
-				"es": "Actualice las dependencias, requiera Node.js 12+",
-				"pl": "Zaktualizuj zależności, wymagaj Node.js 12+",
-				"zh-cn": "更新依赖，需要 Node.js 12+"
-			},
-			"2.7.3": {
-				"en": "Fix remaining JS-Controller 3.3 warnings",
-				"de": "Korrigieren Sie die verbleibenden JS-Controller 3.3-Warnungen",
-				"ru": "Исправить оставшиеся предупреждения JS-Controller 3.3",
-				"pt": "Corrigir os avisos restantes do JS-Controller 3.3",
-				"nl": "Los de resterende JS-Controller 3.3-waarschuwingen op",
-				"fr": "Correction des avertissements restants du JS-Controller 3.3",
-				"it": "Correggere i restanti avvisi JS-Controller 3.3",
-				"es": "Corregir las advertencias restantes de JS-Controller 3.3",
-				"pl": "Napraw pozostałe ostrzeżenia JS-Controller 3.3",
-				"zh-cn": "修复剩余的JS-Controller 3.3警告"
-			},
-			"2.7.2": {
-				"en": "Avoid warning about `undefined` states in JS-Controller 3.3+",
-				"de": "Vermeiden Sie Warnungen vor \"undefinierten\" Zuständen in JS-Controller 3.3+",
-				"ru": "Избегайте предупреждений о состояниях undefined в JS-Controller 3.3+",
-				"pt": "Evite advertir sobre estados `undefined` em JS-Controller 3.3+",
-				"nl": "Vermijd waarschuwingen over 'ongedefinieerde' toestanden in JS-Controller 3.3+",
-				"fr": "Évitez les avertissements sur les états `indéfinis` dans JS-Controller 3.3+",
-				"it": "Evita di avvertire gli stati \"undefined\" in JS-Controller 3.3+",
-				"es": "Evite advertir sobre estados \"indefinidos\" en JS-Controller 3.3+",
-				"pl": "Unikaj ostrzeżeń o stanach niezdefiniowanych w JS-Controller 3.3+",
-				"zh-cn": "避免在JS-Controller 3.3+中提示有关“未定义”状态的警告"
-			}
-		},
-		"title": "IKEA Trådfri",
-		"titleLang": {
-			"de": "IKEA Trådfri",
-			"en": "IKEA Trådfri",
-			"es": "IKEA Trådfri",
-			"fr": "IKEA Trådfri",
-			"it": "IKEA Trådfri",
-			"nl": "IKEA Trådfri",
-			"pl": "IKEA Trådfri",
-			"pt": "IKEA Trådfri",
-			"ru": "IKEA Trådfri",
-			"zh-cn": "宜家Trådfri"
-		},
-		"desc": {
-			"en": "Communicates with IKEA Trådfri Gateway to control devices",
-			"de": "Kommuniziert mit IKEA Trådfri Gateway, um Geräte zu steuern",
-			"ru": "Общается с ИКЕА шлюз Trådfri для управления устройствами",
-			"pt": "Comunica-se com a IKEA Trådfri Gateway para dispositivos de controle de",
-			"nl": "Communiceert met de IKEA Trådfri Gateway om de apparatuur te bedienen",
-			"fr": "Communique avec IKEA Trådfri Passerelle de dispositifs de contrôle de la",
-			"it": "Comunica con IKEA Trådfri Gateway per dispositivi di controllo",
-			"es": "Se comunica con IKEA Trådfri Puerta de entrada a los dispositivos de control de",
-			"pl": "Komunikuje się z IKEA brama Trådfri do zarządzania urządzeniami",
-			"zh-cn": "与IKEA Trådfri网关，以控制设备"
-		},
-		"authors": ["AlCalzone <d.griesel@gmx.net>"],
-		"license": "MIT",
-		"platform": "Javascript/Node.js",
-		"main": "build/main.js",
-		"mode": "daemon",
-		"icon": "tradfri.png",
-		"enabled": false,
-		"extIcon": "https://raw.githubusercontent.com/AlCalzone/ioBroker.tradfri/master/admin/tradfri.png",
-		"keywords": ["ikea", "tradfri"],
-		"readme": "https://github.com/AlCalzone/ioBroker.tradfri/blob/master/README.md",
-		"loglevel": "info",
-		"type": "lighting",
-		"connectionType": "local",
-		"dataSource": "push",
-		"messagebox": true,
-		"materialize": true,
-		"compact": true,
-		"dependencies": [
-			{
-				"js-controller": ">=1.4.2"
-			}
-		]
-	},
-	"native": {
-		"discoverGateway": true,
-		"host": "",
-		"securityCode": "",
-		"identity": "",
-		"psk": "",
-		"preserveTransitionTime": false,
-		"roundToDigits": 2
-	},
-	"protectedNative": ["securityCode", "identity", "psk"],
-	"objects": [],
-	"instanceObjects": [
-		{
-			"_id": "info",
-			"type": "channel",
-			"common": {
-				"name": "Adapter-Information"
-			},
-			"native": {}
-		},
-		{
-			"_id": "info.connection",
-			"type": "state",
-			"common": {
-				"role": "indicator.connected",
-				"name": "Whether the adapter is connected to the gateway",
-				"type": "boolean",
-				"read": true,
-				"write": false,
-				"def": false
-			},
-			"native": {}
-		}
-	]
+  "common": {
+    "name": "tradfri",
+    "version": "3.1.2",
+    "news": {
+      "3.1.2": {
+        "en": "Fixed a typo preventing the adapter from controlling air purifiers",
+        "de": "Ein Tippfehler wurde behoben, der den Adapter daran hinderte, Luftreiniger zu steuern",
+        "ru": "Исправлена опечатка, из-за которой адаптер не мог управлять очистителями воздуха.",
+        "pt": "Corrigido um erro de digitação que impedia o adaptador de controlar os purificadores de ar",
+        "nl": "Een typefout verholpen waardoor de adapter de luchtreinigers niet kon bedienen",
+        "fr": "Correction d'une faute de frappe empêchant l'adaptateur de contrôler les purificateurs d'air",
+        "it": "Risolto un errore di battitura che impediva all'adattatore di controllare i purificatori d'aria",
+        "es": "Se corrigió un error tipográfico que impedía que el adaptador controlara los purificadores de aire.",
+        "pl": "Naprawiono literówkę uniemożliwiającą adapterowi sterowanie oczyszczaczami powietrza",
+        "zh-cn": "修复了阻止适配器控制空气净化器的错字"
+      },
+      "3.1.1": {
+        "en": "Fix: Actually create states for STARKVIND Air Purifier",
+        "de": "Fix: Zustände für den STARKVIND-Luftreiniger werden jetzt auch erstellt",
+        "ru": "Исправлено: фактическое создание состояний для очистителя воздуха STARKVIND.",
+        "pt": "Correção: crie realmente estados para o purificador de ar STARKVIND",
+        "nl": "Oplossing: maak daadwerkelijk toestanden aan voor STARKVIND-luchtreiniger",
+        "fr": "Correctif : créez réellement des états pour le purificateur d'air STARKVIND",
+        "it": "Correzione: crea effettivamente stati per il purificatore d'aria STARKVIND",
+        "es": "Solución: crear estados para el purificador de aire STARKVIND",
+        "pl": "Poprawka: faktycznie utwórz stany dla oczyszczacza powietrza STARKVIND",
+        "zh-cn": "修复：实际为 STARKVIND 空气净化器创建状态"
+      },
+      "3.1.0": {
+        "en": "Add support for STARKVIND Air Purifier",
+        "de": "Unterstützung für STARKVIND Luftreiniger hinzugefügt",
+        "ru": "Добавить поддержку очистителя воздуха СТАРКВИНД",
+        "pt": "Adicionar suporte para purificador de ar STARKVIND",
+        "nl": "Ondersteuning toevoegen voor STARKVIND luchtreiniger",
+        "fr": "Ajout de la prise en charge du purificateur d'air STARKVIND",
+        "it": "Aggiungi il supporto per il purificatore d'aria STARKVIND",
+        "es": "Agregue soporte para el purificador de aire STARKVIND",
+        "pl": "Dodaj obsługę oczyszczacza powietrza STARKVIND",
+        "zh-cn": "添加对 STARKVIND 空气净化器的支持"
+      },
+      "3.0.2": {
+        "en": "Improve support for older browsers\nUpdate dependencies",
+        "de": "Unterstützung für ältere Browser verbessert\nAbhängigkeiten aktualisiert",
+        "ru": "Улучшить поддержку старых браузеров\nОбновить зависимости",
+        "pt": "Melhore o suporte para navegadores mais antigos\nAtualizar dependências",
+        "nl": "Ondersteuning voor oudere browsers verbeteren\nAfhankelijkheden bijwerken",
+        "fr": "Améliorer la prise en charge des anciens navigateurs\nMettre à jour les dépendances",
+        "it": "Migliora il supporto per i browser meno recenti\nAggiorna dipendenze",
+        "es": "Mejorar la compatibilidad con navegadores más antiguos\nActualizar dependencias",
+        "pl": "Popraw obsługę starszych przeglądarek\nAktualizuj zależności",
+        "zh-cn": "改进对旧浏览器的支持\n更新依赖"
+      },
+      "3.0.1": {
+        "en": "Workaround for a bug in IKEA gateway firmware `v1.15.x`",
+        "de": "Problemumgehung für einen Fehler in der IKEA Gateway-Firmware `v1.15.x`",
+        "ru": "Обход ошибки в прошивке шлюза IKEA `v1.15.x`",
+        "pt": "Solução alternativa para um bug no firmware do gateway IKEA `v1.15.x`",
+        "nl": "Tijdelijke oplossing voor een bug in IKEA gateway-firmware `v1.15.x`",
+        "fr": "Solution de contournement pour un bogue dans le firmware de la passerelle IKEA `v1.15.x`",
+        "it": "Soluzione alternativa per un bug nel firmware del gateway IKEA `v1.15.x`",
+        "es": "Solución alternativa para un error en el firmware de la puerta de enlace IKEA `v1.15.x`",
+        "pl": "Obejście błędu w oprogramowaniu bramy IKEA `v1.15.x`",
+        "zh-cn": "解决宜家网关固件“v1.15.x”中的错误"
+      },
+      "3.0.0": {
+        "en": "Update dependencies, require Node.js 12+",
+        "de": "Abhängigkeiten aktualisieren, benötigt Node.js 12+",
+        "ru": "Обновите зависимости, требуется Node.js 12+",
+        "pt": "Atualizar dependências, requer Node.js 12+",
+        "nl": "Afhankelijkheden bijwerken, Node.js 12+ . vereisen",
+        "fr": "Mettre à jour les dépendances, nécessite Node.js 12+",
+        "it": "Aggiorna le dipendenze, richiedi Node.js 12+",
+        "es": "Actualice las dependencias, requiera Node.js 12+",
+        "pl": "Zaktualizuj zależności, wymagaj Node.js 12+",
+        "zh-cn": "更新依赖，需要 Node.js 12+"
+      },
+      "2.7.3": {
+        "en": "Fix remaining JS-Controller 3.3 warnings",
+        "de": "Korrigieren Sie die verbleibenden JS-Controller 3.3-Warnungen",
+        "ru": "Исправить оставшиеся предупреждения JS-Controller 3.3",
+        "pt": "Corrigir os avisos restantes do JS-Controller 3.3",
+        "nl": "Los de resterende JS-Controller 3.3-waarschuwingen op",
+        "fr": "Correction des avertissements restants du JS-Controller 3.3",
+        "it": "Correggere i restanti avvisi JS-Controller 3.3",
+        "es": "Corregir las advertencias restantes de JS-Controller 3.3",
+        "pl": "Napraw pozostałe ostrzeżenia JS-Controller 3.3",
+        "zh-cn": "修复剩余的JS-Controller 3.3警告"
+      }
+    },
+    "title": "IKEA Trådfri",
+    "titleLang": {
+      "de": "IKEA Trådfri",
+      "en": "IKEA Trådfri",
+      "es": "IKEA Trådfri",
+      "fr": "IKEA Trådfri",
+      "it": "IKEA Trådfri",
+      "nl": "IKEA Trådfri",
+      "pl": "IKEA Trådfri",
+      "pt": "IKEA Trådfri",
+      "ru": "IKEA Trådfri",
+      "zh-cn": "宜家Trådfri"
+    },
+    "desc": {
+      "en": "Communicates with IKEA Trådfri Gateway to control devices",
+      "de": "Kommuniziert mit IKEA Trådfri Gateway, um Geräte zu steuern",
+      "ru": "Общается с ИКЕА шлюз Trådfri для управления устройствами",
+      "pt": "Comunica-se com a IKEA Trådfri Gateway para dispositivos de controle de",
+      "nl": "Communiceert met de IKEA Trådfri Gateway om de apparatuur te bedienen",
+      "fr": "Communique avec IKEA Trådfri Passerelle de dispositifs de contrôle de la",
+      "it": "Comunica con IKEA Trådfri Gateway per dispositivi di controllo",
+      "es": "Se comunica con IKEA Trådfri Puerta de entrada a los dispositivos de control de",
+      "pl": "Komunikuje się z IKEA brama Trådfri do zarządzania urządzeniami",
+      "zh-cn": "与IKEA Trådfri网关，以控制设备"
+    },
+    "authors": [
+      "AlCalzone <d.griesel@gmx.net>"
+    ],
+    "license": "MIT",
+    "platform": "Javascript/Node.js",
+    "main": "build/main.js",
+    "mode": "daemon",
+    "icon": "tradfri.png",
+    "enabled": false,
+    "extIcon": "https://raw.githubusercontent.com/AlCalzone/ioBroker.tradfri/master/admin/tradfri.png",
+    "keywords": [
+      "ikea",
+      "tradfri"
+    ],
+    "readme": "https://github.com/AlCalzone/ioBroker.tradfri/blob/master/README.md",
+    "loglevel": "info",
+    "type": "lighting",
+    "connectionType": "local",
+    "dataSource": "push",
+    "messagebox": true,
+    "materialize": true,
+    "compact": true,
+    "dependencies": [
+      {
+        "js-controller": ">=1.4.2"
+      }
+    ]
+  },
+  "native": {
+    "discoverGateway": true,
+    "host": "",
+    "securityCode": "",
+    "identity": "",
+    "psk": "",
+    "preserveTransitionTime": false,
+    "roundToDigits": 2
+  },
+  "protectedNative": [
+    "securityCode",
+    "identity",
+    "psk"
+  ],
+  "objects": [],
+  "instanceObjects": [
+    {
+      "_id": "info",
+      "type": "channel",
+      "common": {
+        "name": "Adapter-Information"
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.connection",
+      "type": "state",
+      "common": {
+        "role": "indicator.connected",
+        "name": "Whether the adapter is connected to the gateway",
+        "type": "boolean",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    }
+  ]
 }
