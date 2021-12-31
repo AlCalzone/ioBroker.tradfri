@@ -71,6 +71,9 @@ The result object `ret` looks as follows:
 	Placeholder for next release:
 	### __WORK IN PROGRESS__
 -->
+### __WORK IN PROGRESS__
+* Fixed a typo preventing the adapter from controlling air purifiers
+
 ### 3.1.1 (2021-12-21)
 * Fix: actually create states for STARKVIND Air Purifier
 

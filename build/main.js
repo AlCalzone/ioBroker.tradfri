@@ -384,7 +384,7 @@ function startAdapter(options = {}) {
               return;
             }
             default: {
-              if (id.indexOf(".lightbulb.") > -1 || id.indexOf(".plug.") > -1 || id.indexOf(".blind.") > -1 || id.indexOf(".airpurifier.") > -1) {
+              if (id.indexOf(".lightbulb.") > -1 || id.indexOf(".plug.") > -1 || id.indexOf(".blind.") > -1 || id.indexOf(".airPurifier.") > -1) {
                 if (!(rootObj.native.instanceId in import_session.session.devices)) {
                   import_global.Global.log(`The device with ID ${rootObj.native.instanceId} was not found!`, "warn");
                   return;

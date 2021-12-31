@@ -668,7 +668,7 @@ function startAdapter(options: Partial<utils.AdapterOptions> = {}) {
 								id.indexOf(".lightbulb.") > -1 ||
 								id.indexOf(".plug.") > -1 ||
 								id.indexOf(".blind.") > -1 ||
-								id.indexOf(".airpurifier.") > -1
+								id.indexOf(".airPurifier.") > -1
 							) {
 								// read the instanceId and get a reference value
 								if (!(rootObj.native.instanceId in $.devices)) {
