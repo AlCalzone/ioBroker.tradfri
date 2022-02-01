@@ -36,7 +36,7 @@
     "@alcalzone/release-script-plugin-iobroker": "~3.4.1",
     "@alcalzone/release-script-plugin-license": "~3.4.1",
     "@alcalzone/release-script-plugin-manual-review": "~3.4.1",
-    "@iobroker/testing": "^2.5.2",
+    "@iobroker/testing": "^2.5.3",
     "@types/chai": "^4.3.0",
     "@types/chai-as-promised": "^7.1.4",
     "@types/jquery": "^3.5.13",
