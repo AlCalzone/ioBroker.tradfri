@@ -41,7 +41,7 @@
     "@types/chai-as-promised": "^7.1.4",
     "@types/jquery": "^3.5.11",
     "@types/materialize-css": "^1.0.11",
-    "@types/mocha": "^9.0.0",
+    "@types/mocha": "^9.1.0",
     "@types/node": "^16.11.21",
     "@types/react": "^17.0.38",
     "@types/react-dom": "^17.0.11",
