@@ -1,52 +1,52 @@
-var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
-var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __markAsModule = (target) => __defProp(target, "__esModule", {value: true});
+var __markAsModule = (target) => __defProp(target, "__esModule", { value: true });
 var __export = (target, all) => {
   for (var name in all)
-    __defProp(target, name, {get: all[name], enumerable: true});
+    __defProp(target, name, { get: all[name], enumerable: true });
 };
-var __reExport = (target, module2, desc) => {
+var __reExport = (target, module2, copyDefault, desc) => {
   if (module2 && typeof module2 === "object" || typeof module2 === "function") {
     for (let key of __getOwnPropNames(module2))
-      if (!__hasOwnProp.call(target, key) && key !== "default")
-        __defProp(target, key, {get: () => module2[key], enumerable: !(desc = __getOwnPropDesc(module2, key)) || desc.enumerable});
+      if (!__hasOwnProp.call(target, key) && (copyDefault || key !== "default"))
+        __defProp(target, key, { get: () => module2[key], enumerable: !(desc = __getOwnPropDesc(module2, key)) || desc.enumerable });
   }
   return target;
 };
-var __toModule = (module2) => {
-  return __reExport(__markAsModule(__defProp(module2 != null ? __create(__getProtoOf(module2)) : {}, "default", module2 && module2.__esModule && "default" in module2 ? {get: () => module2.default, enumerable: true} : {value: module2, enumerable: true})), module2);
-};
-__markAsModule(exports);
-__export(exports, {
+var __toCommonJS = /* @__PURE__ */ ((cache) => {
+  return (module2, temp) => {
+    return cache && cache.get(module2) || (temp = __reExport(__markAsModule({}), module2, 1), cache && cache.set(module2, temp), temp);
+  };
+})(typeof WeakMap !== "undefined" ? /* @__PURE__ */ new WeakMap() : 0);
+var message_exports = {};
+__export(message_exports, {
   onMessage: () => onMessage
 });
-var import_objects = __toModule(require("alcalzone-shared/objects"));
-var import_typeguards = __toModule(require("alcalzone-shared/typeguards"));
-var import_node_tradfri_client = __toModule(require("node-tradfri-client"));
-var import_global = __toModule(require("../lib/global"));
-var import_iobroker_objects = __toModule(require("../lib/iobroker-objects"));
-var import_virtual_group = __toModule(require("../lib/virtual-group"));
-var import_groups = __toModule(require("./groups"));
-var import_session = __toModule(require("./session"));
+var import_objects = require("alcalzone-shared/objects");
+var import_typeguards = require("alcalzone-shared/typeguards");
+var import_node_tradfri_client = require("node-tradfri-client");
+var import_global = require("../lib/global");
+var import_iobroker_objects = require("../lib/iobroker-objects");
+var import_virtual_group = require("../lib/virtual-group");
+var import_groups = require("./groups");
+var import_session = require("./session");
 const onMessage = async (obj) => {
   function respond(response) {
     if (obj.callback)
       import_global.Global.adapter.sendTo(obj.from, obj.command, response, obj.callback);
   }
   const responses = {
-    ACK: {error: null},
-    OK: {error: null, result: "ok"},
-    ERROR_UNKNOWN_COMMAND: {error: "Unknown command!"},
+    ACK: { error: null },
+    OK: { error: null, result: "ok" },
+    ERROR_UNKNOWN_COMMAND: { error: "Unknown command!" },
     MISSING_PARAMETER: (paramName) => {
-      return {error: 'missing parameter "' + paramName + '"!'};
+      return { error: 'missing parameter "' + paramName + '"!' };
     },
-    COMMAND_RUNNING: {error: "command running"},
-    RESULT: (result) => ({error: null, result}),
-    ERROR: (error) => ({error})
+    COMMAND_RUNNING: { error: "command running" },
+    RESULT: (result) => ({ error: null, result }),
+    ERROR: (error) => ({ error })
   };
   function requireParams(...params) {
     for (const param of params) {
@@ -90,7 +90,7 @@ const onMessage = async (obj) => {
         const params = obj.message;
         const id = parseInt(params.id, 10);
         if (!(id in import_session.session.virtualGroups)) {
-          respond({error: `no virtual group with ID ${id} found!`});
+          respond({ error: `no virtual group with ID ${id} found!` });
           return;
         }
         const group = import_session.session.virtualGroups[id];
@@ -111,7 +111,7 @@ const onMessage = async (obj) => {
         const params = obj.message;
         const id = parseInt(params.id, 10);
         if (!(id in import_session.session.virtualGroups)) {
-          respond({error: `no virtual group with ID ${id} found!`});
+          respond({ error: `no virtual group with ID ${id} found!` });
           return;
         }
         const group = import_session.session.virtualGroups[id];
@@ -203,6 +203,7 @@ const onMessage = async (obj) => {
     }
   }
 };
+module.exports = __toCommonJS(message_exports);
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   onMessage

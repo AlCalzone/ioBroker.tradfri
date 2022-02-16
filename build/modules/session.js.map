@@ -1,6 +1,7 @@
 {
   "version": 3,
   "sources": ["../../src/modules/session.ts"],
-  "mappings": ";;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAGO,cAAc;AAAA,EAAd,cAHP;AAQQ,mBAAqC;AAErC,kBAAoC;AAEpC,yBAA8C;AAE9C,mBAA2C;AAAA;AAAA;AAG5C,MAAM,UAAU,IAAI;",
+  "sourcesContent": ["import type { Accessory, GroupInfo, TradfriClient } from \"node-tradfri-client\";\nimport type { VirtualGroup } from \"../lib/virtual-group\";\n\nexport class Session {\n\t// We know this will be definitely assigned in the adapter ready callback\n\tpublic tradfri!: TradfriClient;\n\n\t/** dictionary of known devices */\n\tpublic devices: Record<string, Accessory> = {};\n\t/** dictionary of known groups */\n\tpublic groups: Record<string, GroupInfo> = {};\n\t/** dictionary of known virtual groups */\n\tpublic virtualGroups: Record<string, VirtualGroup> = {};\n\t// dictionary of ioBroker objects\n\tpublic objects: Record<string, ioBroker.Object> = {};\n}\n\nexport const session = new Session();\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAGO,cAAc;AAAA,EAAd,cAHP;AAQQ,mBAAqC;AAErC,kBAAoC;AAEpC,yBAA8C;AAE9C,mBAA2C;AAAA;AAAA;AAG5C,MAAM,UAAU,IAAI;",
   "names": []
 }

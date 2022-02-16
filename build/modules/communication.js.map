@@ -1,6 +1,7 @@
 {
   "version": 3,
   "sources": ["../../src/modules/communication.ts"],
-  "mappings": ";;AAAA;",
+  "sourcesContent": ["import type { Spectrum } from \"node-tradfri-client\";\n\nexport interface Group {\n\tid: string;\n\tname: string;\n\tdeviceIDs: number[];\n\ttype: \"real\" | \"virtual\";\n}\n\nexport interface DeviceBase {\n\tid: string;\n\tname: string;\n}\nexport interface LightbulbDevice extends DeviceBase {\n\ttype: \"lightbulb\";\n\tspectrum?: Spectrum;\n}\n\nexport interface PlugDevice extends DeviceBase {\n\ttype: \"plug\";\n}\n\nexport type Device = LightbulbDevice | PlugDevice;\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;",
   "names": []
 }
