@@ -1,27 +1,27 @@
-var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
-var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __markAsModule = (target) => __defProp(target, "__esModule", {value: true});
+var __markAsModule = (target) => __defProp(target, "__esModule", { value: true });
 var __export = (target, all) => {
   for (var name in all)
-    __defProp(target, name, {get: all[name], enumerable: true});
+    __defProp(target, name, { get: all[name], enumerable: true });
 };
-var __reExport = (target, module2, desc) => {
+var __reExport = (target, module2, copyDefault, desc) => {
   if (module2 && typeof module2 === "object" || typeof module2 === "function") {
     for (let key of __getOwnPropNames(module2))
-      if (!__hasOwnProp.call(target, key) && key !== "default")
-        __defProp(target, key, {get: () => module2[key], enumerable: !(desc = __getOwnPropDesc(module2, key)) || desc.enumerable});
+      if (!__hasOwnProp.call(target, key) && (copyDefault || key !== "default"))
+        __defProp(target, key, { get: () => module2[key], enumerable: !(desc = __getOwnPropDesc(module2, key)) || desc.enumerable });
   }
   return target;
 };
-var __toModule = (module2) => {
-  return __reExport(__markAsModule(__defProp(module2 != null ? __create(__getProtoOf(module2)) : {}, "default", module2 && module2.__esModule && "default" in module2 ? {get: () => module2.default, enumerable: true} : {value: module2, enumerable: true})), module2);
-};
-__markAsModule(exports);
-__export(exports, {
+var __toCommonJS = /* @__PURE__ */ ((cache) => {
+  return (module2, temp) => {
+    return cache && cache.get(module2) || (temp = __reExport(__markAsModule({}), module2, 1), cache && cache.set(module2, temp), temp);
+  };
+})(typeof WeakMap !== "undefined" ? /* @__PURE__ */ new WeakMap() : 0);
+var iobroker_objects_exports = {};
+__export(iobroker_objects_exports, {
   accessoryToCommon: () => accessoryToCommon,
   accessoryToNative: () => accessoryToNative,
   calcGroupId: () => calcGroupId,
@@ -39,15 +39,15 @@ __export(exports, {
   objectDefinitions: () => objectDefinitions,
   updatePossibleScenes: () => updatePossibleScenes
 });
-var import_helpers = __toModule(require("alcalzone-shared/helpers"));
-var import_objects = __toModule(require("alcalzone-shared/objects"));
-var import_node_tradfri_client = __toModule(require("node-tradfri-client"));
-var import_session = __toModule(require("../modules/session"));
-var import_global = __toModule(require("./global"));
-var import_math = __toModule(require("./math"));
-var import_object_polyfill = __toModule(require("./object-polyfill"));
-var import_strings = __toModule(require("./strings"));
-var import_virtual_group = __toModule(require("./virtual-group"));
+var import_helpers = require("alcalzone-shared/helpers");
+var import_objects = require("alcalzone-shared/objects");
+var import_node_tradfri_client = require("node-tradfri-client");
+var import_session = require("../modules/session");
+var import_global = require("./global");
+var import_math = require("./math");
+var import_object_polyfill = require("./object-polyfill");
+var import_strings = require("./strings");
+var import_virtual_group = require("./virtual-group");
 function accessoryToCommon(accessory) {
   const ret = {
     name: accessory.name || accessory.deviceInfo.modelNumber
@@ -350,7 +350,7 @@ function groupToCommon(group) {
     }
   } else
     return (0, import_helpers.assertNever)(group);
-  return {name};
+  return { name };
 }
 function groupToNative(group) {
   return {
@@ -800,6 +800,7 @@ const objectDefinitions = {
     }
   })
 };
+module.exports = __toCommonJS(iobroker_objects_exports);
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   accessoryToCommon,

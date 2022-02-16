@@ -1,6 +1,7 @@
 {
   "version": 3,
   "sources": ["../../src/lib/strings.ts"],
-  "mappings": ";;;;;;AAAA;AAAA;AAAA;AAAA;AAMO,kBACN,KACA,WACA,OAAe,KACN;AAET,MAAI,OAAO,QAAQ,IAAI,UAAU;AAAW,WAAO;AAEnD,MAAI,QAAQ,QAAQ,KAAK,SAAS;AACjC,UAAM,IAAI,MAAM;AAGjB,QAAM,gBAAgB,YAAY,IAAI;AACtC,QAAM,UAAU,KAAK,KAAK,gBAAgB,KAAK;AAC/C,SAAO,KAAK,OAAO,SAAS,OAAO,GAAG,iBAAiB;AAAA;",
+  "sourcesContent": ["/**\n * Pads a string to the given length by repeatedly prepending the filler at the beginning of the string.\n * @param str The string to pad\n * @param targetLen The target length\n * @param fill The filler string to prepend. Depending on the lenght requirements, this might get truncated.\n */\nexport function padStart(\n\tstr: string,\n\ttargetLen: number,\n\tfill: string = \" \",\n): string {\n\t// simply return strings that are long enough to not be padded\n\tif (str != null && str.length >= targetLen) return str;\n\t// make sure that <fill> isn't empty\n\tif (fill == null || fill.length < 1)\n\t\tthrow new Error(\"fill must be at least one char\");\n\n\t// figure out how often we need to repeat <fill>\n\tconst missingLength = targetLen - str.length;\n\tconst repeats = Math.ceil(missingLength / fill.length);\n\treturn fill.repeat(repeats).substr(0, missingLength) + str;\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAMO,kBACN,KACA,WACA,OAAe,KACN;AAET,MAAI,OAAO,QAAQ,IAAI,UAAU;AAAW,WAAO;AAEnD,MAAI,QAAQ,QAAQ,KAAK,SAAS;AACjC,UAAM,IAAI,MAAM;AAGjB,QAAM,gBAAgB,YAAY,IAAI;AACtC,QAAM,UAAU,KAAK,KAAK,gBAAgB,KAAK;AAC/C,SAAO,KAAK,OAAO,SAAS,OAAO,GAAG,iBAAiB;AAAA;",
   "names": []
 }

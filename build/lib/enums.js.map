@@ -1,6 +1,7 @@
 {
   "version": 3,
   "sources": ["../../src/lib/enums.ts"],
+  "sourcesContent": ["import { entries } from \"alcalzone-shared/objects\";\n\nexport interface Enumeration {\n\t[id: string]: number;\n}\n\nexport function getEnumValueAsName(\n\tenumeration: Enumeration,\n\tvalue: number,\n): string {\n\tfor (const [id, val] of entries(enumeration)) {\n\t\tif (val === value) return id;\n\t}\n\treturn \"\";\n}\n"],
   "mappings": ";;;;;;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA,qBAAwB;AAMjB,4BACN,aACA,OACS;AACT,aAAW,CAAC,IAAI,QAAQ,4BAAQ,cAAc;AAC7C,QAAI,QAAQ;AAAO,aAAO;AAAA;AAE3B,SAAO;AAAA;",
   "names": []
 }

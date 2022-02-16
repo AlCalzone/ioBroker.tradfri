@@ -1,6 +1,7 @@
 {
   "version": 3,
   "sources": ["../../src/lib/str2regex.ts"],
-  "mappings": ";;;;;;AAAA;AAAA;AAAA;AAAA;AAAO,mBAAmB,SAAyB;AAClD,SAAO,IAAI,OACV,QACE,QAAQ,OAAO,QACf,QAAQ,OAAO,OACf,QAAQ,OAAO,MACf,QAAQ,OAAO;AAAA;",
+  "sourcesContent": ["export function str2regex(pattern: string): RegExp {\n\treturn new RegExp(\n\t\tpattern\n\t\t\t.replace(/\\\\/g, \"\\\\\\\\\") // Punkte als solche matchen\n\t\t\t.replace(/\\./g, \"\\\\.\") // Punkte als solche matchen\n\t\t\t.replace(/\\*/g, \".*\") // Wildcard in Regex umsetzen\n\t\t\t.replace(/\\!/g, \"?!\"), // negative lookahead\n\t);\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAO,mBAAmB,SAAyB;AAClD,SAAO,IAAI,OACV,QACE,QAAQ,OAAO,QACf,QAAQ,OAAO,OACf,QAAQ,OAAO,MACf,QAAQ,OAAO;AAAA;",
   "names": []
 }

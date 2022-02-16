@@ -8,7 +8,7 @@ var __getOwnPropSymbols = Object.getOwnPropertySymbols;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __propIsEnum = Object.prototype.propertyIsEnumerable;
-var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, {enumerable: true, configurable: true, writable: true, value}) : obj[key] = value;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __spreadValues = (a, b) => {
   for (var prop in b || (b = {}))
     if (__hasOwnProp.call(b, prop))
@@ -21,34 +21,34 @@ var __spreadValues = (a, b) => {
   return a;
 };
 var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
-var __markAsModule = (target) => __defProp(target, "__esModule", {value: true});
-var __reExport = (target, module2, desc) => {
+var __markAsModule = (target) => __defProp(target, "__esModule", { value: true });
+var __reExport = (target, module2, copyDefault, desc) => {
   if (module2 && typeof module2 === "object" || typeof module2 === "function") {
     for (let key of __getOwnPropNames(module2))
-      if (!__hasOwnProp.call(target, key) && key !== "default")
-        __defProp(target, key, {get: () => module2[key], enumerable: !(desc = __getOwnPropDesc(module2, key)) || desc.enumerable});
+      if (!__hasOwnProp.call(target, key) && (copyDefault || key !== "default"))
+        __defProp(target, key, { get: () => module2[key], enumerable: !(desc = __getOwnPropDesc(module2, key)) || desc.enumerable });
   }
   return target;
 };
-var __toModule = (module2) => {
-  return __reExport(__markAsModule(__defProp(module2 != null ? __create(__getProtoOf(module2)) : {}, "default", module2 && module2.__esModule && "default" in module2 ? {get: () => module2.default, enumerable: true} : {value: module2, enumerable: true})), module2);
+var __toESM = (module2, isNodeMode) => {
+  return __reExport(__markAsModule(__defProp(module2 != null ? __create(__getProtoOf(module2)) : {}, "default", !isNodeMode && module2 && module2.__esModule ? { get: () => module2.default, enumerable: true } : { value: module2, enumerable: true })), module2);
 };
-var utils = __toModule(require("@iobroker/adapter-core"));
-var import_helpers = __toModule(require("alcalzone-shared/helpers"));
-var import_objects = __toModule(require("alcalzone-shared/objects"));
-var import_node_tradfri_client = __toModule(require("node-tradfri-client"));
-var path = __toModule(require("path"));
-var import_colors = __toModule(require("./lib/colors"));
-var import_fix_objects = __toModule(require("./lib/fix-objects"));
-var import_global = __toModule(require("./lib/global"));
-var import_iobroker_objects = __toModule(require("./lib/iobroker-objects"));
-var import_math = __toModule(require("./lib/math"));
-var import_virtual_group = __toModule(require("./lib/virtual-group"));
-var import_custom_subscriptions = __toModule(require("./modules/custom-subscriptions"));
-var import_groups = __toModule(require("./modules/groups"));
-var import_message = __toModule(require("./modules/message"));
-var import_operations = __toModule(require("./modules/operations"));
-var import_session = __toModule(require("./modules/session"));
+var utils = __toESM(require("@iobroker/adapter-core"));
+var import_helpers = require("alcalzone-shared/helpers");
+var import_objects = require("alcalzone-shared/objects");
+var import_node_tradfri_client = require("node-tradfri-client");
+var path = __toESM(require("path"));
+var import_colors = require("./lib/colors");
+var import_fix_objects = require("./lib/fix-objects");
+var import_global = require("./lib/global");
+var import_iobroker_objects = require("./lib/iobroker-objects");
+var import_math = require("./lib/math");
+var import_virtual_group = require("./lib/virtual-group");
+var import_custom_subscriptions = require("./modules/custom-subscriptions");
+var import_groups = require("./modules/groups");
+var import_message = require("./modules/message");
+var import_operations = require("./modules/operations");
+var import_session = require("./modules/session");
 let connectionAlive;
 let adapter;
 function startAdapter(options = {}) {
@@ -133,7 +133,7 @@ function startAdapter(options = {}) {
         }
       } else if (securityCode != null && securityCode.length > 0) {
         try {
-          ({identity, psk} = await import_session.session.tradfri.authenticate(securityCode));
+          ({ identity, psk } = await import_session.session.tradfri.authenticate(securityCode));
           import_global.Global.log(`The authentication was successful. The adapter should now restart. If not, please restart it manually.`, "info");
           await updateConfig({
             identity,

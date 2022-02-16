@@ -1,6 +1,7 @@
 {
   "version": 3,
   "sources": ["../../src/lib/colors.ts"],
-  "mappings": ";;;;;;AAAA;AAAA;AAAA;AAAA;AAGA,MAAM,gBAAgB;AAEf,2BAA2B,OAAmC;AACpE,QAAM,QAAQ,cAAc,KAAK;AACjC,MAAI,SAAS,MAAM,SAAS;AAAG,WAAO,MAAM;AAAA;",
+  "sourcesContent": ["// accept a bunch of stuff that follows 2 rules\n// 1. ends with 6 hex digits\n// 2. the remainder does not contain letters or digits\nconst hexColorRegex = /^[^a-zA-Z0-9]*([a-fA-F0-9]{6})$/;\n/** Normalizes any input that might represent a hex color. Returns undefined if no match was found */\nexport function normalizeHexColor(color: string): string | undefined {\n\tconst match = hexColorRegex.exec(color);\n\tif (match && match.length > 1) return match[1];\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAGA,MAAM,gBAAgB;AAEf,2BAA2B,OAAmC;AACpE,QAAM,QAAQ,cAAc,KAAK;AACjC,MAAI,SAAS,MAAM,SAAS;AAAG,WAAO,MAAM;AAAA;",
   "names": []
 }

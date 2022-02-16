@@ -291,3 +291,5 @@ admin/i18n
 
 # Devserver
 .dev-server
+
+admin/.watch

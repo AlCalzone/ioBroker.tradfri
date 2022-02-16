@@ -1,14 +1,12 @@
-var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __defProps = Object.defineProperties;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getOwnPropSymbols = Object.getOwnPropertySymbols;
-var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __propIsEnum = Object.prototype.propertyIsEnumerable;
-var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, {enumerable: true, configurable: true, writable: true, value}) : obj[key] = value;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __spreadValues = (a, b) => {
   for (var prop in b || (b = {}))
     if (__hasOwnProp.call(b, prop))
@@ -21,30 +19,32 @@ var __spreadValues = (a, b) => {
   return a;
 };
 var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
-var __markAsModule = (target) => __defProp(target, "__esModule", {value: true});
+var __markAsModule = (target) => __defProp(target, "__esModule", { value: true });
 var __export = (target, all) => {
   for (var name in all)
-    __defProp(target, name, {get: all[name], enumerable: true});
+    __defProp(target, name, { get: all[name], enumerable: true });
 };
-var __reExport = (target, module2, desc) => {
+var __reExport = (target, module2, copyDefault, desc) => {
   if (module2 && typeof module2 === "object" || typeof module2 === "function") {
     for (let key of __getOwnPropNames(module2))
-      if (!__hasOwnProp.call(target, key) && key !== "default")
-        __defProp(target, key, {get: () => module2[key], enumerable: !(desc = __getOwnPropDesc(module2, key)) || desc.enumerable});
+      if (!__hasOwnProp.call(target, key) && (copyDefault || key !== "default"))
+        __defProp(target, key, { get: () => module2[key], enumerable: !(desc = __getOwnPropDesc(module2, key)) || desc.enumerable });
   }
   return target;
 };
-var __toModule = (module2) => {
-  return __reExport(__markAsModule(__defProp(module2 != null ? __create(__getProtoOf(module2)) : {}, "default", module2 && module2.__esModule && "default" in module2 ? {get: () => module2.default, enumerable: true} : {value: module2, enumerable: true})), module2);
-};
-__markAsModule(exports);
-__export(exports, {
+var __toCommonJS = /* @__PURE__ */ ((cache) => {
+  return (module2, temp) => {
+    return cache && cache.get(module2) || (temp = __reExport(__markAsModule({}), module2, 1), cache && cache.set(module2, temp), temp);
+  };
+})(typeof WeakMap !== "undefined" ? /* @__PURE__ */ new WeakMap() : 0);
+var fix_objects_exports = {};
+__export(fix_objects_exports, {
   ensureInstanceObjects: () => ensureInstanceObjects,
   fixAdapterObjects: () => fixAdapterObjects
 });
-var import_objects = __toModule(require("alcalzone-shared/objects"));
-var import_io_package = __toModule(require("../../io-package.json"));
-var import_global = __toModule(require("./global"));
+var import_objects = require("alcalzone-shared/objects");
+var import_io_package = require("../../io-package.json");
+var import_global = require("./global");
 const instanceObjects = import_io_package.instanceObjects;
 async function fixAdapterObjects() {
   const stateObjs = (0, import_objects.values)(await import_global.Global.$$(`${import_global.Global.adapter.namespace}.*`, "state"));
@@ -97,6 +97,7 @@ async function ensureInstanceObjects() {
   const setObjects = instanceObjects.map((obj) => import_global.Global.adapter.setObjectNotExistsAsync(obj._id, obj));
   await Promise.all(setObjects);
 }
+module.exports = __toCommonJS(fix_objects_exports);
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   ensureInstanceObjects,
