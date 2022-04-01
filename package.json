@@ -56,7 +56,7 @@
     "eslint-plugin-prettier": "^4.0.0",
     "iobroker-react-components": "^1.0.0",
     "jquery": "^3.6.0",
-    "mocha": "^9.2.1",
+    "mocha": "^9.2.2",
     "nyc": "^15.1.0",
     "prettier": "^2.6.1",
     "prettier-plugin-organize-imports": "^2.3.4",
