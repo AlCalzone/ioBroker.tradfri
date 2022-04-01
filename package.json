@@ -32,8 +32,8 @@
     "node-tradfri-client": "~3.1.0"
   },
   "devDependencies": {
-    "@alcalzone/release-script": "~3.5.2",
-    "@alcalzone/release-script-plugin-iobroker": "~3.5.1",
+    "@alcalzone/release-script": "~3.5.6",
+    "@alcalzone/release-script-plugin-iobroker": "~3.5.7",
     "@alcalzone/release-script-plugin-license": "~3.5.0",
     "@alcalzone/release-script-plugin-manual-review": "~3.5.3",
     "@iobroker/adapter-dev": "^1.0.0",
@@ -45,9 +45,9 @@
     "@types/mocha": "^9.1.0",
     "@types/node": "^16.11.26",
     "@types/react": "^17.0.38",
-    "@types/react-dom": "^17.0.11",
+    "@types/react-dom": "^17.0.14",
     "@types/sinon": "^10.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.13.0",
+    "@typescript-eslint/eslint-plugin": "^5.17.0",
     "@typescript-eslint/parser": "^5.13.0",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
