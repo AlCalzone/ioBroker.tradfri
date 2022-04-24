@@ -71,7 +71,7 @@ The result object `ret` looks as follows:
 	Placeholder for next release:
 	### __WORK IN PROGRESS__
 -->
-### __WORK IN PROGRESS__
+### 3.1.3 (2022-04-24)
 * Fix: support for Node.js 18
 
 ### 3.1.2 (2021-12-31)
@@ -86,9 +86,6 @@ The result object `ret` looks as follows:
 ### 3.0.2 (2021-12-03)
 * Improve support for older browsers
 * Update dependencies
-
-### 3.0.1 (2021-06-30)
-* Workaround for a bug in IKEA gateway firmware `v1.15.x`
 
 ## License
 The MIT License (MIT)

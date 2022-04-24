@@ -1,8 +1,20 @@
 {
   "common": {
     "name": "tradfri",
-    "version": "3.1.2",
+    "version": "3.1.3",
     "news": {
+      "3.1.3": {
+        "en": "Fix: support for Node.js 18",
+        "de": "Fix: Unterstützung für Node.js 18",
+        "ru": "Исправлено: поддержка Node.js 18",
+        "pt": "Correção: suporte para Node.js 18",
+        "nl": "Oplossing: ondersteuning voor Node.js 18",
+        "fr": "Correctif : prise en charge de Node.js 18",
+        "it": "Correzione: supporto per Node.js 18",
+        "es": "Arreglo: soporte para Node.js 18",
+        "pl": "Poprawka: wsparcie dla Node.js 18",
+        "zh-cn": "修复：对 Node.js 18 的支持"
+      },
       "3.1.2": {
         "en": "Fixed a typo preventing the adapter from controlling air purifiers",
         "de": "Ein Tippfehler wurde behoben, der den Adapter daran hinderte, Luftreiniger zu steuern",
@@ -74,18 +86,6 @@
         "es": "Actualice las dependencias, requiera Node.js 12+",
         "pl": "Zaktualizuj zależności, wymagaj Node.js 12+",
         "zh-cn": "更新依赖，需要 Node.js 12+"
-      },
-      "2.7.3": {
-        "en": "Fix remaining JS-Controller 3.3 warnings",
-        "de": "Korrigieren Sie die verbleibenden JS-Controller 3.3-Warnungen",
-        "ru": "Исправить оставшиеся предупреждения JS-Controller 3.3",
-        "pt": "Corrigir os avisos restantes do JS-Controller 3.3",
-        "nl": "Los de resterende JS-Controller 3.3-waarschuwingen op",
-        "fr": "Correction des avertissements restants du JS-Controller 3.3",
-        "it": "Correggere i restanti avvisi JS-Controller 3.3",
-        "es": "Corregir las advertencias restantes de JS-Controller 3.3",
-        "pl": "Napraw pozostałe ostrzeżenia JS-Controller 3.3",
-        "zh-cn": "修复剩余的JS-Controller 3.3警告"
       }
     },
     "title": "IKEA Trådfri",
