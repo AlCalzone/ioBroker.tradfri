@@ -71,6 +71,9 @@ The result object `ret` looks as follows:
 	Placeholder for next release:
 	### __WORK IN PROGRESS__
 -->
+### __WORK IN PROGRESS__
+* Fix: support for Node.js 18
+
 ### 3.1.2 (2021-12-31)
 * Fixed a typo preventing the adapter from controlling air purifiers
 
