@@ -38,7 +38,7 @@
     "@alcalzone/release-script-plugin-manual-review": "~3.5.9",
     "@iobroker/adapter-dev": "^1.0.1",
     "@iobroker/testing": "^2.6.0",
-    "@types/chai": "^4.3.1",
+    "@types/chai": "^4.3.3",
     "@types/chai-as-promised": "^7.1.5",
     "@types/jquery": "^3.5.14",
     "@types/materialize-css": "^1.0.11",
