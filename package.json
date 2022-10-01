@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@iobroker/adapter-core": "^2.6.6",
-    "alcalzone-shared": "^4.0.1",
+    "alcalzone-shared": "^4.0.8",
     "node-tradfri-client": "^3.1.1"
   },
   "devDependencies": {
@@ -47,7 +47,7 @@
     "@types/react": "^18.0.15",
     "@types/react-dom": "^17.0.14",
     "@types/sinon": "^10.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.36.1",
+    "@typescript-eslint/eslint-plugin": "^5.38.1",
     "@typescript-eslint/parser": "^5.30.0",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
