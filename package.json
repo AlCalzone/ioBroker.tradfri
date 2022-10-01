@@ -27,7 +27,7 @@
     "node": ">=12"
   },
   "dependencies": {
-    "@iobroker/adapter-core": "^2.6.0",
+    "@iobroker/adapter-core": "^2.6.6",
     "alcalzone-shared": "^4.0.1",
     "node-tradfri-client": "^3.1.1"
   },
