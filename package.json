@@ -27,7 +27,7 @@
     "node": ">=12"
   },
   "dependencies": {
-    "@iobroker/adapter-core": "^2.6.0",
+    "@iobroker/adapter-core": "^2.6.6",
     "alcalzone-shared": "^4.0.1",
     "node-tradfri-client": "^3.1.1"
   },
@@ -55,7 +55,7 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.0.0",
     "iobroker-react-components": "^1.0.0",
-    "jquery": "^3.6.0",
+    "jquery": "^3.6.1",
     "mocha": "^9.2.2",
     "nyc": "^15.1.0",
     "prettier": "^2.7.1",
