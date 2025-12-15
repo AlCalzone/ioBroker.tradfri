@@ -118,7 +118,6 @@
     ],
     "license": "MIT",
     "platform": "Javascript/Node.js",
-    "main": "build/main.js",
     "mode": "daemon",
     "icon": "tradfri.png",
     "enabled": false,
