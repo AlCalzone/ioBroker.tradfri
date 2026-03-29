@@ -22,7 +22,7 @@ import {
 	TradfriError,
 	TradfriErrorCodes,
 } from "node-tradfri-client";
-import * as path from "path";
+import * as path from "node:path";
 // Adapter-Module laden
 import { normalizeHexColor } from "./lib/colors";
 import { ensureInstanceObjects, fixAdapterObjects } from "./lib/fix-objects";
