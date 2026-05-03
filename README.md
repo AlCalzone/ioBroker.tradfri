@@ -87,6 +87,8 @@ The result object `ret` looks as follows:
 * Improve support for older browsers
 * Update dependencies
 
+[Older changelogs can be found there](CHANGELOG_OLD.md)
+
 ## License
 The MIT License (MIT)
 
