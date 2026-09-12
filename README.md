@@ -66,6 +66,9 @@ The result object `ret` looks as follows:
 ```
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+- (iobroker-bot) Adapter requires node.js >= 22 now.
 [Older changes](CHANGELOG_OLD.md)
 <!--
 	Placeholder for next release:
